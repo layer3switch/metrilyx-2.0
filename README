@@ -25,7 +25,7 @@ This will install all required OS packages as well as python packages and restar
 
 For **other distributions**, follow the instructions below:
 
-	- Install the required OS packages based on your OS distributions package manager.
+	- Install the required OS packages based on your OS's package manager.
 	
 	- [</path/to/app>]$ make pydeps
 	
@@ -37,7 +37,7 @@ For **other distributions**, follow the instructions below:
 ###### Path 
 %{metrilyx_home}/etc/metrilyx/metrilyx.conf
 
-The configuration file is in JSON format.
+The configuration file is in JSON format.  The only required fields are the uri and port.
 	
 	{
 		"tsdb": {
