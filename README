@@ -1,0 +1,67 @@
+### Requirements
+Metrilyx will run on any system that supports the packages below.  It has primarily been tested on RedHat based flavors of Linux.
+
+##### OS Packages:
+	libuuid
+	uuid
+	httpd
+	mod_wsgi
+	
+
+##### Python Packages:
+	Django
+	django-filter
+	Markdown
+	djangorestframework
+	uuid
+
+### Installation
+The provided makefile will work with **RedHat** based distributions.  You can issue the command below, which will auto-install the complete package including dependencies:	
+	
+	[</path/to/app>]$ make
+	
+
+This will install all required OS packages as well as python packages and restart apache.
+
+For **other distributions**, follow the instructions below:
+
+	- Install the required OS packages based on your OS distributions package manager.
+	
+	- [</path/to/app>]$ make pydeps
+	
+	- [</path/to/app>]$ make install
+	
+
+### Configuration
+
+###### Path 
+%{metrilyx_home}/etc/metrilyx.conf
+
+The configuration file is essentially a python file. The path is a hard link to %{metrilyx_home}/metrilyx/metrilyxconfig.py and is meant for user convenience.
+	
+	config = {
+		"tsdb": {
+			"uri":"tsdb.example.com",
+			"port": 80
+		},
+		"static_path": os.path.join(os.path.dirname(__file__), "static"),
+		"schema_path": os.path.join(os.path.dirname(os.path.dirname(__file__)), "schemas"),
+		"model_path": os.path.join(os.path.dirname(os.path.dirname(__file__)), "pagemodels")
+	}
+	
+###### tsdb.uri
+OpenTSDB http host
+
+###### tsdb.port
+OpenTSDB http Port (default: 80)
+
+###### static_path (should not be changed)
+Path to webroot static content.  
+
+*** Changing this value would require changing other configuration items as well.
+		
+###### schema_path (should not be changed)
+Path to pod, graph, page schemas.
+
+###### model_path (default: %{home}/pagemodels)
+Path to directory where JSON page models (i.e. dashboards) will be stored.
