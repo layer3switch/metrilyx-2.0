@@ -16,12 +16,12 @@ Metrilyx will run on any system that supports the packages below.  It has primar
 	uuid
 
 ### Installation
-The provided makefile will work with **RedHat** based distributions.  You can issue the command below, which will auto-install the complete package including dependencies:	
+The provided makefile will work with **RedHat** based distributions.  You can issue the command below, to auto-install the complete package including dependencies. The default install path is **/opt/metrilyx**.	
 	
 	[</path/to/app>]$ make
 	
 
-This will install all required OS packages as well as python packages and restart apache.
+This will install all required OS packages as well as python packages and restart apache.  
 
 For **other distributions**, follow the instructions below:
 
@@ -35,18 +35,16 @@ For **other distributions**, follow the instructions below:
 ### Configuration
 
 ###### Path 
-%{metrilyx_home}/etc/metrilyx.conf
+%{metrilyx_home}/etc/metrilyx/metrilyx.conf
 
-The configuration file is essentially a python file. The path is a hard link to %{metrilyx_home}/metrilyx/metrilyxconfig.py and is meant for user convenience.
+The configuration file is in JSON format.
 	
-	config = {
+	{
 		"tsdb": {
 			"uri":"tsdb.example.com",
 			"port": 80
 		},
-		"static_path": os.path.join(os.path.dirname(__file__), "static"),
-		"schema_path": os.path.join(os.path.dirname(os.path.dirname(__file__)), "schemas"),
-		"model_path": os.path.join(os.path.dirname(os.path.dirname(__file__)), "pagemodels")
+		"model_path": <absolute path to models directory>
 	}
 	
 ###### tsdb.uri
@@ -55,13 +53,5 @@ OpenTSDB http host
 ###### tsdb.port
 OpenTSDB http Port (default: 80)
 
-###### static_path (should not be changed)
-Path to webroot static content.  
-
-*** Changing this value would require changing other configuration items as well.
-		
-###### schema_path (should not be changed)
-Path to pod, graph, page schemas.
-
-###### model_path (default: %{home}/pagemodels)
-Path to directory where JSON page models (i.e. dashboards) will be stored.
+###### model_path
+Path to directory where JSON page models (i.e. dashboards) will be stored.  Optional (default: %{home}/pagemodels)
