@@ -90,12 +90,13 @@ angular.module('pageLayout', [])
 				$(elem).dblclick(function(evt) {
 					if(scope.editMode == "") return;
 					evt.stopPropagation();
+					if(! $(evt.target).hasClass('dblclick-helper')) return;
 					
 					//pos = element_position(evt.currentTarget);
 					//mousePosY = evt.pageY - pos.y;
 					//mPos = mousePos(evt);
 					ypos = evt.pageY-evt.currentTarget.offsetTop;
-					console.log($(evt.target).hasClass('column-handle'));
+					//console.log($(evt.target).hasClass('column-handle'));
 					if($(evt.target).hasClass('column-handle')) {
 						ngModel.$modelValue.unshift(
 							JSON.parse(JSON.stringify(scope.droppablePodSchema[0])));
