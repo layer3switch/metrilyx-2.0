@@ -1,6 +1,11 @@
 all: deps pydeps install
 
 deps:
+	if [ ! -f "/etc/redhat-release" ] then; \
+		echo "Not a redhat based distro."; \
+		echo "Run 'make pydeps && make install' after installing the required OS packages to complete the installation." \
+		exit; \
+	fi;
 	for pkg in libuuid uuid httpd mod_wsgi python-setuptools; do \
 		rpm -qa | grep $$pkg || yum -y install $$pkg; \
 	done;
