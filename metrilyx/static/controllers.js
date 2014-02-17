@@ -338,7 +338,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 		if($routeParams.pageId == "new") {
 			setTimeout(function() {
 				$scope.enableEditMode();	
-			}, 300);
+			}, 100);
 		} else {
 			if($scope.editMode == "") {
 				$scope.disableDragDrop();	
