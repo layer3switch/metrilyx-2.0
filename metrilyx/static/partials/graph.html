@@ -1,0 +1,86 @@
+	<div style="background-color: #fff">
+		<div class="pad10">
+			<div class="row" style="margin:0;">
+				<div class="col-md-1">
+				</div>
+				<div class="col-md-10 text-center" title="Graph Name">
+					<input type="text" ng-model="graph.name" class="edit-comp{{editMode}}" placeholder="Graph Name" disabled="true">
+				</div>
+				<div class="col-md-1 text-right graph-controls edit-comp{{editMode}}">
+					<a href="javascript:void(0)" title="Remove Graph" ng-click="removeGraph($parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$index, $parent.$parent.$index, $index);">
+						<i class="glyphicon glyphicon-remove"></i>
+					</a>
+				</div>
+			</div>
+		</div>
+		<div class="pad10 pod-controls edit-comp{{editMode}}" style="border-top: 1px solid #ddd;border-bottom: 1px solid #ddd">
+			<div class="row" style="margin:0;">
+				<div class="col-md-6 text-left" title="Graph Type">
+					<span>type</span>
+					<select ng-model="graph.graphType">
+						<option value="line">line</option>
+						<option value="pie">pie</option>	
+					</select>
+				</div>
+				<div class="col-md-6 text-right" title="Vertical graph size">
+					<span>size</span>
+					<select ng-model="graph.size" ng-change="reflow()">
+						<option value="small">small</option>
+						<option value="medium">medium</option>
+						<option value="large">large</option>
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div>
+	<div class="graph {{graph.size}} text-center"  style="width:100%" data-graph-id="{{graph._id}}" ui-sortable ng-model="graph.series">
+	</div>
+	<div class="graph-controls edit-comp{{editMode}} graph-metrics-panel collapse">
+			<div ng-repeat="metric in graph.series">
+				<div class="pad10" style="overflow-x:hidden;text-wrap:none;white-space:nowrap">
+					<span style="overflow-x:hidden;text-wrap:none;white-space:nowrap">{{metric.query.metric}}</span>
+					<a href="javascript:void(0)" ng-click="removeMetric($parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$index, $parent.$index, $index)" class="pull-right">
+						<i class="glyphicon glyphicon-trash icon-lite"></i>
+					</a>
+				</div>
+				<div class="padl15 padr10 padb10">
+					<div>
+						<span class="metric-control-label">aggregator</span>
+						<select ng-model="metric.query.aggregator">
+							<option value="min">min</option>
+							<option value="avg">avg</option>
+							<option value="sum">sum</option>
+							<option value="max">max</option>
+						</select>
+						<span class="metric-control-label">rate</span>
+						<input type="checkbox" ng-model="metric.query.rate">
+					</div>
+					<div style="margin-top:4px">
+						<span class="input-group input-group-sm">
+							<!--<div class="metric-control-label">alias</div>
+							<input type="text" ng-model="metric.alias" class="metric-control">-->
+							<div class="input-group-addon" title="Series name shown in legend">alias</div>
+							<input type="text" ng-model="metric.alias" class="form-control">
+						</span>
+					</div>
+					<div style="margin-top:4px">
+						<span class="input-group input-group-sm">
+							<!--
+							<span class="metric-control-label">tags</span>
+							<input type="text" class="metric-control" ng-model="metric.query.tags" key-value-pairs="true">-->
+							<span class="input-group-addon">tags</span>
+							<input type="text" class="form-control" ng-model="metric.query.tags" key-value-pairs="true">
+						</span>
+					</div>
+					<div style="margin-top:4px">
+						<span class="input-group input-group-sm">
+							<!--<span class="metric-control-label">yTransform</span>-->
+							<span class="input-group-addon" title="Function applied to each datapoint">yTransform</span>
+							<!--<input type="text" ng-model="metric.yTransform" class="metric-control" placeholder="lambda x: x/1024">-->
+							<input type="text" ng-model="metric.yTransform" class="form-control" placeholder="lambda x: x/1024">
+						</span>
+					</div>
+				</div>
+			</div>
+	</div>

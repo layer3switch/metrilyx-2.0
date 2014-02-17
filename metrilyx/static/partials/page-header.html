@@ -1,0 +1,53 @@
+<div class="page-model-header edit-comp{{editMode}}">
+	<div class="row" style="margin:0;">
+		<div class="col-md-4" style="padding:0">
+			<span class="pointer interactive" ng-click="toggleEditMode()" style="font-size: 20px;" title="Edit Page">
+				<i class="glyphicon glyphicon-cog"></i>
+			</span>
+		</div>
+		<!-- Page Name/ID -->
+		<div class="col-md-4 text-center" style="padding:0">
+			<div class="row">
+				<div class="col-md-12">
+					<input type="text" ng-model="model.name" class="edit-comp{{editMode}}" placeholder="Page Name" disabled="true" title="Page Name">
+					<input type="text" ng-model="model._id" class="edit-comp{{editMode}}" placeholder="Page ID" required style="min-width: 40px;" title="Page ID">
+				</div>
+			</div>
+		</div>
+		<!-- time picker -->
+		<div class="col-md-4 text-right" style="padding:0">
+			<div class="row" style="margin:0">
+				<div class="col-md-12 text-right" style="padding:0">
+					<span class="animated">
+						<select ng-model="timeType" relative-time="true" class="time interactive">
+			            	<option value="24h-ago">24 hours</option>
+			            	<option value="12h-ago">12 hours</option>
+			            	<option value="6h-ago">6 hours</option>
+			            	<option value="3h-ago">3 hours</option>
+			            	<option value="2h-ago">2 hours</option>
+			            	<option value="1h-ago">1 hour</option>
+			            	<option value="5m-ago">5 mins</option>
+			            	<option value="1m-ago">1 min</option>
+			            	<option value="absolute">Custom Range</option>
+			            </select>
+		            </span>
+					<span id="absolute-time" class="time animated btn-group btn-group-sm {{timeType}}">
+						<span ng-model="startTime" date-time class="btn btn-default interactive" style="padding-left:7px;padding-right:7px;">
+							<span>
+								<i class="glyphicon glyphicon-calendar"></i>
+							</span>
+							<span style="padding-left:5px;">{{startTime|dateTime}}</span>
+		                </span>
+		                <span ng-model="endTime" date-time class="btn btn-default interactive" style="padding-left:7px;padding-right:7px;">
+		                	<span><i class="glyphicon glyphicon-calendar"></i></span>
+		                	<span style="padding-left:5px;">{{endTime|dateTime}}</span>
+		                </span>
+		                <button class="btn btn-default interactive" style="padding-top:8px;padding-bottom:8px;" ng-click="setAbsoluteTime()" title="Apply">
+		                	<i class="glyphicon glyphicon-ok"></i>
+		                </button>
+	                </span>
+		        </div>
+			</div>
+		</div>
+	</div><!-- END .row -->
+</div>

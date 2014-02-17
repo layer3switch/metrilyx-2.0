@@ -1,0 +1,57 @@
+<div class="layout-column edit-comp{{editMode}} col-md-{{row.length|columnWidth}}" ng-repeat="column in row" ui-sortable="columnSortOpts" ng-model="column" column="true">
+	<div class="dblclick-helper edit-comp{{editMode}} text-center column-handle">Double-click to add new pod</div>
+	<!--<div class="pad20">-->
+	<div ng-repeat="pod in column" class="pod" ng-model="pod" pod="true">
+		<div class="pod-header edit-comp{{editMode}}">
+			<div class="row" style="padding-bottom:5px;margin:0">
+				<div class="col-md-1" style="padding:0"></div>
+				<div class="col-md-10 text-center" style="padding:0" title="Pod" title="Pod Name">
+					<input type="text" class="edit-comp{{editMode}}" ng-model="pod.name" placeholder="Pod Name" disabled="true">
+				</div>
+				<div class="col-md-1 text-right" style="padding:0">
+					<div class="pod-controls edit-comp{{editMode}}">
+						<a href="javascript:void(0)" ng-click="removePod($parent.$parent.$index, $parent.$index, $index)" title="Remove Pod">
+							<span>
+								<i class="glyphicon glyphicon-remove" style="position:relative;right:3px;top:5px;"></i>
+							</span>
+						</a>
+					</div>
+				</div>
+			</div>
+			<div class="row pod-controls edit-comp{{editMode}}" style="border-top:1px solid #888;margin:0;padding-top:5px;">
+				<div class="col-md-6 text-left" style="padding-left:5px;padding-right:5px;">
+					<span class="btn-group btn-group-sm">
+						<button type="button" class="btn btn-default interactive" ng-click="addGraph($parent.$parent.$index, $parent.$index, $index);" title="Add graph to pod">
+							<i class="glyphicon glyphicon-plus"></i>
+						</button>
+					</span>
+				</div>
+				<div class="col-md-6 text-right" style="padding-left:5px;padding-right:5px;">
+					<span class="btn-group btn-group-sm">
+						<button type="button" title="Vertical graph layout" ng-click="pod.orientation='vertical';" class="btn btn-default interactive"><i class="glyphicon glyphicon-resize-vertical"></i></button>
+						<button title="Horizontal graph layout" type="button" class="btn btn-default interactive" ng-click="pod.orientation='horizontal';"><i class="glyphicon glyphicon-resize-horizontal"></i></button>
+					</span>
+				</div>
+			</div>
+		</div>
+		<!-- drop new graph -->
+		<div class="graphs">
+			<!-- drop new metric -->
+			<div ng-switch="pod.orientation">
+				<div class="row" style="margin:0" ui-sortable="graphSortOpts" ng-model="pod.graphs" graphs="true">
+					<div ng-switch-when="horizontal">
+						<div ng-repeat="graph in pod.graphs" class="col-md-{{pod.graphs.length|columnWidth}}">
+							<div ng-include="graphHtml" ng-model="graph" highstock-graph></div><!-- gidx, pidx, cidx, ridx -->
+						</div>
+					</div>
+					<div ng-switch-default>
+						<div ng-repeat="graph in pod.graphs" class="col-md-12">
+							<div ng-include="graphHtml" ng-model="graph" highstock-graph></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div><!-- END .pod -->
+	<div class="dblclick-helper edit-comp{{editMode}} text-center">Double-click to add new pod</div>
+</div><!-- END .col-md-X -->
