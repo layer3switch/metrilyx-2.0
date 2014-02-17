@@ -1,0 +1,10 @@
+{
+	"alias": "",
+	"yTransform": "",
+	"query": {
+		"metric": "",
+		"aggregator": "sum",
+		"rate": false,
+		"tags": {}
+	}
+}
