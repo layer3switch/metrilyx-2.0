@@ -18,7 +18,7 @@ Metrilyx will run on any system that supports the packages below.  It has primar
 ### Installation
 The provided makefile will work with **RedHat** based distributions.  You can issue the command below, to auto-install the complete package including dependencies. The default install path is **/opt/metrilyx**.	
 	
-	[</path/to/app>]$ make
+	[</path/to/app>]$ bash install.sh
 	
 
 This will install all required OS packages as well as python packages and restart apache.  
@@ -31,6 +31,11 @@ For **other distributions**, follow the instructions below:
 	
 	- [</path/to/app>]$ make install
 	
+	- Set the permissions to /opt/metrilyx to the appropriate web user 
+
+	- Edit the configuration (more below).
+
+	- Restart the webserver.
 
 ### Configuration
 
