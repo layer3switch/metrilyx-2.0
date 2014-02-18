@@ -7,8 +7,8 @@ install_os_deps() {
 };
 install_pydeps() {
 	which pip || easy_install pip;
-	for pypkg in uuid Django djangorestframework django-filter; do \
-		pip list | grep ${pypkg} || pip install ${pypkg}; \
+	for pypkg in uuid Django djangorestframework django-filter; do
+		pip list | grep ${pypkg} || pip install ${pypkg};
 	done;
 };
 clean() {
@@ -18,8 +18,8 @@ clean() {
 install_app(){
 	clean;
 	/etc/init.d/httpd stop;
-	if [ -d /opt/metrilyx ]; then \
-		mv /opt/metrilyx /opt/metrilyx-$(date '+%d%b%Y_%H%M'); \	
+	if [ -d /opt/metrilyx ]; then
+		mv /opt/metrilyx /opt/metrilyx-$(date '+%d%b%Y_%H%M');
 	fi;
 	mkdir -p /opt/metrilyx;
 	cp -a . /opt/metrilyx/;
