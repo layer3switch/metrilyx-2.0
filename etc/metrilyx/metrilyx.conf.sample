@@ -1,0 +1,6 @@
+{
+	"tsdb": {
+		"uri": "<OpenTSDB host>",
+		"port": 80
+	}
+}
