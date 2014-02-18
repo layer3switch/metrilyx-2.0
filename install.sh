@@ -14,7 +14,6 @@ install_pydeps() {
 clean() {
 	find . -name '*.pyc' -exec rm -rvf '{}' \;
 }
-
 install_app(){
 	clean;
 	/etc/init.d/httpd stop;
