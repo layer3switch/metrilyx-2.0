@@ -3,6 +3,7 @@ var metrilyxControllers = angular.module('metrilyxControllers', []);
 metrilyxControllers.controller('staticsController', ['$scope', '$routeParams', 
 	function($scope, $routeParams) {
 		console.log('tutorials')
+		clearAllTimeouts();
 	}
 ]);
 metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph',
@@ -112,15 +113,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 		// close side panel when new page model loaded //
 		$('#stage').removeClass('right');
 
-
-		function clearAllTimeouts() {
-			console.log("Clearing timeouts");
-			var id = window.setTimeout(function() {}, 0);
-			while (id--) {
-				// will do nothing if no timeout with id is present //
-    			window.clearTimeout(id); 
-			}
-		}
 		function flashAlertsBar() {
 			$('#global-alerts').fadeIn(500);
 				setTimeout(function() {
@@ -188,20 +180,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 			tmp.end = $scope.endTime;
 			$location.search(tmp);
 		}
-		function _getColumnPosition(event) {
-			if(event.originalEvent.offsetX <= event.currentTarget.clientWidth/2) {
-				return 0;
-			} else {
-				return -1;
-			}
-		}
-		function _getVerticalPosition(event) {
-			if(event.originalEvent.offsetY <= event.currentTarget.clientHeight/2) {
-				return 0;
-			} else {
-				return -1;
-			}
-		}
 
 		$scope.removePod = function(rowIdx, colIdx, podIdx) {
 			console.log("removing", rowIdx, colIdx, podIdx);
@@ -257,13 +235,13 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 		}
 		$scope.disableDragDrop = function() {
 			$('[ui-sortable]').each(function() {
-				console.log("disabling DnD");
+				//console.log("disabling DnD");
 				$(this).sortable({disabled: true});
 			});
 		}
 		$scope.enableDragDrop = function() {
 			$('[ui-sortable]').each(function() {
-				console.log("enabling DnD");
+				//console.log("enabling DnD");
 				$(this).sortable({disabled: false});
 			});
 		}

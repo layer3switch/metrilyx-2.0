@@ -353,8 +353,8 @@ input[ng-model*='name'].edit-mode {
 .page-model-header {
 	margin:0;
 	padding-top: 15px;
-	padding-left:20px;
-	padding-right:20px;
+	padding-left:10px;
+	padding-right:10px;
 	/*
 	padding-bottom: 10px;
 	background: -webkit-linear-gradient(rgba(120,120,120,0.85),rgba(120,120,120,0.95));

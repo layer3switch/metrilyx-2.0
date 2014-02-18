@@ -206,3 +206,11 @@ function commaSepStrToDict(tagsStr) {
 	}
 	return d;
 }
+function clearAllTimeouts() {
+	console.log("Clearing timeouts");
+	var id = window.setTimeout(function() {}, 0);
+	while (id--) {
+		// will do nothing if no timeout with id is present //
+		window.clearTimeout(id); 
+	}
+}

@@ -91,10 +91,7 @@ angular.module('pageLayout', [])
 					if(scope.editMode == "") return;
 					evt.stopPropagation();
 					if(! $(evt.target).hasClass('dblclick-helper')) return;
-					
-					//pos = element_position(evt.currentTarget);
-					//mousePosY = evt.pageY - pos.y;
-					//mPos = mousePos(evt);
+
 					ypos = evt.pageY-evt.currentTarget.offsetTop;
 					//console.log($(evt.target).hasClass('column-handle'));
 					if($(evt.target).hasClass('column-handle')) {
@@ -291,30 +288,18 @@ angular.module('graphing', [])
 							// this is to make sure we are only watching aggr,rate and not tags
 							// tags require validation before they can be used
 							if(equalObjects(graph.series[s].query, oldValue.series[s].query)) continue;
-							/*
-							if((graph.series[s].query.aggregator == oldValue.series[s].query.aggregator) && (graph.series[s].query.rate == oldValue.series[s].query.rate)) {
-								continue;
-							}*/
 							var q = scope.baseQuery(graph);
 							q.series = [ graph.series[s] ];
 							
 							if(!equalObjects(graph.series[s].query.tags, oldValue.series[s].query.tags)) {
-								console.log("tags changed.");
 								Graph.getData(q, function(result) {
-									console.log("re-building graph.");
-									//console.log("temporarily disabling updates.");
-									//scope.updatesEnabled = false;
+									console.log("tags changed. re-building graph.");
 									graphing_newGraph(result);
-									//console.log("updates re-enabled")
-									//scope.updatesEnabled = true;
 								});
 							} else {
-								console.log("rate, aggr changed. temporarily disabling updates.");
 								Graph.getData(q, function(result) {
 									// find and replace series with new data //
-									console.log("find & replace series");
-									//console.log("temporarily disabling updates.");
-									//scope.updatesEnabled = false;
+									console.log("rate, aggr changed. find & replacing series.");
 									graphing_replaceSeries(result);
 								});
 							}
@@ -333,6 +318,10 @@ angular.module('graphing', [])
 						graphing_removeSeries(graph);
 					}
 				}, true);
+				// clear timeout's //
+				scope.$on("$destroy", function( event ) {
+                	clearTimeout(currTimer);
+                });
 			}
 		};	
 	}]);

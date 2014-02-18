@@ -33,7 +33,7 @@
 		</div>
 	</div>
 </div>
-<div class="row edit-comp{{editMode}}" style="margin:0;" id="main-view">
+<div class="row edit-comp{{editMode}}" style="margin:0;padding-left:10px;padding-right:10px" id="main-view">
 	<div class="col-md-12" style="padding:0">
 		<div ng-include="pageHeaderHtml"></div>
 		<div class="row layout edit-comp{{editMode}}" ui-sortable="layoutSortOpts" ng-model="model.layout" layout="true">
@@ -43,7 +43,7 @@
 			<div class="dblclick-helper edit-comp{{editMode}} text-center">Double-click to add new pod</div>
 		</div>
 		<div class="text-center small">
-			<a href="#/tutorials" class="pad5">tutorials</a>
+			<a href="#/tutorials" class="pad5 interactive" style="font-weight:bold;color:#555">tutorials</a>
 		</div>
 	</div><!-- END .col-md-9 -->
 </div><!-- END .row -->
