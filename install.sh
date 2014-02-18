@@ -24,7 +24,7 @@ install_app(){
 	mkdir -p /opt/metrilyx;
 	cp -a . /opt/metrilyx/;
 	cp etc/httpd/conf.d/metrilyx.conf /etc/httpd/conf.d/;
-	cp etc/metrilyx/metrilyx.conf.sample etc/metrilyx/metrilyx.conf;
+	cp etc/metrilyx/metrilyx.conf.sample /opt/metrilyx/etc/metrilyx/metrilyx.conf;
 	chown -R apache:apache /opt/metrilyx;
 }
 
