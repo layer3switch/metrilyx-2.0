@@ -37,7 +37,7 @@ For **other distributions**, follow the instructions below:
 ###### Path 
 %{metrilyx_home}/etc/metrilyx/metrilyx.conf
 
-The configuration file is in JSON format.  The only required fields are the uri and port.
+A sample config file is provided in the same directory above.  The configuration file is in JSON format.  To begin you can copy the sample config to the path mentioned above and fill in the uri and port.
 	
 	{
 		"tsdb": {
