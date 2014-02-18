@@ -355,19 +355,6 @@ input[ng-model*='name'].edit-mode {
 	padding-top: 15px;
 	padding-left:10px;
 	padding-right:10px;
-	/*
-	padding-bottom: 10px;
-	background: -webkit-linear-gradient(rgba(120,120,120,0.85),rgba(120,120,120,0.95));
-	background:    -moz-linear-gradient(rgba(120,120,120,0.85),rgba(120,120,120,0.95));
-	background:     -ms-linear-gradient(rgba(120,120,120,0.85),rgba(120,120,120,0.95));
-	background:      -o-linear-gradient(rgba(120,120,120,0.85),rgba(120,120,120,0.95));
-	background:         linear-gradient(rgba(120,120,120,0.85),rgba(120,120,120,0.95));
-	-moz-box-shadow: 1px 2px 10px rgba(0,0,0,0.98);
-    -webkit-box-shadow: 1px 2px 10px rgba(0,0,0,0.98);
-    box-shadow: 1px 2px 10px rgba(0,0,0,0.98); 
-    border-radius: 0;
-    border-bottom: 1px solid rgba(100,100,100,0.9);
-    */
 }
 .page-model-header.edit-mode {
 	padding-bottom: 10px;
