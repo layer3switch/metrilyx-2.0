@@ -24,8 +24,8 @@ install_app(){
 	mkdir -p /opt/metrilyx;
 	cp -a . /opt/metrilyx/;
 	cp etc/httpd/conf.d/metrilyx.conf /etc/httpd/conf.d/;
+	cp etc/metrilyx/metrilyx.conf.sample etc/metrilyx/metrilyx.conf;
 	chown -R apache:apache /opt/metrilyx;
-	/etc/init.d/httpd start;
 }
 
 ##### Main ####
@@ -35,6 +35,18 @@ if [ ! -f "/etc/redhat-release" ]; then
 	exit 1;
 fi
 
+echo "-- Installing OS dependencies...."
 install_os_deps;
+
+echo "-- Installing python dependencies..."
 install_pydeps;
+
+echo "-- Installing..."
 install_app;
+
+echo "-- Setup configuration"
+vim /opt/metrilyx/etc/metrilyx/metrilyx.conf
+
+echo "-- Restarting apache..."
+/etc/init.d/httpd restart
+
