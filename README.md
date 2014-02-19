@@ -1,6 +1,6 @@
 metrilyx-2.0
 ============
-Metrilyx is a web based dashboard engine as a frontend to OpenTSDB.  It allows for analyzing, cross cutting and viewing of time series data in a simple fashion.
+Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database used to store large amounts of data.  It allows for analyzing, cross cutting and viewing of time series data in a simple manner.
  
 ### Requirements
 Metrilyx will run on any system that supports the packages below.  It has primarily been tested on RedHat based flavors of Linux.
