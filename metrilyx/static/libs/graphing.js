@@ -51,6 +51,30 @@ ChartOptions.prototype.pieChartDefaults = function() {
     opts.series = this._sfmt.pieSeries();
     return opts;
 }
+ChartOptions.prototype.__plotBands = function() {
+    console.log(this._graph);
+    out = {
+        gridLineWidth: 1
+    };
+    if(this._graph.thresholds) {
+        out.plotBands = [
+            {
+                from: this._graph.thresholds['info'],
+                to: this._graph.thresholds['warning'],
+                color: "rgba(99,177,211,0.3)"
+            },{
+                from: this._graph.thresholds['warning'],
+                to: this._graph.thresholds['danger'],
+                color:"rgba(224,158,73,0.3)"
+            },{
+                from: this._graph.thresholds['danger'],
+                to: this._graph.thresholds['danger']+1000,
+                color: "rgba(187,74,71,0.3)"
+            }
+        ];
+    }
+    return out;
+}
 ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
     opts = this.chartDefaults();
     $.extend(opts, {
@@ -105,11 +129,9 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
         },
         xAxis: {
             gridLineWidth: 1
-        },
-        yAxis: {
-            gridLineWidth: 1
         }
     }, extraOpts, true);
+    opts.yAxis = this.__plotBands();
     opts.series = this._sfmt.lineSeries();
     return opts;
 }
@@ -161,7 +183,7 @@ function graphing_removeSeries(gobj) {
             }
         } 
         if(remove) {
-            console.log("removing series:", hcg.series[h].name);
+            //console.log("removing series:", hcg.series[h].name);
             hcg.series[h].remove(true);
         }
     }
@@ -330,9 +352,9 @@ function graphing_upsertSeries(args) {
                         }
                         //console.log('total', newData.length);
                         if(!newData) {
-                            console.log("no new data:",hcg.series[i].name);
+                            //console.log("no new data:",hcg.series[i].name);
                         } else {
-                            console.log("updating series:",hcg.series[i].name);
+                            //console.log("updating series:",hcg.series[i].name);
                             hcg.series[i].setData(newData, false);
                         }
                         break;
@@ -343,7 +365,7 @@ function graphing_upsertSeries(args) {
                 console.log(e)
             }
             if(!found) {
-                console.log("upserting series:", args.series[j].data[d].alias);
+                //console.log("upserting series:", args.series[j].data[d].alias);
                 hsd = highchartsSeries(args.series[0].data[d]);
                 hsd.query = args.series[0].query;
                 hcg.addSeries(hsd, false);

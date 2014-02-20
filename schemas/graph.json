@@ -2,5 +2,10 @@
 	"name": "",
 	"graphType": "line",
 	"size": "small",
+	"thresholds": {
+		"danger"	: 999999999999999999,
+		"warning"	: 9999999999999999,
+		"info"		: 999999999999999
+	},
 	"series": []
 }

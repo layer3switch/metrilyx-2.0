@@ -427,6 +427,10 @@ input.metric-control {
 #absolute-time.absolute {
 	display: inline-block !important;
 }
+[class*='col-md-'].nopad {
+	padding-right: 0px !important;
+	padding-left: 0px !important;
+}
 div[class*='layout-'] {
     border-radius: 2px;
 	margin: 0px !important;

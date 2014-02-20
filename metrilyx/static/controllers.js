@@ -13,6 +13,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 		clearAllTimeouts();
 		var canceler;
 
+		$scope.thresholdsHtml	= "partials/thresholds.html";
 		$scope.graphHtml 		= "partials/graph.html";
 		$scope.podHtml 			= "partials/pod.html";
 		$scope.pageHeaderHtml 	= "partials/page-header.html";
@@ -223,7 +224,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 			var q = {
 				_id: graphObj._id,
 				graphType: graphObj.graphType,
-				tags: $scope.globalTags
+				tags: $scope.globalTags,
+				thresholds: graphObj.thresholds
 			};
 			if($scope.timeType == "absolute") {
 				q['start'] = $scope.startTime;

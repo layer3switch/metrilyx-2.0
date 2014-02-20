@@ -70,7 +70,7 @@ angular.module('pageLayout', [])
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
 					// lock graphs if only 1 on pod //
-					console.log("graphs changed");
+					console.log("[graphs]: graphs changed");
 					if(newValue.length <= 1) {
 						//console.log(elem);
 						$(elem).sortable({disabled: true});
