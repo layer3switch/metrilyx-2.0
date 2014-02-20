@@ -42,10 +42,10 @@ For **other distributions**, follow the instructions below:
 	- Restart the webserver.
 
 ### Configuration
-
 The default username and password for the site is admin and password respectively.  This is specifically needed by the rest api and to create the appropriate internal state.
 
-###### Path 
+
+##### Path 
 %{metrilyx_home}/etc/metrilyx/metrilyx.conf
 
 A sample config file is provided in the same directory above.  The configuration file is in JSON format.  To begin you can copy the sample config to the path mentioned above and fill in the uri and port.
@@ -58,11 +58,11 @@ A sample config file is provided in the same directory above.  The configuration
 		"model_path": <absolute path to models directory>
 	}
 	
-###### tsdb.uri
+##### tsdb.uri
 OpenTSDB http host
 
-###### tsdb.port
+##### tsdb.port
 OpenTSDB http Port (default: 80)
 
-###### model_path
+##### model_path
 Path to directory where JSON page models (i.e. dashboards) will be stored.  Optional (default: %{home}/pagemodels)
