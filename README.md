@@ -22,7 +22,7 @@ Metrilyx will run on any system that supports the packages below.  It has primar
 ### Installation
 The provided makefile will work with **RedHat** based distributions.  You can issue the command below, to auto-install the complete package including dependencies. The default install path is **/opt/metrilyx**.	
 	
-	[</path/to/app>]$ bash install.sh
+	[</path/to/downloaded/app>]$ bash install.sh
 	
 
 This will install all required OS packages as well as python packages and restart apache.  
@@ -31,7 +31,7 @@ For **other distributions**, follow the instructions below:
 
 	- Install the required OS packages based on your OS's package manager.
 	
-	- [</path/to/app>]$ make pydeps
+	- [</path/to/downloaded/app>]$ make pydeps
 	
 	- Copy etc/httpd/conf.d/metrilyx.conf to your webservers config directory.
 	
@@ -42,6 +42,7 @@ For **other distributions**, follow the instructions below:
 	- Restart the webserver.
 
 ### Configuration
+The default installation directory is /opt/metrilyx (i.e %{metrilyx_home}).
 
 ##### Path 
 %{metrilyx_home}/etc/metrilyx/metrilyx.conf
@@ -63,8 +64,9 @@ OpenTSDB http host
 OpenTSDB http Port (default: 80)
 
 ##### model_path
-Path to directory where JSON page models (i.e. dashboards) will be stored.  Optional (default: %{home}/pagemodels)
+Path to directory where JSON page models (i.e. dashboards) will be stored.  Optional (default: %{metrilyx_home}/pagemodels)
 
 
 #### Notes
-The default username and password for the site are admin and password respectively. These should almost never be required and are specifically needed by the REST interface.
+- The default username and password for the site are admin and password respectively. These should almost never be required and are specifically needed by the REST interface.
+- If you would like to change the password, change to the application installation directory.  Remove the file called metrilyx.sqlite3 and run **python manage.py syncdb**.  This should prompt you to create a new admin user.  Type 'yes', then the admin username and password.
