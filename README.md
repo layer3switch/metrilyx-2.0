@@ -42,6 +42,7 @@ For **other distributions**, follow the instructions below:
 	- Restart the webserver.
 
 ### Configuration
+The default username and password for the site is admin and password respectively.  This is specifically needed by the rest api and to create the appropriate internal state.
 
 ###### Path 
 %{metrilyx_home}/etc/metrilyx/metrilyx.conf
