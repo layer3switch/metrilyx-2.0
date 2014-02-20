@@ -137,5 +137,5 @@ OpenTSDB http Port (default: 80)
 Path to directory where JSON page models (i.e. dashboards) will be stored.  Optional (default: %{home}/pagemodels)
 
 
-##### Notes
+#### Notes
 The default username and password for the site are admin and password respectively. These should almost never be required and are specifically needed by the REST interface.
