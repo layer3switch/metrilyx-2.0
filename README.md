@@ -25,7 +25,7 @@ The provided makefile will work with **RedHat** based distributions.  You can is
 	[</path/to/downloaded/app>]$ bash install.sh
 	
 
-This will install all required OS packages as well as python packages and restart apache.  
+This will install all required OS packages as well as python packages and apache configs. 
 
 For **other distributions**, follow the instructions below:
 
@@ -69,4 +69,4 @@ Path to directory where JSON page models (i.e. dashboards) will be stored.  Opti
 
 #### Notes
 - The default username and password for the site are admin and password respectively. These should almost never be required and are specifically needed by the REST interface.
-- If you would like to change the password, change to the application installation directory.  Remove the file called metrilyx.sqlite3 and run **python manage.py syncdb**.  This should prompt you to create a new admin user.  Type 'yes', then the admin username and password.
+- If you would like to change the password, change to the application installation directory.  Remove the file called **metrilyx.sqlite3** and run **python manage.py syncdb**.  This should prompt you to create a new admin user.  Type 'yes', and follow the prompts to create a new username and password.
