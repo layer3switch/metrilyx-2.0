@@ -44,7 +44,7 @@ echo "-- Installing..."
 install_app;
 
 echo "-- Setup configuration"
-vim /opt/metrilyx/etc/metrilyx/metrilyx.conf
+vi /opt/metrilyx/etc/metrilyx/metrilyx.conf
 
 echo "-- Restarting apache..."
 /etc/init.d/httpd restart
