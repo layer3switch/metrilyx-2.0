@@ -14,15 +14,15 @@ Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database us
 ### Requirements
 Metrilyx will run on any system that supports the packages below.  It has primarily been tested on RedHat based flavors of Linux.
 
-##### OS Packages:
-RHEL:
+#### OS Packages:
+##### RHEL:
 	libuuid
 	uuid
 	httpd
 	mod_wsgi
 	python-setuptools
 	
-Debian:
+##### Debian:
 	libuuid1 
 	uuid-runtime 
 	apache2-mpm-worker 
