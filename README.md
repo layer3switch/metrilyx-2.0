@@ -79,7 +79,7 @@ A sample config file is provided in the same directory above.  The configuration
 OpenTSDB http host
 
 ##### tsdb.port
-OpenTSDB http Port (default: 80)
+OpenTSDB http Port (default: 4242)
 
 ##### model_path
 Path to directory where JSON page models (i.e. dashboards) will be stored.  Optional (default: %{metrilyx_home}/pagemodels)
