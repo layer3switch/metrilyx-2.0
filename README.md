@@ -82,6 +82,7 @@ OpenTSDB http Port (default: 4242)
 ##### model_path
 Path to directory where JSON page models (i.e. dashboards) will be stored.  Optional (default: %{metrilyx_home}/pagemodels)
 
+After you've installed and configured metrilyx, click on the "tutorials" link towards the bottom-center of the page (i.e. http://<metrilyx_host>/#/tutorials) for a general overview and basic tutorial on how to get started.
 
 #### Notes
 - The default username and password for the site are admin and password respectively. These should almost never be required and are specifically needed by the REST interface.
