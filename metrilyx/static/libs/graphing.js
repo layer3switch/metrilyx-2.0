@@ -61,7 +61,8 @@ ChartOptions.prototype.__plotBands = function() {
         return getPlotBands(this._graph.thresholds);
     }
     return {
-        gridLineWidth: 1
+        gridLineWidth: 1,
+        gridLineColor: "#ccc",
     };
 }
 ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
@@ -117,7 +118,8 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
             enabled: false
         },
         xAxis: {
-            gridLineWidth: 1
+            gridLineWidth: 1,
+            gridLineColor: "#ccc",
         }
     }, extraOpts, true);
     opts.yAxis = this.__plotBands();
@@ -237,6 +239,7 @@ function equalObjects(obj1, obj2) {
 function getPlotBands(thresholds) {
     return  {
         gridLineWidth: 1,
+        gridLineColor: "#ccc",
         plotBands: [
             {
                 from: thresholds['info'],
