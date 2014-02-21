@@ -8,23 +8,6 @@
 			</span>
 		</div>
 		<div ng-if="graph.graphType!='pie'" ng-include="thresholdsHtml"></div>
-		<!--
-		<div class="row" style="margin:0;">
-			<div class="col-md-1">
-			</div>
-			<div class="col-md-10 text-center" title="Graph Name">
-				<div class="padt5">
-					<input type="text" ng-model="graph.name" class="edit-comp{{editMode}}" placeholder="Graph Name" disabled="true">
-				</div>
-			</div>
-			<div class="col-md-1 text-right graph-controls edit-comp{{editMode}}">
-				<a href="javascript:void(0)" title="Remove Graph" ng-click="removeGraph($parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$index, $parent.$parent.$index, $index);">
-					<i class="glyphicon glyphicon-remove"></i>
-				</a>
-			</div>
-			<div ng-if="graph.graphType!='pie'" ng-include="thresholdsHtml"></div>
-		</div>
-		-->
 		<div class="padlr10 padt5 padb10 pod-controls edit-comp{{editMode}}" style="border-bottom: 1px solid #ccc">
 			<div class="row" style="margin:0;color:#666;font-size:12px;">
 				<div class="col-md-6 text-left" title="Graph Type">
