@@ -253,24 +253,33 @@ input.search-field {
 }
 input[ng-model*='name'] {
 	border: 1px solid rgba(255,255,255,0) !important;
-	background: rgba(255,255,255,0) !important;
+	background: none !important;
 	text-align: center;
-	color: #ddd;
 	font-weight: bold;
 }
 input[ng-model='pod.name'] {
 	font-size: 16px;
 	width:100%;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.0);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,0.0);
 }
 input[ng-model='graph.name'] {
-	color: #555;
 	width: 100%;
+	font-size: 14px;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.0);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,0.0);
+	background: none;
+}
+input[ng-model='pod.name'].edit-mode,
+input[ng-model='graph.name'].edit-mode {
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+	border: 1px solid #efefef !important;
 }
 input[ng-model='model.name'] {
-	color: #555;
 	font-size: 18px;
 }
-input[ng-model*='name'].edit-mode {
+input[ng-model='model.name'].edit-mode {
 	border: 1px solid #ccc !important;
 	background-color: #eee !important;
 	color: #555;
@@ -489,7 +498,7 @@ div[class*='layout-'] {
 .pod-header {
 	padding-top: 5px;
 	color: #ddd;
-	border-bottom: 1px solid #ccc;
+	border-bottom: 1px solid #eee;
 	/*border-bottom: 1px solid rgba(99,99,99,0.9);
 	border-top: 1px solid rgba(255,255,255,0.2);*/
 }
@@ -498,10 +507,10 @@ div[class*='layout-'] {
 }
 .pod {
 	/*background-color: #eee;*/
-	background: #555555;
+	background: #fff;
 	/*margin-bottom: 10px;*/
 	border-radius: 3px;
-	border: 1px solid #474747;
+	border: 1px solid #bbb;
 	/*padding:7px;*/
 	padding-bottom: 5px;
 	margin:5px;
@@ -575,12 +584,35 @@ ul.ui-autocomplete.ui-widget-content > li.ui-menu-item {
 .ui-state-focus {
 	font-weight: bold;
 }
-input.form-control.nobg,
-.input-group-addon.nobg {
+input.form-control.nobg {
 	background:none !important;
 	border: 1px solid rgba(0,0,0,0) !important;
+}
+.input-group-btn.nobg,
+.input-group-addon.nobg {
+	background:none !important;
+	border: none !important;
+}
+.input-group-addon.remove-btn {
+	background: none !important;
+	opacity: 0;
+}
+.input-group-addon.remove-btn.edit-mode {
+	opacity: 1 !important;
 }
 .threshold-label {
 	font-weight: bold !important;
 	font-size: 12px !important;
 }
+a.pod-header-btn {
+	color: #666 !important;
+	padding-top: 9px !important;
+	padding-bottom: 9px !important;
+}
+.pod-btn-bar {
+	opacity: 0;
+}
+.pod-btn-bar.edit-mode {
+	opacity: 1 !important;
+}
+

@@ -1,4 +1,14 @@
 	<div style="background-color: #fff">
+		<div class="input-group input-group-sm pad5">
+			<input type="text" ng-model="graph.name" class="edit-comp{{editMode}} form-control" placeholder="Graph Name" disabled="true">
+			<span class="input-group-addon nobg remove-btn edit-comp{{editMode}}">
+				<a href="javascript:void(0)" title="Remove Graph" ng-click="removeGraph($parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$index, $parent.$parent.$index, $index);" style="color:#666;" class="interactive">
+						<i class="glyphicon glyphicon-remove"></i>
+				</a>
+			</span>
+		</div>
+		<div ng-if="graph.graphType!='pie'" ng-include="thresholdsHtml"></div>
+		<!--
 		<div class="row" style="margin:0;">
 			<div class="col-md-1">
 			</div>
@@ -14,8 +24,9 @@
 			</div>
 			<div ng-if="graph.graphType!='pie'" ng-include="thresholdsHtml"></div>
 		</div>
-		<div class="pad10 pod-controls edit-comp{{editMode}}" style="border-top: 1px solid #ddd;border-bottom: 1px solid #ddd">
-			<div class="row" style="margin:0;">
+		-->
+		<div class="padlr10 padt5 padb10 pod-controls edit-comp{{editMode}}" style="border-bottom: 1px solid #ccc">
+			<div class="row" style="margin:0;color:#666;font-size:12px;">
 				<div class="col-md-6 text-left" title="Graph Type">
 					<span>type</span>
 					<select ng-model="graph.graphType">
