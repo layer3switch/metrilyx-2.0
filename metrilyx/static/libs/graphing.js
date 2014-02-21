@@ -51,29 +51,18 @@ ChartOptions.prototype.pieChartDefaults = function() {
     opts.series = this._sfmt.pieSeries();
     return opts;
 }
+/*
+    Determine if plot bands are applicable.
+    Return:
+        yAxis highcharts config.
+*/
 ChartOptions.prototype.__plotBands = function() {
-    console.log(this._graph);
-    out = {
+    if(this._graph.thresholds) {
+        return getPlotBands(this._graph.thresholds);
+    }
+    return {
         gridLineWidth: 1
     };
-    if(this._graph.thresholds) {
-        out.plotBands = [
-            {
-                from: this._graph.thresholds['info'],
-                to: this._graph.thresholds['warning'],
-                color: "rgba(99,177,211,0.3)"
-            },{
-                from: this._graph.thresholds['warning'],
-                to: this._graph.thresholds['danger'],
-                color:"rgba(224,158,73,0.3)"
-            },{
-                from: this._graph.thresholds['danger'],
-                to: this._graph.thresholds['danger']+1000,
-                color: "rgba(187,74,71,0.3)"
-            }
-        ];
-    }
-    return out;
 }
 ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
     opts = this.chartDefaults();
@@ -245,6 +234,27 @@ function equalObjects(obj1, obj2) {
     }
     return true;
 }
+function getPlotBands(thresholds) {
+    return  {
+        gridLineWidth: 1,
+        plotBands: [
+            {
+                from: thresholds['info'],
+                to: thresholds['warning'],
+                color: "rgba(99,177,211,0.3)"
+            },{
+                from: thresholds['warning'],
+                to: thresholds['danger'],
+                color:"rgba(224,158,73,0.3)"
+            },{
+                from: thresholds['danger'],
+                to: thresholds['danger']+1000,
+                color: "rgba(187,74,71,0.3)"
+            }
+        ]
+    };
+}
+
 // TODO below here needs fixing //
 function highchartsSeries(dataObj) {
     return {
@@ -282,6 +292,17 @@ function dataHasErrors(gObj) {
         }
     }
     return false;
+}
+function setPlotBands(graph) {
+    renderTo = "[data-graph-id='"+graph._id+"']";
+    //hc.showLoading();
+    hc = $(renderTo).highcharts();
+    if(hc == undefined) {
+        console.log("chart undefined", graph._id);
+        return;
+    }
+    hc.options.yAxis = getPlotBands(graph.thresholds);
+    $(renderTo).highcharts("StockChart",hc.options);  
 }
 /*
  * @params

@@ -75,7 +75,6 @@ angular.module('pageLayout', [])
 						//console.log(elem);
 						$(elem).sortable({disabled: true});
 					}
-					
 				}, true);
 			}
 		};
@@ -251,7 +250,6 @@ angular.module('graphing', [])
 						console.log('not processing graph');
 						return;
 					}
-
 					// initial populate //
 					hc = $("[data-graph-id='"+graph._id+"']").highcharts();
 					if(hc == undefined) {
@@ -280,6 +278,10 @@ angular.module('graphing', [])
 						});
 						return;
 					};
+					if(!equalObjects(graph.thresholds, oldValue.thresholds)) {
+						//console.log("[graphing.highstockGraph] thresholds changed");
+						return;
+					}
 					// check length //
 					if(graph.series.length == oldValue.series.length) {
 						// this requires a special case as the all data needs to be replaced with new data //
@@ -418,7 +420,7 @@ angular.module('timeframe', [])
 				scope.$watch(function() {
 					return ctrl.$modelValue;
 				}, function(newVal, oldVal) {
-					console.log(newVal,oldVal);
+					//console.log(newVal,oldVal);
 					if(equalObjects(newVal, oldVal)) return;
 					//console.log("passed", newVal,oldVal);
 					tagsLoc = dictToCommaSepStr(newVal);

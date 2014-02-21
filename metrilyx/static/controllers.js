@@ -314,7 +314,9 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 				flashAlertsBar();
 			});
 		}
-		
+		$scope.setPlotBands = function(graph) {
+			setPlotBands(graph);
+		}
 		if($routeParams.pageId == "new") {
 			setTimeout(function() {
 				$scope.enableEditMode();	
