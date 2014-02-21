@@ -3,41 +3,21 @@
 	<!--<div class="pad20">-->
 	<div ng-repeat="pod in column" class="pod" ng-model="pod" pod="true">
 		<div class="pod-header edit-comp{{editMode}}">
-			<div class="input-group">
+			<div class="input-group" style="width:100%">
 				<span class="input-group-btn edit-comp{{editMode}} pod-btn-bar nobg">
-					<a href="javascript:void(0)" class="btn pod-header-btn interactive" ng-click="addGraph($parent.$parent.$index, $parent.$index, $index);" title="Add graph to pod"><i class="glyphicon glyphicon-plus"></i></a>
-					<a href="javascript:void(0)" title="Vertical graph layout" ng-click="pod.orientation='vertical';" class="btn interactive pod-header-btn"><i class="glyphicon glyphicon-resize-vertical"></i></a>
+					<a href="javascript:void(0)" class="btn pod-header-btn interactive edit-comp{{editMode}}" ng-click="addGraph($parent.$parent.$index, $parent.$index, $index);" title="Add graph to pod"><i class="glyphicon glyphicon-plus"></i></a>
+					<a href="javascript:void(0)" title="Vertical graph layout" ng-click="pod.orientation='vertical';" class="btn interactive pod-header-btn edit-comp{{editMode}}"><i class="glyphicon glyphicon-resize-vertical"></i></a>
 				</span>
-				<input type="text" class="edit-comp{{editMode}} form-control" ng-model="pod.name" placeholder="Pod Name" disabled="true">
+				<input type="text" class="edit-comp{{editMode}}" ng-model="pod.name" placeholder="Pod Name" disabled="true">
 				<span class="edit-comp{{editMode}} input-group-btn pod-btn-bar">
-					<a href="javascript:void(0)" title="Horizontal graph layout" class="btn interactive pod-header-btn" ng-click="pod.orientation='horizontal';">
+					<a href="javascript:void(0)" title="Horizontal graph layout" class="btn interactive pod-header-btn edit-comp{{editMode}}" ng-click="pod.orientation='horizontal';">
 						<i class="glyphicon glyphicon-resize-horizontal"></i>
 					</a>
-					<a href="javascript:void(0)" ng-click="removePod($parent.$parent.$index, $parent.$index, $index)" title="Remove Pod" class="btn interactive pod-header-btn">
+					<a href="javascript:void(0)" ng-click="removePod($parent.$parent.$index, $parent.$index, $index)" title="Remove Pod" class="btn interactive pod-header-btn edit-comp{{editMode}}">
 						<i class="glyphicon glyphicon-remove"></i>
 					</a>
 				</span>
 			</div>
-			<!--
-			<div class="row pod-controls edit-comp{{editMode}}" style="border-top:1px solid #eee;margin:0;padding-top:5px;">
-				<div class="col-md-6 nopad text-left">
-					<span class="btn-group btn-group-sm">
-						<button type="button" class="btn btn-default interactive" ng-click="addGraph($parent.$parent.$index, $parent.$index, $index);" title="Add graph to pod" style="padding-top:8px;padding-bottom:8px;">
-							<i class="glyphicon glyphicon-plus"></i>
-						</button>
-					</span>
-				</div>
-				<div class="col-md-6 nopad text-right">
-					<span class="btn-group btn-group-sm">
-						<button type="button" class="btn btn-default interactive" ng-click="addGraph($parent.$parent.$index, $parent.$index, $index);" title="Add graph to pod" style="padding-top:8px;padding-bottom:8px;">
-							<i class="glyphicon glyphicon-plus"></i>
-						</button>
-						<button type="button" title="Vertical graph layout" ng-click="pod.orientation='vertical';" class="btn btn-default interactive" style="padding-top:8px;padding-bottom:8px;"><i class="glyphicon glyphicon-resize-vertical"></i></button>
-						<button title="Horizontal graph layout" type="button" class="btn btn-default interactive" ng-click="pod.orientation='horizontal';" style="padding-top:8px;padding-bottom:8px;"><i class="glyphicon glyphicon-resize-horizontal"></i></button>
-					</span>
-				</div>
-			</div>
-			-->
 		</div>
 		<!-- drop new graph -->
 		<div class="graphs">

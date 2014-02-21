@@ -593,12 +593,14 @@ input.form-control.nobg {
 	background:none !important;
 	border: none !important;
 }
-.input-group-addon.remove-btn {
+a.graph-rm-btn {
 	background: none !important;
 	opacity: 0;
+	display: none;
 }
-.input-group-addon.remove-btn.edit-mode {
+a.graph-rm-btn.edit-mode {
 	opacity: 1 !important;
+	display: inline-block;
 }
 .threshold-label {
 	font-weight: bold !important;
@@ -608,6 +610,10 @@ a.pod-header-btn {
 	color: #666 !important;
 	padding-top: 9px !important;
 	padding-bottom: 9px !important;
+	display: none;
+}
+a.pod-header-btn.edit-mode {
+	display: inline-block !important;
 }
 .pod-btn-bar {
 	opacity: 0;
@@ -615,4 +621,6 @@ a.pod-header-btn {
 .pod-btn-bar.edit-mode {
 	opacity: 1 !important;
 }
-
+.form-control[disabled] {
+	cursor: default !important;
+} 
