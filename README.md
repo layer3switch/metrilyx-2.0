@@ -1,16 +1,34 @@
 metrilyx-2.0
 ============
+
+#### Overview
+![Alt text](metrilyx/static/imgs/readme/screenshot_1.png)
+#### Page listing
+![Alt text](metrilyx/static/imgs/readme/screenshot_2.png)
+#### Edit Mode
+![Alt text](metrilyx/static/imgs/readme/screenshot_3.png)
+
+
 Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database used to store large amounts of data.  It allows for analyzing, cross cutting and viewing of time series data in a simple manner.
  
 ### Requirements
 Metrilyx will run on any system that supports the packages below.  It has primarily been tested on RedHat based flavors of Linux.
 
 ##### OS Packages:
+RHEL:
 	libuuid
 	uuid
 	httpd
 	mod_wsgi
+	python-setuptools
 	
+Debian:
+	libuuid1 
+	uuid-runtime 
+	apache2-mpm-worker 
+	libapache2-mod-wsgi 
+	make 
+	python-setuptools
 
 ##### Python Packages:
 	Django
