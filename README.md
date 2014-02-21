@@ -2,7 +2,7 @@ metrilyx-2.0
 ============
 
 #### Overview
-![Alt text](metrilyx/static/imgs/readme/screenshot_1.png)
+![Alt text](/metrilyx/static/imgs/readme/screenshot_1.png)
 #### Page listing
 ![Alt text](metrilyx/static/imgs/readme/screenshot_2.png)
 #### Edit Mode
