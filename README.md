@@ -91,3 +91,4 @@ After you've installed and configured metrilyx, click on the "tutorials" link to
 #### Notes
 - The default username and password for the site are admin and password respectively. These should almost never be required and are specifically needed by the REST interface.
 - If you would like to change the password, change to the application installation directory.  Remove the file called **metrilyx.sqlite3** and run **python manage.py syncdb**.  This should prompt you to create a new admin user.  Type 'yes', and follow the prompts to create a new username and password.
+- Please be aware that although the project has a MIT license, the graphing library is under the creative commons license.  
