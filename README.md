@@ -68,7 +68,8 @@ A sample config file is provided in the same directory above.  The configuration
 	{
 		"tsdb": {
 			"uri":"tsdb.example.com",
-			"port": 80
+			"port": 80,
+			"suggest_limit": 100
 		},
 		"model_path": <absolute path to models directory>
 	}
@@ -78,6 +79,9 @@ OpenTSDB http host
 
 ##### tsdb.port
 OpenTSDB http Port (default: 4242)
+
+##### tsdb.suggest_limit
+OpenTSDB suggest max result limit. 
 
 ##### model_path
 Path to directory where JSON page models (i.e. dashboards) will be stored.  Optional (default: %{metrilyx_home}/pagemodels)
