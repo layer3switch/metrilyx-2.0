@@ -110,6 +110,6 @@ class SearchView(APIView):
 			return Response([ os.path.splitext(f)[0] for f in os.listdir(config['model_path']) if search_query in f ])
 		else:
 			hjc = HttpJsonClient(config['tsdb']['uri'], config['tsdb']['port'])
-			rslt = hjc.GET(self.tsdb_endpoints.suggest+"?max=16000000&type="+search_type+"&q="+search_query)
+			rslt = hjc.GET(self.tsdb_endpoints.suggest+"?max="+str(config['tsdb']['suggest_limit'])+"&type="+search_type+"&q="+search_query)
 			return Response(rslt)
 
