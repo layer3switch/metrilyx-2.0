@@ -1,7 +1,7 @@
 {
 	"tsdb": {
 		"uri": "<OpenTSDB host>",
-		"port": 4242
+		"port": 4242,
 		"suggest_limit": 100
 	}
 }
