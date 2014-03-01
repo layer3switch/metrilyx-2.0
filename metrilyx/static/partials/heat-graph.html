@@ -1,0 +1,45 @@
+<div class="margin5" ng-include="thresholdsHtml"></div>
+<div class="graph {{graph.size}} marginlr10" ui-sortable ng-model="graph.series">
+	<table style="width:100%">
+		<tr ng-repeat="heat in graph.series[0].data">
+			<td class="pad10 text-left"><span class="h5">{{heat.tags[pod.pivot_tag]}}</span></td>
+			<td class="pad10 text-right">
+				<span style="font-size:12px;color:#ccc;">{{heat.timestamp|dateTime}}</span>
+			</td>
+			<td class="text-right"><span class="badge bg {{heat.severity}}">{{heat.value.toFixed(2)}}</span></td>
+		</tr>
+	</table>
+</div>
+<div class="graph-controls edit-comp{{editMode}} graph-metrics-panel collapse">
+	<div ng-repeat="metric in graph.series">
+		<div class="pad10 metric-name">
+			<span class="metric-control-header">{{metric.query.metric}}</span>
+			<a href="javascript:void(0)" ng-click="removeMetric($parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$index, $parent.$index, $index)" class="pull-right">
+				<i class="glyphicon glyphicon-trash icon-lite"></i>
+			</a>
+		</div>
+		<div class="padl10 padr10 padb10">
+			<div>
+				<span class="padr5 metric-control-label">aggregator</span>
+				<select ng-model="metric.query.aggregator">
+					<option value="min">min</option>
+					<option value="avg">avg</option>
+					<option value="sum">sum</option>
+					<option value="max">max</option>
+				</select>
+				<span class="pull-right">
+					<span class="padr5 metric-control-label">rate</span>
+					<input type="checkbox" ng-model="metric.query.rate">
+				</span>
+			</div>
+			<div class="input-group input-group-sm" style="margin-top:4px">
+				<span class="input-group-addon nobg metric-control-label" style="padding-left:0px;">tags</span>
+				<input type="text" ng-model="metric.query.tags" key-value-pairs="true" class="form-control dark">
+			</div>
+			<div class="input-group input-group-sm" style="margin-top:4px">
+				<span class="input-group-addon nobg metric-control-label" style="padding-left:0px;">pivot tag</span>
+				<input type="text" ng-model="pod.pivot_tag" class="form-control dark">
+			</div>
+		</div>
+	</div>
+</div>

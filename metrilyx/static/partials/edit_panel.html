@@ -1,0 +1,26 @@
+<div class="edit-comp{{editMode}}" id="edit-panel">
+	<div class="marginlr5 padb10" style="border-bottom:1px solid #555;padding-top:12px;">
+		<span class="edit-panel-btn pointer interactive padr10" title="Delete Page" ng-click="removeModel()">
+			<i class="glyphicon glyphicon-trash"></i>
+		</span>
+		<span ng-click="saveModel()" class="edit-panel-btn pointer interactive" title="Save Page">
+			<i class="glyphicon glyphicon-save"></i>
+		</span>
+	</div>
+	<div class="input-group input-group-sm panel-searchbar marginlr5 padl5 padr10" style="border-bottom:1px solid #555;">
+				<span class="input-group-addon">
+					<i class="glyphicon glyphicon-search"></i>
+				</span>
+				<input type="text" class="form-control" ng-model="metricQuery" ng-change="searchForMetric()" placeholder="Metric Search" style="border:1px solid #666 !important;">
+	</div>
+
+	<div>
+		<div ui-sortable="metricListSortOpts" drag-copy="true" ng-model="metricQueryResult">
+			<div class="metric interactive page-list-item" ng-repeat="metric in metricQueryResult" ng-model="metric" title="{{metric.query.metric}}" style="color:#ccc">
+				<span class="padr10"><i class="glyphicon glyphicon-stats"></i></span>
+				<span>{{metric.query.metric}}</span>
+			</div>
+		</div>
+	</div>
+
+</div>

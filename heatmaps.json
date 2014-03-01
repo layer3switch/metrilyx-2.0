@@ -1,0 +1,17 @@
+{
+    "sum:proc.loadavg.1min{host=*}": {
+        "query": "sum:proc.loadavg.1min{host=*}", 
+        "_id": "sum:proc.loadavg.1min{host=*}", 
+        "name": "Load 1 by Host"
+    }, 
+    "sum:rate:proc.net.bytes{cluster=*}": {
+        "query": "sum:rate:proc.net.bytes{cluster=*}", 
+        "_id": "sum:rate:proc.net.bytes{cluster=*}", 
+        "name": "Network Traffic by Cluster"
+    }, 
+    "sum:proc.loadavg.1min{cluster=*}": {
+        "query": "sum:proc.loadavg.1min{cluster=*}", 
+        "_id": "sum:proc.loadavg.1min{cluster=*}", 
+        "name": "Load by Cluster"
+    }
+}
