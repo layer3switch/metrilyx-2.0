@@ -42,8 +42,6 @@ install_web_config() {
 	echo "-- Install UI..."
 	cp etc/httpd/conf.d/metrilyx.conf /etc/httpd/conf.d/;
 	chown -R apache:apache /opt/metrilyx;
-	echo "-- Setup configuration"
-	vi /opt/metrilyx/etc/metrilyx/metrilyx.conf
 	echo "-- Restarting apache..."
 	/etc/init.d/httpd restart
 }
