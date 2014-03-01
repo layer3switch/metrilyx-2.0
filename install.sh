@@ -1,7 +1,7 @@
 
 install_os_deps() {
 	echo "-- Installing OS dependencies...."
-	for pkg in libuuid uuid httpd mod_wsgi python-setuptools mongodb; do
+	for pkg in libuuid uuid httpd mod_wsgi python-setuptools gcc python-devel mongodb; do
 		rpm -qa | grep ${pkg} || yum -y install ${pkg};
 	done;
 	chkconfig httpd on;
