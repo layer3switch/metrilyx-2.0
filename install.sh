@@ -36,6 +36,7 @@ install_app(){
 	if [ ! -f /opt/metrilyx/etc/metrilyx/metrilyx.conf ]; then
 		cp etc/metrilyx/metrilyx.conf.sample /opt/metrilyx/etc/metrilyx/metrilyx.conf;
 	fi
+	vi /opt/metrilyx/etc/metrilyx/metrilyx.conf;
 }
 install_web_config() {
 	echo "-- Install UI..."
