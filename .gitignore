@@ -1,5 +1,6 @@
 # Metrilyx config files #
 #########################
+celerybeat-schedule*
 metrilyx.conf
 
 # Python #
@@ -16,4 +17,3 @@ metrilyx.conf
 .Trashes
 ehthumbs.db
 Thumbs.db
-celerybeat-schedule*
