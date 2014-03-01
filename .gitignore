@@ -16,3 +16,4 @@ metrilyx.conf
 .Trashes
 ehthumbs.db
 Thumbs.db
+celerybeat-schedule*
