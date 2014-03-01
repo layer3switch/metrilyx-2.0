@@ -3,5 +3,20 @@
 		"uri": "<OpenTSDB host>",
 		"port": 4242,
 		"suggest_limit": 100
+	},
+	"heatmaps": {
+		"analysis_interval": "1m-ago",
+		"transport": "mongodb",
+		"broker": {
+	    	"host": "127.0.0.1",
+	    	"port": 27017,
+	    	"database": "jobs", 
+	    	"taskmeta_collection": "taskmeta_collection"
+		}
+	},
+	"celery": {
+		"tasks": [
+			"metrilyx.heatmap_tasks"
+		]
 	}
 }
