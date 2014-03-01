@@ -2,7 +2,7 @@
 install_os_deps() {
 	echo "-- Installing OS dependencies...."
 	for pkg in libuuid gcc uuid httpd mod_wsgi python-setuptools python-devel mongodb; do
-		rpm -qa | grep ${pkg} || yum -y install ${pkg};
+		rpm -qa | egrep "^${pkg}" || yum -y install ${pkg};
 	done;
 	chkconfig httpd on;
 };
