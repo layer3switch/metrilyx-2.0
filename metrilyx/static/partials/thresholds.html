@@ -1,15 +1,25 @@
 <div class="row edit-comp" style="margin:0;">
 	<div class="col-md-12 nopad">
-		<div class="input-group input-group-sm padtb5 marginlr5 marginb5" style="border-bottom:1px solid #eee;border-top:1px solid #eee;">
+		<div class="input-group input-group-sm padtb5" style="border-bottom:1px solid #eee;">
 			<span class="input-group-addon nobg threshold-label" style="color:rgba(187,74,71,1);">Danger: </span>
 			<input type="text" class="form-control nobg" ng-model="graph.thresholds.danger" style="color:rgba(187,74,71,0.95);">
 			<span class="input-group-addon nobg threshold-label" style="color:rgba(224,158,73,1);">Warn: </span>
 			<input type="text" class="form-control nobg" ng-model="graph.thresholds.warning" style="color:rgba(224,158,73,0.95);">
 			<span class="input-group-addon nobg threshold-label" style="color:rgba(99,177,211,1);">Info: </span>
 			<input type="text" class="form-control nobg" ng-model="graph.thresholds.info" style="color:rgba(99,177,211,0.95);">
-			<a href="javascript:void(0)" title="Set thresholds" ng-click="setPlotBands(graph)" class="input-group-addon nobg">
-				<i class="glyphicon glyphicon-ok-circle" style="font-size:16px;"></i>
-			</a>
+			<span ng-switch="modelType" class="input-group-addon nobg">
+				<span ng-switch-when="">
+					<a href="javascript:void(0)" title="Set thresholds" ng-click="setPlotBands(graph)">
+						<i class="glyphicon glyphicon-ok-circle" style="font-size:16px;"></i>
+					</a>
+				</span>
+				<span ng-switch-default>
+					<!--
+					<a href="javascript:void(0)" title="Set thresholds">
+						<i class="glyphicon glyphicon-ok-circle" style="font-size:16px;"></i>
+					</a>-->
+				</span>
+			</span>
 		</div>
 	</div>
 </div>

@@ -1,6 +1,6 @@
 <html lang="en">
 	<head>
-		<title>metrilyx-frontend</title>
+		<title>metrilyx</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 		<script src="libs/jquery/jquery-1.10.2.min.js"></script>
@@ -26,6 +26,7 @@
 		<script src="controllers.js"></script>
 		<script src="services.js"></script>
 		<script src="libs/angular-graphing.js"></script>
+		<script src="libs/angular-heatmap.js"></script>
 		
 		<link rel="stylesheet" href="css/style.css">
 		<link rel="stylesheet" href="css/layout.css">
@@ -34,30 +35,41 @@
 		<link rel="stylesheet" href="libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css">
 
 	</head>
-	<body ng-app="app" ng-controller="pageController">
-		<div id="side-panel" class="inset-shadow">
-			<div class="page-selector-header">
-				<!--<i class="glyphicon glyphicon-list-alt"></i>-->
-				<span>Pages</span>
-				<a href="#/new" class="pull-right interactive" style="color:#ccc" title="New Page">
-					<i class="glyphicon glyphicon-plus"></i>
-				</a>
-			</div>
-			<div class="edit-panel-item header inset-shadow">
-				<input type="text" class="edit-panel-item-label search-field" placeholder="Page Search" ng-model="pageQuery">
-			</div>
-			<div class="inset-shadow" style="height:100%">
-				<a ng-repeat="pageModel in pageModels | filter:pageQuery" href="#/{{pageModel._id}}{{globalTags|tagsLink}}" >
+	<body ng-app="app">
+		<div id="side-panel" class="inset-shadow" ng-controller="sidePanelController">
+			<div class="inset-shadow" style="height:100%;padding-left:10px;padding-right:10px">
+				<div class="page-selector-header">
+					<a class="interactive" style="color:#ccc" ng-click="loadPagemodelList()" href="javascript:void(0)" title="Page listing">
+						<span class="marginr10 pad10" style="padding-left:0">
+							<i class="glyphicon glyphicon-file"></i>
+						</span>
+					</a>
+					<a class="interactive" style="color:#ccc" ng-click="loadHeatmapList()" href="javascript:void(0)" title="Heatmap listing">
+						<span class="marginr10 pad10">
+							<i class="glyphicon glyphicon-map-marker"></i>
+						</span>
+					</a>
+				</div>
+				<div class="input-group input-group-sm panel-searchbar">
+					<span class="input-group-addon page-icon">
+						<i class="glyphicon glyphicon-search"></i>
+					</span>
+					<input type="text" class="form-control" placeholder="Search" ng-model="modelQuery">
+					<a href="#/{{modelType}}new" class="input-group-addon page-icon interactive" title="New Page">
+						<i class="glyphicon glyphicon-plus"></i>
+					</a>
+				</div>
+				<a ng-repeat="model in modelsList | filter:modelQuery" href="#/{{modelType}}{{model._id}}" >
 					<div class="page-list-item">
 						<span class="page-icon">
 							<i class="glyphicon glyphicon-stats"></i>
 						</span>
-						<span class="padl10">{{pageModel.name}}</span>
+						<span class="padl10">{{model.name}}</span>
 					</div>
 				</a>
 			</div>
 		</div><!-- END #side-panel -->
-		<div class="shift" id="stage">
+		<div class="shift" id="stage" ng-controller="pageController">
 			<div class="page-mast">
 				<div class="row">
 					<div class="col-md-6">
@@ -72,16 +84,15 @@
 						</span>
 					</div>
 					<div class="col-md-6">
-						<div class="input-group input-group-sm" title="Tags for all graphs">
-							<span class="input-group-addon" style="border-radius:3px 0 0 3px !important">global tags:</span>
-							<input type="text" ng-model="globalTags" class="form-control" key-value-pairs global-tags style="0 3px 3px 0 !important">
+						<div class="input-group" title="Global tags terminated with ';'">
+							<span class="input-group-addon nobg" style="font-size:26px!important;color:#ccc;padding-top:1px!important;"><i class="glyphicon glyphicon-globe"></i></span>
+							<input type="text" ng-model="globalTags" key-value-pairs global-tags class="form-control dark" style="height:30px;">
 						</div>
 					</div>
 				</div>
 			</div>
 			<div ng-view></div>
 		</div>
-
 		<div ng-include="jsonHtml"></div>
 		<div id="global-alerts" class="alert"></div>
 	</body>

@@ -6,15 +6,43 @@ metrilyxControllers.controller('staticsController', ['$scope', '$routeParams',
 		clearAllTimeouts();
 	}
 ]);
-metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph',
-	function($scope, $routeParams, $location, $http, Metrics, Schema, Model, Graph) {
-		
-		console.log($routeParams.pageId);
+metrilyxControllers.controller('sidePanelController', ['$scope', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Heatmap',
+	function($scope, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap) {
+		$scope.modelsList = [];
+		$scope.modelType = "";
+		$scope.modelQuery = "";
+		Model.listModels(function(result) {
+			$scope.modelsList = result;
+		});
+		$scope.loadHeatmapList = function() {
+			Heatmap.listModels(function(result) {
+				$scope.modelType = "heatmap/";
+				$scope.modelsList = result;
+			});
+		}
+		$scope.loadPagemodelList = function() {
+			Model.listModels(function(result) {
+				$scope.modelType = "";
+				$scope.modelsList = result;
+			});
+		}
+	}
+]);
+metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph','Heatmap',
+	function($scope, $routeParams, $location, $http, Metrics, Schema, Model, Graph, Heatmap) {
+		//console.log($routeParams);
+		if($routeParams.heatmapId) {
+			$scope.modelType = "heatmap/";
+		} else {
+			$scope.modelType = "";
+		}
 		clearAllTimeouts();
 		var canceler;
 
+		$scope.editPanelHtml	= "partials/edit_panel.html";
 		$scope.thresholdsHtml	= "partials/thresholds.html";
 		$scope.graphHtml 		= "partials/graph.html";
+		$scope.heatGraphHtml 	= "partials/heat-graph.html"
 		$scope.podHtml 			= "partials/pod.html";
 		$scope.pageHeaderHtml 	= "partials/page-header.html";
 		$scope.jsonHtml 		= "partials/json.html";
@@ -28,13 +56,14 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 						"1h-ago",
 						"Custom Range"
 						];
-		
+
 		$scope.metricListSortOpts 	= dndconfig.metricList;
 		$scope.graphSortOpts 		= dndconfig.graph;
 		$scope.podSortOpts 			= dndconfig.pod;
 		$scope.columnSortOpts 		= dndconfig.column;
 		$scope.rowSortOpts 			= dndconfig.row;
 		$scope.layoutSortOpts 		= dndconfig.layout;
+
 
 		// set default to relative time //
 		$scope.timeType = "1h-ago";
@@ -67,12 +96,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 		$scope.editMode = "";
 		$scope.updatesEnabled = true;
 
-		$scope.pageQuery = "";
-
 		$scope.metricQuery = "";
 		$scope.metricQueryResult = [];
-
-		$scope.pageModels = [];
 
 		$scope.reload = false;
 		/* pod schema */
@@ -82,10 +107,12 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 
 		//clearAllTimeouts();
 		Schema.get({modelType: 'pod'},function(podModel){
-			Schema.get({modelType:'graph'}, function(graphModel) {
+			/* used for dropped pod */
+			$scope.droppablePodSchema = [ podModel ];
+			//Schema.get({modelType:'graph'}, function(graphModel) {
 				/* used for dropped pod */
-				$scope.droppablePodSchema = [ podModel ];
-				if(!$routeParams.pageId || $routeParams.pageId == "new") {
+				//$scope.droppablePodSchema = [ podModel ];
+				if((!$routeParams.pageId && !$routeParams.heatmapId) || $routeParams.pageId == "new" || $routeParams.heatmapId == "new") {
 					Schema.get({modelType: 'page'}, function(pageModel) {
 						$scope.model = pageModel;
 						// make a copy of podModel //
@@ -94,25 +121,30 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 					});
 				} else {
 					// initial page load
-					Model.get({pageId: $routeParams.pageId}, function(result) {
-						if(result.error) {
-							console.log(result);
-						} else {
-							$scope.model = result;
-						}
-					});
+					//console.log("mt", $scope.modelType, "dd", this.modelType);
+					if($scope.modelType == "") {
+						Model.get({pageId: $routeParams.pageId}, function(result) {
+							if(result.error) {
+								console.log(result);
+							} else {
+								$scope.model = result;
+							}
+						});
+					} else {
+						Heatmap.get({pageId: $routeParams.heatmapId}, function(result) {
+							if(result.error) {
+								console.log(result);
+							} else {
+								$scope.model = result;
+								//console.log($scope.model);
+							}
+						});
+					}
 				}
-
-			});
-		});
-		/*
-		 * Populate page models list
-		 */
-		Model.listModels(function(models) {
-		 	$scope.pageModels = models;
+			//});
 		});
 		// close side panel when new page model loaded //
-		$('#stage').removeClass('right');
+		//$('#stage').removeClass('right');
 
 		function flashAlertsBar() {
 			$('#global-alerts').fadeIn(500);
@@ -140,8 +172,14 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 			$scope.delayLoadPageModel($routeParams.pageId);
 		}
 		$scope.searchForMetric = function(args) {
-			Metrics.suggest($scope.metricQuery, function(result) {
-				
+			//console.log("|",this.metricQuery,"|");
+			/* 
+				'this.metricQuery' must be used rather than '$scope.metricQuery' because 
+				edit-panel is ng-include so a new scope gets created.
+			*/
+			if(this.metricQuery == "") return;
+			Metrics.suggest(this.metricQuery, function(result) {
+				$scope.metricQuery = this.metricQuery;
 				Schema.get({modelType:'metric'}, function(graphModel) {
 					var arr = [];
 					for(var i in result) {
@@ -149,11 +187,10 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 						obj.alias = result[i];
 						obj.query.metric = result[i];
 						arr.push(obj);
-					}	
+					}
 					$scope.metricQueryResult = arr;
 				});
-				
-				console.log($scope.metricQueryResult.length);
+				//console.log($scope.metricQueryResult.length);
 			});
 		}
 		// Load initial empty page -> pod -> graph //
@@ -202,16 +239,15 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 		 *
 		 */
 		$scope.removeMetric = function(rowIdx, colIdx, podIdx, graphIdx, metricIdx) {
-			//console.log(rowIdx, colIdx, podIdx, graphIdx, metricIdx);
+			console.log(rowIdx, colIdx, podIdx, graphIdx, metricIdx);
 			graph = $scope.model.layout[rowIdx][colIdx][podIdx].graphs[graphIdx];
 			graph.series.splice(metricIdx,1);
 		}
 		/* Reflow all graphs on page */
 		$scope.reflow = function(args) {
-			console.log("reflow in 500...");
 			// This is to compensate for angulars processing time until I can figure out a better way //
 			setTimeout(function() {
-				console.log("reflow");
+				//console.log("reflow");
 				$('[data-graph-id]').each(function() {
 					hc = $(this).highcharts();
 					if(hc != undefined) {
@@ -251,12 +287,18 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 			$scope.editMode = " edit-mode";
 			$scope.updatesEnabled = false;
 			$(".graph-metrics-panel").collapse('show');
+			if($scope.modelType == "") {
+				$("[ng-include='thresholdsHtml']").collapse('show');
+			}
 			$('input.edit-comp').attr('disabled',false);
 			$scope.enableDragDrop();
 		}
 		$scope.disableEditMode = function() {
 			if($scope.timeType != "absolute") $scope.updatesEnabled = true;
 			$(".graph-metrics-panel").collapse('hide');
+			if($scope.modelType == "") {
+				$("[ng-include='thresholdsHtml']").collapse('hide');	
+			}
 			$('input.edit-comp').attr('disabled',true);
 			$scope.editMode = "";
 			$scope.disableDragDrop();
@@ -271,53 +313,74 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 			}
 			$scope.reflow();
 		}
-		
+		function _removeModelCallback(rslt) {
+			$('#global-alerts').html(rslt.message);
+			if(rslt.error) {
+				$('#global-alerts').removeClass('alert-success');
+				$('#global-alerts').addClass('alert-danger');
+				$('#global-alerts').html("<b>Error: </b>"+rslt.message)
+				//$scope.globalAlerts = result.error;
+			} else {
+				$('#global-alerts').addClass('alert-success');
+				$('#global-alerts').removeClass('alert-danger');
+				$('#global-alerts').html("<b>Success: </b>"+rslt.message);
+				// reload page model list //
+				/*
+				Model.listModels(function(models) {
+	 				$scope.pageModels = models;
+				});*/
+			}
+			flashAlertsBar();
+		}
 		$scope.removeModel = function(args) {
-			Model.removeModel({pageId: $scope.model._id}, {}, function(result) {
-				$('#global-alerts').html(result.message);
-				if(result.error) {
-					$('#global-alerts').removeClass('alert-success');
-					$('#global-alerts').addClass('alert-danger');
-					$('#global-alerts').html("<b>Error: </b>"+result.message)
-					//$scope.globalAlerts = result.error;
-				} else {
-					$('#global-alerts').addClass('alert-success');
-					$('#global-alerts').removeClass('alert-danger');
-					$('#global-alerts').html("<b>Success: </b>"+result.message);
-					// reload page model list //
-					Model.listModels(function(models) {
-		 				$scope.pageModels = models;
-					});
-				}
-				flashAlertsBar();
-			});
+			if($scope.modelType == "") {
+				Model.removeModel({pageId: $scope.model._id}, {}, function(result) {
+					_removeModelCallback(result)
+				});
+			} else {
+				console.log($scope.model._id);
+				Heatmap.removeModel({pageId: $scope.model._id}, {}, function(result) {
+					_removeModelCallback(result)
+				});
+			}
+		}
+		function _saveModelCallback(rslt) {
+			$('#global-alerts').html(rslt.message);
+			if(rslt.error) {
+				$('#global-alerts').removeClass('alert-success');
+				$('#global-alerts').addClass('alert-danger');
+				$('#global-alerts').html("<b>Error: </b>"+rslt.message)
+				//$scope.globalAlerts = result.error;
+			} else {
+				$('#global-alerts').addClass('alert-success');
+				$('#global-alerts').removeClass('alert-danger');
+				//$scope.globalAlerts = result.success;
+				$('#global-alerts').html("<b>Success: </b>"+rslt.message);
+				$scope.disableEditMode();
+				$scope.reflow();
+			}
+			//console.log("globalAlerts", result);
+			flashAlertsBar();		
 		}
 		$scope.saveModel = function(args) {
 			//console.log($scope.model);
-			Model.editModel($scope.model, function(result) {
-				//$scope.globalAlerts = result;
-				$('#global-alerts').html(result.message);
-				if(result.error) {
-					$('#global-alerts').removeClass('alert-success');
-					$('#global-alerts').addClass('alert-danger');
-					$('#global-alerts').html("<b>Error: </b>"+result.message)
-					//$scope.globalAlerts = result.error;
-				} else {
-					$('#global-alerts').addClass('alert-success');
-					$('#global-alerts').removeClass('alert-danger');
-					//$scope.globalAlerts = result.success;
-					$('#global-alerts').html("<b>Success: </b>"+result.message);
-					$scope.disableEditMode();
-					$scope.reflow();
-				}
-				//console.log("globalAlerts", result);
-				flashAlertsBar();
-			});
+			if($scope.modelType == "") {
+				Model.editModel($scope.model, function(result) {
+					_saveModelCallback(result);
+				});
+			} else {
+				Heatmap.editModel($scope.model, function(result) {
+					_saveModelCallback(result);
+				});
+			}
 		}
 		$scope.setPlotBands = function(graph) {
 			setPlotBands(graph);
 		}
-		if($routeParams.pageId == "new") {
+
+		// close side panel //
+		$('#stage').removeClass('right');
+		if($routeParams.pageId == "new" || $routeParams.heatmapId == 'new') {
 			setTimeout(function() {
 				$scope.enableEditMode();	
 			}, 100);

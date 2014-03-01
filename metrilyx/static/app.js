@@ -5,6 +5,7 @@ var app = angular.module('app', [
 	'timeframe',
 	'graphing',
 	'pageLayout',
+	'heatmaps',
 	'metrilyxControllers',
 	'metrilyxServices'
 ]);
@@ -19,6 +20,10 @@ app.config(['$routeProvider',
 			when('/tutorials', {
 				templateUrl: 'partials/tutorials.html',
 				controller: 'staticsController'
+			})
+			.when('/heatmap/:heatmapId', {
+				templateUrl: 'partials/page.html',
+				controller: 'pageController',
 			})
 			.when('/:pageId', {
 				templateUrl: 'partials/page.html',

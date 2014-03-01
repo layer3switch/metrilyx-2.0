@@ -1,13 +1,16 @@
 	<div style="background-color: #fff">
 		<div class="input-group input-group-sm pad5" style="width:100%">
+			<a ng-if="graph.graphType!='pie'" href="javascript:void(0)" data-target="[ng-include='thresholdsHtml']" data-toggle="collapse" class="input-group-addon nobg interactive">
+				<i class="glyphicon glyphicon-chevron-down"></i>
+			</a>
 			<input type="text" ng-model="graph.name" class="edit-comp{{editMode}} form-control" placeholder="Graph Name" disabled="true">
 			<span class="input-group-addon nobg">
 				<a href="javascript:void(0)" title="Remove Graph" ng-click="removeGraph($parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$index, $parent.$parent.$index, $index);" style="color:#666;" class="interactive graph-rm-btn edit-comp{{editMode}}">
-						<i class="glyphicon glyphicon-remove"></i>
+					<i class="glyphicon glyphicon-remove"></i>
 				</a>
 			</span>
 		</div>
-		<div ng-if="graph.graphType!='pie'" ng-include="thresholdsHtml"></div>
+		<div ng-if="graph.graphType!='pie'" class="marginlr5 marginb5 collapse" ng-include="thresholdsHtml"></div>
 		<div class="padlr10 padt5 padb10 pod-controls edit-comp{{editMode}}" style="border-bottom: 1px solid #ccc">
 			<div class="row" style="margin:0;color:#666;font-size:12px;">
 				<div class="col-md-6 text-left" title="Graph Type">
@@ -34,7 +37,7 @@
 	<div class="graph-controls edit-comp{{editMode}} graph-metrics-panel collapse">
 			<div ng-repeat="metric in graph.series">
 				<div class="pad10" style="overflow-x:hidden;text-wrap:none;white-space:nowrap">
-					<span style="overflow-x:hidden;text-wrap:none;white-space:nowrap">{{metric.query.metric}}</span>
+					<span class="metric-control-header">{{metric.query.metric}}</span>
 					<a href="javascript:void(0)" ng-click="removeMetric($parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$index, $parent.$index, $index)" class="pull-right">
 						<i class="glyphicon glyphicon-trash icon-lite"></i>
 					</a>
@@ -48,32 +51,29 @@
 							<option value="sum">sum</option>
 							<option value="max">max</option>
 						</select>
-						<span class="metric-control-label">rate</span>
-						<input type="checkbox" ng-model="metric.query.rate">
-					</div>
-					<div style="margin-top:4px">
-						<span class="input-group input-group-sm">
-							<!--<div class="metric-control-label">alias</div>
-							<input type="text" ng-model="metric.alias" class="metric-control">-->
-							<div class="input-group-addon" title="Series name shown in legend">alias</div>
-							<input type="text" ng-model="metric.alias" class="form-control">
+						<span class="pull-right">
+							<span class="metric-control-label">rate</span>
+							<input type="checkbox" ng-model="metric.query.rate">
 						</span>
 					</div>
 					<div style="margin-top:4px">
 						<span class="input-group input-group-sm">
-							<!--
-							<span class="metric-control-label">tags</span>
-							<input type="text" class="metric-control" ng-model="metric.query.tags" key-value-pairs="true">-->
-							<span class="input-group-addon">tags</span>
-							<input type="text" class="form-control" ng-model="metric.query.tags" key-value-pairs="true">
+							<div class="input-group-addon nobg metric-control-label" title="Series name shown in legend">alias</div>
+							<input type="text" ng-model="metric.alias" class="form-control dark">
+						</span>
+					</div>
+					<div style="margin-top:4px">
+						<span class="input-group input-group-sm">
+							<span class="input-group-addon nobg metric-control-label">tags</span>
+							<input type="text" class="form-control dark" ng-model="metric.query.tags" key-value-pairs="true">
 						</span>
 					</div>
 					<div style="margin-top:4px">
 						<span class="input-group input-group-sm">
 							<!--<span class="metric-control-label">yTransform</span>-->
-							<span class="input-group-addon" title="Function applied to each datapoint">yTransform</span>
+							<span class="input-group-addon nobg metric-control-label" title="Function applied to each datapoint">yTransform</span>
 							<!--<input type="text" ng-model="metric.yTransform" class="metric-control" placeholder="lambda x: x/1024">-->
-							<input type="text" ng-model="metric.yTransform" class="form-control" placeholder="lambda x: x/1024">
+							<input type="text" ng-model="metric.yTransform" class="form-control dark" placeholder="lambda x: x/1024">
 						</span>
 					</div>
 				</div>

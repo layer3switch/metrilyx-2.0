@@ -1,4 +1,6 @@
 
+import math
+
 from ..httpclients import HttpJsonClient
 from ..datastreams import GraphRequest
 from ..metrilyxconfig import config
@@ -123,19 +125,14 @@ class MetrilyxSeries(object):
 				}
 		try:
 			dataset['dps'] = self.__convert_timestamp(dataset['dps'])
+			#pprint(dataset['dps'])
 			print "%s: %d" %(dataset['metric'], len(dataset['dps']))
 		except Exception,e:
 			print "----- ERROR -----"
 			pprint(e)
 			pprint(dataset['metric'])
 			print "-----------------"
-		
-		"""	
-		dataset['alias'] = self.__normalize_alias(self._serie['alias'], {
-					'tags': dataset['tags'],
-					'metric': dataset['metric']
-					})
-		"""
+
 		### scan tags to make unique series alias (looks for * and | operators)
 		uq = self.__determine_uniqueness(self._serie['query'])
 		nstr = ""
@@ -196,6 +193,15 @@ class MetrilyxSeries(object):
 		except KeyError:
 			#print str(e)
 			return obj['metric']
+
+	def __sig_figs(self, num):
+		"""
+			for server side precision calculation
+		"""
+		if num != 0:
+			return round(num, config['sig_figs'])
+		else:
+			return 0  # Can't take the log of 0
 
 	def __convert_timestamp(self, data):
 		"""

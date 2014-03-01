@@ -48,15 +48,28 @@ metrilyxServices.factory('Model', ['$resource', 'Auth',
 		});														 
 	}
 ]);
+metrilyxServices.factory('Heatmap', ['$resource',
+	function($resource) {
+		//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
+		return $resource('/api/heatmap/:pageId', {}, {
+			get: {method:'GET', params:{modelId:'@pageId'}, isArray:false},
+			listModels:{method:'GET', isArray:true},
+			saveModel: {method:'POST', isArray:false},
+			editModel: {method:'PUT', isArray:false},
+			removeModel:{method:'DELETE', params:{pageId:'@pageId'} }
+		});														 
+	}
+]);
 
 metrilyxServices.factory('Schema', ['$resource', 'Auth',
 	function($resource, Auth) {
 		//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
-		return $resource('/api/schemas/:modelType', {}, {
+		return $resource('/api/schema/:modelType', {}, {
 			get: {method:'GET', params:{modelType:'@modelType'}, isArray:false}										 
 		});
 	}
 ]);
+
 metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 	return {
 		getData: function(query, callback) {
@@ -75,6 +88,38 @@ metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 				console.log(status);
 				//console.log(data);
 				//console.log(arg1);
+				console.log(arg2);
+			});
+		},
+	};
+}]);
+
+metrilyxServices.factory('Heat', [ '$http',function($http) {
+	return {
+		getData: function(query, callback) {
+			//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
+			var qstr = "";
+			if(query.rate) {
+				qstr += query.aggregator+":rate:"+query.metric;
+			} else {
+				qstr += query.aggregator+":"+query.metric;
+			}
+			qstr += "{";		
+			for(var k in query.tags) {
+				qstr += k + "=" + query.tags[k] + ",";
+			}
+			qstr = qstr.replace(/\,$/,'}');
+
+			$http({
+				method: 'GET',
+				url: '/api/heat/'+qstr,
+				headers: { 'Content-type': 'application/json' }
+			}).
+			success(function(result) {
+				callback(result);
+			}).
+			error(function(data, status, arg1, arg2) {
+				console.log(status);
 				console.log(arg2);
 			});
 		},

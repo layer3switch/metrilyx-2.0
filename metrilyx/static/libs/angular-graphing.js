@@ -193,8 +193,9 @@ angular.module('pageLayout', [])
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
 					// remove empty rows //
+					//console.log("newValue", newValue);
 					for(var i in newValue) {
-						if(newValue[i].length <= 0) {
+						if(newValue[i] == null || newValue[i].length <= 0) {
 							newValue.splice(i,1);
 						}
 					}

@@ -5,7 +5,14 @@
 		<div class="pod-header edit-comp{{editMode}}">
 			<div class="input-group" style="width:100%">
 				<span class="input-group-btn edit-comp{{editMode}} pod-btn-bar nobg">
-					<a href="javascript:void(0)" class="btn pod-header-btn interactive edit-comp{{editMode}}" ng-click="addGraph($parent.$parent.$index, $parent.$index, $index);" title="Add graph to pod"><i class="glyphicon glyphicon-plus"></i></a>
+					<span ng-switch="modelType">
+						<span ng-switch-when="">
+							<a href="javascript:void(0)" class="btn pod-header-btn interactive edit-comp{{editMode}}" ng-click="addGraph($parent.$parent.$index, $parent.$index, $index);" title="Add graph to pod"><i class="glyphicon glyphicon-plus"></i></a>
+						</span>
+						<span ng-switch-default>
+							<span style="opacity:0"><i class="glyphicon glyphicon-plus"></i></span>
+						</span>
+					</span>
 					<a href="javascript:void(0)" title="Vertical graph layout" ng-click="pod.orientation='vertical';" class="btn interactive pod-header-btn edit-comp{{editMode}}"><i class="glyphicon glyphicon-resize-vertical"></i></a>
 				</span>
 				<input type="text" class="edit-comp{{editMode}}" ng-model="pod.name" placeholder="Pod Name" disabled="true">
@@ -25,13 +32,33 @@
 			<div ng-switch="pod.orientation">
 				<div class="row" style="margin:0" ui-sortable="graphSortOpts" ng-model="pod.graphs" graphs="true">
 					<div ng-switch-when="horizontal">
-						<div ng-repeat="graph in pod.graphs" class="col-md-{{pod.graphs.length|columnWidth}}">
-							<div ng-include="graphHtml" ng-model="graph" highstock-graph></div><!-- gidx, pidx, cidx, ridx -->
+						<div ng-switch="modelType">
+							<div ng-switch-when="">
+								<div ng-repeat="graph in pod.graphs" class="col-md-{{pod.graphs.length|columnWidth}}">
+									<div ng-include="graphHtml" ng-model="graph" highstock-graph></div><!-- gidx, pidx, cidx, ridx -->
+								</div>
+							</div>
+							<!-- heatmap request -->
+							<div ng-switch-default>
+								<div ng-repeat="graph in pod.graphs" class="col-md-{{pod.graphs.length|columnWidth}}">
+									<div ng-include="heatGraphHtml" ng-model="graph" heatgraph></div>
+								</div>
+							</div>
 						</div>
 					</div>
 					<div ng-switch-default>
-						<div ng-repeat="graph in pod.graphs" class="col-md-12">
-							<div ng-include="graphHtml" ng-model="graph" highstock-graph></div>
+						<div ng-switch="modelType">
+							<div ng-switch-when="">
+								<div ng-repeat="graph in pod.graphs" class="col-md-12">
+									<div ng-include="graphHtml" ng-model="graph" highstock-graph></div>
+								</div>
+							</div>
+							<!-- heatmap request -->
+							<div ng-switch-default>
+								<div ng-repeat="graph in pod.graphs" class="col-md-12">
+									<div ng-include="heatGraphHtml" ng-model="graph" heatgraph></div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

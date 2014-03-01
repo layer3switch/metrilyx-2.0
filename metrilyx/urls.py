@@ -9,6 +9,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 from rest_framework import routers
+from metrilyxconfig import config
 from metrilyx import apiviews
 
 
@@ -16,9 +17,11 @@ urlpatterns = patterns('',
     # url(r'^$', apiviews.index),
     # (api/)* is to allow apache to point to /api and work from CLI
     # as well as from a webserver
-	url(r'^(api/)*schemas/(?P<model_type>(metric|graph|pod|page))$', apiviews.SchemaView.as_view()),
+	url(r'^(api/)*schema/(?P<model_type>(metric|graph|pod|page|heatmap))$', apiviews.SchemaView.as_view()),
 	url(r'^(api/)*page(/(?P<page_id>.*)|/*)$', apiviews.PageView.as_view()),
+    url(r'^(api/)*heatmap(/(?P<page_id>.*)|/*)$', apiviews.HeatmapView.as_view()),
     url(r'^(api/)*graph/*$', apiviews.GraphView.as_view()),
+    url(r'^(api/)*heat(/(?P<heat_id>.*)|/*)$', apiviews.HeatView.as_view()),
     url(r'^(api/)*search.*$', apiviews.SearchView.as_view()),
     # Examples:
     # url(r'^$', 'MetrilyxServer.views.home', name='home'),
