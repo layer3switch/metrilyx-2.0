@@ -29,13 +29,13 @@ angular.module('heatmaps', [])
 
 function getSeverity(data, thresholds) {
 		var sev = "default";
-		if(data['value'] >= thresholds.info) {
+		if(data['value'] >= parseFloat(thresholds.info)) {
 			sev = "info";
 		}
-		if(data['value'] >= thresholds.warning) {
+		if(data['value'] >= parseFloat(thresholds.warning)) {
 			sev = "warning";
 		}
-		if(data['value'] >= thresholds.danger) {
+		if(data['value'] >= parseFloat(thresholds.danger)) {
 			sev = "danger";
 		}
 		return sev;
