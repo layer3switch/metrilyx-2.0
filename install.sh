@@ -23,7 +23,7 @@ clean() {
 install_app(){
 	clean;
 	echo "-- Installing app..."
-	/etc/init.d/httpd stop;
+	/etc/init.d/httpd stop > /dev/null 2>&1;
 	if [ -d /opt/metrilyx ]; then
 		mv /opt/metrilyx /opt/metrilyx-$(date '+%d%b%Y_%H%M');
 	fi;
@@ -37,7 +37,7 @@ install_app(){
 		cp etc/metrilyx/metrilyx.conf.sample /opt/metrilyx/etc/metrilyx/metrilyx.conf;
 	fi
 }
-install_web_ui() {
+install_web_config() {
 	echo "-- Install UI..."
 	cp etc/httpd/conf.d/metrilyx.conf /etc/httpd/conf.d/;
 	chown -R apache:apache /opt/metrilyx;
@@ -62,7 +62,7 @@ case "$1" in
 	all)
 		install_deps;
 		install_app;
-		install_web_ui;
+		install_web_config;
 		;;	
 	*)
 		echo -e "\n\tUsage:\n\t\t$0\t[lyx|www|all]\n";
