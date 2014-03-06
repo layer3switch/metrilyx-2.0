@@ -63,6 +63,7 @@ class PageView(APIView):
 		#return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 		rslt = self.modelstore.editModel(req_obj)
 		if rslt.get("error"):
+			print rslt.get("error")
 			rslt = self.modelstore.addModel(req_obj)
 		return Response(rslt)
 
