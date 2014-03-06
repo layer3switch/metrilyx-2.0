@@ -116,6 +116,14 @@ class MetrilyxSeries(object):
 		#print "    returned series: %d" %(len(data))
 		return data
 
+	def __apply_ytransform(self, dataset, yTransform):
+		if yTransform == "":
+			return dataset
+		dps = []
+		for ts, val in dataset:
+			dps.append(( ts, eval(yTransform)(val) ))
+		return dps
+
 	def __process_serie(self, dataset):
 		#data = response
 		if type(dataset) == dict and dataset.get('error'):
@@ -133,6 +141,8 @@ class MetrilyxSeries(object):
 			pprint(dataset['metric'])
 			print "-----------------"
 
+		dataset['dps'] = self.__apply_ytransform(dataset['dps'], self._serie['yTransform'])
+		
 		### scan tags to make unique series alias (looks for * and | operators)
 		uq = self.__determine_uniqueness(self._serie['query'])
 		nstr = ""
