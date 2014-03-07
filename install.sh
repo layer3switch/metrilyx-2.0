@@ -1,4 +1,3 @@
-
 install_os_deps() {
 	for pkg in libuuid uuid httpd mod_wsgi python-setuptools; do
 		rpm -qa | grep ${pkg} || yum -y install ${pkg};
@@ -44,7 +43,7 @@ echo "-- Installing..."
 install_app;
 
 echo "-- Setup configuration"
-vi /opt/metrilyx/etc/metrilyx/metrilyx.conf
+${EDITOR:-vi} /opt/metrilyx/etc/metrilyx/metrilyx.conf
 
 echo "-- Restarting apache..."
 /etc/init.d/httpd restart
