@@ -57,6 +57,7 @@ class OpenTSDBRequest(GraphRequest):
 	def __init__(self, metrilyx_request, data_callback=None):
 		super(OpenTSDBRequest,self).__init__(metrilyx_request)
 		#pprint(self.tags)
+		## convert to celery task
 		hjc = HttpJsonClient(self.tsd_host, self.tsd_port)
 		for serie in self.series:
 			tsd_data = hjc.POST(self.endpoints.query, self.__serieQuery(serie, self.tags))

@@ -95,7 +95,9 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
         },
         tooltip: {
             crosshairs: [true,true],
-            valueDecimals: 2
+            valueDecimals: 2,
+            shadow: false,
+            animation: false
         },
         scrollbar: {
             enabled: false

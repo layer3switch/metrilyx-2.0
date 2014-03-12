@@ -154,30 +154,45 @@ class HeatView(APIView):
 			#return Response([])
 
 class GraphView(APIView):
-	"""
-	Handles graph data requests.
-	Returns: graph model, with data 
-	"""
-	def post(self, request, base=None):
-		req_obj = json.loads(request.body)
-		#print req_obj['graphType'], req_obj['_id']
-		## pie charts only needs a smaller subset
+
+	def __calibrate_piegraph(self, req_obj):
+		"""
+		In the case of pie graphs cut the query time down to 
+		2 mins.
+
+		Args:
+			req_obj	: original http request object
+		Returns:
+			Modified request object with trimmed time
+		"""
 		if req_obj['graphType'] == "pie":
 			#print req_obj['start']
 			if type(req_obj['start']) != int and "-ago" in req_obj['start']:
-				req_obj['start'] = "3m-ago"
+				req_obj['start'] = "2m-ago"
 			else:
-				start = int(req_obj['start'])
-				end = int(req_obj['end'])
+				start = int(req_obj['start'])			
 				if req_obj.get('end'):
-					if (end - start) > 180:
-						req_obj['start'] = end-180
+					end = int(req_obj['end'])
+					if (end - start) > 120:
+						req_obj['start'] = end - 120
 				else:
 					now = int(time.time())
-					if (now - start) > 180:
-						req_obj['start'] = now - 180
+					if (now - start) > 120:
+						req_obj['start'] = now - 120
+		return req_obj
 	
+	def post(self, request, base=None):
+		"""
+		Handles graph data requests.
+		
+		Returns: 
+			graph model, with data 
+		"""
+		req_obj = json.loads(request.body)
+		## pie charts only needs a smaller subset
+		req_obj = self.__calibrate_piegraph(req_obj)
 		tsd_req = OpenTSDBRequest(req_obj)
+		## analyze data here
 		return Response(tsd_req.data)
 
 class SearchView(APIView):
