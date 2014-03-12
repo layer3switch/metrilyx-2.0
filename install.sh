@@ -1,3 +1,4 @@
+#!/bin/bash
 
 install_os_deps() {
 	echo "-- Installing OS dependencies...."
@@ -64,6 +65,6 @@ case "$1" in
 		install_web_config;
 		;;	
 	*)
-		echo -e "\n\tUsage:\n\t\t$0\t[lyx|www|all]\n";
+		echo -e "\n\tUsage:\n\t\t$0\t[lyx|all]\n";
 		exit 2;
 esac
