@@ -124,72 +124,6 @@
                         {
                             "series": [
                                 {
-                                    "alias": "df.bytes.free", 
-                                    "yTransform": "", 
-                                    "query": {
-                                        "aggregator": "sum", 
-                                        "metric": "df.bytes.free", 
-                                        "rate": false, 
-                                        "tags": {}
-                                    }
-                                }, 
-                                {
-                                    "alias": "df.bytes.used", 
-                                    "yTransform": "", 
-                                    "query": {
-                                        "aggregator": "sum", 
-                                        "metric": "df.bytes.used", 
-                                        "rate": false, 
-                                        "tags": {}
-                                    }
-                                }
-                            ], 
-                            "_id": "2cda17a57b634bde921fcd1822c63e3c", 
-                            "graphType": "pie", 
-                            "name": "Bytes", 
-                            "size": "small"
-                        }, 
-                        {
-                            "series": [
-                                {
-                                    "alias": "df.inodes.free", 
-                                    "yTransform": "", 
-                                    "query": {
-                                        "aggregator": "sum", 
-                                        "metric": "df.inodes.free", 
-                                        "rate": false, 
-                                        "tags": {}
-                                    }
-                                }, 
-                                {
-                                    "alias": "df.inodes.used", 
-                                    "yTransform": "", 
-                                    "query": {
-                                        "aggregator": "sum", 
-                                        "metric": "df.inodes.used", 
-                                        "rate": false, 
-                                        "tags": {}
-                                    }
-                                }
-                            ], 
-                            "_id": "6a0dc0460c974f46804532c6d819f9b1", 
-                            "graphType": "pie", 
-                            "name": "Inodes", 
-                            "size": "small"
-                        }
-                    ], 
-                    "name": "Disk Usage", 
-                    "orientation": "horizontal"
-                }
-            ]
-        ], 
-        [
-            [
-                {
-                    "graphs": [
-                        {
-                            "series": [
-                                {
                                     "alias": "iostat.disk.read_requests", 
                                     "yTransform": "", 
                                     "query": {
@@ -291,6 +225,72 @@
                         }
                     ], 
                     "name": "CPU", 
+                    "orientation": "horizontal"
+                }
+            ]
+        ], 
+        [
+            [
+                {
+                    "graphs": [
+                        {
+                            "series": [
+                                {
+                                    "alias": "df.bytes.free", 
+                                    "yTransform": "", 
+                                    "query": {
+                                        "aggregator": "sum", 
+                                        "metric": "df.bytes.free", 
+                                        "rate": false, 
+                                        "tags": {}
+                                    }
+                                }, 
+                                {
+                                    "alias": "df.bytes.used", 
+                                    "yTransform": "", 
+                                    "query": {
+                                        "aggregator": "sum", 
+                                        "metric": "df.bytes.used", 
+                                        "rate": false, 
+                                        "tags": {}
+                                    }
+                                }
+                            ], 
+                            "_id": "2cda17a57b634bde921fcd1822c63e3c", 
+                            "graphType": "pie", 
+                            "name": "Bytes", 
+                            "size": "small"
+                        }, 
+                        {
+                            "series": [
+                                {
+                                    "alias": "df.inodes.free", 
+                                    "yTransform": "", 
+                                    "query": {
+                                        "aggregator": "sum", 
+                                        "metric": "df.inodes.free", 
+                                        "rate": false, 
+                                        "tags": {}
+                                    }
+                                }, 
+                                {
+                                    "alias": "df.inodes.used", 
+                                    "yTransform": "", 
+                                    "query": {
+                                        "aggregator": "sum", 
+                                        "metric": "df.inodes.used", 
+                                        "rate": false, 
+                                        "tags": {}
+                                    }
+                                }
+                            ], 
+                            "_id": "6a0dc0460c974f46804532c6d819f9b1", 
+                            "graphType": "pie", 
+                            "name": "Inodes", 
+                            "size": "small"
+                        }
+                    ], 
+                    "name": "Disk Usage", 
                     "orientation": "horizontal"
                 }
             ]
