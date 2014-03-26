@@ -3,6 +3,11 @@
 celerybeat-schedule*
 metrilyx.conf
 
+# DB's #
+########
+*.sqlite
+*.sqlite3
+
 # Python #
 ##########
 *.pyc
