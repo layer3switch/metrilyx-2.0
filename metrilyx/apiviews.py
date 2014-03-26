@@ -41,14 +41,6 @@ class PageView(APIView):
 			rslt = self.modelstore.listModels()	
 		else:	
 			rslt = self.modelstore.getModel(page_id)
-			"""
-			dl = request.GET.get('download', False)
-			if dl != False:
-				return Response(rslt,headers={
-					"Content-Disposition": "attachment; filename='%s.json'" %(page_id),
-					"Media-Type": "text/plain"
-					})
-			"""
 		return Response(rslt)
 
 	## Add
@@ -62,6 +54,7 @@ class PageView(APIView):
 		req_obj = json.loads(request.body)
 		#return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 		rslt = self.modelstore.editModel(req_obj)
+		pprint(rslt)
 		if rslt.get("error"):
 			print rslt.get("error")
 			rslt = self.modelstore.addModel(req_obj)
