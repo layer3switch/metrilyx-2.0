@@ -215,9 +215,9 @@ angular.module('graphing', [])
 				// returns query with complete time window
 				// enable all inputs in edit mode //
 				if(scope.editMode == " edit-mode") {
-						$(elem).find("input[ng-model*=name]").each(function() {
-							$(this).attr('disabled', false);
-						});
+					$(elem).find("input[ng-model*=name]").each(function() {
+						$(this).attr('disabled', false);
+					});
 				} else {
 					scope.disableDragDrop();
 				}
@@ -240,6 +240,14 @@ angular.module('graphing', [])
 						getUpdates();
 					}, 50000);
 				}
+				function changeGraphType(graph) {
+					var q = scope.baseQuery(graph);
+					q.series = graph.series;
+					Graph.getData(q, function(result) {
+						//console.log(result);
+						graphing_newGraph(result);
+					});
+				}
 
 				getUpdates();
 				
@@ -247,10 +255,7 @@ angular.module('graphing', [])
 					return ngModel.$modelValue;
 				}, function(graph, oldValue) {
 					//console.log(oldValue.series.length);
-					if(graph.series.length <= 0 && oldValue.series.length <= 0) {
-						console.log('not processing graph');
-						return;
-					}
+					if(graph.series.length <= 0 && oldValue.series.length <= 0) return;
 					// initial populate //
 					hc = $("[data-graph-id='"+graph._id+"']").highcharts();
 					if(hc == undefined) {
@@ -263,6 +268,7 @@ angular.module('graphing', [])
 						q.series = graph.series;
 						//$.extend(q, graph, true);
 						Graph.getData(q, function(result) {
+							//TODO: scrape tags for link creation //
 							//console.log(result);
 							graphing_newGraph(result);
 						});
@@ -271,12 +277,7 @@ angular.module('graphing', [])
 					// handle graph change //
 					if(graph.graphType != oldValue.graphType) {
 						console.log("graph type changed. re-rendering");
-						var q = scope.baseQuery(graph);
-						q.series = graph.series;
-						Graph.getData(q, function(result) {
-							//console.log(result);
-							graphing_newGraph(result);
-						});
+						changeGraphType(graph);
 						return;
 					};
 					if(!equalObjects(graph.thresholds, oldValue.thresholds)) {
