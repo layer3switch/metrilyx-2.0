@@ -268,8 +268,13 @@ angular.module('graphing', [])
 						q.series = graph.series;
 						//$.extend(q, graph, true);
 						Graph.getData(q, function(result) {
-							//TODO: scrape tags for link creation //
-							//console.log(result);
+							/*
+							 * TODO: scrape tags for link creation 
+							 */
+							sf = new SeriesFormatter(result.series);
+							sTags = sf.seriesTags();
+							//console.info(sTags);
+							// write to links object //
 							graphing_newGraph(result);
 						});
 						return;

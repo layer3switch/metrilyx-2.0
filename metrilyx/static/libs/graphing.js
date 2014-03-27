@@ -132,6 +132,24 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
 function SeriesFormatter(metSeries) {
     this.metSeries = metSeries;
 }
+SeriesFormatter.prototype.seriesTags = function() {
+    var tags = {};
+    for(var i in this.metSeries) {
+        for(var d in this.metSeries[i].data) {
+            //console.log(this.metSeries[i].data[d].tags);
+            for(var j in this.metSeries[i].data[d].tags) {
+                if(tags[j]) {
+                    if(tags[j].indexOf(this.metSeries[i].data[d].tags[j]) < 0) {
+                        tags[j].push(this.metSeries[i].data[d].tags[j]);
+                    }
+                } else {
+                    tags[j] = [this.metSeries[i].data[d].tags[j]];
+                }
+            }
+        }
+    }
+    return tags;
+}
 SeriesFormatter.prototype.lineSeries = function() {
     out = [];
     for(var i in this.metSeries) {
@@ -148,17 +166,15 @@ SeriesFormatter.prototype.lineSeries = function() {
     return out;
 }
 SeriesFormatter.prototype.pieSeries = function() {
-    //console.log(this.metSeries);
     var pieData = [];
     for(var i in this.metSeries) {
-        /*
-        if(this.metSeries[i].data.error) {
-            continue;
-        }*/
         for(var d in this.metSeries[i].data){
-            //if(this.metSeries[i].data.error) return this.metSeries[i].data.error;
             dps = this.metSeries[i].data[d].dps;
-            pieData.push([ this.metSeries[i].data[d].alias, dps[dps.length-1][1] ]);
+            if(this.metSeries[i].data[d].dps.length <=0) {
+                console.warn("(pie) No data for:", this.metSeries[i].alias);
+            } else {
+                pieData.push([ this.metSeries[i].data[d].alias, dps[dps.length-1][1] ]);
+            }
         }
     }
     return [{ data: pieData, type: 'pie' }];
@@ -328,6 +344,7 @@ function graphing_newGraph(graph) {
     
     if(graph.graphType == "pie") {
         var opts = copts.pieChartDefaults();
+        //if(opts.series.)
         $(renderTo).highcharts(opts);
     } else {
         var opts = copts.lineChartDefaults();
