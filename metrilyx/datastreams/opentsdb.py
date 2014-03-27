@@ -114,7 +114,6 @@ class MetrilyxSeries(object):
 		data = []
 		for r in self._data:
 			data.append(self.__process_serie(r))
-		#print "    returned series: %d" %(len(data))
 		return data
 
 	def __apply_ytransform(self, dataset, yTransform):
@@ -135,7 +134,7 @@ class MetrilyxSeries(object):
 		try:
 			dataset['dps'] = self.__convert_timestamp(dataset['dps'])
 			#pprint(dataset['dps'])
-			print "%s: %d" %(dataset['metric'], len(dataset['dps']))
+			#print "%s: %d" %(dataset['metric'], len(dataset['dps']))
 		except Exception,e:
 			print "----- ERROR -----"
 			pprint(e)
@@ -212,7 +211,7 @@ class MetrilyxSeries(object):
 		if num != 0:
 			return round(num, config['sig_figs'])
 		else:
-			return 0  # Can't take the log of 0
+			return 0
 
 	def __convert_timestamp(self, data):
 		"""
