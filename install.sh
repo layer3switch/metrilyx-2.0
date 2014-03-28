@@ -29,8 +29,13 @@ install_app(){
 	if [ -d /opt/metrilyx ]; then
 		mv /opt/metrilyx /opt/metrilyx-${install_time};
 	fi;
+	
 	mkdir -p /opt/metrilyx;
 	cp -a . /opt/metrilyx/;
+	chmod g+w /opt/metrilyx;
+	id celery || useradd celery;
+	chgrp celery /opt/metrilyx;
+	
 	cp -a etc/rc.d/init.d/* /etc/rc.d/init.d/;
 	if [ ! -f /etc/sysconfig/celeryd ]; then 
 		cp etc/sysconfig/celeryd /etc/sysconfig/;
