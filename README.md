@@ -38,10 +38,10 @@ Metrilyx will run on any system that supports the packages below.  It has primar
 ### Installation
 The provided makefile will work with **RedHat** based distributions.  You can issue the command below, to auto-install the complete package including dependencies. The default install path is **/opt/metrilyx**.	
 	
-	[</path/to/downloaded/app>]$ bash install.sh
+	[</path/to/downloaded/app>]$./install.sh all
 	
 
-This will install all required OS packages as well as python packages and apache configs. 
+This will install all required OS packages as well as python packages and apache configs.
 
 For **other distributions**, follow the instructions below:
 
@@ -71,7 +71,22 @@ A sample config file is provided in the same directory above.  The configuration
 			"port": 80,
 			"suggest_limit": 100
 		},
-		"model_path": <absolute path to models directory>
+		"model_path": <absolute path to models directory>,
+		"heatmaps": {
+			"analysis_interval": "1m-ago",
+			"transport": "mongodb",
+			"broker": {
+		    	"host": "127.0.0.1",
+		    	"port": 27017,
+		    	"database": "jobs", 
+		    	"taskmeta_collection": "clry_taskmeta_collection"
+			}
+		},
+		"celery": {
+			"tasks": [
+				"metrilyx.heatmap_tasks"
+			]
+		}
 	}
 	
 ##### tsdb.uri
@@ -87,6 +102,24 @@ OpenTSDB suggest max result limit.
 Path to directory where JSON page models (i.e. dashboards) will be stored.  Optional (default: %{metrilyx_home}/pagemodels)
 
 After you've installed and configured metrilyx, click on the "tutorials" link towards the bottom-center of the page (i.e. http://<metrilyx_host>/#/tutorials) for a general overview and basic tutorial on how to get started.
+
+##### heatmaps
+This configuration option is to generate heatmaps.  The only needed change here is the mongodb information relative to your setup.
+
+
+#### Heat Maps
+Heatmaps are used to few your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10. 
+
+Heatmap jobs are stored in the application directory under 'heatmaps.json'.  The heatmap dashboards are stored in a directory called 'heatmaps' in the application directory (default: /opt/metrilyx)
+
+In order to use heatmaps, you will also need a mongodb server.  Heatmaps are calculated using celery.  For scalability more celery compute nodes can be added by issuing './install lyx' and editing the config using the appropriate settings.
+
+Start the heatmap generator
+/etc/init.d/celerybeatd start
+
+Start the heatmap processor
+/etc/init.d/celeryd start
+
 
 #### Notes
 - The default username and password for the site are admin and password respectively. These should almost never be required and are specifically needed by the REST interface.
