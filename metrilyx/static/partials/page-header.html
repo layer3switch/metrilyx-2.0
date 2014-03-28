@@ -4,10 +4,12 @@
 			<span class="pointer interactive" ng-click="toggleEditMode()" title="Edit Page" style="font-size:20px;">
 				<i class="glyphicon glyphicon-cog"></i>
 			</span>
-			<div ng-repeat="(tagname, tagvalues) in tagsOnPage" class="btn-group pad5">
-			  <span class="pointer interactive dropdown-toggle" data-toggle="dropdown">{{tagname}}</span>
-			  <ul class="dropdown-menu" role="menu">
-			    <li ng-repeat="tagvalue in tagvalues"><a href="javascript:void(0)" ng-click="updateGlobalTag(tagname, tagvalue);">{{tagvalue}}</a></li>
+			<div ng-repeat="(tagname, tagvalues) in tagsOnPage" class="btn-group padb10">
+			  <span class="pointer interactive dropdown-toggle pad5" data-toggle="dropdown">{{tagname}}</span>
+			  <ul class="dropdown-menu" role="menu" style="background:rgba(255,255,255,0.89)">
+			    <li ng-repeat="tagvalue in tagvalues">
+			    	<a href="javascript:void(0)" style="border-top:1px solid #eee;margin-left:5px;margin-right:5px;" ng-click="updateGlobalTag(tagname, tagvalue);">{{tagvalue}}</a>
+			    </li>
 			  </ul>
 			</div>
 		</div>
