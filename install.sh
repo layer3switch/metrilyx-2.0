@@ -25,8 +25,9 @@ install_app(){
 	clean;
 	echo "-- Installing app..."
 	/etc/init.d/httpd stop > /dev/null 2>&1;
+	install_time=$(date '+%d%b%Y_%H%M');
 	if [ -d /opt/metrilyx ]; then
-		mv /opt/metrilyx /opt/metrilyx-$(date '+%d%b%Y_%H%M');
+		mv /opt/metrilyx /opt/metrilyx-${install_time};
 	fi;
 	mkdir -p /opt/metrilyx;
 	cp -a . /opt/metrilyx/;
@@ -34,10 +35,13 @@ install_app(){
 	if [ ! -f /etc/sysconfig/celeryd ]; then 
 		cp etc/sysconfig/celeryd /etc/sysconfig/;
 	fi
-	if [ ! -f /opt/metrilyx/etc/metrilyx/metrilyx.conf ]; then
+	if [ -f "/opt/metrilyx-${install_time}/etc/metrilyx/metrilyx.conf" ]; then
+		cp /opt/metrilyx-${install_time}/etc/metrilyx/metrilyx.conf /opt/metrilyx/etc/metrilyx/metrilyx.conf;
+	else
 		cp etc/metrilyx/metrilyx.conf.sample /opt/metrilyx/etc/metrilyx/metrilyx.conf;
+		${EDITOR:-vi} /opt/metrilyx/etc/metrilyx/metrilyx.conf;
 	fi
-	${EDITOR:-vi} /opt/metrilyx/etc/metrilyx/metrilyx.conf;
+	
 }
 install_web_config() {
 	echo "-- Install UI..."
