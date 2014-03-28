@@ -1,9 +1,15 @@
 <div class="page-model-header edit-comp{{editMode}}">
 	<div class="row" style="margin:0;">
-		<div class="col-md-4" style="padding:0">
-			<span class="pointer interactive" ng-click="toggleEditMode()" style="font-size: 20px;" title="Edit Page">
+		<div class="col-md-4" style="padding:0;">
+			<span class="pointer interactive" ng-click="toggleEditMode()" title="Edit Page" style="font-size:20px;">
 				<i class="glyphicon glyphicon-cog"></i>
 			</span>
+			<div ng-repeat="(tagname, tagvalues) in tagsOnPage" class="btn-group pad5">
+			  <span class="pointer interactive dropdown-toggle" data-toggle="dropdown">{{tagname}}</span>
+			  <ul class="dropdown-menu" role="menu">
+			    <li ng-repeat="tagvalue in tagvalues"><a href="javascript:void(0)" ng-click="updateGlobalTag(tagname, tagvalue);">{{tagvalue}}</a></li>
+			  </ul>
+			</div>
 		</div>
 		<!-- Page Name/ID -->
 		<div class="col-md-4 text-center" style="padding:0">

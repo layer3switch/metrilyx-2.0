@@ -63,10 +63,10 @@ angular.module('filters',[]).
 		}
 	}).filter('tagsLink', function() {
 		return function(obj) {
-		    tstr = '?tags=';
+		    var tstr = '?tags=';
 		    for(var i in obj) {
-		        tstr += i+":"+obj[i]+",";
-		    }
+			    tstr += i+":"+obj[i]+",";
+			}
 		    if(tstr == '?tags=') return "";
 		    return tstr.replace(/\,$/,'%3B');
 		}
@@ -191,6 +191,7 @@ app.directive('keyValuePairs', function() {
  * return: key1:val1,key2:val2
  */
 function dictToCommaSepStr(obj) {
+	//console.log('called', obj);
     tstr = '';
     for(var i in obj) {
         tstr += i+":"+obj[i]+",";
@@ -212,7 +213,7 @@ function commaSepStrToDict(tagsStr) {
 	return d;
 }
 function clearAllTimeouts() {
-	console.log("Clearing timeouts");
+	//console.log("Clearing timeouts");
 	var id = window.setTimeout(function() {}, 0);
 	while (id--) {
 		// will do nothing if no timeout with id is present //

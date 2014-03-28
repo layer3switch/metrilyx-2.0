@@ -35,7 +35,9 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 			$scope.modelType = "heatmap/";
 		} else {
 			$scope.modelType = "";
+			$scope.tagsOnPage = {};
 		}
+
 		clearAllTimeouts();
 		var canceler;
 
@@ -64,7 +66,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 		$scope.rowSortOpts 			= dndconfig.row;
 		$scope.layoutSortOpts 		= dndconfig.layout;
 
-
 		// set default to relative time //
 		$scope.timeType = "1h-ago";
 		// relative time or 'absolute' //
@@ -83,7 +84,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 		 
 		if(urlParams.tags) {
 			try {
-				$scope.globalTags = commaSepStrToDict(urlParams.tags);
+				$scope.$parent.globalTags = commaSepStrToDict(urlParams.tags);
 			} catch(e) {
 				console.log("error: could not set global tags");
 				console.log("  reason:", e);
@@ -145,7 +146,10 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 		});
 		// close side panel when new page model loaded //
 		//$('#stage').removeClass('right');
-
+		$scope.updateGlobalTag = function(tagkey, tagval) {
+			$scope.$parent.globalTags[tagkey] = tagval;
+			//console.log($scope.globalTags);
+		}
 		function flashAlertsBar() {
 			$('#global-alerts').fadeIn(500);
 				setTimeout(function() {
@@ -166,6 +170,25 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 					}
 				});
 			}, 500);
+		}
+		$scope.updateTagsOnPage = function(obj) {
+			var top = $scope.tagsOnPage;
+			for(var k in obj) {
+				if(top[k]) {
+					for(var i in obj[k]) {
+						if(top[k].indexOf(obj[k][i]) >= 0) {
+							continue;
+						} else {
+							top[k].push(obj[k][i]);
+						}
+					}
+				} else {
+					top[k] = obj[k];
+					top[k].push("*");
+				}
+			}
+			$scope.tagsOnPage = top;
+			//console.log($scope.tagsOnPage);
 		}
 		$scope.setTimeType = function(newRelativeTime) {
 			$scope.timeType = newRelativeTime;

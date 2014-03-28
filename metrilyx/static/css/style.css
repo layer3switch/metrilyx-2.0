@@ -290,6 +290,14 @@ input[ng-model='model.name'].edit-mode {
 	padding: 5px;
 	border-radius: 3px;
 }
+[ng-model='model.link_tags'] {
+	opacity: 0;
+	display: none;
+}
+[ng-model='model.link_tags'].edit-mode {
+	opacity: 1;
+	display: inline-block;
+}
 .page-list-item {
 	padding-top: 7px;
 	padding-bottom: 7px;

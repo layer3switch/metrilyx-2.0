@@ -331,7 +331,7 @@ function setPlotBands(graph) {
  *      complete graph object
  */
 function graphing_newGraph(graph) {
-    console.log(graph.graphType,":",graph._id);
+    //console.log(graph.graphType,":",graph._id);
     var renderTo = "[data-graph-id='"+graph._id+"']"; 
     // check data
     dhe = dataHasErrors(graph);
