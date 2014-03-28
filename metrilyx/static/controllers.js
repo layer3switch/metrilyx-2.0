@@ -382,7 +382,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				//$scope.disableEditMode();
 				//$scope.reflow();
 				//$route.reload();
-				location.reload();
+				location.reload(true);
 			}
 			//console.log("globalAlerts", result);
 			flashAlertsBar();		
