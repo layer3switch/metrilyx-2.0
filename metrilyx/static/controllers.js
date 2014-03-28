@@ -381,7 +381,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				$('#global-alerts').html("<b>Success: </b>"+rslt.message);
 				//$scope.disableEditMode();
 				//$scope.reflow();
-				$route.reload();
+				//$route.reload();
+				location.reload();
 			}
 			//console.log("globalAlerts", result);
 			flashAlertsBar();		
