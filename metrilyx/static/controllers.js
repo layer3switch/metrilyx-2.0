@@ -28,8 +28,8 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$routeParams',
 		}
 	}
 ]);
-metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph','Heatmap',
-	function($scope, $routeParams, $location, $http, Metrics, Schema, Model, Graph, Heatmap) {
+metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph','Heatmap',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Graph, Heatmap) {
 		//console.log($routeParams);
 		if($routeParams.heatmapId) {
 			$scope.modelType = "heatmap/";
@@ -379,8 +379,9 @@ metrilyxControllers.controller('pageController', ['$scope', '$routeParams', '$lo
 				$('#global-alerts').removeClass('alert-danger');
 				//$scope.globalAlerts = result.success;
 				$('#global-alerts').html("<b>Success: </b>"+rslt.message);
-				$scope.disableEditMode();
-				$scope.reflow();
+				//$scope.disableEditMode();
+				//$scope.reflow();
+				$route.reload();
 			}
 			//console.log("globalAlerts", result);
 			flashAlertsBar();		
