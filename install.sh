@@ -36,6 +36,7 @@ install_app(){
 		cp etc/sysconfig/celeryd /etc/sysconfig/;
 	fi
 	if [ -f "/opt/metrilyx-${install_time}/etc/metrilyx/metrilyx.conf" ]; then
+		echo " copying existing config...";
 		cp /opt/metrilyx-${install_time}/etc/metrilyx/metrilyx.conf /opt/metrilyx/etc/metrilyx/metrilyx.conf;
 	else
 		cp etc/metrilyx/metrilyx.conf.sample /opt/metrilyx/etc/metrilyx/metrilyx.conf;
