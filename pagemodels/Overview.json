@@ -124,7 +124,7 @@
                         {
                             "series": [
                                 {
-                                    "alias": "iostat.disk.read_requests", 
+                                    "alias": "io.read.requests", 
                                     "yTransform": "", 
                                     "query": {
                                         "aggregator": "sum", 
@@ -134,7 +134,7 @@
                                     }
                                 }, 
                                 {
-                                    "alias": "iostat.disk.write_requests", 
+                                    "alias": "io.write.requests", 
                                     "yTransform": "", 
                                     "query": {
                                         "aggregator": "sum", 
