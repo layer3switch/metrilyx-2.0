@@ -293,7 +293,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			} else {
 				q['start'] = $scope.timeType;
 			}
-			console.log(q);
 			return q;
 		}
 		$scope.disableDragDrop = function() {
@@ -376,6 +375,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				$('#global-alerts').addClass('alert-danger');
 				$('#global-alerts').html("<b>Error: </b>"+rslt.message)
 				//$scope.globalAlerts = result.error;
+				flashAlertsBar();
 			} else {
 				$('#global-alerts').addClass('alert-success');
 				$('#global-alerts').removeClass('alert-danger');
@@ -383,11 +383,12 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				$('#global-alerts').html("<b>Success: </b>"+rslt.message);
 				//$scope.disableEditMode();
 				//$scope.reflow();
-				//$route.reload();
-				location.reload(true);
+				if(location.hash === ("#/" + $scope.model._id)) { 
+					$location.reload(true);
+				} else {
+					location.hash = $scope.model._id;
+				}
 			}
-			//console.log("globalAlerts", result);
-			flashAlertsBar();		
 		}
 		$scope.saveModel = function(args) {
 			//console.log($scope.model);
