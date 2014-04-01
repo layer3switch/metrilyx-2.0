@@ -256,14 +256,15 @@ angular.module('graphing', [])
 				}, function(graph, oldValue) {
 					//console.log(oldValue.series.length);
 					if(graph.series.length <= 0 && oldValue.series.length <= 0) return;
+					if(!equalObjects(graph.thresholds, oldValue.thresholds)) return;
+					
 					// initial populate //
 					hc = $("[data-graph-id='"+graph._id+"']").highcharts();
 					if(hc == undefined) {
 						$("[data-graph-id='"+graph._id+"']").html(
 							"<table class='gif-loader-table'><tr><td> \
-							<img src='/imgs/loader.gif'></td></tr></table>"
-							);
-						//console.log("new graph:", graph._id);
+							<img src='/imgs/loader.gif'></td></tr></table>");
+
 						var q = scope.baseQuery(graph);
 						q.series = graph.series;
 						//$.extend(q, graph, true);
@@ -285,10 +286,7 @@ angular.module('graphing', [])
 						changeGraphType(graph);
 						return;
 					};
-					if(!equalObjects(graph.thresholds, oldValue.thresholds)) {
-						//console.log("[graphing.highstockGraph] thresholds changed");
-						return;
-					}
+					
 					// check length //
 					if(graph.series.length == oldValue.series.length) {
 						// this requires a special case as the all data needs to be replaced with new data //
@@ -301,8 +299,11 @@ angular.module('graphing', [])
 							q.series = [ graph.series[s] ];
 							
 							if(!equalObjects(graph.series[s].query.tags, oldValue.series[s].query.tags)) {
+								$("[data-graph-id='"+graph._id+"']").html(
+											"<table class='gif-loader-table'><tr><td> \
+											<img src='/imgs/loader.gif'></td></tr></table>");
 								Graph.getData(q, function(result) {
-									console.log("tags changed. re-building graph.");
+									//console.log("tags changed. re-building graph.");
 									graphing_newGraph(result);
 								});
 							} else {
@@ -361,16 +362,7 @@ angular.module('timeframe', [])
 								$('[ng-model=startTime]').data("DateTimePicker").setEndDate(e.date);
 							}
 							//$(elem).data("DateTimePicker").setDate(d);
-							scope.$apply();	
-			
-							console.log("issue query", scope.startTime, scope.endTime);
-							/*
-							$location.search({
-								start: scope.startTime,
-								end: scope.endTime
-							});
-							*/
-							
+							scope.$apply();		
 						} catch(e) {
 							console.log(e);
 						}
@@ -389,10 +381,10 @@ angular.module('timeframe', [])
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
 					if(newValue == "absolute") {
-						console.log(newValue, oldValue);
+						scope.setTimeType(scope.timeType);
 						scope.setUpdatesEnabled(false);
-						//scope.clearAllTimeouts();
-						if(newValue != oldValue) {
+						
+						if(newValue !== oldValue) {
 							d = new Date();
 							endTime = Math.ceil(d.getTime()/1000);
 							startTime = endTime - relativeToAbsoluteTime(oldValue);
@@ -404,11 +396,6 @@ angular.module('timeframe', [])
 					} else {
 						if(newValue == oldValue) return;
 						console.log("reloading with:",newValue);
-						//scope.setTimeType(newValue);
-						//d = new Date();
-						//now = Math.ceil(d.getTime()/1000);
-						//abstime = now - relativeToAbsoluteTime(newValue);
-						//scope.setStartTime(abstime);
 						tmp = $location.search();
 						if(tmp.end) delete tmp.end;
 						tmp.start = newValue;

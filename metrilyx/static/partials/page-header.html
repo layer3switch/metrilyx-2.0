@@ -41,13 +41,13 @@
 				            </select>
 			            </span>
 						<span id="absolute-time" class="time animated btn-group btn-group-sm {{timeType}}">
-							<span ng-model="startTime" date-time class="btn btn-default interactive" style="padding-left:7px;padding-right:7px;">
+							<span ng-model="startTime" date-time class="btn btn-default interactive absolute-time-field">
 								<span>
 									<i class="glyphicon glyphicon-calendar"></i>
 								</span>
 								<span style="padding-left:5px;">{{startTime|dateTime}}</span>
 			                </span>
-			                <span ng-model="endTime" date-time class="btn btn-default interactive" style="padding-left:7px;padding-right:7px;">
+			                <span ng-model="endTime" date-time class="btn btn-default interactive absolute-time-field">
 			                	<span><i class="glyphicon glyphicon-calendar"></i></span>
 			                	<span style="padding-left:5px;">{{endTime|dateTime}}</span>
 			                </span>

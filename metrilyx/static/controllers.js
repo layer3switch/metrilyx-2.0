@@ -190,9 +190,10 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$scope.tagsOnPage = top;
 			//console.log($scope.tagsOnPage);
 		}
-		$scope.setTimeType = function(newRelativeTime) {
+		$scope.setTimeType = function(newRelativeTime, reloadPage) {
 			$scope.timeType = newRelativeTime;
-			$scope.delayLoadPageModel($routeParams.pageId);
+			if(reloadPage !== undefined && reloadPage) 
+				$scope.delayLoadPageModel($routeParams.pageId);
 		}
 		$scope.searchForMetric = function(args) {
 			//console.log("|",this.metricQuery,"|");
@@ -292,6 +293,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			} else {
 				q['start'] = $scope.timeType;
 			}
+			console.log(q);
 			return q;
 		}
 		$scope.disableDragDrop = function() {
