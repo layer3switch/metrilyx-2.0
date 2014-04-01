@@ -1,7 +1,7 @@
 {
 	"name": "",
 	"graphType": "line",
-	"size": "small",
+	"size": "medium",
 	"thresholds": {
 		"danger"	: 999999999999999999,
 		"warning"	: 9999999999999999,
