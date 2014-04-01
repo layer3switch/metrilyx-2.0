@@ -384,7 +384,7 @@ function graphing_upsertSeries(args) {
                         //console.log("series found in graph: ", hcg.series[i].name);
                         if(Object.prototype.toString.call(args.series[j].data) === '[object Object]') {
                             if(args.series[j].data.error) {
-                                console.log("upsert: tsdb error:", args.series[j].data.error.message);
+                                console.warn("graphing_upsertSeries tsdb error:", args.series[j].data.error.message.substring(0,100));
                                 break;
                             }
                         }
