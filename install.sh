@@ -23,13 +23,18 @@ clean() {
 }
 install_app(){
 	clean;
-	echo "-- Installing app..."
+
+	echo "- Stopping apache...";
 	/etc/init.d/httpd stop > /dev/null 2>&1;
+	
 	install_time=$(date '+%d%b%Y_%H%M');
+	
 	if [ -d /opt/metrilyx ]; then
+		echo "- Backing up existing installation...";
 		mv /opt/metrilyx /opt/metrilyx-${install_time};
 	fi;
 	
+	echo "- Installing app..."
 	mkdir -p /opt/metrilyx;
 	cp -a . /opt/metrilyx/;
 	chmod g+w /opt/metrilyx;
@@ -41,8 +46,15 @@ install_app(){
 		cp etc/sysconfig/celeryd /etc/sysconfig/;
 	fi
 	if [ -f "/opt/metrilyx-${install_time}/etc/metrilyx/metrilyx.conf" ]; then
-		echo " copying existing config...";
+		echo "- Importing existing data..."
+		echo "  configs...";
 		cp /opt/metrilyx-${install_time}/etc/metrilyx/metrilyx.conf /opt/metrilyx/etc/metrilyx/metrilyx.conf;
+		echo "  dashboards..."
+		cp -a /opt/metrilyx-${install_time}/pagemodels/ /opt/metrilyx/pagemodels/;
+		echo "  heatmap index..."
+		cp -f /opt/metrilyx-${install_time}/heatmaps.json /opt/metrilyx/heatmaps.json;
+		echo "  heatmaps..."
+		cp -a /opt/metrilyx-${install_time}/heatmaps/ /opt/metrilyx/heatmaps/;
 	else
 		cp etc/metrilyx/metrilyx.conf.sample /opt/metrilyx/etc/metrilyx/metrilyx.conf;
 		${EDITOR:-vi} /opt/metrilyx/etc/metrilyx/metrilyx.conf;
@@ -50,17 +62,17 @@ install_app(){
 	
 }
 install_web_config() {
-	echo "-- Install UI..."
+	echo "- Installing web components..."
 	cp etc/httpd/conf.d/metrilyx.conf /etc/httpd/conf.d/;
 	chown -R apache:apache /opt/metrilyx;
-	echo "-- Restarting apache..."
+	echo "- Restarting apache..."
 	/etc/init.d/httpd restart
 }
 
 ##### Main ####
 
 if [ ! -f "/etc/redhat-release" ]; then 
-	echo "Not a RedHat based distro.  Please install manually.";
+	echo "Currently only RedHat based distro are supported.  Please install manually.";
 	exit 1;
 fi
 
