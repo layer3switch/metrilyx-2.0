@@ -112,12 +112,12 @@ Heatmaps are used to few your top 10 consumers for a given metric.  They are cre
 
 Heatmap jobs are stored in the application directory under 'heatmaps.json'.  The heatmap dashboards are stored in a directory called 'heatmaps' in the application directory (default: /opt/metrilyx)
 
-In order to use heatmaps, you will also need a mongodb server.  Heatmaps are calculated using celery.  For scalability more celery compute nodes can be added by issuing './install lyx' and editing the config using the appropriate settings.
+In order to use heatmaps, you will also need a mongodb server.  Heatmap computations are performed using celery (python distributed processing framework).  For scalability more celery worker nodes can be added.  To install simply download the application on the node in question and run the install script: './install lyx'.  Add the appropriate configuration parameters.
 
-Start the heatmap generator
+Start the heatmap generator.  Only 1 instance of this should be running.
 /etc/init.d/celerybeatd start
 
-Start the heatmap processor
+Start the heatmap processor.  These can run on as many nodes as you like.
 /etc/init.d/celeryd start
 
 
