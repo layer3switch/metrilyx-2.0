@@ -41,6 +41,15 @@ class PageView(APIView):
 			rslt = self.modelstore.listModels()	
 		else:	
 			rslt = self.modelstore.getModel(page_id)
+		
+		export = request.QUERY_PARAMS.get("export", False)
+		if export:
+			request.accepted_media_type = "application/json; indent=4"
+			return Response(rslt, headers={
+				'Content-Disposition': 'attachment; filename: %s.json' %(page_id),
+				'Content-Type': 'application/json'
+				})
+		
 		return Response(rslt)
 
 	## Add

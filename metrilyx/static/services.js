@@ -77,14 +77,11 @@ metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 			$http({
 				method: 'POST',
 				url: '/api/graph',
-				headers: {
-					'Content-type': 'application/json',
-				},
-				data: query}).
-			success(function(result) {
+				headers: {'Content-type': 'application/json'},
+				data: query
+			}).success(function(result) {
 				callback(result);
-			}).
-			error(function(data, status, arg1, arg2) {
+			}).error(function(data, status, arg1, arg2) {
 				console.log(status);
 				//console.log(data);
 				//console.log(arg1);

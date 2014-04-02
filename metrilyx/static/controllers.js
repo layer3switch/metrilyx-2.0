@@ -190,6 +190,16 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$scope.tagsOnPage = top;
 			//console.log($scope.tagsOnPage);
 		}
+		$scope.exportModel = function() {
+			File.save(csvInput, function (content) {
+			    var hiddenElement = document.createElement('a');
+
+			    hiddenElement.href = 'data:attachment/csv,' + encodeURI(content);
+			    hiddenElement.target = '_blank';
+			    hiddenElement.download = 'myFile.csv';
+			    hiddenElement.click();
+			});
+		}
 		$scope.setTimeType = function(newRelativeTime, reloadPage) {
 			$scope.timeType = newRelativeTime;
 			if(reloadPage !== undefined && reloadPage) 

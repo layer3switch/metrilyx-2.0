@@ -274,8 +274,8 @@ angular.module('graphing', [])
 							 */
 							sf = new SeriesFormatter(result.series);
 							sTags = sf.seriesTags();
-							scope.updateTagsOnPage(sTags);
 							// write to links object //
+							scope.updateTagsOnPage(sTags);
 							graphing_newGraph(result);
 						});
 						return;

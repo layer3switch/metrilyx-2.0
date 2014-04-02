@@ -3,17 +3,19 @@
 		<span class="edit-panel-btn pointer interactive padr10" title="Delete Page" ng-click="removeModel()">
 			<i class="glyphicon glyphicon-trash"></i>
 		</span>
-		<span ng-click="saveModel()" class="edit-panel-btn pointer interactive" title="Save Page">
+		<span ng-click="saveModel()" class="edit-panel-btn pointer interactive" title="Save page">
 			<i class="glyphicon glyphicon-save"></i>
 		</span>
+		<a href="/api/page/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json" class="edit-panel-btn pointer interactive" title="Export model">
+			<i class="glyphicon glyphicon-export"></i>
+		</a>
 	</div>
 	<div class="input-group input-group-sm panel-searchbar marginlr5 padl5 padr10" style="border-bottom:1px solid #555;">
-				<span class="input-group-addon">
-					<i class="glyphicon glyphicon-search"></i>
-				</span>
-				<input type="text" class="form-control" ng-model="metricQuery" ng-change="searchForMetric()" placeholder="Metric Search" style="border:1px solid #666 !important;">
+		<span class="input-group-addon">
+			<i class="glyphicon glyphicon-search"></i>
+		</span>
+		<input type="text" class="form-control" ng-model="metricQuery" ng-change="searchForMetric()" placeholder="Metric Search" style="border:1px solid #666 !important;">
 	</div>
-
 	<div>
 		<div ui-sortable="metricListSortOpts" drag-copy="true" ng-model="metricQueryResult">
 			<div class="metric interactive page-list-item" ng-repeat="metric in metricQueryResult" ng-model="metric" title="{{metric.query.metric}}" style="color:#ccc">
@@ -22,5 +24,4 @@
 			</div>
 		</div>
 	</div>
-
 </div>
