@@ -93,7 +93,7 @@ A sample config file is provided in the same directory above.  The configuration
 OpenTSDB http host
 
 ##### tsdb.port
-OpenTSDB http Port (default: 4242)
+OpenTSDB http port (default: 4242)
 
 ##### tsdb.suggest_limit
 OpenTSDB suggest max result limit. 
@@ -107,17 +107,17 @@ After you've installed and configured metrilyx, click on the "tutorials" link to
 This configuration option is to generate heatmaps.  The only needed change here is the mongodb information relative to your setup.
 
 
-#### Heat Maps
+#### HeatMaps
 Heatmaps are used to few your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10. 
 
 Heatmap jobs are stored in the application directory under 'heatmaps.json'.  The heatmap dashboards are stored in a directory called 'heatmaps' in the application directory (default: /opt/metrilyx)
 
 In order to use heatmaps, you will also need a mongodb server.  Heatmap computations are performed using celery (python distributed processing framework).  For scalability more celery worker nodes can be added.  To install simply download the application on the node in question and run the install script: './install lyx'.  Add the appropriate configuration parameters.
 
-Start the heatmap generator.  Only 1 instance of this should be running.
+Start the heatmap generator.  (Only 1 instance of this should be running.)
 /etc/init.d/celerybeatd start
 
-Start the heatmap processor.  These can run on as many nodes as you like.
+Start the heatmap processor.  (These can run on as many nodes as you like.)
 /etc/init.d/celeryd start
 
 
