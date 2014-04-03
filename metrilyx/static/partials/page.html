@@ -13,3 +13,20 @@
 		</div>
 	</div><!-- END .col-md-9 -->
 </div><!-- END .row -->
+<div class="modal fade" id="confirm-delete">
+	<div class="modal-dialog">
+	    <div class="modal-content">
+			<div class="modal-header">
+	        	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        	<h4 class="modal-title">Deleting <b>{{model.name}}</b></h4>
+			</div>
+			<div class="modal-body">
+	        	<span>Are you sure you want to delete the <b>{{model._id}}</b> page?</span>
+			</div>
+		    <div class="modal-footer" style="margin-top:0px">
+		    	<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+		    	<button type="button" class="btn btn-danger" ng-click="removeModel();">Delete</button>
+		    </div>
+	    </div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

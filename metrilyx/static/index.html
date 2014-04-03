@@ -53,11 +53,12 @@
 					</a>
 				</div>
 				<div class="input-group input-group-sm panel-searchbar">
-					<span class="input-group-addon page-icon">
-						<i class="glyphicon glyphicon-search"></i>
+					<span class="input-group-addon page-icon pointer interactive" onclick="document.getElementById('modelimport').click()" title="Import">
+						<i class="glyphicon glyphicon-import"></i>
+						<input id="modelimport" type="file" style="display:none" onchange="angular.element(this).scope().importModel(this.files)">
 					</span>
 					<input type="text" class="form-control" placeholder="Search" ng-model="modelQuery">
-					<a href="#/{{modelType}}new" class="input-group-addon page-icon interactive" title="New Page">
+					<a href="#/{{modelType}}new" class="input-group-addon page-icon interactive" title="New">
 						<i class="glyphicon glyphicon-plus"></i>
 					</a>
 				</div>

@@ -39,6 +39,10 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		}
 
 		clearAllTimeouts();
+		// make sure modal window is not lingering around //
+		$('#confirm-delete').modal('hide');
+		$('.modal-backdrop').remove();
+
 		var canceler;
 
 		$scope.editPanelHtml	= "partials/edit_panel.html";
@@ -370,27 +374,27 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				$('#global-alerts').addClass('alert-danger');
 				$('#global-alerts').html("<b>Error: </b>"+rslt.message)
 				//$scope.globalAlerts = result.error;
+				flashAlertsBar();
 			} else {
 				$('#global-alerts').addClass('alert-success');
 				$('#global-alerts').removeClass('alert-danger');
 				$('#global-alerts').html("<b>Success: </b>"+rslt.message);
-				// reload page model list //
-				/*
-				Model.listModels(function(models) {
-	 				$scope.pageModels = models;
-				});*/
+				if($scope.modelType == "") {
+					location.hash = "#/new";
+				} else {
+					location.hash = "#/heatmap/new";
+				}
 			}
-			flashAlertsBar();
 		}
-		$scope.removeModel = function(args) {
+		$scope.removeModel = function(callback) {
 			if($scope.modelType == "") {
 				Model.removeModel({pageId: $scope.model._id}, {}, function(result) {
-					_removeModelCallback(result)
+					_removeModelCallback(result);
 				});
 			} else {
 				console.log($scope.model._id);
 				Heatmap.removeModel({pageId: $scope.model._id}, {}, function(result) {
-					_removeModelCallback(result)
+					_removeModelCallback(result);
 				});
 			}
 		}
@@ -410,6 +414,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				//$scope.disableEditMode();
 				//$scope.reflow();
 				if(location.hash === ("#/" + $scope.model._id)) { 
+					//console.log($location);
 					$location.reload(true);
 				} else {
 					location.hash = $scope.model._id;

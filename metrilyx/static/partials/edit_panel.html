@@ -1,18 +1,18 @@
 <div class="edit-comp{{editMode}}" id="edit-panel">
 	<div class="marginlr5 padb10" style="border-bottom:1px solid #555;padding-top:12px;">
-		<span class="edit-panel-btn pointer interactive padr10" title="Delete Page" ng-click="removeModel()">
+		<span class="edit-panel-btn pointer interactive padr10" title="Delete" data-toggle="modal" data-target="#confirm-delete">
 			<i class="glyphicon glyphicon-trash"></i>
 		</span>
-		<span ng-click="saveModel()" class="edit-panel-btn pointer interactive" title="Save page">
+		<span ng-click="saveModel()" class="edit-panel-btn pointer interactive" title="Save">
 			<i class="glyphicon glyphicon-save"></i>
 		</span>
-		<a href="/api/page/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json" class="edit-panel-btn pointer interactive" title="Export model">
+		<a href="/api/page/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json" class="edit-panel-btn pointer interactive" title="Export">
 			<i class="glyphicon glyphicon-export"></i>
-		</a>
+		</a><!--
 		<span class="edit-panel-btn pointer interactive" onclick="document.getElementById('modelimport').click()">
 			<i class="glyphicon glyphicon-import"></i>
 			<input id="modelimport" type="file" style="display:none" onchange="angular.element(this).scope().importModel(this.files)">
-		</span>
+		</span>-->
 	</div>
 	<div class="input-group input-group-sm panel-searchbar marginlr5 padl5 padr10" style="border-bottom:1px solid #555;">
 		<span class="input-group-addon">
