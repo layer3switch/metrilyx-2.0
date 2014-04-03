@@ -9,6 +9,10 @@
 		<a href="/api/page/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json" class="edit-panel-btn pointer interactive" title="Export model">
 			<i class="glyphicon glyphicon-export"></i>
 		</a>
+		<span class="edit-panel-btn pointer interactive" onclick="document.getElementById('modelimport').click()">
+			<i class="glyphicon glyphicon-import"></i>
+			<input id="modelimport" type="file" style="display:none" onchange="angular.element(this).scope().importModel(this.files)">
+		</span>
 	</div>
 	<div class="input-group input-group-sm panel-searchbar marginlr5 padl5 padr10" style="border-bottom:1px solid #555;">
 		<span class="input-group-addon">
