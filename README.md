@@ -108,16 +108,20 @@ This configuration option is to generate heatmaps.  The only needed change here 
 
 
 ### Heat Maps
-Heatmaps are used to few your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10. 
+Heatmaps are used to few your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10.  This is usually the tag containing a value of '*'.
 
-Heatmap jobs are stored in the application directory under 'heatmaps.json'.  The heatmap dashboards are stored in a directory called 'heatmaps' in the application directory (default: /opt/metrilyx)
+Heatmap jobs are stored in the application directory in 'heatmaps.json'.  The heatmap dashboards are stored in a directory called 'heatmaps' in the application directory (default: /opt/metrilyx)
 
-In order to use heatmaps, you will also need a mongodb server.  Heatmap computations are performed using celery (python distributed processing framework).  For scalability more celery worker nodes can be added.  To install simply download the application on the node in question and run the install script: './install lyx'.  Add the appropriate configuration parameters.
+In order to use heatmaps, you will need a mongodb server.  Heatmap computations are performed using celery (python distributed processing framework) which uses mongodb for its backend.  For scalability more celery worker nodes can be added.  To install simply download the application on the node in question and run the install script.
 
-	Start the heatmap generator.  (Only 1 instance of this should be running.)
+#####Install
+	./install.sh lyx  
+This will install the worker and the celeryd daemon.  After the installation completes, edit the heatmaps section in the configuration file with information specific to your environment.
+
+#####Start the heatmap generator.  (only 1 instance of this should be running)
 	/etc/init.d/celerybeatd start
-
-	Start the heatmap processor.  (These can run on as many nodes as you like.)
+	
+#####Start the heatmap processor.  (these can run on as many nodes as you like)
 	/etc/init.d/celeryd start
 
 
