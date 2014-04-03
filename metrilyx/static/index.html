@@ -62,7 +62,7 @@
 						<i class="glyphicon glyphicon-plus"></i>
 					</a>
 				</div>
-				<a ng-repeat="model in modelsList | filter:modelQuery" href="#/{{modelType}}{{model._id}}" >
+				<a ng-repeat="model in modelsList | filter:modelQuery | orderBy:name" href="#/{{modelType}}{{model._id}}" >
 					<div class="page-list-item">
 						<span class="page-icon">
 							<i class="glyphicon glyphicon-stats"></i>
