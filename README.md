@@ -106,8 +106,7 @@ After you've installed and configured metrilyx, click on the "tutorials" link to
 ##### heatmaps
 This configuration option is to generate heatmaps.  The only needed change here is the mongodb information relative to your setup.
 
-
-#### HeatMaps
+### Heat Maps
 Heatmaps are used to few your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10. 
 
 Heatmap jobs are stored in the application directory under 'heatmaps.json'.  The heatmap dashboards are stored in a directory called 'heatmaps' in the application directory (default: /opt/metrilyx)
