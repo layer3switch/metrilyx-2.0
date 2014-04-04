@@ -277,11 +277,9 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			console.log("removing", rowIdx, colIdx, podIdx);
 			$scope.model.layout[rowIdx][colIdx].splice(podIdx,1);
 		}
-
-		$scope.addGraph = function(rowIdx, colIdx, podIdx) {
-			//console.log("addGraph", rowIdx, colIdx, podIdx);
+		$scope.addGraph = function(toPod) {
 			Schema.get({modelType:'graph'}, function(result) {
-				$scope.model.layout[rowIdx][colIdx][podIdx].graphs.push(result);				
+				toPod.graphs.push(result);				
 			});
 		}
 		$scope.removeGraph = function(rowIdx, colIdx, podIdx, graphIdx) {

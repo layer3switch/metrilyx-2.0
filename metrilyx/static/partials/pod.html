@@ -7,7 +7,7 @@
 				<span class="input-group-btn edit-comp{{editMode}} pod-btn-bar nobg">
 					<span ng-switch="modelType">
 						<span ng-switch-when="">
-							<a href="javascript:void(0)" class="btn pod-header-btn interactive edit-comp{{editMode}}" ng-click="addGraph($parent.$parent.$index, $parent.$index, $index);" title="Add graph to pod"><i class="glyphicon glyphicon-plus"></i></a>
+							<a href="javascript:void(0)" class="btn pod-header-btn interactive edit-comp{{editMode}}" ng-click="addGraph(pod);" title="Add graph to pod"><i class="glyphicon glyphicon-plus"></i></a>
 						</span>
 						<span ng-switch-default>
 							<span style="opacity:0"><i class="glyphicon glyphicon-plus"></i></span>

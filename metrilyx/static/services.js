@@ -1,5 +1,19 @@
  /* services.js */
+function ConnectionPool(config) {
+	this.counter = 0;
+	this.urls = [
+		"http://metui1.abs.devops1.cloudsys.tmcs",
+		"http://metui2.abs.devops1.cloudsys.tmcs",
+		"http://metui3.abs.devops1.cloudsys.tmcs"
+	];
+}
+ConnectionPool.prototype.nextConnection = function() {
+	idx = this.counter % 3;
+	this.counter++;
+	return this.urls[idx];
+}
 
+var connectionPool = new ConnectionPool();
 var metrilyxServices = angular.module('metrilyxServices', ['ngResource']);
 
 metrilyxServices.factory('Auth', ['$http', function ($http) {
@@ -17,6 +31,7 @@ metrilyxServices.factory('Metrics', ['$http', 'Auth', function($http, Auth) {
     return {
         suggest: function(query, callback) {
            	//Auth.clearCredentials();
+           	console.info("Next URL:", connectionPool.nextConnection());
 			if(query == "") {
 				callback([]);  
 			} else {
@@ -74,6 +89,7 @@ metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 	return {
 		getData: function(query, callback) {
 			//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
+			console.info("Next URL:", connectionPool.nextConnection());
 			$http({
 				method: 'POST',
 				url: '/api/graph',
@@ -107,6 +123,7 @@ metrilyxServices.factory('Heat', [ '$http',function($http) {
 			}
 			qstr = qstr.replace(/\,$/,'}');
 
+			console.info("Next URL:", connectionPool.nextConnection());
 			$http({
 				method: 'GET',
 				url: '/api/heat/'+qstr,
