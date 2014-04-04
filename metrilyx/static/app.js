@@ -31,7 +31,7 @@ app.config(['$routeProvider',
 				/*reloadOnSearch: false*/
 			})
 			.otherwise({
-				redirectTo: '/Overview'
+				redirectTo: '/new'
 			});
 	}
 ]);

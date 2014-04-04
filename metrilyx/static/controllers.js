@@ -334,7 +334,9 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$scope.updatesEnabled = false;
 			$(".graph-metrics-panel").collapse('show');
 			if($scope.modelType == "") {
-				$("[ng-include='thresholdsHtml']").collapse('show');
+				setTimeout(function() {
+					$("[ng-include=thresholdsHtml]").collapse('show');
+				}, 200);
 			}
 			$('input.edit-comp').attr('disabled',false);
 			$scope.enableDragDrop();
@@ -434,7 +436,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		if($routeParams.pageId == "new" || $routeParams.heatmapId == 'new') {
 			setTimeout(function() {
 				$scope.enableEditMode();	
-			}, 100);
+			}, 200);
 		} else {
 			if($scope.editMode == "") {
 				$scope.disableDragDrop();	
