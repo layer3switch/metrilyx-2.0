@@ -29,6 +29,7 @@ Metrilyx will run on any system that supports the packages below.  It has primar
 	python-setuptools
 
 #### Python Packages:
+	celery
 	Django
 	django-filter
 	Markdown
