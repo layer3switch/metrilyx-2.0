@@ -407,7 +407,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				//$scope.reflow();
 				if(location.hash === ("#/" + $scope.model._id)) { 
 					//console.log($location);
-					$location.reload(true);
+					location.reload(true);
 				} else {
 					location.hash = $scope.model._id;
 				}
