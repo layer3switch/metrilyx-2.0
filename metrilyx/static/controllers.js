@@ -26,6 +26,32 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$routeParams',
 				$scope.modelsList = result;
 			});
 		}
+		$scope.importModel = function(fileList) {
+			var freader = new FileReader();
+			//console.log(fileList[0].name);
+			freader.onload = function(evt) {	
+				try {
+					jobj = JSON.parse(evt.target.result);
+					//console.log(jobj);
+					Model.saveModel(jobj, function(rslt) {
+						//$('#global-alerts').html(rslt.message);
+						if(rslt.error) {
+							$('#global-alerts').removeClass('alert-success');
+							$('#global-alerts').addClass('alert-danger');
+							$('#global-alerts').html("<b>Error: </b>"+rslt.message);
+						} else {
+							$('#global-alerts').removeClass('alert-danger');
+							$('#global-alerts').addClass('alert-success');
+							$('#global-alerts').html("<b>Success: </b>"+rslt.message);
+						}
+						flashAlertsBar();
+					});
+				} catch(e) {
+					console.error("Could not import model", fileList[0].name, e);
+				}
+			};
+			freader.readAsText(fileList[0]);
+		}
 	}
 ]);
 metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph','Heatmap',
@@ -154,12 +180,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$scope.$parent.globalTags[tagkey] = tagval;
 			//console.log($scope.globalTags);
 		}
-		function flashAlertsBar() {
-			$('#global-alerts').fadeIn(500);
-				setTimeout(function() {
-					$('#global-alerts').fadeOut(1000);
-				}, 3000);
-		}
 		$scope.delayLoadPageModel = function(pageId, cb) {
 			clearAllTimeouts();
 			setTimeout(function() {
@@ -193,32 +213,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			}
 			$scope.tagsOnPage = top;
 			//console.log($scope.tagsOnPage);
-		}
-		$scope.importModel = function(fileList) {
-			var freader = new FileReader();
-			//console.log(fileList[0].name);
-			freader.onload = function(evt) {	
-				try {
-					jobj = JSON.parse(evt.target.result);
-					//console.log(jobj);
-					Model.saveModel(jobj, function(rslt) {
-						//$('#global-alerts').html(rslt.message);
-						if(rslt.error) {
-							$('#global-alerts').removeClass('alert-success');
-							$('#global-alerts').addClass('alert-danger');
-							$('#global-alerts').html("<b>Error: </b>"+rslt.message);
-						} else {
-							$('#global-alerts').removeClass('alert-danger');
-							$('#global-alerts').addClass('alert-success');
-							$('#global-alerts').html("<b>Success: </b>"+rslt.message);
-						}
-						flashAlertsBar();
-					});
-				} catch(e) {
-					console.error("Could not import model", fileList[0].name, e);
-				}
-			};
-			freader.readAsText(fileList[0]);
 		}
 		$scope.setTimeType = function(newRelativeTime, reloadPage) {
 			$scope.timeType = newRelativeTime;

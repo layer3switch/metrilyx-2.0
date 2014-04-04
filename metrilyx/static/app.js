@@ -220,3 +220,9 @@ function clearAllTimeouts() {
 		window.clearTimeout(id); 
 	}
 }
+function flashAlertsBar() {
+	$('#global-alerts').fadeIn(500);
+		setTimeout(function() {
+			$('#global-alerts').fadeOut(1000);
+		}, 3000);
+}
