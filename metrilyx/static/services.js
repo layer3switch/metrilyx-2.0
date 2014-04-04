@@ -31,7 +31,7 @@ metrilyxServices.factory('Metrics', ['$http', 'Auth', function($http, Auth) {
     return {
         suggest: function(query, callback) {
            	//Auth.clearCredentials();
-           	console.info("Next URL:", connectionPool.nextConnection());
+           	//console.info("Next URL:", connectionPool.nextConnection());
 			if(query == "") {
 				callback([]);  
 			} else {
@@ -89,7 +89,7 @@ metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 	return {
 		getData: function(query, callback) {
 			//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
-			console.info("Next URL:", connectionPool.nextConnection());
+			//console.info("Next URL:", connectionPool.nextConnection());
 			$http({
 				method: 'POST',
 				url: '/api/graph',
@@ -123,7 +123,7 @@ metrilyxServices.factory('Heat', [ '$http',function($http) {
 			}
 			qstr = qstr.replace(/\,$/,'}');
 
-			console.info("Next URL:", connectionPool.nextConnection());
+			//console.info("Next URL:", connectionPool.nextConnection());
 			$http({
 				method: 'GET',
 				url: '/api/heat/'+qstr,
