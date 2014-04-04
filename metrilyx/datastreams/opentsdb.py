@@ -1,4 +1,5 @@
 
+from multiprocessing import Pool
 import math
 
 from ..httpclients import HttpJsonClient
@@ -56,16 +57,19 @@ class OpenTSDBRequest(GraphRequest):
 
 	def __init__(self, metrilyx_request, data_callback=None):
 		super(OpenTSDBRequest,self).__init__(metrilyx_request)
-		#pprint(self.tags)
-		## convert to celery task
-		hjc = HttpJsonClient(self.tsd_host, self.tsd_port)
+		self.data_callback = data_callback
 		for serie in self.series:
-			tsd_data = hjc.POST(self.endpoints.query, self.__serieQuery(serie, self.tags))
-			if type(tsd_data) == dict and tsd_data.get("error"):
-				serie['data'] = tsd_data
-			else:
-				m_serie = MetrilyxSeries(serie, tsd_data, data_callback)
-				serie['data'] = m_serie.data
+			serie = self.__fetch_serie(serie)
+
+	def __fetch_serie(self, serie):
+		hjc = HttpJsonClient(self.tsd_host, self.tsd_port)
+		tsd_data = hjc.POST(self.endpoints.query, self.__serieQuery(serie, self.tags))
+		if type(tsd_data) == dict and tsd_data.get("error"):
+			serie['data'] = tsd_data
+		else:
+			m_serie = MetrilyxSeries(serie, tsd_data, self.data_callback)
+			serie['data'] = m_serie.data
+		return serie
 
 	def __extendTags(self, tags1, global_tags):
 		"""
