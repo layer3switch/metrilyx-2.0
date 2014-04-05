@@ -213,6 +213,8 @@ class MetrilyxSeries(object):
 		except KeyError:
 			#print str(e)
 			return obj['metric']
+		except Exception, e:
+			return str(e)
 
 	def __sig_figs(self, num):
 		"""
