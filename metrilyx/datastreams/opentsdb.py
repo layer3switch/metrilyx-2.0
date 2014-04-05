@@ -137,8 +137,6 @@ class MetrilyxSeries(object):
 				}
 		try:
 			dataset['dps'] = self.__convert_timestamp(dataset['dps'])
-			#pprint(dataset['dps'])
-			#print "%s: %d" %(dataset['metric'], len(dataset['dps']))
 		except Exception,e:
 			print "----- ERROR -----"
 			pprint(e)
