@@ -153,10 +153,13 @@ class MetrilyxSeries(object):
 			if talias not in self._serie['alias']:
 				nstr += " "+talias
 
-		dataset['alias'] = self.__normalize_alias(self._serie['alias']+nstr, {
+		dataset['alias'] = self.__normalize_alias(self._serie['alias'], {
 			'tags': dataset['tags'],
 			'metric': dataset['metric']
 			})
+
+		if nstr and not self._serie['alias'].startswith("!"):
+			dataset['alias'] = dataset['alias'] + nstr
 
 		## any custom callback for resulting data set 
 		if self._data_callback != None:
@@ -199,12 +202,19 @@ class MetrilyxSeries(object):
 		"""
 		#pprint(obj['tags'])
 		flat_obj = self.__flatten_dict(obj)
+
+		# When alias_str starts with ! we will do an eval for lambda processing
+		if alias_str.startswith("!"):
+			return eval(alias_str[1:])(flat_obj)
+
 		try:
 			#print alias_str %(obj)
 			return alias_str %(flat_obj)
 		except KeyError:
 			#print str(e)
 			return obj['metric']
+		except Exception, e:
+			return str(e)
 
 	def __sig_figs(self, num):
 		"""
