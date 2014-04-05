@@ -82,42 +82,6 @@ app.directive('stopEvent', function () {
     };
 });
 /*
- *
- * Adds global tags to URL
- *
- */
- /*
-app.directive('globalTags', [ '$location', function($location) {
-	return {
-		restrict: 'A',
-		require: '?ngModel',
-		link: function(scope, elem, attrs, ctrl) {
-			if(!ctrl) return;
-			scope.$watch(function() {
-				return ctrl.$modelValue;
-			}, function(newVal, oldVal) {
-				if(equalObjects(newVal, oldVal)) return;
-				tagsLoc = dictToCommaSepStr(newVal);
-				tmp = $location.search();
-				if(tagsLoc == "") {
-					if(tmp.tags) {
-						delete tmp.tags;
-						$location.search(tmp);
-					}
-					return;
-				}
-				$.extend(tmp, {tags: tagsLoc}, true);
-				$location.search(tmp);
-				//console.log(scope.globalTags);
-				//console.log(newVal);
-				scope.globalTagsChanged();
-			},true);
-			
-		}
-	};
-}]);
-*/
-/*
  * Parse tags object to 'tag1=val1,tag2=val2;'
  * Error checking and validity setting.
  */

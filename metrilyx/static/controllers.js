@@ -114,15 +114,16 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		 
 		if(urlParams.tags) {
 			try {
+				//$scope.$parent
 				$scope.$parent.globalTags = commaSepStrToDict(urlParams.tags);
 			} catch(e) {
 				console.log("error: could not set global tags");
 				console.log("  reason:", e);
 				$scope.globalTags = {}
 			}
-		} /*else {
+		} else {
 			$scope.globalTags = {};
-		}*/
+		}
 		//disableDragDrop();
 		$scope.editMode = "";
 		$scope.updatesEnabled = true;
@@ -178,7 +179,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		//$('#stage').removeClass('right');
 		$scope.updateGlobalTag = function(tagkey, tagval) {
 			$scope.$parent.globalTags[tagkey] = tagval;
-			//console.log($scope.globalTags);
 		}
 		$scope.delayLoadPageModel = function(pageId, cb) {
 			clearAllTimeouts();
@@ -336,7 +336,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			if($scope.modelType == "") {
 				setTimeout(function() {
 					$("[ng-include=thresholdsHtml]").collapse('show');
-				}, 200);
+				}, 250);
 			}
 			$('input.edit-comp').attr('disabled',false);
 			$scope.enableDragDrop();
