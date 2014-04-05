@@ -31,7 +31,17 @@ class SchemaView(APIView):
 		obj = jsonFromFile(abspath)
 		if model_type == "graph":
 			obj['_id'] = "".join(str(uuid.uuid4()).split("-"))
-		return Response(obj)
+		
+		return Response(obj, headers={
+			'Access-Control-Allow-Origin': '*',
+			'Content-Type': 'application/json'			
+			})
+
+	def metadata(self, request):
+	    self.headers['Access-Control-Allow-Origin'] = '*'
+	    self.headers['Access-Control-Allow-Headers'] = 'accept,content-type'
+	    data = super(SchemaView, self).metadata(request)
+	    return data
 
 class PageView(APIView):
 	modelstore = FileModelStore(config['model_path'])
@@ -156,6 +166,8 @@ class HeatView(APIView):
 			#return Response([])
 
 class GraphView(APIView):
+	
+
 
 	def __calibrate_piegraph(self, req_obj):
 		"""
@@ -195,7 +207,19 @@ class GraphView(APIView):
 		req_obj = self.__calibrate_piegraph(req_obj)
 		tsd_req = OpenTSDBRequest(req_obj)
 		## analyze data here
-		return Response(tsd_req.data)
+
+		#"Access-Control-Allow-Origin
+		return Response(tsd_req.data, headers={
+			'Access-Control-Allow-Origin': '*',
+			'Content-Type': 'application/json'
+			})
+
+
+	def metadata(self, request):
+	    self.headers['Access-Control-Allow-Origin'] = '*'
+	    self.headers['Access-Control-Allow-Headers'] = 'accept,content-type'
+	    data = super(GraphView, self).metadata(request)
+	    return data
 
 class SearchView(APIView):
 	"""
