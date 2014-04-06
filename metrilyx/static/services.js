@@ -4,6 +4,7 @@ function ConnectionPool(urls) {
 	this.urls = urls;
 }
 ConnectionPool.prototype.nextConnection = function() {
+	if(this.urls.length < 1) return "";
 	idx = this.counter % this.urls.length;
 	this.counter++;
 	return this.urls[idx];
@@ -95,9 +96,9 @@ metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 			}).success(function(result) {
 				callback(result);
 			}).error(function(data, status, arg1, arg2) {
+				console.log(data);
 				console.log(status);
-				//console.log(data);
-				//console.log(arg1);
+				console.log(arg1);
 				console.log(arg2);
 			});
 		},
