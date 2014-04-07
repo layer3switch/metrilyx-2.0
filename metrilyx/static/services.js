@@ -86,8 +86,9 @@ metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 	return {
 		getData: function(query, callback) {
 			//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
-			//console.info("Next URL:", connectionPool.nextConnection());
-			var poolUrl = connectionPool.nextConnection();
+			// TODO: enable once CORS issue is resolved //
+			//var poolUrl = connectionPool.nextConnection();
+			var poolUrl = "";
 			$http({
 				method: 'POST',
 				url: poolUrl+'/api/graph',
