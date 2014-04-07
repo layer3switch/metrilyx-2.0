@@ -102,7 +102,7 @@ OpenTSDB suggest max result limit.
 ##### model_path
 Path to directory where JSON page models (i.e. dashboards) will be stored.  Optional (default: /opt/metrilyx/pagemodels)
 
-After you've installed and configured metrilyx, click on the "tutorials" link towards the bottom-center of the page (i.e. http://< metrilyx host >/#/tutorials) for a general overview and basic tutorial on how to get started.
+After you've installed and configured metrilyx, click on the "tutorials" link towards the bottom-center of the page (i.e. http://< metrilyx host >/\#/tutorials) for a general overview and basic tutorial on how to get started.
 
 ##### heatmaps
 This configuration option is to generate heatmaps.  The only needed change here is the mongodb information relative to your setup.
