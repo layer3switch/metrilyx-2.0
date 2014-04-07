@@ -38,10 +38,10 @@ class SchemaView(APIView):
 			})
 
 	def metadata(self, request):
-	    self.headers['Access-Control-Allow-Origin'] = '*'
-	    self.headers['Access-Control-Allow-Headers'] = 'accept,content-type'
-	    data = super(SchemaView, self).metadata(request)
-	    return data
+		self.headers['Access-Control-Allow-Origin'] = '*'
+		#self.headers['Access-Control-Allow-Headers'] = 'accept,content-type'
+		data = super(SchemaView, self).metadata(request)
+		return data
 
 class PageView(APIView):
 	modelstore = FileModelStore(config['model_path'])
@@ -216,10 +216,12 @@ class GraphView(APIView):
 
 
 	def metadata(self, request):
-	    self.headers['Access-Control-Allow-Origin'] = '*'
-	    self.headers['Access-Control-Allow-Headers'] = 'accept,content-type'
-	    data = super(GraphView, self).metadata(request)
-	    return data
+		self.headers['Access-Control-Allow-Origin'] = '*'
+		self.headers['Access-Control-Allow-Headers'] = "Content-type,Accept"
+		self.headers['Access-Control-Allow-Methods'] = "POST,OPTIONS"
+		data = super(GraphView, self).metadata(request)
+		#pprint(self.headers)
+		return data
 
 class SearchView(APIView):
 	"""
