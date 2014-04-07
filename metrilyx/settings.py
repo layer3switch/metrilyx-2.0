@@ -3,6 +3,7 @@
 APPEND_SLASH = False
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+CORS_ORIGIN_ALLOW_ALL = True
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -101,6 +102,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 )
 
 ROOT_URLCONF = 'metrilyx.urls'
@@ -131,6 +133,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'rest_framework',
+    'corsheaders',
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
