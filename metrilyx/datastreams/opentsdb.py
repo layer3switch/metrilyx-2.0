@@ -144,22 +144,25 @@ class MetrilyxSeries(object):
 			print "-----------------"
 
 		dataset['dps'] = self.__apply_ytransform(dataset['dps'], self._serie['yTransform'])
-		
-		### scan tags to make unique series alias (looks for * and | operators)
-		uq = self.__determine_uniqueness(self._serie['query'])
-		nstr = ""
-		for u in uq:
-			talias = "%("+u+")s"
-			if talias not in self._serie['alias']:
-				nstr += " "+talias
-
+		### normalize alias (i.e. either lambda function or string formatting)
 		dataset['alias'] = self.__normalize_alias(self._serie['alias'], {
 			'tags': dataset['tags'],
 			'metric': dataset['metric']
 			})
 
+		### scan tags to make unique series alias (looks for * and | operators)
+		uq = self.__determine_uniqueness(self._serie['query'])
+		nstr = ""
+		for u in uq:
+			talias = "%(" + u + ")s"
+			if talias not in self._serie['alias']:
+				nstr += " " + talias
+		### apply the unique tag and normalize
 		if nstr and not self._serie['alias'].startswith("!"):
-			dataset['alias'] = dataset['alias'] + nstr
+			dataset['alias'] = self.__normalize_alias(self._serie['alias']+nstr, {
+				'tags': dataset['tags'],
+				'metric': dataset['metric']
+				})
 
 		## any custom callback for resulting data set 
 		if self._data_callback != None:
@@ -211,9 +214,9 @@ class MetrilyxSeries(object):
 			#print alias_str %(obj)
 			return alias_str %(flat_obj)
 		except KeyError:
-			#print str(e)
 			return obj['metric']
 		except Exception, e:
+			print e
 			return str(e)
 
 	def __sig_figs(self, num):
