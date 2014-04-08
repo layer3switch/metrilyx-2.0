@@ -7,7 +7,7 @@ angular.module('heatmaps', [])
 				if(!ctrl) return;
 				//console.log(ctrl.$modelValue);
 				var heatmapInterval = setInterval(function() {
-					if(ctrl.$modelValue) {
+					if(ctrl.$modelValue && ctrl.$modelValue.series.length > 0) {
 						Heat.getData(ctrl.$modelValue.series[0].query,function(result) {
 							ctrl.$modelValue.series[0].data = assignSeverity(result['data'], ctrl.$modelValue.thresholds);
 						});	
@@ -16,6 +16,8 @@ angular.module('heatmaps', [])
 				scope.$watch(function() {
 					return ctrl.$modelValue;
 				}, function(newValue, oldValue) {
+					//console.log(newValue, oldValue);
+					if(newValue.series.length < 1) return;
 					Heat.getData(newValue.series[0].query,function(result) {
 						newValue.series[0].data = assignSeverity(result['data'], newValue.thresholds);
 					});
