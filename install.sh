@@ -3,6 +3,7 @@
 INSTALL_ROOT="/opt";
 INSTALL_TIME=$(date '+%d%b%Y_%H%M');
 APP_HOME="${INSTALL_ROOT}/metrilyx";
+PYPKGS="uuid Django djangorestframework django-filter django-cors-headers pymongo celery";
 
 if [[ -f "/etc/redhat-release" ]]; then
 	HTTPD="httpd"
@@ -48,7 +49,7 @@ install_os_deps() {
 install_pydeps() {
 	echo "-- Installing python dependencies..."
 	which pip || easy_install pip;
-	for pypkg in uuid Django djangorestframework django-filter pymongo celery; do
+	for pypkg in $PYPKGS; do
 		pip list | grep ${pypkg} || pip install ${pypkg};
 	done;
 };
