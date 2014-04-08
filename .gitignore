@@ -2,6 +2,7 @@
 #########################
 celerybeat-schedule*
 metrilyx.conf
+config.js
 
 # Python #
 ##########
