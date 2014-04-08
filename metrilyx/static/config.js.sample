@@ -1,0 +1,14 @@
+/* 
+ * This is a list of servers to use for backend calls.
+ * This was specifically added to bypass the browser limitation
+ * in the number of ajax requests that can be made.
+ *
+ * It can be a list of cname's to the same server as well.
+ * 
+ * If supplied some ajax calls will use it to rotate through the connection
+ * pool to improve load times and user experience
+ *
+ */
+CONN_POOL_CFG = {
+	urls: []
+};
