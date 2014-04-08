@@ -39,7 +39,7 @@ class PageView(APIView):
 	## Retrieve
 	def get(self, request, page_id=None):
 		if page_id == None or page_id == "":
-			rslt = self.modelstore.listModels()	
+			rslt = self.modelstore.listModels()
 		else:	
 			rslt = self.modelstore.getModel(page_id)
 		
@@ -50,7 +50,6 @@ class PageView(APIView):
 				'Content-Disposition': 'attachment; filename: %s.json' %(page_id),
 				'Content-Type': 'application/json'
 				})
-		
 		return Response(rslt)
 
 	## Add

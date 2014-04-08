@@ -50,7 +50,7 @@ def heatmap(query, top=10):
 			}
 		for p in d['dps']:
 			#print p[1]
-			if p[1] > dmax['value']:
+			if p[1] >= dmax['value']:
 				dmax['value'] = p[1]
 				dmax['timestamp'] = p[0]
 		out.append(dmax)
