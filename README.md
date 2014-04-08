@@ -32,6 +32,7 @@ Metrilyx will run on any system that supports the packages below.  It has primar
 	celery
 	Django
 	django-filter
+	django-cors-headers
 	Markdown
 	djangorestframework
 	uuid
