@@ -69,6 +69,7 @@ setup_app_config() {
 		echo "  configs...";
 		cp ${APP_HOME}-${INSTALL_TIME}/etc/metrilyx/metrilyx.conf ${APP_HOME}/etc/metrilyx/metrilyx.conf;
 		[[ -f "${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js" ]] || cp ${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js ${APP_HOME}/metrilyx/static/config.js;
+		[[ -f "${APP_HOME}/metrilyx/static/config.js" ]] || cp ${APP_HOME}/metrilyx/static/config.js.sample ${APP_HOME}/metrilyx/static/config.js;
 		echo "  dashboards..."
 		cp -a ${APP_HOME}-${INSTALL_TIME}/pagemodels/ ${APP_HOME}/pagemodels/;
 		echo "  heatmap index..."
@@ -76,7 +77,7 @@ setup_app_config() {
 		echo "  heatmaps..."
 		cp -a ${APP_HOME}-${INSTALL_TIME}/heatmaps/ ${APP_HOME}/heatmaps/;
 	else
-		cp metrilyx/static/config.js.sample ${APP_HOME}/metrilyx/static/config.js;
+		cp ${APP_HOME}/metrilyx/static/config.js.sample ${APP_HOME}/metrilyx/static/config.js;
 		cp etc/metrilyx/metrilyx.conf.sample ${APP_HOME}/etc/metrilyx/metrilyx.conf;
 		${EDITOR:-vi} ${APP_HOME}/etc/metrilyx/metrilyx.conf;
 	fi
