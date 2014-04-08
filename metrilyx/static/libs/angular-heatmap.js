@@ -8,7 +8,7 @@ angular.module('heatmaps', [])
 				//console.log(ctrl.$modelValue);
 				var heatmapInterval = setInterval(function() {
 					if(ctrl.$modelValue && ctrl.$modelValue.series.length > 0) {
-						Heat.getData(ctrl.$modelValue.series[0].query,function(result) {
+						Heat.getData(ctrl.$modelValue.series[0].query, function(result) {
 							ctrl.$modelValue.series[0].data = assignSeverity(result['data'], ctrl.$modelValue.thresholds);
 						});	
 					}

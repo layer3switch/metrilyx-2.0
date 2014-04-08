@@ -141,39 +141,35 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		Schema.get({modelType: 'pod'},function(podModel){
 			/* used for dropped pod */
 			$scope.droppablePodSchema = [ podModel ];
-			//Schema.get({modelType:'graph'}, function(graphModel) {
-				/* used for dropped pod */
-				//$scope.droppablePodSchema = [ podModel ];
-				if((!$routeParams.pageId && !$routeParams.heatmapId) || $routeParams.pageId == "new" || $routeParams.heatmapId == "new") {
-					Schema.get({modelType: 'page'}, function(pageModel) {
-						$scope.model = pageModel;
-						// make a copy of podModel //
-						$scope.model.layout[0][0].push(JSON.parse(JSON.stringify(podModel)));
-						$scope.enableDragDrop();
+			if((!$routeParams.pageId && !$routeParams.heatmapId) || $routeParams.pageId == "new" || $routeParams.heatmapId == "new") {
+				Schema.get({modelType: 'page'}, function(pageModel) {
+					$scope.model = pageModel;
+					// make a copy of podModel //
+					$scope.model.layout[0][0].push(JSON.parse(JSON.stringify(podModel)));
+					$scope.enableDragDrop();
+				});
+			} else {
+				// initial page load
+				if($routeParams.pageId) {
+					Model.get({pageId: $routeParams.pageId}, function(result) {
+						if(result.error) {
+							console.log(result);
+						} else {
+							$scope.model = result;
+						}
+					});
+				} else if($routeParams.heatmapId) {
+					Heatmap.get({pageId: $routeParams.heatmapId}, function(result) {
+						if(result.error) {
+							console.log(result);
+						} else {
+							$scope.model = result;
+						}
 					});
 				} else {
-					// initial page load
-					//console.log("mt", $scope.modelType, "dd", this.modelType);
-					if($scope.modelType == "") {
-						Model.get({pageId: $routeParams.pageId}, function(result) {
-							if(result.error) {
-								console.log(result);
-							} else {
-								$scope.model = result;
-							}
-						});
-					} else {
-						Heatmap.get({pageId: $routeParams.heatmapId}, function(result) {
-							if(result.error) {
-								console.log(result);
-							} else {
-								$scope.model = result;
-								//console.log($scope.model);
-							}
-						});
-					}
+					console.warn("Heatmap or Page id not provided");
 				}
-			//});
+			}
 		});
 		// close side panel when new page model loaded //
 		//$('#stage').removeClass('right');
@@ -407,7 +403,14 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				$('#global-alerts').html("<b>Success: </b>"+rslt.message);
 				//$scope.disableEditMode();
 				//$scope.reflow();
-				if(location.hash === ("#/" + $scope.model._id)) { 
+				var currpath;
+				if($scope.modelType === "") {
+					currpath = "#/"+$scope.model._id;
+				} else {
+					currpath = "#/" + $scope.modelType + $scope.model._id;
+				}
+				console.log(currpath);
+				if(location.hash === currpath) { 
 					//console.log($location);
 					location.reload(true);
 				} else {

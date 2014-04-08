@@ -6,5 +6,7 @@
  * It can be a list of cname's to the server as well.
  */
 CONN_POOL_CFG = {
-	urls: []
+	urls: [
+		"http://met1.abs.devops1.cloudsys.tmcs"
+	]
 };
