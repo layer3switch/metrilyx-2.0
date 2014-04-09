@@ -85,9 +85,6 @@ setup_app_config() {
 install_app(){
 	clean;
 
-	#echo "- Stopping apache...";
-	#/etc/init.d/${HTTPD} stop > /dev/null 2>&1;
-	
 	backup_curr_install;
 	
 	echo "- Installing app..."
