@@ -152,12 +152,8 @@ class HeatView(APIView):
 			out = [ v for k,v in obj.items() if k == heat_id ][0]
 			out['data'] = rslt.get()
 			return Response(out)
-			#return Response([ v for k,v in obj.items() if k == heat_id ][0])
-			#return Response([])
 
 class GraphView(APIView):
-	
-
 
 	def __calibrate_piegraph(self, req_obj):
 		"""
@@ -199,6 +195,7 @@ class GraphView(APIView):
 		return Response(tsd_req.data)
 
 	def get(self, request, graph_query=None):
+		## this does not work with '%' character
 		req_obj = json.loads(graph_query)
 		## pie charts only needs a smaller subset
 		req_obj = self.__calibrate_piegraph(req_obj)
