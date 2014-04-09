@@ -1,8 +1,9 @@
 /* controllers.js */
+
 var metrilyxControllers = angular.module('metrilyxControllers', []);
 metrilyxControllers.controller('staticsController', ['$scope', '$routeParams', 
 	function($scope, $routeParams) {
-		console.log('tutorials')
+		//console.log('tutorials')
 		clearAllTimeouts();
 	}
 ]);
@@ -32,18 +33,8 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$routeParams',
 			freader.onload = function(evt) {	
 				try {
 					jobj = JSON.parse(evt.target.result);
-					//console.log(jobj);
 					Model.saveModel(jobj, function(rslt) {
-						//$('#global-alerts').html(rslt.message);
-						if(rslt.error) {
-							$('#global-alerts').removeClass('alert-success');
-							$('#global-alerts').addClass('alert-danger');
-							$('#global-alerts').html("<b>Error: </b>"+rslt.message);
-						} else {
-							$('#global-alerts').removeClass('alert-danger');
-							$('#global-alerts').addClass('alert-success');
-							$('#global-alerts').html("<b>Success: </b>"+rslt.message);
-						}
+						setGlobalAlerts(rslt);
 						flashAlertsBar();
 					});
 				} catch(e) {
@@ -358,17 +349,18 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$scope.reflow();
 		}
 		function _removeModelCallback(rslt) {
-			$('#global-alerts').html(rslt.message);
+			//$('#global-alerts').html(rslt.message);
+			setGlobalAlerts(rslt);
 			if(rslt.error) {
-				$('#global-alerts').removeClass('alert-success');
-				$('#global-alerts').addClass('alert-danger');
-				$('#global-alerts').html("<b>Error: </b>"+rslt.message)
+				//$('#global-alerts').removeClass('alert-success');
+				//$('#global-alerts').addClass('alert-danger');
+				//$('#global-alerts').html("<b>Error: </b>"+rslt.message)
 				//$scope.globalAlerts = result.error;
 				flashAlertsBar();
 			} else {
-				$('#global-alerts').addClass('alert-success');
-				$('#global-alerts').removeClass('alert-danger');
-				$('#global-alerts').html("<b>Success: </b>"+rslt.message);
+				//$('#global-alerts').addClass('alert-success');
+				//$('#global-alerts').removeClass('alert-danger');
+				//$('#global-alerts').html("<b>Success: </b>"+rslt.message);
 				if($scope.modelType == "") {
 					location.hash = "#/new";
 				} else {
@@ -389,18 +381,19 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			}
 		}
 		function _saveModelCallback(rslt) {
-			$('#global-alerts').html(rslt.message);
+			//$('#global-alerts').html(rslt.message);
+			setGlobalAlerts(rslt);
 			if(rslt.error) {
-				$('#global-alerts').removeClass('alert-success');
-				$('#global-alerts').addClass('alert-danger');
-				$('#global-alerts').html("<b>Error: </b>"+rslt.message)
+				//$('#global-alerts').removeClass('alert-success');
+				//$('#global-alerts').addClass('alert-danger');
+				//$('#global-alerts').html("<b>Error: </b>"+rslt.message)
 				//$scope.globalAlerts = result.error;
 				flashAlertsBar();
 			} else {
-				$('#global-alerts').addClass('alert-success');
-				$('#global-alerts').removeClass('alert-danger');
+				//$('#global-alerts').addClass('alert-success');
+				//$('#global-alerts').removeClass('alert-danger');
 				//$scope.globalAlerts = result.success;
-				$('#global-alerts').html("<b>Success: </b>"+rslt.message);
+				//$('#global-alerts').html("<b>Success: </b>"+rslt.message);
 				//$scope.disableEditMode();
 				//$scope.reflow();
 				var currpath;

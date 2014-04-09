@@ -184,6 +184,17 @@ function clearAllTimeouts() {
 		window.clearTimeout(id); 
 	}
 }
+function setGlobalAlerts(rslt) {
+	if(rslt.error) {
+		$('#global-alerts').removeClass('alert-success');
+		$('#global-alerts').addClass('alert-danger');
+		$('#global-alerts').html("<b>Error: </b>"+rslt.message);
+	} else {
+		$('#global-alerts').removeClass('alert-danger');
+		$('#global-alerts').addClass('alert-success');
+		$('#global-alerts').html("<b>Success: </b>"+rslt.message);
+	}
+}
 function flashAlertsBar() {
 	$('#global-alerts').fadeIn(500);
 		setTimeout(function() {
