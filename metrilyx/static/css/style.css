@@ -201,6 +201,10 @@ input.form-control.md {
 	margin-right: 10px;
 	/*border-bottom: 1px solid rgba(44,44,44,0.6);*/
 }
+.edit-panel-btn-label {
+	padding-top: 5px;
+	font-size: 10px;
+}
 [ng-model='droppablePodSchema'] {
 	border-top: 1px solid rgba(180,180,180,0.5);
 	border-bottom: 1px solid rgba(44,44,44,0.6);
@@ -629,6 +633,10 @@ a.pod-header-btn.edit-mode {
 	color: #999;
 	border-bottom: 1px solid #404040;
 } 
+.input-group.panel-searchbar.model-listing {
+	padding-top: 5px !important;
+	padding-bottom: 5px !important;
+}
 .input-group.panel-searchbar > .input-group-addon {
 	background: none !important;
 	border: 1px solid rgba(0,0,0,0) !important;

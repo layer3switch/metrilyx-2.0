@@ -41,26 +41,34 @@
 	<body ng-app="app">
 		<div id="side-panel" class="inset-shadow" ng-controller="sidePanelController">
 			<div class="inset-shadow" style="height:100%;padding-left:10px;padding-right:10px">
-				<div class="page-selector-header">
+				<div class="page-selector-header text-center">
 					<a class="interactive" style="color:#ccc" ng-click="loadPagemodelList()" href="javascript:void(0)" title="Page listing">
 						<span class="marginr10 pad10" style="padding-left:0">
-							<i class="glyphicon glyphicon-file"></i>
+							<div class="iblk">
+								<div><i class="glyphicon glyphicon-file"></i></div>
+								<div class="edit-panel-btn-label">Models</div>
+							</div>
 						</span>
 					</a>
 					<a class="interactive" style="color:#ccc" ng-click="loadHeatmapList()" href="javascript:void(0)" title="Heatmap listing">
 						<span class="marginr10 pad10">
-							<i class="glyphicon glyphicon-map-marker"></i>
+							<div class="iblk">
+								<div><i class="glyphicon glyphicon-fire"></i></div>
+								<div class="edit-panel-btn-label">Heatmaps</div>
+							</div>
 						</span>
 					</a>
 				</div>
-				<div class="input-group input-group-sm panel-searchbar">
+				<div class="input-group input-group-sm panel-searchbar model-listing">
 					<span class="input-group-addon page-icon pointer interactive" onclick="document.getElementById('modelimport').click()" title="Import">
 						<i class="glyphicon glyphicon-import"></i>
-						<input id="modelimport" type="file" style="display:none" onchange="angular.element(this).scope().importModel(this.files);">
+						<div class="edit-panel-btn-label">Import</div>
+						<input id="modelimport" type="file" style="display:none;" onchange="angular.element(this).scope().importModel(this.files);">
 					</span>
-					<input type="text" class="form-control" placeholder="Search" ng-model="modelQuery">
+					<input type="text" class="form-control" placeholder="Search" ng-model="modelQuery" style="margin-top:7px">
 					<a href="#/{{modelType}}new" class="input-group-addon page-icon interactive" title="New">
 						<i class="glyphicon glyphicon-plus"></i>
+						<div class="edit-panel-btn-label">New</div>
 					</a>
 				</div>
 				<a ng-repeat="model in modelsList | orderBy:name | filter:modelQuery" href="#/{{modelType}}{{model._id}}" >
