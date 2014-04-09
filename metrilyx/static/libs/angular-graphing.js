@@ -49,7 +49,8 @@ angular.module('pageLayout', [])
 							console.log("re-rendering", newValue.graphs[g]._id);
 							q = scope.baseQuery(newValue.graphs[g]);
 							q.series = newValue.graphs[g].series;
-							Graph.getData(q, function(result) {
+							//Graph.getData(q, function(result) {
+							Graph.get(q, function(result) {
 								graphing_newGraph(result);
 							});
 						}
@@ -225,7 +226,8 @@ angular.module('graphing', [])
 				function getUpdates() {
 					if(ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
 						console.log("issuing update...");
-						Graph.getData({
+						//Graph.getData({
+						Graph.get({
 							start: "5m-ago",
 							_id: ngModel.$modelValue._id,
 							series: ngModel.$modelValue.series,
@@ -243,7 +245,8 @@ angular.module('graphing', [])
 				function changeGraphType(graph) {
 					var q = scope.baseQuery(graph);
 					q.series = graph.series;
-					Graph.getData(q, function(result) {
+					//Graph.getData(q, function(result) {
+					Graph.get(q, function(result) {
 						//console.log(result);
 						graphing_newGraph(result);
 					});
@@ -268,7 +271,9 @@ angular.module('graphing', [])
 						var q = scope.baseQuery(graph);
 						q.series = graph.series;
 						//$.extend(q, graph, true);
-						Graph.getData(q, function(result) {
+
+						//Graph.getData(q, function(result) {
+						Graph.get(q, function(result) {
 							/*
 							 * TODO: scrape tags for link creation 
 							 */
@@ -302,12 +307,14 @@ angular.module('graphing', [])
 								$("[data-graph-id='"+graph._id+"']").html(
 											"<table class='gif-loader-table'><tr><td> \
 											<img src='/imgs/loader.gif'></td></tr></table>");
-								Graph.getData(q, function(result) {
+								//Graph.getData(q, function(result) {
+								Graph.get(q, function(result) {
 									//console.log("tags changed. re-building graph.");
 									graphing_newGraph(result);
 								});
 							} else {
-								Graph.getData(q, function(result) {
+								//Graph.getData(q, function(result) {
+								Graph.get(q, function(result) {
 									// find and replace series with new data //
 									console.log("rate, aggr changed. find & replacing series.");
 									graphing_replaceSeries(result);
@@ -319,7 +326,8 @@ angular.module('graphing', [])
 						var q = scope.baseQuery(graph);	
 						q.series = [ graph.series[graph.series.length-1] ];
 						// series gets appended which is why we use 'graph.series.length-1' //
-						Graph.getData(q, function(result) {
+						//Graph.getData(q, function(result) {
+						Graph.get(q, function(result) {
 							// use upsert to void dupes
 							graphing_upsertSeries(result);
 						});
