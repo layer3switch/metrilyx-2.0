@@ -95,7 +95,7 @@ metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 				headers: {'Content-type': 'application/json'},
 				data: query
 			}).success(function(result) {
-				callback(result);
+				if(callback) callback(result);
 			}).error(function(data, status, arg1, arg2) {
 				console.log(data);
 				console.log(status);
@@ -103,6 +103,16 @@ metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 				console.log(arg2);
 			});
 		},
+		get: function(query, callback) {
+			$http({
+				method: 'GET',
+				url: connectionPool.nextConnection()+'/api/graph/'+JSON.stringify(query),
+			}).success(function(result) {
+				if(callback) callback(result);
+			}).error(function(xhr, data, text1, text2) {
+				console.log(text1, text2);
+			});
+		}
 	};
 }]);
 
@@ -125,7 +135,7 @@ metrilyxServices.factory('Heat', [ '$http',function($http) {
 			//console.info("Next URL:", connectionPool.nextConnection());
 			$http({
 				method: 'GET',
-				url: '/api/heat/'+qstr,
+				url: connectionPool.nextConnection()+'/api/heat/'+qstr,
 				headers: { 'Content-type': 'application/json' }
 			}).
 			success(function(result) {
