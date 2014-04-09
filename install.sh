@@ -68,14 +68,14 @@ setup_app_config() {
 		echo "- Importing existing data..."
 		echo "  configs...";
 		cp ${APP_HOME}-${INSTALL_TIME}/etc/metrilyx/metrilyx.conf ${APP_HOME}/etc/metrilyx/metrilyx.conf;
-		[[ -f "${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js" ]] || cp ${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js ${APP_HOME}/metrilyx/static/config.js;
-		[[ -f "${APP_HOME}/metrilyx/static/config.js" ]] || cp ${APP_HOME}/metrilyx/static/config.js.sample ${APP_HOME}/metrilyx/static/config.js;
+		[[ -e "${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js" ]] || cp ${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js ${APP_HOME}/metrilyx/static/config.js;
+		[[ -e "${APP_HOME}/metrilyx/static/config.js" ]] || cp ${APP_HOME}/metrilyx/static/config.js.sample ${APP_HOME}/metrilyx/static/config.js;
 		echo "  dashboards..."
-		cp -a ${APP_HOME}-${INSTALL_TIME}/pagemodels/ ${APP_HOME}/pagemodels/;
+		cp -a ${APP_HOME}-${INSTALL_TIME}/pagemodels ${APP_HOME}/;
 		echo "  heatmap index..."
 		cp -f ${APP_HOME}-${INSTALL_TIME}/heatmaps.json ${APP_HOME}/heatmaps.json;
 		echo "  heatmaps..."
-		cp -a ${APP_HOME}-${INSTALL_TIME}/heatmaps/ ${APP_HOME}/heatmaps/;
+		cp -a ${APP_HOME}-${INSTALL_TIME}/heatmaps ${APP_HOME}/;
 	else
 		cp ${APP_HOME}/metrilyx/static/config.js.sample ${APP_HOME}/metrilyx/static/config.js;
 		cp etc/metrilyx/metrilyx.conf.sample ${APP_HOME}/etc/metrilyx/metrilyx.conf;
