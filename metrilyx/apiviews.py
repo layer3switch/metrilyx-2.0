@@ -185,7 +185,7 @@ class GraphView(APIView):
 						req_obj['start'] = now - 120
 		return req_obj
 	
-	def post(self, request, base=None):
+	def post(self, request, graph_query=None):
 		"""
 		Handles graph data requests.
 		
