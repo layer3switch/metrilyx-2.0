@@ -9,6 +9,9 @@ var app = angular.module('app', [
 	'metrilyxControllers',
 	'metrilyxServices'
 ]);
+app.config(['$sceProvider', function($sceProvider) {
+    $sceProvider.enabled(false);
+}]);
 /* Django specific */
 app.config(['$httpProvider', function($httpProvider) {
     $httpProvider.defaults.xsrfCookieName = 'csrftoken';

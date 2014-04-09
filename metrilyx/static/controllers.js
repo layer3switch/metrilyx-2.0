@@ -69,13 +69,13 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 
 		var canceler;
 
-		$scope.editPanelHtml	= "partials/edit_panel.html";
-		$scope.thresholdsHtml	= "partials/thresholds.html";
-		$scope.graphHtml 		= "partials/graph.html";
-		$scope.heatGraphHtml 	= "partials/heat-graph.html"
-		$scope.podHtml 			= "partials/pod.html";
-		$scope.pageHeaderHtml 	= "partials/page-header.html";
-		$scope.jsonHtml 		= "partials/json.html";
+		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit_panel.html";
+		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
+		$scope.graphHtml 		= connectionPool.nextConnection()+"/partials/graph.html";
+		$scope.heatGraphHtml 	= connectionPool.nextConnection()+"/partials/heat-graph.html"
+		$scope.podHtml 			= connectionPool.nextConnection()+"/partials/pod.html";
+		$scope.pageHeaderHtml 	= connectionPool.nextConnection()+"/partials/page-header.html";
+		$scope.jsonHtml 		= connectionPool.nextConnection()+"/partials/json.html";
 		
 		$scope.relativeTimes = [
 						"24h-ago",
