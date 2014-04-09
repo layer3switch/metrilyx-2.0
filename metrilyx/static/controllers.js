@@ -33,10 +33,17 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$routeParams',
 			freader.onload = function(evt) {	
 				try {
 					jobj = JSON.parse(evt.target.result);
-					Model.saveModel(jobj, function(rslt) {
-						setGlobalAlerts(rslt);
-						flashAlertsBar();
-					});
+					if($scope.modelType === "heatmap/") {
+						Heatmap.saveModel(jobj, function(rslt) {
+							setGlobalAlerts(rslt);
+							flashAlertsBar();
+						});
+					} else {
+						Model.saveModel(jobj, function(rslt) {
+							setGlobalAlerts(rslt);
+							flashAlertsBar();
+						});
+					}
 				} catch(e) {
 					console.error("Could not import model", fileList[0].name, e);
 				}
