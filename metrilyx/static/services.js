@@ -104,6 +104,7 @@ metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 			});
 		},
 		get: function(query, callback) {
+			// this does not work with % (experimental) //
 			$http({
 				method: 'GET',
 				url: connectionPool.nextConnection()+'/api/graph/'+JSON.stringify(query),
