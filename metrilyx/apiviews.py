@@ -20,7 +20,7 @@ from httpclients import HttpJsonClient
 from metrilyxconfig import config
 
 from pprint import pprint
-
+import json
 
 class SchemaView(APIView):
 	def get(self, request, model_type):
@@ -196,9 +196,13 @@ class GraphView(APIView):
 		## pie charts only needs a smaller subset
 		req_obj = self.__calibrate_piegraph(req_obj)
 		tsd_req = OpenTSDBRequest(req_obj)
-		## analyze data here
+		return Response(tsd_req.data)
 
-		#"Access-Control-Allow-Origin
+	def get(self, request, graph_query=None):
+		req_obj = json.loads(graph_query)
+		## pie charts only needs a smaller subset
+		req_obj = self.__calibrate_piegraph(req_obj)
+		tsd_req = OpenTSDBRequest(req_obj)
 		return Response(tsd_req.data)
 
 class SearchView(APIView):

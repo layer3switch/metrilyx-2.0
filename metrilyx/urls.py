@@ -20,7 +20,7 @@ urlpatterns = patterns('',
 	url(r'^(api/)*schema/(?P<model_type>(metric|graph|pod|page|heatmap))$', apiviews.SchemaView.as_view()),
 	url(r'^(api/)*page(/(?P<page_id>.*)|/*)$', apiviews.PageView.as_view()),
     url(r'^(api/)*heatmap(/(?P<page_id>.*)|/*)$', apiviews.HeatmapView.as_view()),
-    url(r'^(api/)*graph/*$', apiviews.GraphView.as_view()),
+    url(r'^(api/)*graph(/(?P<graph_query>.*)|/*)$', apiviews.GraphView.as_view()),
     url(r'^(api/)*heat(/(?P<heat_id>.*)|/*)$', apiviews.HeatView.as_view()),
     url(r'^(api/)*search.*$', apiviews.SearchView.as_view()),
     # Examples:
