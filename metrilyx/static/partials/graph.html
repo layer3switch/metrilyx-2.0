@@ -39,7 +39,7 @@
 			<div ng-repeat="metric in graph.series">
 				<div class="pad10" style="overflow-x:hidden;text-wrap:none;white-space:nowrap">
 					<span class="metric-control-header">{{metric.query.metric}}</span>
-					<a href="javascript:void(0)" ng-click="removeMetric($parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$index, $parent.$index, $index)" class="pull-right">
+					<a href="javascript:void(0)" class="pull-right" ng-click="graph.series.splice(graph.series.indexOf(metric), 1);"><!--ng-click="removeMetric($parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$index, $parent.$index, $index)">-->
 						<i class="glyphicon glyphicon-trash icon-lite"></i>
 					</a>
 				</div>
