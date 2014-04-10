@@ -154,6 +154,8 @@ class HeatView(APIView):
 			return Response(out)
 
 class GraphView(APIView):
+	pie_graph_interval_rel = "5m-ago"
+	pie_graph_interval_secs = 300
 
 	def __calibrate_piegraph(self, req_obj):
 		"""
@@ -168,17 +170,17 @@ class GraphView(APIView):
 		if req_obj['graphType'] == "pie":
 			#print req_obj['start']
 			if type(req_obj['start']) != int and "-ago" in req_obj['start']:
-				req_obj['start'] = "2m-ago"
+				req_obj['start'] = self.pie_graph_interval_rel
 			else:
 				start = int(req_obj['start'])			
 				if req_obj.get('end'):
 					end = int(req_obj['end'])
-					if (end - start) > 120:
-						req_obj['start'] = end - 120
+					if (end - start) > self.pie_graph_interval_secs:
+						req_obj['start'] = end - self.pie_graph_interval_secs
 				else:
 					now = int(time.time())
-					if (now - start) > 120:
-						req_obj['start'] = now - 120
+					if (now - start) > self.pie_graph_interval_secs:
+						req_obj['start'] = now - self.pie_graph_interval_secs
 		return req_obj
 	
 	def post(self, request, graph_query=None):
