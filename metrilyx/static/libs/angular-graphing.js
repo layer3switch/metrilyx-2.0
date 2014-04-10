@@ -226,7 +226,7 @@ angular.module('graphing', [])
 					if(ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
 						console.log("issuing update...");
 						Graph.getData({
-							start: "5m-ago",
+							start: "10m-ago",
 							_id: ngModel.$modelValue._id,
 							series: ngModel.$modelValue.series,
 							graphType: ngModel.$modelValue.graphType,

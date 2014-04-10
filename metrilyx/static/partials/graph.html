@@ -5,7 +5,7 @@
 			</a>
 			<input type="text" ng-model="graph.name" class="edit-comp{{editMode}} form-control" placeholder="Graph Name" disabled="true">
 			<span class="input-group-addon nobg">
-				<a href="javascript:void(0)" title="Remove Graph" ng-click="removeGraph($parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$index, $parent.$parent.$index, $index);" style="color:#666;" class="interactive graph-rm-btn edit-comp{{editMode}}">
+				<a href="javascript:void(0)" title="Remove Graph" class="interactive graph-rm-btn edit-comp{{editMode}}" style="color:#666;" ng-click="pod.graphs.splice(pod.graphs.indexOf(graph),1);reflow();">
 					<i class="glyphicon glyphicon-remove"></i>
 				</a>
 			</span>
@@ -39,7 +39,7 @@
 			<div ng-repeat="metric in graph.series">
 				<div class="pad10" style="overflow-x:hidden;text-wrap:none;white-space:nowrap">
 					<span class="metric-control-header">{{metric.query.metric}}</span>
-					<a href="javascript:void(0)" class="pull-right" ng-click="graph.series.splice(graph.series.indexOf(metric), 1);"><!--ng-click="removeMetric($parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$index, $parent.$index, $index)">-->
+					<a href="javascript:void(0)" class="pull-right" ng-click="graph.series.splice(graph.series.indexOf(metric), 1);">
 						<i class="glyphicon glyphicon-trash icon-lite"></i>
 					</a>
 				</div>

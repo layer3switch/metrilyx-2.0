@@ -69,6 +69,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 
 		var canceler;
 
+		$scope.relativeTimes = ["24h-ago","12h-ago","6h-ago","3h-ago","2h-ago","1h-ago","Custom Range"];
+
 		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit_panel.html";
 		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
 		$scope.graphHtml 		= connectionPool.nextConnection()+"/partials/graph.html";
@@ -76,16 +78,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.podHtml 			= connectionPool.nextConnection()+"/partials/pod.html";
 		$scope.pageHeaderHtml 	= connectionPool.nextConnection()+"/partials/page-header.html";
 		$scope.jsonHtml 		= connectionPool.nextConnection()+"/partials/json.html";
-		
-		$scope.relativeTimes = [
-						"24h-ago",
-						"12h-ago",
-						"6h-ago",
-						"3h-ago",
-						"2h-ago",
-						"1h-ago",
-						"Custom Range"
-						];
 
 		$scope.metricListSortOpts 	= dndconfig.metricList;
 		$scope.graphSortOpts 		= dndconfig.graph;
@@ -102,10 +94,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			if(urlParams.end) {
 				$scope.endTime = urlParams.end;
 				$scope.timeType = "absolute";
-				//$('#absolute-time').fadeIn(300);
 			} else {
 				$scope.timeType = urlParams.start;
-				//console.log($('#absolute-time'));//.fadeOut(300);
 			}
 			$scope.startTime = urlParams.start;
 		}
@@ -135,7 +125,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		/* active model */
 		$scope.model = {};
 
-		//clearAllTimeouts();
 		Schema.get({modelType: 'pod'},function(podModel){
 			/* used for dropped pod */
 			$scope.droppablePodSchema = [ podModel ];
@@ -238,17 +227,14 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		// Load initial empty page -> pod -> graph //
 		$scope.setUpdatesEnabled = function(value) {
 			$scope.updatesEnabled = value;
-			//console.log($scope.updatesEnabled);
 		}
 		$scope.setStartTime = function(sTime) {
-			//console.log("setStartTime");
 			if($scope.endTime) {
 				if($scope.sTime > $scope.endTime) return;
 			}
 			$scope.startTime = sTime;
 		}
 		$scope.setEndTime = function(eTime) {
-			//console.log("setEndTime");
 			if($scope.startTime) {
 				if($scope.eTime < $scope.startTime) return
 			}
@@ -260,28 +246,11 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			tmp.end = $scope.endTime;
 			$location.search(tmp);
 		}
-
-		$scope.removePod = function(rowIdx, colIdx, podIdx) {
-			console.log("removing", rowIdx, colIdx, podIdx);
-			$scope.model.layout[rowIdx][colIdx].splice(podIdx,1);
-		}
 		$scope.addGraph = function(toPod) {
 			Schema.get({modelType:'graph'}, function(result) {
-				toPod.graphs.push(result);				
+				toPod.graphs.push(result);	
+				$scope.reflow();			
 			});
-		}
-		$scope.removeGraph = function(rowIdx, colIdx, podIdx, graphIdx) {
-			//console.log(rowIdx, colIdx,  podIx, graphIdx);
-			$scope.model.layout[rowIdx][colIdx][podIdx].graphs.splice(graphIdx,1);
-		}
-		/*
-		 * Remove metric from graph as well as data structure
-		 *
-		 */
-		$scope.removeMetric = function(rowIdx, colIdx, podIdx, graphIdx, metricIdx) {
-			console.log(rowIdx, colIdx, podIdx, graphIdx, metricIdx);
-			graph = $scope.model.layout[rowIdx][colIdx][podIdx].graphs[graphIdx];
-			graph.series.splice(metricIdx,1);
 		}
 		/* Reflow all graphs on page */
 		$scope.reflow = function(args) {
@@ -313,13 +282,11 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		}
 		$scope.disableDragDrop = function() {
 			$('[ui-sortable]').each(function() {
-				//console.log("disabling DnD");
 				$(this).sortable({disabled: true});
 			});
 		}
 		$scope.enableDragDrop = function() {
 			$('[ui-sortable]').each(function() {
-				//console.log("enabling DnD");
 				$(this).sortable({disabled: false});
 			});
 		}
@@ -356,18 +323,10 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$scope.reflow();
 		}
 		function _removeModelCallback(rslt) {
-			//$('#global-alerts').html(rslt.message);
 			setGlobalAlerts(rslt);
 			if(rslt.error) {
-				//$('#global-alerts').removeClass('alert-success');
-				//$('#global-alerts').addClass('alert-danger');
-				//$('#global-alerts').html("<b>Error: </b>"+rslt.message)
-				//$scope.globalAlerts = result.error;
 				flashAlertsBar();
 			} else {
-				//$('#global-alerts').addClass('alert-success');
-				//$('#global-alerts').removeClass('alert-danger');
-				//$('#global-alerts').html("<b>Success: </b>"+rslt.message);
 				if($scope.modelType == "") {
 					location.hash = "#/new";
 				} else {
@@ -388,21 +347,10 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			}
 		}
 		function _saveModelCallback(rslt) {
-			//$('#global-alerts').html(rslt.message);
 			setGlobalAlerts(rslt);
 			if(rslt.error) {
-				//$('#global-alerts').removeClass('alert-success');
-				//$('#global-alerts').addClass('alert-danger');
-				//$('#global-alerts').html("<b>Error: </b>"+rslt.message)
-				//$scope.globalAlerts = result.error;
 				flashAlertsBar();
 			} else {
-				//$('#global-alerts').addClass('alert-success');
-				//$('#global-alerts').removeClass('alert-danger');
-				//$scope.globalAlerts = result.success;
-				//$('#global-alerts').html("<b>Success: </b>"+rslt.message);
-				//$scope.disableEditMode();
-				//$scope.reflow();
 				var currpath;
 				if($scope.modelType === "") {
 					currpath = "#/"+$scope.model._id;

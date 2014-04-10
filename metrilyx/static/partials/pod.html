@@ -20,7 +20,7 @@
 					<a href="javascript:void(0)" title="Horizontal graph layout" class="btn interactive pod-header-btn edit-comp{{editMode}}" ng-click="pod.orientation='horizontal';">
 						<i class="glyphicon glyphicon-resize-horizontal"></i>
 					</a>
-					<a href="javascript:void(0)" ng-click="removePod($parent.$parent.$index, $parent.$index, $index)" title="Remove Pod" class="btn interactive pod-header-btn edit-comp{{editMode}}">
+					<a href="javascript:void(0)" title="Remove Pod" class="btn interactive pod-header-btn edit-comp{{editMode}}" ng-click="column.splice(column.indexOf(pod),1);reflow();">
 						<i class="glyphicon glyphicon-remove"></i>
 					</a>
 				</span>

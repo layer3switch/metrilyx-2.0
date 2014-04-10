@@ -173,7 +173,12 @@ SeriesFormatter.prototype.pieSeries = function() {
             if(this.metSeries[i].data[d].dps.length <=0) {
                 console.warn("(pie) No data for:", this.metSeries[i].alias);
             } else {
-                pieData.push([ this.metSeries[i].data[d].alias, dps[dps.length-1][1] ]);
+                /* 
+                 * Use the first datapoint rather than last as 
+                 * the tail end of tsd data is inaccurate.
+                 * i.e dps[0][1]
+                 */
+                pieData.push([ this.metSeries[i].data[d].alias, dps[0][1] ]);
             }
         }
     }
