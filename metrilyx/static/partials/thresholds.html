@@ -7,18 +7,10 @@
 			<input type="text" class="form-control nobg" ng-model="graph.thresholds.warning" style="color:rgba(224,158,73,0.95);">
 			<span class="input-group-addon nobg threshold-label" style="color:rgba(99,177,211,1);">Info: </span>
 			<input type="text" class="form-control nobg" ng-model="graph.thresholds.info" style="color:rgba(99,177,211,0.95);">
-			<span ng-switch="modelType" class="input-group-addon nobg">
-				<span ng-switch-when="">
-					<a href="javascript:void(0)" title="Set thresholds" ng-click="setPlotBands(graph)">
-						<i class="glyphicon glyphicon-ok-circle" style="font-size:16px;"></i>
-					</a>
-				</span>
-				<span ng-switch-default>
-					<!--
-					<a href="javascript:void(0)" title="Set thresholds">
-						<i class="glyphicon glyphicon-ok-circle" style="font-size:16px;"></i>
-					</a>-->
-				</span>
+			<span ng-if="modelType!=='heatmap/'" class="input-group-addon nobg">
+				<a href="javascript:void(0)" title="Set thresholds" ng-click="setPlotBands(graph)">
+					<i class="glyphicon glyphicon-ok-circle" style="font-size:16px;"></i>
+				</a>
 			</span>
 		</div>
 	</div>

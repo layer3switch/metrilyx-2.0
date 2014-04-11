@@ -7,8 +7,8 @@ metrilyxControllers.controller('staticsController', ['$scope', '$routeParams',
 		clearAllTimeouts();
 	}
 ]);
-metrilyxControllers.controller('sidePanelController', ['$scope', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Heatmap',
-	function($scope, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap) {
+metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Heatmap',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap) {
 		$scope.modelsList = [];
 		$scope.modelType = "";
 		$scope.modelQuery = "";
@@ -69,8 +69,9 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 
 		var canceler;
 
-		$scope.relativeTimes = ["24h-ago","12h-ago","6h-ago","3h-ago","2h-ago","1h-ago","Custom Range"];
+		//$scope.relativeTimes = ["24h-ago","12h-ago","6h-ago","3h-ago","2h-ago","1h-ago","Custom Range"];
 
+		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
 		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit_panel.html";
 		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
 		$scope.graphHtml 		= connectionPool.nextConnection()+"/partials/graph.html";
@@ -252,6 +253,9 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				$scope.reflow();			
 			});
 		}
+		$scope.graphSizeChanged = function() {
+			$scope.reflow();
+		}
 		/* Reflow all graphs on page */
 		$scope.reflow = function(args) {
 			// This is to compensate for angulars processing time until I can figure out a better way //
@@ -381,6 +385,10 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.setPlotBands = function(graph) {
 			setPlotBands(graph);
 		}
+		$scope.loadHome = function() {
+			$location.path('/graph').search({});
+			$route.reload();
+		}
 
 		// close side panel //
 		$('#stage').removeClass('right');
@@ -394,3 +402,280 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			}
 		}
 }]);
+metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Graph) {
+		//console.log($routeParams);
+		
+		$scope.modelType 		= "graph";
+		//$scope.relativeTimes 	= ["24h-ago","12h-ago","6h-ago","3h-ago","2h-ago","1h-ago","Custom Range"];
+		$scope.timeType 		= "1h-ago";
+		$scope.editMode 		= " edit-mode";
+		
+		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
+		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit_panel.html";
+		$scope.pageHeaderHtml 	= connectionPool.nextConnection()+"/partials/page-header.html";
+		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
+
+		$scope.metricListSortOpts 	= dndconfig.metricList;
+
+		$scope.metricQueryResult = [];
+		$scope.tagsOnPage = {};
+		$scope.graph = {};
+
+		if($routeParams.editMode==="false") {
+			$scope.editMode = "";
+		} else {
+			$scope.editMode = " edit-mode";
+		}
+
+		if($routeParams.start) {
+			if($routeParams.end) {
+				$scope.endTime = $routeParams.end;
+				$scope.timeType = "absolute";
+			} else {
+				$scope.timeType = $routeParams.start;
+			}
+			$scope.startTime = $routeParams.start;
+		}
+
+		Schema.get({modelType: 'graph'}, function(graphModel) {
+			if($routeParams.size){ 
+				graphModel.size = $routeParams.size;
+			} else {
+				graphModel.size = "large";
+			}
+			if($routeParams.type) graphModel.graphType = $routeParams.type;
+			if($routeParams.thresholds) {
+					try {
+						arr = $routeParams.thresholds.split(":");
+						if(arr.length == 3) {
+							graphModel.thresholds = {
+								'danger': arr[0],
+								'warning': arr[1],
+								'info': arr[2]
+							}
+						} 
+					} catch(e) {
+						console.warn("cannot set thresholds", e);
+					}
+			}
+			if($routeParams.m) {
+				var metrics;
+				if(Object.prototype.toString.call($routeParams.m) === '[object Array]') {
+					//console.log('arr');
+					metrics = $routeParams.m;
+				} else {
+					metrics = [ $routeParams.m ];
+				}
+				for(var i in metrics) {
+					arr = metrics[i].match(/^(.*)\{(.*)\}\{alias:(.*),yTransform:(.*)\}$/);
+					met = arr[1].split(":");
+					rate = false;
+					if(met.length == 3) rate = true;
+					graphModel.series.push({	
+						'alias': arr[3],
+						'yTransform': arr[4],
+						'query':{
+							'aggregator': met[0],
+							'rate': rate,
+							'metric': met[met.length-1],
+							'tags': commaSepStrToDict(arr[2])
+						}
+					});
+				}
+				$scope.graph = graphModel;
+				$scope.reloadGraph();
+			} else {
+				// initial empty page
+				$scope.graph = graphModel;
+			}
+		});
+
+		if($scope.editMode === "") {
+			$scope.metricListSortOpts.disabled = true;
+		} else {
+			$scope.metricListSortOpts.disabled = false;
+		}
+
+		$scope.setStatus = function(serieIdx, status) {
+			//console.log(serieIdx, status);
+			$scope.graph.series[serieIdx].loading = status;
+		}
+
+		$scope.baseQuery = function(graphObj) {
+			var q = {
+				_id: graphObj._id,
+				graphType: graphObj.graphType,
+				tags: {},
+				thresholds: graphObj.thresholds
+			};
+			if($scope.timeType == "absolute") {
+				q['start'] = $scope.startTime;
+				if($scope.endTime) q.end = $scope.endTime;
+			} else {
+				q['start'] = $scope.timeType;
+			}
+			return q;
+		}
+		$scope.setURL = function(obj) {
+			var outarr = [];
+			for(var s in obj.series) {
+				serie = obj.series[s];
+				q = serie.query;
+				var params = q.aggregator+":";
+				if(q.rate) params += "rate:";
+				params += q.metric+"{"
+				tagstr = "";
+				for(var tk in q.tags) {
+					tagstr += tk+":"+q.tags[tk]+","
+				}
+				if(tagstr !== "") tagstr.replace(/\,$/,'');
+				params += "}";
+				params += "{alias:"+serie.alias;
+				params += ",yTransform:"+serie.yTransform+"}";
+				outarr.push(params);
+			}
+			srch = {
+				'm': outarr,
+				'thresholds': $scope.graph.thresholds.danger+":"+$scope.graph.thresholds.warning+":"+$scope.graph.thresholds.info,
+				'type': $scope.graph.graphType,
+				'size': $scope.graph.size,
+			};
+			if($scope.editMode === "") {
+				srch.editMode = "false";
+			}
+			if($scope.timeType === "absolute") {
+				srch.start = $scope.startTime;
+				if($scope.endTime) srch.end = $scope.endTime;
+			} else {
+				srch.start = $scope.timeType;
+			}
+			$location.search(srch);
+		}
+		$scope.reloadGraph = function() {
+			$('.adhoc-metric-editor').hide();
+			if($scope.graph.series.length < 1) return;
+
+			for(var s in $scope.graph.series) {
+				$scope.graph.series[s].loading = "loading";
+			}
+			//console.log($location.search());
+			$scope.setURL($scope.graph);
+
+			q = $scope.baseQuery($scope.graph)
+			q.series = $scope.graph.series;
+			Graph.getData(q, function(result) {
+				graphing_newGraph(result);
+				for(var s in $scope.graph.series) {
+					$scope.graph.series[s].loading = "done-loading";
+				}
+			});
+		}
+
+		$scope.disableDragDrop = function() {
+			$('[ui-sortable]').each(function() {
+				$(this).sortable({disabled: true});
+			});
+		}
+		$scope.enableDragDrop = function() {
+			$('[ui-sortable]').each(function() {
+				$(this).sortable({disabled: false});
+			});
+		}
+
+		$scope.setPlotBands = function(graph) {
+			setPlotBands(graph);
+			$scope.setURL(graph);
+		}
+		$scope.enableEditMode = function() {
+			$scope.editMode = " edit-mode";
+			$scope.enableDragDrop();
+			$scope.reflow();
+		}
+		$scope.disableEditMode = function() {
+			$scope.editMode = "";
+			$scope.disableDragDrop();
+			$scope.reflow();
+		}
+		$scope.toggleEditMode = function() {
+			if($scope.editMode == "") {
+				$scope.enableEditMode();
+			} else {
+				$scope.disableEditMode();
+			}
+		}
+
+		$scope.searchForMetric = function(args) {
+			if(this.metricQuery == "") return;
+			Metrics.suggest(this.metricQuery, function(result) {
+				$scope.metricQuery = this.metricQuery;
+				Schema.get({modelType:'metric'}, function(graphModel) {
+					var arr = [];
+					for(var i in result) {
+						obj = JSON.parse(JSON.stringify(graphModel));
+						obj.alias = result[i];
+						obj.loading = "loading";
+						obj.query.metric = result[i];
+						arr.push(obj);
+					}
+					$scope.metricQueryResult = arr;
+				});
+			});
+		}
+
+		$scope.updateTagsOnPage = function(obj) {
+			var top = $scope.tagsOnPage;
+			for(var k in obj) {
+				if(top[k]) {
+					for(var i in obj[k]) {
+						if(top[k].indexOf(obj[k][i]) >= 0) {
+							continue;
+						} else {
+							top[k].push(obj[k][i]);
+						}
+					}
+				} else {
+					top[k] = obj[k];
+					top[k].push("*");
+				}
+			}
+			$scope.tagsOnPage = top;
+		}
+		$scope.loadHome = function() {
+			$location.path('/graph').search({});
+			$route.reload();
+		}
+		$scope.graphSizeChanged = function() {
+			$scope.setURL($scope.graph);
+			$scope.reflow();
+		}
+		$scope.reflow = function(args) {
+			setTimeout(function() {
+				$('[data-graph-id]').each(function() {
+					hc = $(this).highcharts();
+					if(hc != undefined) hc.reflow();
+				});
+			}, 300);
+		}
+		$scope.setStartTime = function(sTime) {
+			if($scope.endTime) {
+				if($scope.sTime > $scope.endTime) return;
+			}
+			$scope.startTime = sTime;
+		}
+		$scope.setEndTime = function(eTime) {
+			if($scope.startTime) {
+				if($scope.eTime < $scope.startTime) return
+			}
+			$scope.endTime = eTime;
+		}
+		$scope.setTimeType = function(newRelativeTime, reloadPage) {
+			$scope.timeType = newRelativeTime;
+		}
+		$scope.setAbsoluteTime = function() {
+			$scope.reloadGraph();
+			//console.log($scope.startTime, $scope.endTime, $scope.timeType);
+		}
+	}
+]);
+

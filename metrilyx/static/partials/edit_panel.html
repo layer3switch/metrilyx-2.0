@@ -1,34 +1,31 @@
 <div class="edit-comp{{editMode}}" id="edit-panel">
-	<div class="marginlr5 padb10 text-center" style="border-bottom:1px solid #555;padding-top:12px;">
-		<span class="edit-panel-btn pointer interactive padr10" title="Delete" data-toggle="modal" data-target="#confirm-delete">
-			<div class="iblk">
-				<div><i class="glyphicon glyphicon-trash"></i></div>
-				<div class="edit-panel-btn-label">Delete</div>
-			</div>
-		</span>
-		<span ng-click="saveModel()" class="edit-panel-btn pointer interactive" title="Save">
-			<div class="iblk">
-				<div><i class="glyphicon glyphicon-save"></i></div>
-				<div class="edit-panel-btn-label">Save</div>
-			</div>
-		</span>
-		<a ng-if="modelType===''" href="/api/page/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json" class="edit-panel-btn pointer interactive" title="Export">
-			<div class="iblk">
-				<div><i class="glyphicon glyphicon-export"></i></div>
-				<div class="edit-panel-btn-label">Export</div>
-			</div>
-		</a>
-		<a ng-if="modelType==='heatmap/'" href="/api/heatmap/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json" class="edit-panel-btn pointer interactive" title="Export">
-			<div class="iblk">
-				<div><i class="glyphicon glyphicon-export"></i></div>
-				<div class="edit-panel-btn-label">Export</div>
-			</div>
-		</a>
-		<!--
-		<span class="edit-panel-btn pointer interactive" onclick="document.getElementById('modelimport').click()">
-			<i class="glyphicon glyphicon-import"></i>
-			<input id="modelimport" type="file" style="display:none" onchange="angular.element(this).scope().importModel(this.files)">
-		</span>-->
+	<div ng-if="modelType!=='graph'">
+		<div class="marginlr5 padb10 text-center" style="border-bottom:1px solid #555;padding-top:12px;">
+			<span class="edit-panel-btn pointer interactive padr10" title="Delete" data-toggle="modal" data-target="#confirm-delete">
+				<div class="iblk">
+					<div><i class="glyphicon glyphicon-trash"></i></div>
+					<div class="edit-panel-btn-label">Delete</div>
+				</div>
+			</span>
+			<span ng-click="saveModel()" class="edit-panel-btn pointer interactive" title="Save">
+				<div class="iblk">
+					<div><i class="glyphicon glyphicon-save"></i></div>
+					<div class="edit-panel-btn-label">Save</div>
+				</div>
+			</span>
+			<a ng-if="modelType===''" href="/api/page/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json" class="edit-panel-btn pointer interactive" title="Export">
+				<div class="iblk">
+					<div><i class="glyphicon glyphicon-export"></i></div>
+					<div class="edit-panel-btn-label">Export</div>
+				</div>
+			</a>
+			<a ng-if="modelType==='heatmap/'" href="/api/heatmap/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json" class="edit-panel-btn pointer interactive" title="Export">
+				<div class="iblk">
+					<div><i class="glyphicon glyphicon-export"></i></div>
+					<div class="edit-panel-btn-label">Export</div>
+				</div>
+			</a>
+		</div>
 	</div>
 	<div class="input-group input-group-sm panel-searchbar marginlr5 padl5 padr10" style="border-bottom:1px solid #555;">
 		<span class="input-group-addon">

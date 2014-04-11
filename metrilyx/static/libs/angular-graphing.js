@@ -206,6 +206,77 @@ angular.module('pageLayout', [])
 
 /* graph initialization and loading */
 angular.module('graphing', [])
+	.directive('highstockAdhocGraph', ['Graph', function(Graph) {
+		return {
+			restrict: 'A',
+			require: '?ngModel',
+			link: function(scope, elem, attrs, ngModel) {
+				if(!ngModel) return;
+
+				function getGraphData(graph, callback) {
+					var q = scope.baseQuery(graph);
+					q.series = graph.series;
+					Graph.getData(q, function(result) {
+						//graphing_newGraph(result);
+						callback(result);
+					});
+				}
+				function updateTagsOnPage(result) {
+					sf = new SeriesFormatter(result.series);
+					sTags = sf.seriesTags();
+					// write to links object //
+					scope.updateTagsOnPage(sTags);
+				}
+				scope.$watch(function() {
+					return ngModel.$modelValue;
+				}, function(newVal, oldVal) {
+					//console.log(newVal, oldVal);
+					if(!newVal.series || !oldVal.series) return;
+					if((newVal.series.length <= 0) && (oldVal.series.length <= 0)) return;
+					if(!equalObjects(newVal.thresholds, oldVal.thresholds)) return;
+
+					hc = $("[data-graph-id='"+newVal._id+"']").highcharts();
+					if(hc == undefined) {
+						$("[data-graph-id='"+newVal._id+"']").html(
+							"<table class='gif-loader-table'><tr><td> \
+							<img src='/imgs/loader.gif'></td></tr></table>");
+						scope.setStatus(newVal.series.length-1, 'loading');
+						scope.setURL(newVal);
+						getGraphData(newVal, function(result) {
+							//updateTagsOnPage(result);
+							graphing_newGraph(result);
+							scope.setStatus(newVal.series.length-1, 'done-loading');
+						});
+						return;
+					}
+					if(newVal.graphType !== oldVal.graphType) {					
+						scope.reloadGraph();
+						scope.setURL(newVal);
+						return;
+					};
+					if(newVal.series.length == oldVal.series.length) {
+						//scope.setURL(newVal);
+						return;
+					} else if(newVal.series.length > oldVal.series.length) {
+						scope.setURL(newVal);
+						var q = scope.baseQuery(newVal);	
+						q.series = [ newVal.series[newVal.series.length-1] ];
+						scope.setStatus(newVal.series.length-1, 'loading');
+						Graph.getData(q, function(result) {
+							scope.setStatus(newVal.series.length-1, 'done-loading');
+							//updateTagsOnPage(result);
+							graphing_upsertSeries(result);
+							scope.setStatus(newVal.series.length-1, 'done-loading');
+						});
+					} else {
+						graphing_removeSeries(newVal);
+						scope.setURL(newVal);
+						//updateTagsOnPage(newVal);
+					}
+				}, true);
+			}
+		};
+	}])
 	.directive('highstockGraph', [ '$timeout', 'Graph', function($timeout, Graph) {
 		return {
 			restrict: 'A',
@@ -270,9 +341,6 @@ angular.module('graphing', [])
 						//$.extend(q, graph, true);
 
 						Graph.getData(q, function(result) {
-							/*
-							 * TODO: scrape tags for link creation 
-							 */
 							sf = new SeriesFormatter(result.series);
 							sTags = sf.seriesTags();
 							// write to links object //
@@ -381,11 +449,14 @@ angular.module('timeframe', [])
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
+					//console.log(newValue,oldValue);
+					if(newValue === oldValue) return;
 					if(newValue == "absolute") {
-						scope.setTimeType(scope.timeType);
-						scope.setUpdatesEnabled(false);
+						scope.setTimeType(newValue);
+						//scope.setTimeType(scope.timeType);
+						if(scope.modelType !== 'graph') scope.setUpdatesEnabled(false);
 						
-						if(newValue !== oldValue) {
+						//if(newValue !== oldValue) {
 							d = new Date();
 							endTime = Math.ceil(d.getTime()/1000);
 							startTime = endTime - relativeToAbsoluteTime(oldValue);
@@ -393,14 +464,18 @@ angular.module('timeframe', [])
 							$('[ng-model=startTime]').data("DateTimePicker").setDate(new Date(startTime*1000));
 							scope.setEndTime(endTime);
 							$('[ng-model=startTime]').data("DateTimePicker").setDate(new Date(endTime*1000));
-						}
+						//}
 					} else {
-						if(newValue == oldValue) return;
-						console.log("reloading with:",newValue);
-						tmp = $location.search();
-						if(tmp.end) delete tmp.end;
-						tmp.start = newValue;
-						$location.search(tmp);
+						if(scope.modelType === 'graph') {
+							scope.setTimeType(newValue);
+							scope.reloadGraph();
+						} else {
+							console.log("reloading with:",newValue);
+							tmp = $location.search();
+							if(tmp.end) delete tmp.end;
+							tmp.start = newValue;
+							$location.search(tmp);
+						}
 					}
 				}, true);
 			}

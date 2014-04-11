@@ -24,6 +24,11 @@ app.config(['$routeProvider',
 				templateUrl: 'partials/tutorials.html',
 				controller: 'staticsController'
 			})
+			.when('/graph', {
+				templateUrl: 'partials/adhoc-graph.html',
+				controller: 'adhocGraphController',
+				reloadOnSearch: false
+			})
 			.when('/heatmap/:heatmapId', {
 				templateUrl: 'partials/page.html',
 				controller: 'pageController',
@@ -34,7 +39,7 @@ app.config(['$routeProvider',
 				/*reloadOnSearch: false*/
 			})
 			.otherwise({
-				redirectTo: '/new'
+				redirectTo: '/graph'
 			});
 	}
 ]);
@@ -171,6 +176,7 @@ function dictToCommaSepStr(obj) {
  * return: { key1: val1, key2: val2 }
  */
 function commaSepStrToDict(tagsStr) {
+	if(tagsStr == "") return {};
 	d = {};
 	kvpairs = tagsStr.replace(/;$/, '').split(",");
 	for(var i in kvpairs) {

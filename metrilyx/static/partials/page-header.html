@@ -14,17 +14,36 @@
 			</div>
 		</div>
 		<!-- Page Name/ID -->
-		<div class="col-md-4 text-center" style="padding:0">
-			<div class="row">
-				<div class="col-md-12">
-					<input type="text" ng-model="model.name" class="edit-comp{{editMode}}" placeholder="Page Name" disabled="true" title="Page Name">
-					<input type="text" ng-model="model._id" class="edit-comp{{editMode}}" placeholder="Page ID" required style="min-width: 40px;" title="Page ID">
+		<div ng-if="modelType!=='graph'" class="col-md-4 text-center" style="padding:0">
+				<div class="row">
+					<div class="col-md-12">
+						<input type="text" ng-model="model.name" class="edit-comp{{editMode}}" placeholder="Page Name" disabled="true" title="Page Name">
+						<input type="text" ng-model="model._id" class="edit-comp{{editMode}}" placeholder="Page ID" required style="min-width: 40px;" title="Page ID">
+					</div>
+				</div>
+		</div>
+		<div ng-if="modelType==='graph'" class="col-md-4 text-center" style="padding:0">
+			<div class="row" style="margin:0;color:#666;font-size:12px;">
+				<div class="col-md-6 text-left" title="Graph Type">
+					<span>type</span>
+					<select ng-model="graph.graphType">
+						<option value="line">line</option>
+						<option value="pie">pie</option>	
+					</select>
+				</div>
+				<div class="col-md-6 text-right" title="Vertical graph size">
+					<span>size</span>
+					<select ng-model="graph.size" ng-change="graphSizeChanged()">
+						<option value="small">small</option>
+						<option value="medium">medium</option>
+						<option value="large">large</option>
+					</select>
 				</div>
 			</div>
 		</div>
 		<!-- time picker -->
 		<div class="col-md-4 text-right" style="padding:0">
-			<div ng-if="modelType==''">
+			<div ng-if="modelType!=='heatmap/'">
 				<div class="row" style="margin:0">
 					<div class="col-md-12 text-right" style="padding:0">
 						<span class="animated">
@@ -37,7 +56,7 @@
 				            	<option value="1h-ago">1 hour</option>
 				            	<option value="5m-ago">5 mins</option>
 				            	<option value="1m-ago">1 min</option>
-				            	<option value="absolute">Custom Range</option>
+				            	<option value="absolute">Custom</option>
 				            </select>
 			            </span>
 						<span id="absolute-time" class="time animated btn-group btn-group-sm {{timeType}}">

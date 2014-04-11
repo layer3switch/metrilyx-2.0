@@ -47,6 +47,7 @@ select[ng-model="timeType"] {
 	display: none;
 	opacity: 0.96;
 }
+[ng-model="serie.query.aggregator"],
 [ng-model="metric.query.aggregator"],
 [ng-model="graph.graphType"],
 [ng-model="graph.size"] {
@@ -434,7 +435,7 @@ input.metric-control {
 #absolute-time {
 	/*float: left;*/
 	display: none;
-	background-color: #fff;
+	background: none;
 }
 #absolute-time.absolute {
 	display: inline-block !important;
@@ -549,13 +550,16 @@ div.graphs [class*='col-md-'] {
 	/*background-color:#ddd;*/
 }
 .graph.small {
-	min-height: 190px;	
+	min-height: 190px;
+	height: 190px;	
 }
 .graph.medium {
 	min-height: 300px;
+	height: 300px;
 }
 .graph.large {
 	min-height: 500px;
+	height: 500px;
 }
 .graph-error {
 	color: #ff0000;
@@ -578,6 +582,7 @@ ul.ui-autocomplete.ui-widget-content {
 	border-bottom: 0px solid #ddd !important;
 	width: 200px;
 	font-size: 12px;
+	z-index: 20;
 }
 ul.ui-autocomplete.ui-widget-content > li.ui-menu-item {
 	border-bottom: 1px solid #ddd !important;
@@ -662,6 +667,7 @@ input[ng-model='metric.query.tags'].form-control {
 input[ng-model='metric.query.tags'].form-control.ng-invalid.ng-dirty {
 	color: #a94442;
 }*/
+select.dark,
 input.dark {
 	background:none !important;
 	border:1px solid #777 !important;
@@ -691,3 +697,30 @@ input.dark {
 .bg.info {
 	background-color: #428bca;
 }
+.loading {
+	display: inline-block;
+}
+.done-loading {
+	display: none;
+}
+.caret.loading {
+	display: none;
+}
+.caret.done-loading {
+	display: inline-block;
+}
+.adhoc-metric-editor {
+	display:none;
+	position:absolute;
+	z-index:1;
+	top:34px;
+	min-width:200px;
+	padding:8px;
+	border-radius:3px;
+	background:#666;
+	color:#ccc;"
+}
+
+
+
+
