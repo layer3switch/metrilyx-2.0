@@ -68,8 +68,12 @@ setup_app_config() {
 		echo "- Importing existing data..."
 		echo "  configs...";
 		cp ${APP_HOME}-${INSTALL_TIME}/etc/metrilyx/metrilyx.conf ${APP_HOME}/etc/metrilyx/metrilyx.conf;
-		[ -e "${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js" ] || cp ${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js ${APP_HOME}/metrilyx/static/config.js;
-		[ -e "${APP_HOME}/metrilyx/static/config.js" ] || cp ${APP_HOME}/metrilyx/static/config.js.sample ${APP_HOME}/metrilyx/static/config.js;
+		if [ -f "${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js" ]; then
+			cp ${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js ${APP_HOME}/metrilyx/static/config.js;
+		fi
+		if [ ! -f "${APP_HOME}/metrilyx/static/config.js" ]; then
+			cp ${APP_HOME}/metrilyx/static/config.js.sample ${APP_HOME}/metrilyx/static/config.js;
+		fi
 		echo "  dashboards..."
 		cp -a ${APP_HOME}-${INSTALL_TIME}/pagemodels ${APP_HOME}/;
 		echo "  heatmap index..."
