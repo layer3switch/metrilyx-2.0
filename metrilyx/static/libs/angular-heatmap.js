@@ -5,7 +5,7 @@ angular.module('heatmaps', [])
 			require: '?ngModel',
 			link: function(scope, elem, attrs, ctrl) {
 				if(!ctrl) return;
-				//console.log(ctrl.$modelValue);
+
 				var heatmapInterval = setInterval(function() {
 					if(ctrl.$modelValue && ctrl.$modelValue.series.length > 0) {
 						Heat.getData(ctrl.$modelValue.series[0].query, function(result) {
@@ -16,7 +16,6 @@ angular.module('heatmaps', [])
 				scope.$watch(function() {
 					return ctrl.$modelValue;
 				}, function(newValue, oldValue) {
-					//console.log(newValue, oldValue);
 					if(newValue.series.length < 1) return;
 					Heat.getData(newValue.series[0].query,function(result) {
 						newValue.series[0].data = assignSeverity(result['data'], newValue.thresholds);
@@ -46,7 +45,6 @@ function assignSeverity(heatData,thresholds) {
 	for(var d in heatData) {
 		heatData[d].severity = getSeverity(heatData[d], thresholds);
 	}
-	//console.log(heatData);
 	return heatData;	
 }
 
