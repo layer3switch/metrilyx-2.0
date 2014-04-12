@@ -1,10 +1,17 @@
 /* controllers.js */
 
 var metrilyxControllers = angular.module('metrilyxControllers', []);
-metrilyxControllers.controller('staticsController', ['$scope', '$routeParams', 
-	function($scope, $routeParams) {
+metrilyxControllers.controller('staticsController', ['$scope', '$route', '$routeParams', '$location',
+	function($scope, $route, $routeParams, $location) {
 		//console.log('tutorials')
 		clearAllTimeouts();
+		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
+		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit_panel.html";
+
+		$scope.loadHome = function() {
+			$location.path('/graph').search({});
+			$route.reload();
+		}
 	}
 ]);
 metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Heatmap',
