@@ -79,6 +79,9 @@ select[ng-model="timeType"] {
 .interactive:hover {
 	color: #428bca !important;
 }
+.list-active {
+	color: #428bca !important;	
+}
 .shift {
 	position: absolute;
 	left:0;

@@ -42,7 +42,7 @@
 		<div id="side-panel" class="inset-shadow" ng-controller="sidePanelController">
 			<div class="inset-shadow" style="height:100%;padding-left:10px;padding-right:10px">
 				<div class="page-selector-header text-center">
-					<a class="interactive" style="color:#ccc" ng-click="loadPagemodelList()" href="javascript:void(0)" title="Page listing">
+					<a id="model-list-btn" class="interactive model-list-btn list-active" style="color:#ccc" ng-click="loadPagemodelList('#model-list-btn')" href="javascript:void(0)" title="Page listing">
 						<span class="marginr10 pad10" style="padding-left:0">
 							<div class="iblk">
 								<div><i class="glyphicon glyphicon-file"></i></div>
@@ -50,7 +50,7 @@
 							</div>
 						</span>
 					</a>
-					<a class="interactive" style="color:#ccc" ng-click="loadHeatmapList()" href="javascript:void(0)" title="Heatmap listing">
+					<a id="heatmap-list-btn" class="interactive model-list-btn" style="color:#ccc" ng-click="loadHeatmapList('#heatmap-list-btn')" href="javascript:void(0)" title="Heatmap listing">
 						<span class="marginr10 pad10">
 							<div class="iblk">
 								<div><i class="glyphicon glyphicon-fire"></i></div>
