@@ -22,13 +22,17 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 		Model.listModels(function(result) {
 			$scope.modelsList = result;
 		});
-		$scope.loadHeatmapList = function() {
+		$scope.loadHeatmapList = function(elem) {
+			$('.model-list-btn').removeClass('list-active');
+			$(elem).addClass('list-active');
 			Heatmap.listModels(function(result) {
 				$scope.modelType = "heatmap/";
 				$scope.modelsList = result;
 			});
 		}
-		$scope.loadPagemodelList = function() {
+		$scope.loadPagemodelList = function(elem) {
+			$('.model-list-btn').removeClass('list-active');
+			$(elem).addClass('list-active');
 			Model.listModels(function(result) {
 				$scope.modelType = "";
 				$scope.modelsList = result;
@@ -68,7 +72,13 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$scope.modelType = "";
 			$scope.tagsOnPage = {};
 		}
-
+		if($routeParams.pageId == "new" || $routeParams.heatmapId == 'new') {
+			$scope.editMode = " edit-mode";
+			$scope.updatesEnabled = false;
+		} else {
+			$scope.editMode = "";
+			$scope.updatesEnabled = true;
+		}
 		clearAllTimeouts();
 		// make sure modal window is not lingering around //
 		$('#confirm-delete').modal('hide');
@@ -120,9 +130,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		} else {
 			$scope.globalTags = {};
 		}
-		//disableDragDrop();
-		$scope.editMode = "";
-		$scope.updatesEnabled = true;
+		
 
 		$scope.metricQuery = "";
 		$scope.metricQueryResult = [];
@@ -398,16 +406,17 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		}
 
 		// close side panel //
+		/*
 		$('#stage').removeClass('right');
 		if($routeParams.pageId == "new" || $routeParams.heatmapId == 'new') {
 			setTimeout(function() {
 				$scope.enableEditMode();	
-			}, 200);
+			}, 300);
 		} else {
 			if($scope.editMode == "") {
 				$scope.disableDragDrop();	
 			}
-		}
+		}*/
 }]);
 metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph',
 	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Graph) {
