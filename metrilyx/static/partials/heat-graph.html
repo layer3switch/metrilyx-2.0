@@ -1,5 +1,5 @@
 <div class="margin5" ng-include="thresholdsHtml"></div>
-<div class="graph {{graph.size}} marginlr10" ui-sortable ng-model="graph.series">
+<div class="graph marginlr10" style="min-height:200px;" ui-sortable ng-model="graph.series">
 	<table style="width:100%">
 		<tr ng-repeat="heat in graph.series[0].data">
 			<td class="pad10 text-left"><span class="h5">{{heat.tags[pod.pivot_tag]}}</span></td>
