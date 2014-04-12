@@ -129,3 +129,7 @@ case "$1" in
 		echo -e "\n\tUsage:\n\t\t$0\t[lyx|all]\n";
 		exit 2;
 esac
+
+echo "** Please restart the webserver **"
+echo "** Heatmaps are still in beta phase.  Currently requiring a frequent restart."
+echo "** If you choose to use heatmaps set the config options (/opt/metrilyx/etc/metrilyx/metrilyx.conf) and start celerybeat and celeryd **"
