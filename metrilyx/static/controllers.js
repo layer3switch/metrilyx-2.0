@@ -174,10 +174,9 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				}
 			}
 		});
-		// close side panel when new page model loaded //
-		//$('#stage').removeClass('right');
 		$scope.updateGlobalTag = function(tagkey, tagval) {
-			$scope.$parent.globalTags[tagkey] = tagval;
+			$scope.globalTags[tagkey] = tagval;
+			//$scope.$parent.globalTags[tagkey] = tagval;
 		}
 		$scope.delayLoadPageModel = function(pageId, cb) {
 			clearAllTimeouts();
