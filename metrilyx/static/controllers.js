@@ -543,9 +543,13 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				params += q.metric+"{"
 				tagstr = "";
 				for(var tk in q.tags) {
+					if(tk == "") continue;
 					tagstr += tk+":"+q.tags[tk]+","
 				}
-				if(tagstr !== "") tagstr.replace(/\,$/,'');
+				tagstr.replace(/\,$/,'');
+				if(tagstr !== "") {
+					params += tagstr;
+				}
 				params += "}";
 				params += "{alias:"+serie.alias;
 				params += ",yTransform:"+serie.yTransform+"}";
@@ -566,7 +570,24 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			} else {
 				srch.start = $scope.timeType;
 			}
+			//console.log(srch.m);
 			$location.search(srch);
+		}
+		$scope.updateTagsOnPage = function(obj) {
+			var top = $scope.tagsOnPage;
+			for(var k in obj) {
+				if(top[k] == undefined) {
+					top[k] = ["*"];
+					top[k].push(obj[k]);
+					continue;
+				}
+				if(top[k].indexOf(obj[k]) >= 0) {
+					continue;
+				} else {
+					top[k].push(obj[k]);
+				}
+			}
+			$scope.tagsOnPage = top;
 		}
 		$scope.reloadGraph = function() {
 			$('.adhoc-metric-editor').hide();
@@ -575,7 +596,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			for(var s in $scope.graph.series) {
 				$scope.graph.series[s].loading = "loading";
 			}
-			//console.log($location.search());
+			//console.log($scope.graph.series[0].query.tags);
 			$scope.setURL($scope.graph);
 
 			q = $scope.baseQuery($scope.graph)
@@ -584,6 +605,10 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				graphing_newGraph(result);
 				for(var s in $scope.graph.series) {
 					$scope.graph.series[s].loading = "done-loading";
+					for(var d in result.series[s].data) {
+						$scope.updateTagsOnPage(result.series[s].data[d].tags);
+						//console.log(result.series[s].data[d].tags);
+					}
 				}
 			});
 		}
@@ -638,25 +663,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				});
 			});
 		}
-
-		$scope.updateTagsOnPage = function(obj) {
-			var top = $scope.tagsOnPage;
-			for(var k in obj) {
-				if(top[k]) {
-					for(var i in obj[k]) {
-						if(top[k].indexOf(obj[k][i]) >= 0) {
-							continue;
-						} else {
-							top[k].push(obj[k][i]);
-						}
-					}
-				} else {
-					top[k] = obj[k];
-					top[k].push("*");
-				}
-			}
-			$scope.tagsOnPage = top;
-		}
+		
 		$scope.loadHome = function() {
 			$location.path('/graph').search({});
 			$route.reload();
@@ -691,6 +698,14 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.setAbsoluteTime = function() {
 			$scope.reloadGraph();
 			//console.log($scope.startTime, $scope.endTime, $scope.timeType);
+		}
+		$scope.updateGlobalTag = function(tagkey, tagval) {
+			if(tagkey == undefined || tagkey == "") return;
+			for(var s in $scope.graph.series) {
+				$scope.graph.series[s].query.tags[tagkey] = tagval;
+			}
+			$scope.setURL($scope.graph);
+			$route.reload();
 		}
 	}
 ]);

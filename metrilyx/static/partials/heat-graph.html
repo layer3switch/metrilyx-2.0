@@ -21,12 +21,15 @@
 		<div class="padl10 padr10 padb10">
 			<div>
 				<span class="padr5 metric-control-label">aggregator</span>
-				<select ng-model="metric.query.aggregator">
-					<option value="min">min</option>
-					<option value="avg">avg</option>
-					<option value="sum">sum</option>
-					<option value="max">max</option>
-				</select>
+				<span class="select-container left-caret aggr">
+					<span class="caret"></span>
+					<select ng-model="metric.query.aggregator" class="select-input dark">
+						<option value="min">min</option>
+						<option value="avg">avg</option>
+						<option value="sum">sum</option>
+						<option value="max">max</option>
+					</select>
+				</span>
 				<span class="pull-right">
 					<span class="padr5 metric-control-label">rate</span>
 					<input type="checkbox" ng-model="metric.query.rate">

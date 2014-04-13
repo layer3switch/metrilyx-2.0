@@ -181,6 +181,7 @@ function commaSepStrToDict(tagsStr) {
 	kvpairs = tagsStr.replace(/;$/, '').split(",");
 	for(var i in kvpairs) {
 		kv = kvpairs[i].split(":");
+		if(kv[0] == "") continue;
 		d[kv[0]] = kv[1];
 	}
 	return d;

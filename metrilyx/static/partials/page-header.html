@@ -5,7 +5,9 @@
 				<i class="glyphicon glyphicon-cog"></i>
 			</span>
 			<div ng-repeat="(tagname, tagvalues) in tagsOnPage" class="btn-group padb10">
-			  <span class="pointer interactive dropdown-toggle pad5" data-toggle="dropdown">{{tagname}}</span>
+			  <span class="pointer interactive dropdown-toggle pad5" data-toggle="dropdown">
+				<span><span class="caret"></span><span class="padl5">{{tagname}}</span></span>
+			  </span>
 			  <ul class="dropdown-menu" role="menu" style="background:rgba(255,255,255,0.89)">
 			    <li ng-repeat="tagvalue in tagvalues">
 			    	<a href="javascript:void(0)" style="border-top:1px solid #eee;margin-left:5px;margin-right:5px;" ng-click="updateGlobalTag(tagname, tagvalue);">{{tagvalue}}</a>
@@ -23,22 +25,32 @@
 				</div>
 		</div>
 		<div ng-if="modelType==='graph'" class="col-md-4 text-center" style="padding:0">
-			<div class="row" style="margin:0;color:#666;font-size:12px;">
-				<div class="col-md-6 text-left" title="Graph Type">
-					<span>type</span>
-					<select ng-model="graph.graphType">
-						<option value="line">line</option>
-						<option value="pie">pie</option>	
-					</select>
+			<div class="padt5">
+			<div class="row" style="margin:0;font-size:12px;">
+				<div class="col-md-12">
+					<span class="padlr5">
+						<span style="color:#888">Type :</span>
+						<span class="select-container left-caret">
+							<span class="caret"></span>
+							<select ng-model="graph.graphType" class="select-input interactive" style="font-size:13px;color:#555">
+								<option value="line">line</option>
+								<option value="pie">pie</option>	
+							</select>
+						</span>
+					</span>
+					<span class="padlr5">
+						<span style="color:#888">Size :</span>
+						<span class="select-container left-caret">
+							<span class="caret"></span>
+							<select ng-model="graph.size" ng-change="graphSizeChanged()" class="select-input interactive" style="font-size:13px;color:#555">
+								<option value="small">small</option>
+								<option value="medium">medium</option>
+								<option value="large">large</option>
+							</select>
+						</span>
+					</span>
 				</div>
-				<div class="col-md-6 text-right" title="Vertical graph size">
-					<span>size</span>
-					<select ng-model="graph.size" ng-change="graphSizeChanged()">
-						<option value="small">small</option>
-						<option value="medium">medium</option>
-						<option value="large">large</option>
-					</select>
-				</div>
+			</div>
 			</div>
 		</div>
 		<!-- time picker -->
@@ -46,7 +58,8 @@
 			<div ng-if="modelType!=='heatmap/'">
 				<div class="row" style="margin:0">
 					<div class="col-md-12 text-right" style="padding:0">
-						<span class="animated">
+						<span class="animated select-container left-caret">
+							<span class="caret"></span>
 							<select ng-model="timeType" relative-time="true" class="time interactive">
 				            	<option value="24h-ago">24 hours</option>
 				            	<option value="12h-ago">12 hours</option>

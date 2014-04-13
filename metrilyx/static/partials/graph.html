@@ -6,7 +6,7 @@
 			<input type="text" ng-model="graph.name" class="edit-comp{{editMode}} form-control" placeholder="Graph Name" disabled="true">
 			<span class="input-group-addon nobg">
 				<a href="javascript:void(0)" title="Remove Graph" class="interactive graph-rm-btn edit-comp{{editMode}}" style="color:#666;" ng-click="pod.graphs.splice(pod.graphs.indexOf(graph),1);reflow();">
-					<i class="glyphicon glyphicon-remove"></i>
+					<i class="glyphicon glyphicon-trash"></i>
 				</a>
 			</span>
 		</div>
@@ -14,26 +14,34 @@
 		<div class="padlr10 padt5 padb10 pod-controls edit-comp{{editMode}}" style="border-bottom: 1px solid #ccc">
 			<div class="row" style="margin:0;color:#666;font-size:12px;">
 				<div class="col-md-6 text-left" title="Graph Type">
-					<span>type</span>
-					<select ng-model="graph.graphType">
-						<option value="line">line</option>
-						<option value="pie">pie</option>	
-					</select>
+					<span style="color:#aaa">Type :</span>
+					<span class="select-container left-caret">
+						<span class="caret"></span>
+						<select ng-model="graph.graphType" class="select-input"> 
+							<option value="line">line</option>
+							<option value="pie">pie</option>	
+						</select>
+					</span>
 				</div>
 				<div class="col-md-6 text-right" title="Vertical graph size">
-					<span>size</span>
-					<select ng-model="graph.size" ng-change="reflow()">
-						<option value="small">small</option>
-						<option value="medium">medium</option>
-						<option value="large">large</option>
-					</select>
+					<span style="color:#aaa">Size :</span>
+					<span class="select-container left-caret">
+						<span class="caret"></span>
+						<select ng-model="graph.size" ng-change="reflow()" class="select-input">
+							<option value="small">small</option>
+							<option value="medium">medium</option>
+							<option value="large">large</option>
+						</select>
+					</span>
 				</div>
 			</div>
 		</div>
 	</div>
 	<div>
 	<div class="graph {{graph.size}} text-center animated"  style="width:100%" data-graph-id="{{graph._id}}" ui-sortable ng-model="graph.series">
-		<span class="pad20" style="color:#eee">Drag metric from the left here</span>
+		<table class='gif-loader-table' style="color:#ccc"><tr><td>
+			Drag metrics here from search
+		</td></tr></table>
 	</div>
 	<div class="graph-controls edit-comp{{editMode}} graph-metrics-panel collapse">
 		<div ng-repeat="metric in graph.series">
@@ -46,12 +54,15 @@
 			<div class="padl15 padr10 padb10">
 				<div>
 					<span class="metric-control-label">aggregator</span>
-					<select ng-model="metric.query.aggregator">
-						<option value="min">min</option>
-						<option value="avg">avg</option>
-						<option value="sum">sum</option>
-						<option value="max">max</option>
-					</select>
+					<span class="select-container left-caret aggr">
+						<span class="caret"></span>
+						<select ng-model="metric.query.aggregator" class="dark select-input">
+							<option value="min">min</option>
+							<option value="avg">avg</option>
+							<option value="sum">sum</option>
+							<option value="max">max</option>
+						</select>
+					</span>
 					<span class="pull-right">
 						<span class="metric-control-label">rate</span>
 						<input type="checkbox" ng-model="metric.query.rate">
