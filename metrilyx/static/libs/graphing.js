@@ -10,7 +10,11 @@ ChartOptions.prototype.chartDefaults = function() {
     return {
         chart: {
             borderRadius: 0,
-            borderWidth: 0
+            borderWidth: 0,
+            spacingLeft: 5,
+            spacingRight: 5,
+            spacingTop: 5,
+            spacingBottom: 5
         },
         title: {
             text: ''
@@ -31,7 +35,11 @@ ChartOptions.prototype.pieChartDefaults = function() {
             plotBorderWidth: null,
             plotShadow: false,
             borderRadius: 0,
-            borderWidth: 0
+            borderWidth: 0,
+            spacingTop: 5,
+            spacingLeft: 5,
+            spacingRight: 5,
+            spacingBottom: 5
         },
         tooltip: {
             pointFormat: '<b>{point.y}</b>'
@@ -72,7 +80,10 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
             spacingTop: 0,
             zoomType: 'xy',
             borderRadius: 0,
-            borderWidth: 0
+            borderWidth: 0,
+            spacingLeft: 5,
+            spacingRight: 5,
+            spacingBottom: 5,
         },
         legend: {
             enabled: true,

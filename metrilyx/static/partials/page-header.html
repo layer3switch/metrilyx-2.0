@@ -1,10 +1,10 @@
 <div class="page-model-header edit-comp{{editMode}}">
 	<div class="row" style="margin:0;">
 		<div class="col-md-4" style="padding:0;">
-			<span class="pointer interactive" ng-click="toggleEditMode()" title="Edit Page" style="font-size:20px;">
+			<span class="pointer interactive" ng-click="toggleEditMode()" title="Edit Page" style="font-size:20px;color:#666">
 				<i class="glyphicon glyphicon-cog"></i>
 			</span>
-			<div ng-repeat="(tagname, tagvalues) in tagsOnPage" class="btn-group padb10">
+			<div ng-repeat="(tagname, tagvalues) in tagsOnPage" class="btn-group padb10" style="color:#666">
 			  <span class="pointer interactive dropdown-toggle pad5" data-toggle="dropdown">
 				<span><span class="caret"></span><span class="padl5">{{tagname}}</span></span>
 			  </span>
