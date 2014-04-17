@@ -112,6 +112,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			if(urlParams.end) {
 				$scope.endTime = urlParams.end;
 				$scope.timeType = "absolute";
+				$scope.updatesEnabled = false;
 			} else {
 				$scope.timeType = urlParams.start;
 			}
@@ -130,7 +131,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		} else {
 			$scope.globalTags = {};
 		}
-		
 
 		$scope.metricQuery = "";
 		$scope.metricQueryResult = [];
