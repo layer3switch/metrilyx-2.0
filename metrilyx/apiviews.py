@@ -1,6 +1,7 @@
 
 import os
 import uuid
+import json
 
 #from django.http import Http404
 from django.http import HttpResponseRedirect
@@ -20,7 +21,7 @@ from httpclients import HttpJsonClient
 from metrilyxconfig import config
 
 from pprint import pprint
-import json
+
 
 class SchemaView(APIView):
 	def get(self, request, model_type):
@@ -74,12 +75,6 @@ class PageView(APIView):
 		#return Response(status=status.HTTP_204_NO_CONTENT)
 		rslt = self.modelstore.removeModel(page_id)
 		return Response(rslt)
-
-	## Update
-	#def patch(self, request, model_type, model_id=None, format=None):
-	#	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-		#return Response(request.DATA)
-
 
 class HeatmapView(PageView):
 	modelstore = FileModelStore(config['heatmaps']['store_path'])
@@ -196,20 +191,11 @@ class GraphView(APIView):
 		tsd_req = OpenTSDBRequest(req_obj)
 		return Response(tsd_req.data)
 
-	def get(self, request, graph_query=None):
-		## this does not work with '%' character
-		req_obj = json.loads(graph_query)
-		## pie charts only needs a smaller subset
-		req_obj = self.__calibrate_piegraph(req_obj)
-		tsd_req = OpenTSDBRequest(req_obj)
-		return Response(tsd_req.data)
-
 class SearchView(APIView):
 	"""
 		Search for pages, metrics, tag keys and tag values.
 		Metrics and tag key-value pairs use OpenTSDB's interface.
 	"""
-	#md_search_types = ( "metrics", "tagk", "tagv" )
 	tsdb_endpoints = OpenTSDBEndpoints()
 
 	def get(self, request, request_prefix):
