@@ -157,7 +157,7 @@ class MetrilyxSeries(object):
 			talias = "%(" + u + ")s"
 			if talias not in self._serie['alias']:
 				nstr += " " + talias
-		### apply the unique tag and normalize
+		### apply the unique tag/s and re-normalize
 		if nstr and not self._serie['alias'].startswith("!"):
 			dataset['alias'] = self.__normalize_alias(self._serie['alias']+nstr, {
 				'tags': dataset['tags'],
@@ -165,6 +165,7 @@ class MetrilyxSeries(object):
 				})
 
 		## any custom callback for resulting data set 
+		## e.g. scrape metadata here.
 		if self._data_callback != None:
 			self._data_callback(dataset)
 
