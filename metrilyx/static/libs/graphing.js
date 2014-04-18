@@ -317,8 +317,8 @@ function formatDataHighcharts(graphSeries) {
 }
 function dataHasErrors(gObj) {
     for(var s in gObj.series) {
-        if(gObj.series[s].data.error) {
-            msg = gObj.series[s].data.error['message'].substring(0,50)+"...";
+        if(gObj.series[s].data.error !== undefined) {
+            msg = gObj.series[s].data.error.substring(0,50)+"...";
             //console.log(msg.substring(0, 50));
             //gObj.series[s].alias+" (error: "+msg+")"; 
             return { 
@@ -354,6 +354,8 @@ function graphing_newGraph(graph) {
     if(dhe) {
         $(renderTo).html("<span class='graph-error'><b>"+dhe.error.metric+": </b>"+dhe.error.message+"</span>");
         console.log("error:", dhe.error);
+        // trial //
+        //$(renderTo).highcharts("StockChart",{});
         return;
     }
     var copts = new ChartOptions(graph);
@@ -384,7 +386,7 @@ function graphing_upsertSeries(args) {
     // return if graph is not defined.
     // this could be due to an error while creating the graph (graphing_newGraph)
     if(hcg == undefined) {
-        console.log("graph uninitialized: not upserting. name", args.name, "_id", args._id);
+        console.log("graph uninitialized: not upserting. name", args.name, "type", args.graphType,"_id", args._id);
         return;
     }
     for(var j in args.series) {

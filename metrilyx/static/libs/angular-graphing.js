@@ -296,15 +296,22 @@ angular.module('graphing', [])
 				function getUpdates() {
 					if(ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
 						console.log("issuing update...");
-						Graph.getData({
+						var q = {
 							start: "10m-ago",
+							size: ngModel.$modelValue.size,
 							_id: ngModel.$modelValue._id,
 							series: ngModel.$modelValue.series,
 							graphType: ngModel.$modelValue.graphType,
 							tags: scope.globalTags
-						}, function(gData) {
+						};
+						Graph.getData(q, function(gData) {
 							renderGraph(gData);
 						}); // END Graph.getData //
+						/*
+						Graph.get(q, function(gData) {
+							console.log(gData._id);
+						});
+						*/ 
 					}
 					if(currTimer) clearTimeout(currTimer);
 					currTimer = setTimeout(function() { 
@@ -473,7 +480,7 @@ angular.module('timeframe', [])
 							console.log("reloading with:",newValue);
 							tmp = $location.search();
 							if(tmp.end) delete tmp.end;
-							tmp.start = newValue;
+							tmp['start'] = newValue;
 							$location.search(tmp);
 						}
 					}
