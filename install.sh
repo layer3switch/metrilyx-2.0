@@ -8,7 +8,7 @@ PYPKGS="uuid Django djangorestframework django-filter django-cors-headers pymong
 if [[ -f "/etc/redhat-release" ]]; then
 	HTTPD="httpd"
 	HTTP_USER="apache"
-	PKGS="libuuid gcc uuid ${HTTPD} mod_wsgi python-setuptools python-devel mongodb"
+	PKGS="libuuid gcc uuid ${HTTPD} mod_wsgi python-setuptools python-devel mongodb-10gen mongodb-10gen-server"
 	PKG_INSTALLER="yum -y install"
 	PKG_LISTER="rpm -qa"
 	PKG_S_PREFIX="^"
@@ -111,25 +111,15 @@ install_web_config() {
 }
 ##### Main ####
 
+install_deps;
+install_app;
+install_web_config;
+app_postinstall;
 
+echo ""
+echo " ** PLEASE RESTART THE WEBSERVER ** "
+echo " ** Heatmaps are still in beta phase, currently requiring a frequent restart."
+echo " ** If you choose to use heatmaps set the config options"
+echo " ** (/opt/metrilyx/etc/metrilyx/metrilyx.conf) and start celerybeat and celeryd."
+echo ""
 
-case "$1" in
-	lyx)	
-		install_deps;
-		install_app;
-		app_postinstall;
-		;;
-	all)
-		install_deps;
-		install_app;
-		install_web_config;
-		app_postinstall;
-		;;	
-	*)
-		echo -e "\n\tUsage:\n\t\t$0\t[lyx|all]\n";
-		exit 2;
-esac
-
-echo "** Please restart the webserver **"
-echo "** Heatmaps are still in beta phase.  Currently requiring a frequent restart."
-echo "** If you choose to use heatmaps set the config options (/opt/metrilyx/etc/metrilyx/metrilyx.conf) and start celerybeat and celeryd **"
