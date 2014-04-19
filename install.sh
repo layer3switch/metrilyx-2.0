@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 INSTALL_ROOT="/opt";
-INSTALL_TIME=$(date '+%d%b%Y_%H%M');
+INSTALL_TIME=$(date '+%d%b%Y_%H%M%S');
 APP_HOME="${INSTALL_ROOT}/metrilyx";
 PYPKGS="uuid Django djangorestframework django-filter django-cors-headers pymongo celery";
 
