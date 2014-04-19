@@ -8,7 +8,7 @@ PYPKGS="uuid Django djangorestframework django-filter django-cors-headers pymong
 if [[ -f "/etc/redhat-release" ]]; then
 	HTTPD="httpd"
 	HTTP_USER="apache"
-	PKGS="libuuid gcc uuid ${HTTPD} mod_wsgi python-setuptools python-devel mongodb-10gen mongodb-10gen-server"
+	PKGS="libuuid gcc uuid ${HTTPD} mod_wsgi python-setuptools python-devel mongo-10gen mongo-10gen-server"
 	PKG_INSTALLER="yum -y install"
 	PKG_LISTER="rpm -qa"
 	PKG_S_PREFIX="^"
