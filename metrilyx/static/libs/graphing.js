@@ -454,9 +454,9 @@ function getNewDataAlignedSeries(currData, newData) {
         while(currData[currData.length-1][0] >= newStartTime) {
             c = currData.pop();
         }
-        // shift data from front per window
-        // removes same amount of old data as new data added
-        while(currData[0][0] < shiftedStartTime) {
+        // shift data from front per window //
+        // removes same amount of old data as is new data added //
+        while(currData.length > 0 && currData[0][0] < shiftedStartTime) {
             c = currData.shift();
         }
         return currData.concat(newData);
