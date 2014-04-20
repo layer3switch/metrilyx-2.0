@@ -168,11 +168,17 @@ input.pad0 {
 .padr5 {
 	padding-right: 5px;
 }
+.padr8 {
+	padding-right: 8px;
+}
 .padl2 {
 	padding-left: 2px;
 }
 .padl5 {
 	padding-left: 5px;
+}
+.padl8 {
+	padding-left: 8px;
 }
 .padl15 {
 	padding-left: 15px;

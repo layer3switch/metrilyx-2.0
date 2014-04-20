@@ -7,6 +7,9 @@ body {
 a {
 	text-decoration: none !important;
 }
+ul {
+	list-style-type: none;
+}
 input {
 	border: 1px solid #ccc !important;
 	background-color: #eee !important;
@@ -190,6 +193,7 @@ input.form-control.md {
 	padding:5px;
 	border-radius:3px;
 	border: 1px solid rgba(0,0,0,0);
+	color: rgba(255,255,255,0.35);
 }
 .edit-panel-item.header {
 	border-bottom: 1px solid rgba(88,88,88,0.5);
@@ -422,7 +426,7 @@ input.metric-control {
 	background-color: #eee !important;
 }
 .metric-control-label {
-	font-weight:bold !important;
+	/*font-weight:bold !important;*/
 	color: #ccc !important;
 	font-size: 13px !important;
 	padding-left: 0 !important;
@@ -679,7 +683,7 @@ input[ng-model='metric.query.tags'].form-control.ng-invalid.ng-dirty {
 select.dark,
 input.dark {
 	background:none !important;
-	border:1px solid #777 !important;
+	border:1px solid #888 !important;
 	border-radius:3px;
 	color: #ccc !important;
 }
@@ -719,18 +723,20 @@ input.dark {
 	display: inline-block;
 }
 .adhoc-metric-editor {
-	display:none;
-	position:absolute;
-	z-index:1;
-	top:29px;
-	min-width:200px;
-	padding:8px;
-	border-radius:0 3px 3px 3px;
-	background:rgba(102,102,102,0.93);
+	display: none;
+	position: absolute;
+	z-index: 1;
+	top: 33px;
+	min-width: 240px;
+	padding: 10px;
+	padding-left: 15px;
+	padding-right: 15px;
+	border-radius:0 2px 2px 2px;
+	background:rgba(102,102,102,1);
 	color:#ccc;"
 }
 .graph-metric-label {
-	border-radius:3px 3px 0 0 !important;
+	border-radius:2px 2px 0 0 !important;
 	border-bottom:none!important;
 	color: #666 !important;
 }
@@ -753,5 +759,27 @@ select.select-input {
 	border: none !important;
 	padding-top: 0px !important;
 }
+.btn-default.inverted {
 
-
+}
+.btn-default.inverted:hover {
+	color: #ccc !important;
+	background:rgba(102,102,102,0.93);
+	border: 1px solid rgba(102,102,102,0.93);
+}
+.btn-default.inverted:focus {
+	color: #ccc !important;
+	background:rgba(102,102,102,0.93);
+	border: 1px solid rgba(102,102,102,0.93);
+}
+.ui-helper-hidden-accessible { display:none; }
+.input-group-addon.trans {
+	background: none;
+	color: #ccc;
+	border-color: #888;
+}
+input.form-control.trans {
+	background: none !important;
+	color: #ccc;
+	border-color: #888 !important;
+}
