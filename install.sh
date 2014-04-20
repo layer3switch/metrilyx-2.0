@@ -99,6 +99,7 @@ install_app(){
 app_postinstall() {
 	if [[ -f "/etc/debian_version" ]]; then
 		a2enmod rewrite;
+		a2enmod headers;
 	elif [[ -f "/etc/redhat-release" ]]; then
 		setup_startup_config;
 	fi
