@@ -511,6 +511,9 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		} else {
 			$scope.metricListSortOpts.disabled = false;
 		}
+		$scope.removeTag = function(tags, tagkey) {
+			delete tags[tagkey];
+		}
 
 		$scope.setStatus = function(serieIdx, status) {
 			//console.log(serieIdx, status);
