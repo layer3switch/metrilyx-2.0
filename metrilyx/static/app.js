@@ -89,6 +89,100 @@ app.directive('stopEvent', function () {
         }
     };
 });
+app.directive('tagkeyvalue', function() {
+	return {
+		restrict: 'A',
+		require: '?ngModel',
+		link: function(scope, elem, attrs, ctrl) {
+			if(!ctrl) return;
+
+			$(elem).attr('placeholder', 'tagkey=tagvalue');
+			$(elem).autocomplete({
+				source: function(request, response) {
+					kvpairs = request.term.split(",");
+					lastKvPair = kvpairs[kvpairs.length-1].split("=");
+	            	var stype, q;
+	            	if(lastKvPair.length <= 1) {
+	            		stype = "tagk";
+	            		q = lastKvPair[0];
+	            	} else {
+	            		stype = "tagv";
+	            		tvals = lastKvPair[1].split("|");
+	            		q = tvals[tvals.length-1];
+	            		if(q === '') return;
+	            	}
+	            	$.getJSON('/api/search','type='+stype+'&q='+q, response);
+	        	},
+	        	messages: {
+	            	noResults: '',
+	            	results: function() {}
+	        	},
+	        	minLength:1,
+	        	select: function( event, ui ) {
+	        		var ival = $(elem).val();
+	        		kv = ival.split("=");
+	        		if(kv.length == 1) {
+	        			$(elem).val(ui.item.value+"=");
+	        			return false;
+	        		} else if(kv.length == 2) {
+	        			var tvals = kv[1].split("|");
+	        			var retstr = "";
+	        			for(var i=0;i<tvals.length-1;i++) {
+	        				retstr += tvals[i]+"|";
+	        			}
+	        			retstr += ui.item.value;
+	        			
+	        			// this throws en error due to | character //
+	        			scope.$apply(ctrl.$modelValue[kv[0]] = retstr);
+	        			
+	        			$(elem).val('');
+	        			event.preventDefault();
+	        			//return false;	
+	        		}
+	        	},
+	        	focus: function( event, ui ) {
+	        		var ival = $(elem).val();
+	        		kv = ival.split("=");
+	        		if(kv.length == 2) {
+	        			var tvals = kv[1].split("|");
+	        			var retstr = "";
+	        			for(var i=0;i<tvals.length-1;i++) {
+	        				retstr += tvals[i]+"|";
+	        			}
+	        			retstr += ui.item.value;
+	        			$(elem).val(kv[0]+"="+retstr);
+	        			event.preventDefault();
+	        		}
+	        	}
+			});
+			// model --> view
+			ctrl.$formatters.push(function(modelValue) {
+				return "";
+			});
+			// view --> model
+			ctrl.$parsers.unshift(function(viewValue) {
+				var kv = viewValue.split("=");
+				if(kv.length == 1) {
+					ctrl.$setValidity('tagkeyvalue', false);
+					return ctrl.$modelValue;
+				} else if(kv.length == 2) {
+					if(kv[1] === undefined || kv[1] === ''){
+						ctrl.$setValidity('tagkeyvalue', false);
+						return ctrl.$modelValue;
+					}
+					ctrl.$setValidity('tagkeyvalue', true);
+					var obj = ctrl.$modelValue;
+					obj[kv[0]] = kv[1];
+					//console.log();
+					return obj;
+				} else {
+					ctrl.$setValidity('tagkeyvalue', false);
+					return ctrl.$modelValue;
+				}
+			});
+		}
+	};
+});
 /*
  * Parse tags object to 'tag1=val1,tag2=val2;'
  * Error checking and validity setting.
@@ -121,6 +215,24 @@ app.directive('keyValuePairs', function() {
 	            	results: function() {}
 	        	},
 	        	minLength:1,
+	        	/*
+	        	select: function( event, ui ) {
+	        		//console.log(event);
+	        		
+	        		var ival = $(elem).val();
+	        		var kvps = ival.split(",");
+	        		
+	        		kv = kvps[kvps.length-1].split(":")
+	        		if(kv.length == 1) {
+	        			return true;
+	        		} else if(kv.length == 2) {
+	        			$(elem).val(kv[0]+":"+ui.item.value);
+	        			return false;
+	        		}
+	        		console.log(ui.item);
+	        		console.log($(elem).val());
+	        		return false;
+	        	}*/
 			});
 			// model --> view
 			ngModel.$formatters.push(dictToCommaSepStr);
