@@ -1,0 +1,58 @@
+<div class="btn-group marginlr3 margintb6" ng-repeat="serie in graph.series">
+	<button type="button" class="btn btn-default graph-metric-label" onclick="$('[ng-repeat=\'serie in graph.series\']').children('div').hide();$(this).next().show();">
+		<span class="interactive" ng-click="graph.series.splice(graph.series.indexOf(serie),1);"><i class="glyphicon glyphicon-remove"></i></span>
+		<span class="padlr5" style="font-weight:bold">{{serie.query.metric}}</span>
+		<span class="animated {{serie.loading}}"><img src='/imgs/loader.gif'></span>
+	</button>
+	<div class="adhoc-metric-editor">
+	    <div class="padb10">
+		    <div class="row" style="margin:0">
+		    	<div class="col-md-8 text-left" style="padding:0px !important">
+			    	<span class="metric-control-label">Aggregator : </span>
+			    	<select ng-model="serie.query.aggregator" class="dark">
+						<option value="min">min</option>
+						<option value="avg">avg</option>
+						<option value="sum">sum</option>
+						<option value="max">max</option>
+					</select>
+				</div>
+		    	<div class="col-md-4 text-right" style="padding:0px !important">
+			    	<span class="metric-control-label">Rate : </span>
+			    	<input type="checkbox" ng-model="serie.query.rate">
+		    	</div>
+		    </div>
+	    </div>
+	    <div class="padt10" style="border-top:1px solid #777;">
+	    	<div class="metric-control-label text-left">Tags : </div>
+	    	<ul style="margin-bottom:5px;margin-top:5px;padding-left:10px">
+				<li ng-repeat="(tk,tv) in serie.query.tags" class="padtb3">
+	    			<div class="input-group input-group-sm">
+	    				<span class="input-group-addon trans">{{tk}}</span>
+	    				<input ng-model="serie.query.tags[tk]" type="text" class="form-control trans">
+	    				<span class="input-group-addon trans interactive pointer" ng-click="removeTag(serie.query.tags, tk);">		
+	    					<i class="glyphicon glyphicon-remove"></i>
+	    				</span>
+	    			</div>
+				</li>
+			</ul>
+	    </div>
+	    <div class="input-group input-group-sm padb10 padl10" style="border-bottom:1px solid #777">
+	    	<input type="text" class="form-control dark" ng-model="serie.query.tags" tagkeyvalue style="border-color:#888 !important">
+	    	<span class="input-group-addon" style="background:none;color:#ccc;border-color:#888;">
+	    		<i class="glyphicon glyphicon-search"></i>
+	    	</span>
+	    </div>
+	    <div class="input-group input-group-sm padt10">
+	    	<span class="input-group-addon nobg metric-control-label">Alias : </span>
+	    	<input type="text" class="form-control dark" ng-model="serie.alias">
+	    </div>
+	    <div class="input-group input-group-sm padt5 padb10" style="border-bottom:1px solid #777">
+	    	<span class="input-group-addon nobg metric-control-label">Y-Transform : </span>
+	    	<input type="text" class="form-control dark" ng-model="serie.yTransform">
+	    </div>
+	    <div class="pull-right padt10">
+	    	<span class="pointer interactive padr8" onclick="$(this).parent().parent().hide();" title="Cancel"><i class="glyphicon glyphicon-ban-circle"></i></span>
+	    	<span class="pointer interactive padl8" title="Apply" ng-click="reloadGraph();"><i class="glyphicon glyphicon-ok"></i></span>
+	    </div>
+	</div>
+</div>
