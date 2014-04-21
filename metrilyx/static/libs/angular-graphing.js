@@ -307,11 +307,6 @@ angular.module('graphing', [])
 						Graph.getData(q, function(gData) {
 							renderGraph(gData);
 						}); // END Graph.getData //
-						/*
-						Graph.get(q, function(gData) {
-							console.log(gData._id);
-						});
-						*/ 
 					}
 					if(currTimer) clearTimeout(currTimer);
 					currTimer = setTimeout(function() { 
@@ -348,6 +343,9 @@ angular.module('graphing', [])
 						//$.extend(q, graph, true);
 
 						Graph.getData(q, function(result) {
+							for(var i in q.series) {
+								q.series[i].loading = "done-loading";
+							}
 							sf = new SeriesFormatter(result.series);
 							sTags = sf.seriesTags();
 							// write to links object //

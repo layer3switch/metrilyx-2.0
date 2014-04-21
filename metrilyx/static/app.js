@@ -155,6 +155,17 @@ app.directive('tagkeyvalue', function() {
 	        		}
 	        	}
 			});
+			$(elem).keyup(function(e) {
+				// clear input & close autocomplete on 'enter' //
+				if(e.keyCode === 13) {
+					var ival = $(elem).val();
+					var arr = ival.split("=");
+					if(arr.length == 2 && arr[1] !== "") {
+						$(elem).val('');
+						$(elem).autocomplete('close');	
+					}
+				}
+			});
 			// model --> view
 			ctrl.$formatters.push(function(modelValue) {
 				return "";

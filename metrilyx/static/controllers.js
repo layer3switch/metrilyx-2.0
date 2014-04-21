@@ -91,6 +91,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
 		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit_panel.html";
 		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
+		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/query-editor.html";
 		$scope.graphHtml 		= connectionPool.nextConnection()+"/partials/graph.html";
 		$scope.heatGraphHtml 	= connectionPool.nextConnection()+"/partials/heat-graph.html"
 		$scope.podHtml 			= connectionPool.nextConnection()+"/partials/pod.html";
@@ -430,6 +431,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit_panel.html";
 		$scope.pageHeaderHtml 	= connectionPool.nextConnection()+"/partials/page-header.html";
 		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
+		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/query-editor.html";
 
 		$scope.metricListSortOpts 	= dndconfig.metricList;
 

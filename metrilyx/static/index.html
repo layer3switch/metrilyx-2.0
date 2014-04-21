@@ -40,32 +40,27 @@
 	</head>
 	<body ng-app="app">
 		<div id="side-panel" ng-controller="sidePanelController">
-			<div style="height:100%;padding-left:10px;padding-right:10px">
+			<div style="height:100%;">
 				<div class="page-selector-header text-center">
-					<a id="model-list-btn" class="interactive model-list-btn list-active" style="color:#ccc" ng-click="loadPagemodelList('#model-list-btn')" href="javascript:void(0)" title="Page listing">
-						<span class="marginr10 pad10" style="padding-left:0">
-							<div class="iblk">
-								<div><i class="glyphicon glyphicon-file"></i></div>
-								<div class="edit-panel-btn-label">Models</div>
-							</div>
-						</span>
-					</a>
-					<a id="heatmap-list-btn" class="interactive model-list-btn" style="color:#ccc" ng-click="loadHeatmapList('#heatmap-list-btn')" href="javascript:void(0)" title="Heatmap listing">
-						<span class="marginr10 pad10">
-							<div class="iblk">
-								<div><i class="glyphicon glyphicon-fire"></i></div>
-								<div class="edit-panel-btn-label">Heatmaps</div>
-							</div>
-						</span>
-					</a>
+					<table style="width:100%"><tr>
+						<td id="model-list-btn" class="text-center side-panel-btn interactive model-list-btn list-active pointer" style="border-right: 1px solid #464646;" ng-click="loadPagemodelList('#model-list-btn')" title="Page listing">
+								<span><i class="glyphicon glyphicon-file"></i></span>
+								<span class="edit-panel-btn-label medium">Models</span>
+						</td>
+						<td id="heatmap-list-btn" class="text-center pointer side-panel-btn interactive model-list-btn" ng-click="loadHeatmapList('#heatmap-list-btn')" title="Heatmap listing" style="border-left: 1px solid #464646;">
+							<span><i class="glyphicon glyphicon-fire"></i></span>
+							<span class="edit-panel-btn-label medium">Heatmaps</span>
+						</td>
+					</tr></table>
 				</div>
+				<div>
 				<div class="input-group input-group-sm panel-searchbar model-listing">
-					<span class="input-group-addon page-icon pointer interactive" onclick="document.getElementById('modelimport').click()" title="Import">
+					<span class="input-group-addon page-icon pointer interactive" onclick="document.getElementById('modelimport').click()" title="Import" style="padding-left:4px;">
 						<i class="glyphicon glyphicon-import"></i>
 						<div class="edit-panel-btn-label">Import</div>
 						<input id="modelimport" type="file" style="display:none;" onchange="angular.element(this).scope().importModel(this.files);">
 					</span>
-					<input type="text" class="form-control" placeholder="Search" ng-model="modelQuery" style="margin-top:7px">
+					<input type="text" class="form-control dark" placeholder="Search" ng-model="modelQuery" style="margin-top:7px">
 					<a href="#/{{modelType}}new" class="input-group-addon page-icon interactive" title="New">
 						<i class="glyphicon glyphicon-plus"></i>
 						<div class="edit-panel-btn-label">New</div>
@@ -79,6 +74,7 @@
 						<span class="padl10">{{model.name}}</span>
 					</div>
 				</a>
+				</div>
 			</div>
 		</div><!-- END #side-panel -->
 		<!--
