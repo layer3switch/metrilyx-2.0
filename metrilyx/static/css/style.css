@@ -3,6 +3,7 @@ body {
 	margin: 0;
 	overflow: none;
 	padding:0;
+	font-family:"Trebuchet MS", Helvetica, sans-serif !important;
 }
 a {
 	text-decoration: none !important;
@@ -62,6 +63,8 @@ select[ng-model="timeType"] {
 	font: -moz-small-control;
 	border-radius: 2px !important;
 	background: none !important;
+	padding: 5px !important;
+	padding-top: 3px !important;
 }
 .page-mast {
 	background: rgba(55,55,55,0.8);
@@ -88,8 +91,19 @@ select[ng-model="timeType"] {
 	color: #428bca !important;
 }
 .list-active {
-	color: #428bca !important;	
+	color: #428bca !important;
+	font-weight: bold !important;
+	/*background-color: #343434 !important;*/
+	-moz-box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    border-bottom: none !important;
 }
+/*
+td.list-active {
+	color: #428bca !important;
+	background-color: #343434 !important;
+}*/
 .shift {
 	position: absolute;
 	left:0;
@@ -119,6 +133,17 @@ select[ng-model="timeType"] {
 	width: 300px;
 	color: #ccc;
 	overflow-y: auto;
+}
+td.side-panel-btn {
+	width: 50%;
+	text-align: center;
+	padding-top: 16px;
+	padding-bottom: 16px;
+	color: #777;
+	border-bottom: 1px solid #464646;
+	-moz-box-shadow: inset 0 -2px 1em rgba(22,22,22,0.3);
+    -webkit-box-shadow: inset 0 -2px 1em rgba(22,22,22,0.3);
+    box-shadow: inset 0 -2px 1em rgba(22,22,22,0.3);
 }
 [ng-repeat="graph in pod.graphs"] {
 	/*border: 1px solid #ccc;*/
@@ -182,12 +207,12 @@ input.form-control.md {
 	background:         linear-gradient(rgba(77,77,77,0.6),rgba(66,66,66,0.9));
 }
 .page-selector-header {
-	font-size: 20px !important;
+	/*font-size: 20px !important;*/
 	color:#aaaaaa;
-	padding: 10px;
+	/*padding: 10px;
 	padding-top: 11px;
 	padding-left:15px;
-	border-bottom: 1px solid #414141;
+	border-bottom: 1px solid #414141;*/
 }
 .page-icon {
 	padding:5px;
@@ -218,6 +243,9 @@ input.form-control.md {
 	padding-top: 5px;
 	font-size: 10px;
 }
+.edit-panel-btn-label.medium {
+	font-size: 14px;
+}
 [ng-model='droppablePodSchema'] {
 	border-top: 1px solid rgba(180,180,180,0.5);
 	border-bottom: 1px solid rgba(44,44,44,0.6);
@@ -244,6 +272,18 @@ input.search-field {
 	height: 30px;
 	outline: none !important;
 }*/
+input[ng-model='metricQuery'] {
+	width:100%;
+	border-radius:20px !important;
+	padding-left: 10px !important;
+	padding-top: 4px !important;
+	padding-bottom: 4px !important;
+}
+input[ng-model='metricQuery']:focus{
+	outline: none;
+    border-color: #428bca !important;
+    box-shadow: 0 0 7px #428bca;
+}
 [ng-model='metricQueryResult'] {
 	color: #ccc;
 	text-decoration: none !important;
@@ -254,6 +294,7 @@ input.search-field {
 	width: 100%;
 	padding-left: 5px;
 	padding-right: 5px;
+	min-height: 20px;
 	/*border-top: 1px solid rgba(44,44,44,0.6);*/
 }
 [ng-repeat="metric in metricQueryResult"] {
@@ -646,10 +687,11 @@ a.pod-header-btn.edit-mode {
 	cursor: default !important;
 }
 .input-group.panel-searchbar {
-	padding-top: 10px;
-	padding-bottom: 10px;
+	padding: 10px;
+	padding-bottom: 11px;
+	padding-top: 11px;
+	padding-left: 12px;
 	color: #999;
-	border-bottom: 1px solid #404040;
 } 
 .input-group.panel-searchbar.model-listing {
 	padding-top: 5px !important;
@@ -668,10 +710,12 @@ a.pod-header-btn.edit-mode {
 	border-radius: 34px !important;
 	padding-left: 10px !important;
 }
-[ng-model="pageQuery"]::-webkit-input-placeholder {
-	color: #555 !important;
+[ng-model="modelQuery"]::-webkit-input-placeholder,
+[ng-model="metricQuery"]::-webkit-input-placeholder {
+	color: #666 !important;
 }
-[ng-model="pageQuery"]::-moz-placeholder {
+[ng-model="modelQuery"]::-moz-placeholder,
+[ng-model="metricQuery"]::-moz-placeholder {
 	color: #666 !important;	
 }/*
 input[ng-model='metric.query.tags'].form-control {
@@ -686,6 +730,9 @@ input.dark {
 	border:1px solid #888 !important;
 	border-radius:3px;
 	color: #ccc !important;
+	-moz-box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
+    -webkit-box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
+    box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
 }
 .heatgraph-list {
 	border-left:none!important;
@@ -736,8 +783,9 @@ input.dark {
 	color:#ccc;"
 }
 .graph-metric-label {
-	border-radius:2px 2px 0 0 !important;
-	border-bottom:none!important;
+	/*border-radius:2px 2px 0 0 !important;
+	border-bottom:none!important;*/
+	border-radius: 2px !important;
 	color: #666 !important;
 }
 .select-container {
@@ -758,6 +806,9 @@ select.select-input {
 	background: none !important;
 	border: none !important;
 	padding-top: 0px !important;
+}
+.btn-default {
+	color: #666 !important;
 }
 .btn-default.inverted {
 
@@ -782,4 +833,17 @@ input.form-control.trans {
 	background: none !important;
 	color: #ccc;
 	border-color: #888 !important;
+	-moz-box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
+    -webkit-box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
+    box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
+}
+#adhoc-graph {
+	width:96%;
+	border-radius:0 3px 3px 3px;
+	border:1px solid #ccc;
+	background-color:#fff;
+	padding: 3px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 10px;
 }

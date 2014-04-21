@@ -293,6 +293,12 @@ select.short146 {
 .margin0 {
 	margin: 0;
 }
+.margin2 {
+	margin: 2px !important;
+}
+.margin3 {
+	margin: 3px !important;
+}
 .margin5 {
 	margin: 5px;
 }
@@ -375,6 +381,10 @@ input.margintb3 {
 	margin-top: 5px;
 	margin-bottom: 5px;
 }
+.margintb6 {
+	margin-top: 6px;
+	margin-bottom: 6px;
+}
 .margintb10 {
 	margin-top: 10px;
 	margin-bottom: 10px;
@@ -429,6 +439,10 @@ input.margintb3 {
 .marginlra {
 	margin-right: auto;
 	margin-left: auto;
+}
+.marginlr2 {
+	margin-right: 2px;
+	margin-left: 2px;
 }
 .marginlr3 {
 	margin-right: 3px;
