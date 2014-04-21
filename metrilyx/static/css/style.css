@@ -261,28 +261,15 @@ input.form-control.md {
 }
 [ng-repeat='metric in graph.series'] {
 	border-top: 1px solid rgba(0,0,0,0.3);
-}/*
-input.search-field {
-	margin:0;
-	width: 100%;
-	border: 1px solid #888;
-	padding-left: 10px !important;
-	padding-right: 5px !important;
-	background-color: #ccc !important;
-	height: 30px;
-	outline: none !important;
-}*/
+}
+input[ng-model='modelQuery'],
 input[ng-model='metricQuery'] {
 	width:100%;
 	border-radius:20px !important;
 	padding-left: 10px !important;
 	padding-top: 4px !important;
 	padding-bottom: 4px !important;
-}
-input[ng-model='metricQuery']:focus{
-	outline: none;
-    border-color: #428bca !important;
-    box-shadow: 0 0 7px #428bca;
+	outline: none!important;
 }
 [ng-model='metricQueryResult'] {
 	color: #ccc;
@@ -708,7 +695,7 @@ a.pod-header-btn.edit-mode {
 	border: 1px solid #505050 !important;
 	color: #999;
 	border-radius: 34px !important;
-	padding-left: 10px !important;
+	padding-left: 10px !important;	
 }
 [ng-model="modelQuery"]::-webkit-input-placeholder,
 [ng-model="metricQuery"]::-webkit-input-placeholder {
@@ -717,13 +704,7 @@ a.pod-header-btn.edit-mode {
 [ng-model="modelQuery"]::-moz-placeholder,
 [ng-model="metricQuery"]::-moz-placeholder {
 	color: #666 !important;	
-}/*
-input[ng-model='metric.query.tags'].form-control {
-	color: #ccc;
-}*//*
-input[ng-model='metric.query.tags'].form-control.ng-invalid.ng-dirty {
-	color: #a94442;
-}*/
+}
 select.dark,
 input.dark {
 	background:none !important;
