@@ -19,6 +19,8 @@ Metrilyx will run on any system that supports the packages below.  It has primar
 	httpd
 	mod_wsgi
 	python-setuptools
+	python-devel
+	gcc
 	
 ##### Debian:
 	libuuid1 
@@ -38,9 +40,9 @@ Metrilyx will run on any system that supports the packages below.  It has primar
 	uuid
 
 ### Installation
-The provided makefile will work with **RedHat** based distributions.  You can issue the command below, to auto-install the complete package including dependencies. The default install path is **/opt/metrilyx**.	
+The provided install script will work with **RedHat** and **Debian** based distributions.  You can issue the command below, to auto-install the complete application including dependencies. The default install destination is **/opt/metrilyx**.	
 	
-	[</path/to/downloaded/app>]$./install.sh all
+	[</path/to/downloaded/app>]$./install.sh
 	
 
 This will install all required OS packages as well as python packages and apache configs.
@@ -49,11 +51,11 @@ For **other distributions**, follow the instructions below:
 
 	- Install the required OS packages based on your OS's package manager.
 	
-	- [</path/to/downloaded/app>]$ make pydeps
+	- Install all required python modules as mentioned above.
 	
-	- Copy etc/httpd/conf.d/metrilyx.conf to your webservers config directory.
+	- Copy etc/httpd/conf.d/metrilyx.conf to your webservers config directory. Usually /etc/httpd/conf.d/ for **RedHat** and /etc/apache2/conf.d/ for **Debian** based distributions.
 	
-	- Set the permissions to /opt/metrilyx to the appropriate web user 
+	- Set the permissions to /opt/metrilyx to the appropriate web server user.   
 
 	- Edit the configuration (more below).
 
@@ -65,7 +67,7 @@ The default installation directory is /opt/metrilyx (i.e %{metrilyx_home}).
 ##### Path 
 %{metrilyx_home}/etc/metrilyx/metrilyx.conf
 
-A sample config file is provided in the same directory above.  The configuration file is in JSON format.  To begin you can copy the sample config to the path mentioned above and fill in the uri and port.
+A sample config file is provided.  The configuration file is in JSON format.  To begin you can copy the sample config to the path mentioned above and fill in the uri and port.
 	
 	{
 		"tsdb": {
@@ -106,19 +108,15 @@ Path to directory where JSON page models (i.e. dashboards) will be stored.  Opti
 After you've installed and configured metrilyx, click on the "tutorials" link towards the bottom-center of the page for a general overview and basic tutorial on how to get started.
 
 ##### heatmaps
-This configuration option is to generate heatmaps.  The only needed change here is the mongodb information relative to your setup.
+This configuration option is only need if you plan to use heatmaps. If you choose to enable this feature the only needed change is the mongodb information relative to your setup.
 
 
 ### Heat Maps
-Heatmaps are used to few your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10.  This is usually the tag containing a value of '*'.
+Heatmaps are used to view your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10.  This is usually the tag containing a value of '*'.
 
-Heatmap jobs are stored in the application directory in 'heatmaps.json'.  The heatmap dashboards are stored in a directory called 'heatmaps' in the application directory (default: /opt/metrilyx)
+Heatmap jobs are stored in the application directory in 'heatmaps.json'.  The heatmap dashboards are stored in a directory called 'heatmaps' in the application directory.
 
-In order to use heatmaps, you will need a mongodb server.  Heatmap computations are performed using celery (python distributed processing framework) which uses mongodb for its backend.  For scalability more celery worker nodes can be added.  To install simply download the application on the node in question and run the install script.
-
-#####Install
-	./install.sh lyx  
-This will install the worker and the celeryd daemon.  After the installation completes, edit the heatmaps section in the configuration file with information specific to your environment.
+In order to use heatmaps, you will need a mongodb server.  Heatmap computations are performed using celery (a python distributed processing framework) which uses mongodb for its backend.  For scalability more celery worker nodes can be added.  To install simply download the application on the node in question and run the install script.
 
 #####Start the heatmap generator.  (only 1 instance of this should be running)
 	/etc/init.d/celerybeatd start
