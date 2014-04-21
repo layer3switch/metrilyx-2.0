@@ -27,16 +27,16 @@
 			</a>
 		</div>
 	</div>
-	<div class="input-group input-group-sm panel-searchbar marginlr5 padl5 padr10" style="border-bottom:1px solid #555;">
-		<span class="input-group-addon">
+	<div class="input-group input-group-sm panel-searchbar">
+		<input type="text" ng-model="metricQuery" ng-change="searchForMetric()" placeholder="Metric Search" class="dark" style="border:1px solid #666 !important">
+		<span class="input-group-addon nobg" style="padding-right:0px!important;">
 			<i class="glyphicon glyphicon-search"></i>
 		</span>
-		<input type="text" class="form-control" ng-model="metricQuery" ng-change="searchForMetric()" placeholder="Metric Search" style="border:1px solid #666 !important;">
 	</div>
 	<div>
 		<div ui-sortable="metricListSortOpts" drag-copy="true" ng-model="metricQueryResult">
 			<div class="metric interactive page-list-item" ng-repeat="metric in metricQueryResult" ng-model="metric" title="{{metric.query.metric}}" style="color:#ccc">
-				<span class="padr10"><i class="glyphicon glyphicon-stats"></i></span>
+				<!--<span class="padr10"><i class="glyphicon glyphicon-stats"></i></span>-->
 				<span>{{metric.query.metric}}</span>
 			</div>
 		</div>

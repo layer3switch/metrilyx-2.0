@@ -11,7 +11,7 @@
 			</span>
 		</div>
 		<div ng-if="graph.graphType!='pie'" class="marginlr5 marginb5 collapse" ng-include="thresholdsHtml"></div>
-		<div class="padlr10 padt5 padb10 pod-controls edit-comp{{editMode}}" style="border-bottom: 1px solid #ccc">
+		<div class="padlr10 padt5 padb10 pod-controls edit-comp{{editMode}}">
 			<div class="row" style="margin:0;color:#666;font-size:12px;">
 				<div class="col-md-6 text-left" title="Graph Type">
 					<span style="color:#aaa">Type :</span>
@@ -38,11 +38,13 @@
 		</div>
 	</div>
 	<div>
+	<div ng-if="editMode===' edit-mode'" ng-include="queryEditorHtml" class="text-center"></div>
 	<div class="graph {{graph.size}} text-center animated"  style="width:100%" data-graph-id="{{graph._id}}" ui-sortable ng-model="graph.series">
 		<table class='gif-loader-table' style="color:#ccc"><tr><td>
 			Drag metrics here from search
 		</td></tr></table>
 	</div>
+	<!--
 	<div class="graph-controls edit-comp{{editMode}} graph-metrics-panel collapse">
 		<div ng-repeat="metric in graph.series">
 			<div class="pad10" style="overflow-x:hidden;text-wrap:none;white-space:nowrap">
@@ -82,7 +84,6 @@
 				</div>
 				<div style="margin-top:4px">
 					<span class="input-group input-group-sm">
-						<!--<span class="metric-control-label">yTransform</span>-->
 						<span class="input-group-addon nobg metric-control-label" title="Function applied to each datapoint">yTransform</span>
 						<input type="text" ng-model="metric.yTransform" class="form-control dark" placeholder="lambda x: x/1024">
 					</span>
@@ -90,3 +91,4 @@
 			</div>
 		</div>
 	</div>
+	-->
