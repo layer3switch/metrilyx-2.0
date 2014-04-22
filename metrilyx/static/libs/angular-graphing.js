@@ -243,7 +243,6 @@ angular.module('graphing', [])
 						scope.setStatus(newVal.series.length-1, 'loading');
 						scope.setURL(newVal);
 						getGraphData(newVal, function(result) {
-							//updateTagsOnPage(result);
 							graphing_newGraph(result);
 							scope.setStatus(newVal.series.length-1, 'done-loading');
 						});
@@ -255,7 +254,6 @@ angular.module('graphing', [])
 						return;
 					};
 					if(newVal.series.length == oldVal.series.length) {
-						//scope.setURL(newVal);
 						return;
 					} else if(newVal.series.length > oldVal.series.length) {
 						scope.setURL(newVal);
@@ -264,14 +262,12 @@ angular.module('graphing', [])
 						scope.setStatus(newVal.series.length-1, 'loading');
 						Graph.getData(q, function(result) {
 							scope.setStatus(newVal.series.length-1, 'done-loading');
-							//updateTagsOnPage(result);
 							graphing_upsertSeries(result);
 							scope.setStatus(newVal.series.length-1, 'done-loading');
 						});
 					} else {
 						graphing_removeSeries(newVal);
 						scope.setURL(newVal);
-						//updateTagsOnPage(newVal);
 					}
 				}, true);
 			}
@@ -435,8 +431,6 @@ angular.module('timeframe', [])
 						scope.setTimeType(newValue);
 						//scope.setTimeType(scope.timeType);
 						if(scope.modelType !== 'graph') scope.setUpdatesEnabled(false);
-						
-						//if(newValue !== oldValue) {
 							d = new Date();
 							endTime = Math.ceil(d.getTime()/1000);
 							startTime = endTime - relativeToAbsoluteTime(oldValue);
@@ -444,7 +438,6 @@ angular.module('timeframe', [])
 							$('[ng-model=startTime]').data("DateTimePicker").setDate(new Date(startTime*1000));
 							scope.setEndTime(endTime);
 							$('[ng-model=startTime]').data("DateTimePicker").setDate(new Date(endTime*1000));
-						//}
 					} else {
 						if(scope.modelType === 'graph') {
 							scope.setTimeType(newValue);
@@ -458,34 +451,6 @@ angular.module('timeframe', [])
 						}
 					}
 				}, true);
-			}
-		};
-	}])
-	.directive('globalTags', [ '$location', function($location) {
-		return {
-			restrict: 'A',
-			require: '?ngModel',
-			link: function(scope, elem, attrs, ctrl) {
-				if(!ctrl) return;
-				scope.$watch(function() {
-					return ctrl.$modelValue;
-				}, function(newVal, oldVal) {
-					//console.log(newVal,oldVal);
-					if(equalObjects(newVal, oldVal)) return;
-					//console.log("passed", newVal,oldVal);
-					tagsLoc = dictToCommaSepStr(newVal);
-					tmp = $location.search();
-					if(tagsLoc == "") {
-						if(tmp.tags) {
-							delete tmp.tags;
-							$location.search(tmp);
-						}
-						return;
-					}
-					$.extend(tmp, {tags: tagsLoc}, true);
-					$location.search(tmp);
-				},true);
-				
 			}
 		};
 	}]);
