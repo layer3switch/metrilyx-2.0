@@ -84,10 +84,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$('#confirm-delete').modal('hide');
 		$('.modal-backdrop').remove();
 
-		var canceler;
-
-		//$scope.relativeTimes = ["24h-ago","12h-ago","6h-ago","3h-ago","2h-ago","1h-ago","Custom Range"];
-
 		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
 		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit_panel.html";
 		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
@@ -175,6 +171,17 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				}
 			}
 		});
+		$scope.onPartialComponentLoad = function() {
+			// this is to account for processing time //
+			setTimeout(function() {
+				if($scope.editMode === ' edit-mode') {
+					console.log('hi');
+					$('input.edit-comp').attr('disabled', false);
+				} else {
+					$('input.edit-comp').attr('disabled', true); 
+				}
+			}, 150);
+		}
 		$scope.updateGlobalTag = function(tagkey, tagval) {
 			$scope.globalTags[tagkey] = tagval;
 			//$scope.$parent.globalTags[tagkey] = tagval;
