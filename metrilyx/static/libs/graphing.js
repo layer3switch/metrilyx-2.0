@@ -318,9 +318,9 @@ function formatDataHighcharts(graphSeries) {
 function dataHasErrors(gObj) {
     for(var s in gObj.series) {
         if(gObj.series[s].data.error !== undefined) {
-            msg = gObj.series[s].data.error.substring(0,50)+"...";
-            //console.log(msg.substring(0, 50));
-            //gObj.series[s].alias+" (error: "+msg+")"; 
+            if(gObj.series[s].data.error.message) msg = gObj.series[s].data.error.message.substring(0,50)+"...";
+            else msg = gObj.series[s].data.error.substring(0,50)+"...";
+            
             return { 
                 "error": {
                     "message": msg,
