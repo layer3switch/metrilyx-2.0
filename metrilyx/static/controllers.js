@@ -65,7 +65,6 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 ]);
 metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph','Heatmap',
 	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Graph, Heatmap) {
-		//console.log($routeParams);
 		if($routeParams.heatmapId) {
 			$scope.modelType = "heatmap/";
 		} else {
@@ -217,7 +216,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				}
 			}
 			$scope.tagsOnPage = top;
-			//console.log($scope.tagsOnPage);
 		}
 		$scope.setTimeType = function(newRelativeTime, reloadPage) {
 			$scope.timeType = newRelativeTime;
@@ -225,7 +223,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				$scope.delayLoadPageModel($routeParams.pageId);
 		}
 		$scope.searchForMetric = function(args) {
-			//console.log("|",this.metricQuery,"|");
 			/* 
 				'this.metricQuery' must be used rather than '$scope.metricQuery' because 
 				edit-panel is ng-include so a new scope gets created.
@@ -243,7 +240,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 					}
 					$scope.metricQueryResult = arr;
 				});
-				//console.log($scope.metricQueryResult.length);
 			});
 		}
 		// Load initial empty page -> pod -> graph //
@@ -281,7 +277,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.reflow = function(args) {
 			// This is to compensate for angulars processing time until I can figure out a better way //
 			setTimeout(function() {
-				//console.log("reflow");
 				$('[data-graph-id]').each(function() {
 					hc = $(this).highcharts();
 					if(hc != undefined) {
@@ -339,10 +334,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		}
 		$scope.toggleEditMode = function() {
 			if($scope.editMode == "") {
-				// enable edit mode
 				$scope.enableEditMode();
 			} else {
-				// disable edit mode
 				$scope.disableEditMode();
 			}
 			$scope.reflow();
@@ -383,8 +376,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 					currpath = "#/" + $scope.modelType + $scope.model._id;
 				}
 				console.log(currpath);
-				if(location.hash === currpath) { 
-					//console.log($location);
+				if(location.hash === currpath) {
 					location.reload(true);
 				} else {
 					location.hash = $scope.model._id;
@@ -410,26 +402,12 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$location.path('/graph').search({});
 			$route.reload();
 		}
-
-		// close side panel //
-		/*
-		$('#stage').removeClass('right');
-		if($routeParams.pageId == "new" || $routeParams.heatmapId == 'new') {
-			setTimeout(function() {
-				$scope.enableEditMode();	
-			}, 300);
-		} else {
-			if($scope.editMode == "") {
-				$scope.disableDragDrop();	
-			}
-		}*/
 }]);
+
 metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph',
 	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Graph) {
-		//console.log($routeParams);
-		
+
 		$scope.modelType 		= "graph";
-		//$scope.relativeTimes 	= ["24h-ago","12h-ago","6h-ago","3h-ago","2h-ago","1h-ago","Custom Range"];
 		$scope.timeType 		= "1h-ago";
 		$scope.editMode 		= " edit-mode";
 		
@@ -485,7 +463,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			if($routeParams.m) {
 				var metrics;
 				if(Object.prototype.toString.call($routeParams.m) === '[object Array]') {
-					//console.log('arr');
 					metrics = $routeParams.m;
 				} else {
 					metrics = [ $routeParams.m ];
@@ -524,7 +501,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		}
 
 		$scope.setStatus = function(serieIdx, status) {
-			//console.log(serieIdx, status);
 			$scope.graph.series[serieIdx].loading = status;
 		}
 
@@ -606,7 +582,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			for(var s in $scope.graph.series) {
 				$scope.graph.series[s].loading = "loading";
 			}
-			//console.log($scope.graph.series[0].query.tags);
 			$scope.setURL($scope.graph);
 
 			q = $scope.baseQuery($scope.graph)
@@ -617,7 +592,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 					$scope.graph.series[s].loading = "done-loading";
 					for(var d in result.series[s].data) {
 						$scope.updateTagsOnPage(result.series[s].data[d].tags);
-						//console.log(result.series[s].data[d].tags);
 					}
 				}
 			});
@@ -707,7 +681,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		}
 		$scope.setAbsoluteTime = function() {
 			$scope.reloadGraph();
-			//console.log($scope.startTime, $scope.endTime, $scope.timeType);
 		}
 		$scope.updateGlobalTag = function(tagkey, tagval) {
 			if(tagkey == undefined || tagkey == "") return;
