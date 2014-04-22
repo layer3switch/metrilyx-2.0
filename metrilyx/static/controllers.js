@@ -202,17 +202,15 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.updateTagsOnPage = function(obj) {
 			var top = $scope.tagsOnPage;
 			for(var k in obj) {
-				if(top[k]) {
-					for(var i in obj[k]) {
-						if(top[k].indexOf(obj[k][i]) >= 0) {
-							continue;
-						} else {
-							top[k].push(obj[k][i]);
-						}
-					}
+				if(top[k] == undefined) {
+					top[k] = ["*"];
+					top[k].push(obj[k]);
+					continue;
+				}
+				if(top[k].indexOf(obj[k]) >= 0) {
+					continue;
 				} else {
-					top[k] = obj[k];
-					top[k].push("*");
+					top[k].push(obj[k]);
 				}
 			}
 			$scope.tagsOnPage = top;
@@ -402,6 +400,27 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$location.path('/graph').search({});
 			$route.reload();
 		}
+		$scope.reloadGraph = function(gobj) {
+			$('.adhoc-metric-editor').hide();
+			if(gobj.series.length < 1) return;
+
+			for(var s in gobj.series) {
+				gobj.series[s].loading = "loading";
+			}
+			//$scope.setURL(gobj);
+
+			q = $scope.baseQuery(gobj)
+			q.series = gobj.series;
+			Graph.getData(q, function(result) {
+				graphing_newGraph(result);
+				for(var s in gobj.series) {
+					gobj.series[s].loading = "done-loading";
+					for(var d in result.series[s].data) {
+						$scope.updateTagsOnPage(result.series[s].data[d].tags);
+					}
+				}
+			});
+		}
 }]);
 
 metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph',
@@ -575,21 +594,21 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			}
 			$scope.tagsOnPage = top;
 		}
-		$scope.reloadGraph = function() {
+		$scope.reloadGraph = function(gobj) {
 			$('.adhoc-metric-editor').hide();
-			if($scope.graph.series.length < 1) return;
+			if(gobj.series.length < 1) return;
 
-			for(var s in $scope.graph.series) {
-				$scope.graph.series[s].loading = "loading";
+			for(var s in gobj.series) {
+				gobj.series[s].loading = "loading";
 			}
-			$scope.setURL($scope.graph);
+			$scope.setURL(gobj);
 
-			q = $scope.baseQuery($scope.graph)
-			q.series = $scope.graph.series;
+			q = $scope.baseQuery(gobj)
+			q.series = gobj.series;
 			Graph.getData(q, function(result) {
 				graphing_newGraph(result);
-				for(var s in $scope.graph.series) {
-					$scope.graph.series[s].loading = "done-loading";
+				for(var s in gobj.series) {
+					gobj.series[s].loading = "done-loading";
 					for(var d in result.series[s].data) {
 						$scope.updateTagsOnPage(result.series[s].data[d].tags);
 					}
