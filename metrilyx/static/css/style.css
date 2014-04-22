@@ -59,8 +59,8 @@ select[ng-model="timeType"] {
 [ng-model="metric.query.aggregator"],
 [ng-model="graph.graphType"],
 [ng-model="graph.size"] {
-	font: -webkit-small-control;
 	font: -moz-small-control;
+	font: -webkit-small-control;
 	border-radius: 2px !important;
 	background: none !important;
 	padding: 5px !important;
