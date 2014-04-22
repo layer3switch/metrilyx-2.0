@@ -354,8 +354,6 @@ function graphing_newGraph(graph) {
     if(dhe) {
         $(renderTo).html("<span class='graph-error'><b>"+dhe.error.metric+": </b>"+dhe.error.message+"</span>");
         console.log("error:", dhe.error);
-        // trial //
-        //$(renderTo).highcharts("StockChart",{});
         return;
     }
     var copts = new ChartOptions(graph);
