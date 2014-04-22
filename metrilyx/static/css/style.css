@@ -755,7 +755,7 @@ input.dark {
 	position: absolute;
 	z-index: 1;
 	top: 33px;
-	min-width: 240px;
+	min-width: 300px;
 	padding: 10px;
 	padding-left: 15px;
 	padding-right: 15px;
