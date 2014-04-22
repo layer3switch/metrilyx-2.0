@@ -340,7 +340,6 @@ angular.module('graphing', [])
 
 						var q = scope.baseQuery(graph);
 						q.series = graph.series;
-						//$.extend(q, graph, true);
 
 						Graph.getData(q, function(result) {
 							for(var i in q.series) {
@@ -363,31 +362,7 @@ angular.module('graphing', [])
 					
 					// check length //
 					if(graph.series.length == oldValue.series.length) {
-						// this requires a special case as the all data needs to be replaced with new data //
-						//console.log("query (rate, aggr, tags) changed");
-						for(var s in graph.series) {
-							// this is to make sure we are only watching aggr,rate and not tags
-							// tags require validation before they can be used
-							if(equalObjects(graph.series[s].query, oldValue.series[s].query)) continue;
-							var q = scope.baseQuery(graph);
-							q.series = [ graph.series[s] ];
-							
-							if(!equalObjects(graph.series[s].query.tags, oldValue.series[s].query.tags)) {
-								$("[data-graph-id='"+graph._id+"']").html(
-											"<table class='gif-loader-table'><tr><td> \
-											<img src='/imgs/loader.gif'></td></tr></table>");
-								Graph.getData(q, function(result) {
-									//console.log("tags changed. re-building graph.");
-									graphing_newGraph(result);
-								});
-							} else {
-								Graph.getData(q, function(result) {
-									// find and replace series with new data //
-									console.log("rate, aggr changed. find & replacing series.");
-									graphing_replaceSeries(result);
-								});
-							}
-						}
+						return;
 					} else if(graph.series.length > oldValue.series.length) {
 						//console.log("add new series");
 						var q = scope.baseQuery(graph);	
