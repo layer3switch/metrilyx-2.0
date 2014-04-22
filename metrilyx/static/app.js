@@ -79,6 +79,7 @@ angular.module('filters',[]).
 		    return tstr.replace(/\,$/,'%3B');
 		}
 	});
+/*	
 app.directive('stopEvent', function () {
     return {
         restrict: 'A',
@@ -88,7 +89,7 @@ app.directive('stopEvent', function () {
             });
         }
     };
-});
+});*/
 app.directive('tagkeyvalue', function() {
 	return {
 		restrict: 'A',
@@ -206,18 +207,42 @@ app.directive('keyValuePairs', function() {
 			// no model - do nothing
 			if(!ngModel) return;
 
-			$(elem).attr('placeholder', 'tag1:val1,tag2:val2;');
+			function getTagsString(tagstr, lastVal, eventType) {
+				tkvs = tagstr.split(",");
+        		var baseTags = "";
+        		for(var i=0;i<tkvs.length-1;i++) {
+    				baseTags += tkvs[i]+",";
+        		}
+        		kv = tkvs[tkvs.length-1].split("=");
+        		if(kv.length == 1) {
+        			if(eventType === 'select') return baseTags+lastVal+"=";
+        			return baseTags+lastVal;
+        			//event.preventDefault();
+        		} else if(kv.length == 2) {
+        			var tvals = kv[1].split("|");
+        			var retstr = "";
+        			for(var i=0;i<tvals.length-1;i++) {
+        				retstr += tvals[i]+"|";
+        			}
+        			retstr += lastVal;
+        			return baseTags+kv[0]+"="+retstr;
+        		}
+			}
+
+			$(elem).attr('placeholder', 'tag1=val1,tag2=val2');
 			$(elem).autocomplete({
 				source: function(request, response) {
 					kvpairs = request.term.split(",");
-					lastKvPair = kvpairs[kvpairs.length-1].split(":");
+					lastKvPair = kvpairs[kvpairs.length-1].split("=");
 	            	var stype, q;
 	            	if(lastKvPair.length <= 1) {
 	            		stype = "tagk";
 	            		q = lastKvPair[0];
 	            	} else {
 	            		stype = "tagv";
-	            		q = lastKvPair[1];
+	            		tvals = lastKvPair[1].split("|");
+	            		q = tvals[tvals.length-1];
+	            		if(q === '') return;
 	            	}
 	            	$.getJSON('/api/search','type='+stype+'&q='+q, response);
 	        	},
@@ -226,24 +251,22 @@ app.directive('keyValuePairs', function() {
 	            	results: function() {}
 	        	},
 	        	minLength:1,
-	        	/*
-	        	select: function( event, ui ) {
-	        		//console.log(event);
-	        		
-	        		var ival = $(elem).val();
-	        		var kvps = ival.split(",");
-	        		
-	        		kv = kvps[kvps.length-1].split(":")
-	        		if(kv.length == 1) {
-	        			return true;
-	        		} else if(kv.length == 2) {
-	        			$(elem).val(kv[0]+":"+ui.item.value);
-	        			return false;
+	        	select: function(event, ui) {
+	        		var tagstring = $(elem).val();
+	        		ttagstr = getTagsString(tagstring, ui.item.value, "select");
+	        		if(ttagstr !== undefined) {
+	        			$(elem).val(ttagstr);
+	        			event.preventDefault();
 	        		}
-	        		console.log(ui.item);
-	        		console.log($(elem).val());
-	        		return false;
-	        	}*/
+	        	},
+	        	focus: function(event, ui) {
+	        		var tagstring = $(elem).val();
+	        		ttagstr = getTagsString(tagstring, ui.item.value, "focus");
+	        		if(ttagstr !== undefined) {
+	        			$(elem).val(ttagstr);
+	        			event.preventDefault();
+	        		}
+	        	}
 			});
 			// model --> view
 			ngModel.$formatters.push(dictToCommaSepStr);
@@ -254,14 +277,17 @@ app.directive('keyValuePairs', function() {
 					ngModel.$setValidity('keyValuePairs', true);
           			return {};
 				}
+				/*
 				if(viewValue.search(/;$/) < 0 ) {
 					ngModel.$setValidity('keyValuePairs', false);
 					return ngModel.$modelValue;
 				}
-				a = viewValue.replace(/;$/,'').split(",");
+				*/
+				//a = viewValue.replace(/;$/,'').split(",");
+				a = viewValue.split(",");
 				var mVal = {};
 				for (var i in a) {
-					pair = a[i].split(":");
+					pair = a[i].split("=");
 					// return original model value if user input is invalid
 					// this is to ensure active queries keep running
 					if(pair.length != 2) {
@@ -283,16 +309,16 @@ app.directive('keyValuePairs', function() {
 });
 /*
  * args: { key1: val1, key2: val2 }
- * return: key1:val1,key2:val2
+ * return: key1=val1,key2=val2
  */
-function dictToCommaSepStr(obj) {
-	//console.log('called', obj);
-    tstr = '';
+function dictToCommaSepStr(obj, delim) {
+	if(delim === undefined) delim = "="; 
+	tstr = '';
     for(var i in obj) {
-        tstr += i+":"+obj[i]+",";
+        tstr += i+delim+obj[i]+",";
     }
-    //return tstr;
-    return tstr.replace(/\,$/,';');
+    //return tstr.replace(/\,$/,';');
+    return tstr.replace(/\,$/,'');
 }
 /*
  * args: key1=val1,key2=val2

@@ -182,7 +182,20 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		}
 		$scope.updateGlobalTag = function(tagkey, tagval) {
 			$scope.globalTags[tagkey] = tagval;
-			//$scope.$parent.globalTags[tagkey] = tagval;
+			$scope.setGlobalTags($scope.globalTags);
+		}
+		$scope.setGlobalTags = function(gblTags) {
+			tagsLoc = dictToCommaSepStr(gblTags, ":");
+			tmp = $location.search();
+			if(tagsLoc == "") {
+				if(tmp.tags) {
+					delete tmp.tags;
+					$location.search(tmp);
+				}
+				return;
+			}
+			$.extend(tmp, {tags: tagsLoc}, true);
+			$location.search(tmp);
 		}
 		$scope.delayLoadPageModel = function(pageId, cb) {
 			clearAllTimeouts();
@@ -202,18 +215,26 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.updateTagsOnPage = function(obj) {
 			var top = $scope.tagsOnPage;
 			for(var k in obj) {
-				if(top[k] == undefined) {
-					top[k] = ["*"];
-					top[k].push(obj[k]);
-					continue;
-				}
-				if(top[k].indexOf(obj[k]) >= 0) {
-					continue;
+				if(Object.prototype.toString.call(obj[k]) === '[object Array]') {
+					if(top[k] == undefined) {
+						top[k] = obj[k];
+						top[k].push("*");
+					} else {
+						for(var i in obj[k]) {
+							if(top[k].indexOf(obj[k][i]) < 0) top[k].push(obj[k][i]);
+						}
+					}
 				} else {
-					top[k].push(obj[k]);
+					if(top[k] == undefined) {
+						top[k] = ["*"];
+						top[k].push(obj[k]);
+					} else if(top[k].indexOf(obj[k]) < 0) {
+						top[k].push(obj[k]);
+					}
 				}
 			}
 			$scope.tagsOnPage = top;
+			//console.log($scope.tagsOnPage);
 		}
 		$scope.setTimeType = function(newRelativeTime, reloadPage) {
 			$scope.timeType = newRelativeTime;

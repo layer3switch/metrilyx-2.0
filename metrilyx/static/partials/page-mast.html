@@ -13,9 +13,12 @@
 			</div>
 			<div class="col-md-6">
 				<div ng-if="modelType==''">
-					<div class="input-group" title="Global tags terminated with ';'">
-						<span class="input-group-addon nobg" style="font-size:26px!important;color:#ccc;padding-top:1px!important;"><i class="glyphicon glyphicon-globe"></i></span>
-						<input type="text" ng-model="globalTags" key-value-pairs global-tags class="form-control dark" style="height:30px;border-color: #707070 !important">
+					<div class="input-group" title="Tags for dashboard.">
+						<span class="input-group-addon nobg" style="color:#ccc;">Global Tags</span>
+						<input type="text" ng-model="globalTags" key-value-pairs class="form-control dark" style="border-color: #707070 !important">
+						<div class="input-group-btn">
+        					<button type="button" class="btn btn-primary" ng-click="setGlobalTags(globalTags)">Apply</button>
+      					</div>
 					</div>
 				</div>
 			</div>
