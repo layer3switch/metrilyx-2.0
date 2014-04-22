@@ -22,7 +22,6 @@ from metrilyxconfig import config
 
 from pprint import pprint
 
-
 class SchemaView(APIView):
 	def get(self, request, model_type):
 		if model_type in ("heatmap", "page"):
@@ -53,15 +52,26 @@ class PageView(APIView):
 				})
 		return Response(rslt)
 
+	def __sanitize_series(self, req_obj):
+		for row in req_obj['layout']:
+			for col in row:
+				for pod in col:
+					for graph in pod['graphs']:
+						for s in graph['series']:
+							if s.get('loading'): del s['loading']
+		return req_obj
+
 	## Add
 	def post(self, request, page_id=None):
-		req_obj = json.loads(request.body)
+		j_req_obj = json.loads(request.body)
+		req_obj = self.__sanitize_series(j_req_obj)
 		rslt = self.modelstore.addModel(req_obj)
 		return Response(rslt)
 
 	## Overwrite or Add
 	def put(self, request, page_id=None):
-		req_obj = json.loads(request.body)
+		j_req_obj = json.loads(request.body)
+		req_obj = self.__sanitize_series(j_req_obj)
 		#return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 		rslt = self.modelstore.editModel(req_obj)
 		pprint(rslt)
