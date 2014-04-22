@@ -175,7 +175,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			// this is to account for processing time //
 			setTimeout(function() {
 				if($scope.editMode === ' edit-mode') {
-					console.log('hi');
 					$('input.edit-comp').attr('disabled', false);
 				} else {
 					$('input.edit-comp').attr('disabled', true); 
