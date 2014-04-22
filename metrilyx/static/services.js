@@ -74,7 +74,6 @@ metrilyxServices.factory('Metrics', ['$http', 'Auth', function($http, Auth) {
     return {
         suggest: function(query, callback) {
            	//Auth.clearCredentials();
-           	//console.info("Next URL:", connectionPool.nextConnection());
 			if(query == "") {
 				callback([]);  
 			} else {
@@ -122,7 +121,6 @@ metrilyxServices.factory('Heatmap', ['$resource',
 metrilyxServices.factory('Schema', ['$resource', 'Auth',
 	function($resource, Auth) {
 		//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
-		//var poolUrl = connectionPool.nextConnection();
 		return $resource(connectionPool.nextConnection()+'/api/schema/:modelType', {}, {
 			get: {method:'GET', params:{modelType:'@modelType'}, isArray:false}										 
 		});
@@ -131,10 +129,6 @@ metrilyxServices.factory('Schema', ['$resource', 'Auth',
 
 metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 	return {
-		/*
-			enable async once issues resolved
-		*/
-		//getDataViaPost: function(query, callback) {
 		getData: function(query, callback) {	
 			//Auth.setCredentials(config.modelstore.username,config.modelstore.password);
 			var poolUrl = "";
@@ -148,19 +142,21 @@ metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 			}).error(function(data, status, arg1, arg2) {
 				console.log(data,status,arg1,arg2);
 			});
-		},
-		//getData: function(query, callback) {
-		asyncDisabled: function(query, callback) {
+		}, 
+		/*
+		// async call - v2.1
+		getData: function(query, callback) {
 			var async_q = new AsyncGraphQuery(query);
 			$http({
 				method: 'GET',
-				url: asyncConnPool.nextConnection()+'/graph?'+async_q.httpGetParams(),
+				url: asyncConnPool.nextConnection()+'/api/graph?'+async_q.httpGetParams(),
 			}).success(function(result) {
 				if(callback) callback(result);
 			}).error(function(xhr, data, text1, text2) {
-				console.log(text1, text2);
+				console.error(text1, text2);
 			});
 		}
+		*/
 	};
 }]);
 
@@ -180,7 +176,6 @@ metrilyxServices.factory('Heat', [ '$http',function($http) {
 			}
 			qstr = qstr.replace(/\,$/,'}');
 
-			//console.info("Next URL:", connectionPool.nextConnection());
 			$http({
 				method: 'GET',
 				url: connectionPool.nextConnection()+'/api/heat/'+qstr,
