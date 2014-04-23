@@ -48,7 +48,7 @@ class FileModelStore(object):
 			response = { 
 				"error": "_id not provided",
 				"message": "_id not provided"
-					}
+				}
 		elif not data.get("name"):
 			data['name'] = data['_id']
 		else:
