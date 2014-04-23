@@ -40,7 +40,7 @@ Metrilyx will run on any system that supports the packages below.  It has primar
 	uuid
 
 ### Installation
-The provided install script will work with **RedHat** and **Debian** based distributions.  You can issue the command below, to auto-install the complete application including dependencies. The default install destination is **/opt/metrilyx**.	
+The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below, to auto-install the complete application including dependencies. The default install destination is **/opt/metrilyx**.	
 	
 	[</path/to/downloaded/app>]$./install.sh
 	
@@ -53,7 +53,7 @@ For **other distributions**, follow the instructions below:
 	
 	- Install all required python modules as mentioned above.
 	
-	- Copy etc/httpd/conf.d/metrilyx.conf to your webservers config directory. Usually /etc/httpd/conf.d/ for **RedHat** and /etc/apache2/conf.d/ for **Debian** based distributions.
+	- Copy etc/httpd/conf.d/metrilyx.conf to your webservers config directory. Usually /etc/httpd/conf.d/ for **RedHat** and /etc/apache2/sites-available/ for **Debian** based distributions.
 	
 	- Set the permissions to /opt/metrilyx to the appropriate web server user.   
 
