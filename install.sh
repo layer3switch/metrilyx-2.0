@@ -15,7 +15,7 @@ if [[ -f "/etc/redhat-release" ]]; then
 elif [[ -f "/etc/debian_version" ]]; then
 	HTTPD="apache2"
 	HTTP_USER="www-data"
-	PKGS="libuuid1 gcc uuid ${HTTPD} libapache2-mod-wsgi python-setuptools python-dev mongodb"
+	PKGS="libuuid1 gcc uuid ${HTTPD} libapache2-mod-wsgi python-setuptools python-dev mongodb mongodb-server"
 	PKG_INSTALLER="apt-get install -y"
 	PKG_LISTER="dpkg -l"
 	PKG_S_PREFIX="ii\s+"
@@ -107,18 +107,30 @@ app_postinstall() {
 }
 install_web_config() {
 	echo "- Installing web components..."
-	cp etc/httpd/conf.d/metrilyx.conf /etc/${HTTPD}/conf.d/;
-	chown -R $HTTP_USER ${APP_HOME};
+	if [[ -f "/etc/debian_version" ]]; then
+		cp etc/httpd/conf.d/metrilyx.conf /etc/apache2/sites-available/ && rm /etc/apache2/sites-enabled/*.conf && a2ensite metrilyx;
+		sed -i "s/#Require all granted/Require all granted/g" /etc/apache2/sites-available/metrilyx.conf;
+	elif [[ -f "/etc/redhat-release" ]]; then
+		cp etc/httpd/conf.d/metrilyx.conf /etc/httpd/conf.d/;
+		chown -R $HTTP_USER ${APP_HOME};
+	fi
 }
 ##### Main ####
+
+runuser=$(whoami)
+if [ "$runuser" != "root" ]; then
+	echo "Must be root!";
+	exit 1;
+fi
 
 install_deps;
 install_app;
 install_web_config;
 app_postinstall;
 
+/etc/init.d/${HTTPD} restart;
+
 echo ""
-echo " ** PLEASE RESTART THE WEBSERVER ** "
 echo " ** Heatmaps are still in beta phase, currently requiring a frequent restart."
 echo " ** If you choose to use heatmaps set the config options"
 echo " ** (/opt/metrilyx/etc/metrilyx/metrilyx.conf) and start celerybeat and celeryd."
