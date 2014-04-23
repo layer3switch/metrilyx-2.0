@@ -47,7 +47,13 @@ class FileModelStore(object):
 		if not data.get("_id"):
 			response = { 
 				"error": "_id not provided",
-				"message": "_id not provided"}
+				"message": "_id not provided"
+				}
+		elif not data.get("name"):
+			response = {
+				"error": "name not provided",
+				"message": "name not provided"
+				}
 		else:
 			new_id = re.sub(r'\\', "_", re.sub(r"/", "_", data["_id"]))
 			model_path = os.path.join(self.repo_path, new_id+".json")
