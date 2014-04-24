@@ -24,15 +24,18 @@
 					</span>
 				</div>
 				<div class="col-md-6 text-right" title="Vertical graph size">
-					<span style="color:#aaa">Size :</span>
-					<span class="select-container left-caret">
-						<span class="caret"></span>
-						<select ng-model="graph.size" ng-change="reflow()" class="select-input">
-							<option value="small">small</option>
-							<option value="medium">medium</option>
-							<option value="large">large</option>
-						</select>
+					<span>
+						<span style="color:#aaa">Size :</span>
+						<span class="select-container left-caret">
+							<span class="caret"></span>
+							<select ng-model="graph.size" ng-change="reflow()" class="select-input">
+								<option value="small">small</option>
+								<option value="medium">medium</option>
+								<option value="large">large</option>
+							</select>
+						</span>
 					</span>
+					<span class="interactive pointer" ng-click="reloadGraph(graph);" title="Refresh"><i class="glyphicon glyphicon-refresh"></i></span>
 				</div>
 			</div>
 		</div>
