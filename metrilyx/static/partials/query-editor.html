@@ -1,5 +1,5 @@
 <div class="btn-group marginlr3 margintb6" ng-repeat="serie in graph.series">
-	<button type="button" class="btn btn-default graph-metric-label" onclick="$('[ng-repeat=\'serie in graph.series\']').children('div').hide();$(this).next().show();">
+	<button type="button" class="btn btn-default graph-metric-label" onclick="toggleQueryEditor(this)">
 		<span class="interactive" ng-click="graph.series.splice(graph.series.indexOf(serie),1);"><i class="glyphicon glyphicon-remove"></i></span>
 		<span class="padlr5" style="font-weight:bold">{{serie.query.metric}}</span>
 		<span class="animated {{serie.loading}}"><img src='/imgs/loader.gif'></span>
@@ -55,4 +55,20 @@
 	    	<span class="pointer interactive padl8" title="View" ng-click="reloadGraph(graph);"><i class="glyphicon glyphicon-eye-open"></i></span>
 	    </div>
 	</div>
+	<script type="text/javascript">
+		function toggleQueryEditor(btn) {
+			curr = $(btn).next();
+			if($(curr).hasClass('active')) {
+				$(curr).toggle();
+				return;
+			}
+			$('[ng-repeat=\'serie in graph.series\']').children('.adhoc-metric-editor').each(function() {
+					$(this).removeClass('active');
+					$(this).hide();
+				}
+			);
+			$(curr).addClass('active');
+			$(curr).toggle();
+		}
+	</script>
 </div>
