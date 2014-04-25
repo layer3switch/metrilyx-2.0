@@ -1,11 +1,11 @@
 <div class="btn-group marginlr3 margintb6" ng-repeat="serie in graph.series">
 	<button type="button" class="btn btn-default graph-metric-label" onclick="toggleQueryEditor(this)">
 		<div class="text-left padb5">
-			<span class="interactive" ng-click="graph.series.splice(graph.series.indexOf(serie),1);"><i class="glyphicon glyphicon-remove"></i></span>
-			<span class="padl5" style="font-weight:bold">{{serie.query.metric}}</span>
+			<span class="interactive"  title="Remove metric" ng-click="graph.series.splice(graph.series.indexOf(serie),1);"><i class="glyphicon glyphicon-remove"></i></span>
+			<span class="padl5" style="font-weight:bold">{{serie.query.aggregator}}:{{serie.query.rate|rateString}}{{serie.query.metric}}</span>
 			<span class="animated {{serie.loading}}"><img src='/imgs/loader.gif'></span>
 		</div>
-		<div class="text-left" style="color:#999;font-size:11px;">{{serie.query.tags|tagsString}}</div>
+		<div class="tagstr-label">{{serie.query.tags|tagsString}}</div>
 	</button>
 	<div class="adhoc-metric-editor">
 	    <div class="padb10">

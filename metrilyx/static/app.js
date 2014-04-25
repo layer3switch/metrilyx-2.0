@@ -69,21 +69,26 @@ angular.module('filters',[]).
 				return epoch;
 			}
 		}
+	}).filter('rateString', function() {
+		return function(rate) {
+			if(rate) return "rate:";
+			return "";
+		}
 	}).filter('tagsString', function() {
 		return function(obj, html) {
 			html=true;
-			var outstr = "{";
+			var outstr = "";
 			if(html) {
 				for(var k in obj) {
-					outstr += k+"="+obj[k]+","
+					outstr += k+"="+obj[k]+", ";
 				}
 			} else {
 				for(var k in obj) {
-					outstr += k+"="+obj[k]+","
+					outstr += k+"="+obj[k]+", ";
 				}
 			}
-			if(outstr === "{") return "Tags: {}";
-			return outstr.replace(/\,$/, "}");
+			if(outstr === "") return "Tags:";
+			return outstr.replace(/\, $/, "");
 		};
 	}).filter('tagsLink', function() {
 		return function(obj) {
