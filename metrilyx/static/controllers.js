@@ -416,6 +416,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		}
 		$scope.setPlotBands = function(graph) {
 			setPlotBands(graph);
+			$('#'+graph._id+'-thresholds').collapse('hide');
 		}
 		$scope.loadHome = function() {
 			$location.path('/graph').search({});

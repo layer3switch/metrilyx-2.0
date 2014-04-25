@@ -1,6 +1,6 @@
 	<div style="background-color: #fff">
 		<div class="input-group input-group-sm pad5" style="width:100%">
-			<a ng-if="graph.graphType!='pie'" href="javascript:void(0)" data-target="[ng-include='thresholdsHtml']" data-toggle="collapse" class="input-group-addon nobg interactive">
+			<a ng-if="graph.graphType!='pie'" href="javascript:void(0)" data-target="#{{graph._id}}-thresholds" data-toggle="collapse" class="input-group-addon nobg interactive" title="Thresholds">
 				<i class="glyphicon glyphicon-chevron-down"></i>
 			</a>
 			<input type="text" ng-model="graph.name" class="edit-comp{{editMode}} form-control" placeholder="Graph Name" disabled="true">
@@ -10,7 +10,7 @@
 				</a>
 			</span>
 		</div>
-		<div ng-if="graph.graphType!='pie'" class="marginlr5 marginb5 collapse" ng-include="thresholdsHtml"></div>
+		<div ng-if="graph.graphType!='pie'" class="marginlr5 marginb5 collapse" ng-include="thresholdsHtml" id="{{graph._id}}-thresholds"></div>
 		<div class="padlr10 padt5 padb10 pod-controls edit-comp{{editMode}}">
 			<div class="row" style="margin:0;color:#666;font-size:12px;">
 				<div class="col-md-6 text-left" title="Graph Type">
