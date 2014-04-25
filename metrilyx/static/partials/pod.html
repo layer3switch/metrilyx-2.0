@@ -50,7 +50,7 @@
 						<div ng-switch="modelType">
 							<div ng-switch-when="">
 								<div ng-repeat="graph in pod.graphs" class="col-md-12">
-									<div ng-include="graphHtml" ng-model="graph" highstock-graph></div>
+									<div ng-include="graphHtml" class="edit-comp{{editMode}}" ng-model="graph" highstock-graph></div>
 								</div>
 							</div>
 							<!-- heatmap request -->

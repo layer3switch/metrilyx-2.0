@@ -31,7 +31,7 @@
 				<li ng-repeat="(tk,tv) in serie.query.tags" class="padtb3">
 	    			<div class="input-group input-group-sm">
 	    				<span class="input-group-addon trans">{{tk}}</span>
-	    				<input ng-model="serie.query.tags[tk]" type="text" class="form-control trans">
+	    				<input ng-model="serie.query.tags[tk]" type="text" title="Edit tag values" class="form-control trans">
 	    				<span class="input-group-addon trans interactive pointer" ng-click="removeTag(serie.query.tags, tk);">		
 	    					<i class="glyphicon glyphicon-remove"></i>
 	    				</span>
