@@ -13,12 +13,12 @@
 							<span style="opacity:0"><i class="glyphicon glyphicon-plus"></i></span>
 						</span>
 					</span>
-					<a href="javascript:void(0)" title="Vertical graph layout" ng-click="pod.orientation='vertical';" class="btn interactive pod-header-btn edit-comp{{editMode}}"><i class="glyphicon glyphicon-resize-vertical"></i></a>
+					<a href="javascript:void(0)" title="Vertical graph layout" ng-click="pod.orientation='vertical';" class="btn interactive pod-header-btn edit-comp{{editMode}} vertical-graphs {{pod.orientation}}"><i class="glyphicon glyphicon-resize-vertical" style="font-weight:bold;"></i></a>
 				</span>
-				<input type="text" class="edit-comp{{editMode}}" ng-model="pod.name" placeholder="Pod Name" disabled="true">
+				<input type="text" class="form-control edit-comp{{editMode}}" ng-model="pod.name" placeholder="Pod Name" disabled="true">
 				<span class="edit-comp{{editMode}} input-group-btn pod-btn-bar">
-					<a href="javascript:void(0)" title="Horizontal graph layout" class="btn interactive pod-header-btn edit-comp{{editMode}}" ng-click="pod.orientation='horizontal';">
-						<i class="glyphicon glyphicon-resize-horizontal"></i>
+					<a href="javascript:void(0)" title="Horizontal graph layout" class="btn interactive pod-header-btn edit-comp{{editMode}} horizontal-graphs {{pod.orientation}}" ng-click="pod.orientation='horizontal';">
+						<i class="glyphicon glyphicon-resize-horizontal" style="font-weight:bold;"></i>
 					</a>
 					<a href="javascript:void(0)" title="Remove Pod" class="btn interactive pod-header-btn edit-comp{{editMode}}" ng-click="column.splice(column.indexOf(pod),1);reflow();">
 						<i class="glyphicon glyphicon-remove"></i>

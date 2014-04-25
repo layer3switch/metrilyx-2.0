@@ -15,9 +15,15 @@ input {
 	border: 1px solid #ccc !important;
 	background-color: #eee !important;
 	border-radius: 3px;
+	/*
 	padding:2px !important;
     padding-left: 5px !important;
     padding-right: 5px !important;
+    */
+    padding:2px;
+    padding-left: 5px;
+    padding-right: 5px;
+    
 }
 select {
 	border: 1px solid #ccc;
@@ -296,9 +302,12 @@ input[ng-model*='name'] {
 	font-weight: bold;
 }
 input[ng-model='pod.name'] {
+	position: relative;
+	top:1px;
 	font-size: 16px;
 	width:100%;
 	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.0);
+	-moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.0);
 	box-shadow: inset 0 1px 1px rgba(0,0,0,0.0);
 }
 input[ng-model='graph.name'] {
@@ -657,8 +666,8 @@ a.graph-rm-btn.edit-mode {
 }
 a.pod-header-btn {
 	color: #666 !important;
-	padding-top: 9px !important;
-	padding-bottom: 9px !important;
+	padding-top: 10px !important;
+	padding-bottom: 10px !important;
 	display: none;
 }
 a.pod-header-btn.edit-mode {
@@ -827,4 +836,17 @@ input.form-control.trans {
 	margin-left: auto;
 	margin-right: auto;
 	margin-bottom: 10px;
+}
+.tagstr-label {
+	text-align: left;
+	color: #777;
+	font-size:11px;
+}
+.horizontal-graphs.vertical,
+.vertical-graphs.horizontal {
+	color: #aaa !important;
+}
+.horizontal-graphs.horizontal,
+.vertical-graphs.vertical {
+	color: #428bca !important;
 }
