@@ -254,7 +254,6 @@ function equalObjects(obj1, obj2) {
     if(keyCount(obj1) != keyCount(obj2)) return false;
     for(var i in obj1) {
         if( Object.prototype.toString.call(obj1[i]) === '[object Object]' ) {
-            //console.log(i);
             return equalObjects(obj1[i], obj2[i]);
         } else {
             //console.log()

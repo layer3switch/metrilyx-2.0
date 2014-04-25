@@ -69,6 +69,22 @@ angular.module('filters',[]).
 				return epoch;
 			}
 		}
+	}).filter('tagsString', function() {
+		return function(obj, html) {
+			html=true;
+			var outstr = "{";
+			if(html) {
+				for(var k in obj) {
+					outstr += k+"="+obj[k]+","
+				}
+			} else {
+				for(var k in obj) {
+					outstr += k+"="+obj[k]+","
+				}
+			}
+			if(outstr === "{") return "Tags: {}";
+			return outstr.replace(/\,$/, "}");
+		};
 	}).filter('tagsLink', function() {
 		return function(obj) {
 		    var tstr = '?tags=';
