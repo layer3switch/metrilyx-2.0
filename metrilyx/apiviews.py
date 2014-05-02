@@ -3,16 +3,20 @@ import os
 import uuid
 import json
 
-#from django.http import Http404
+from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect
-from django.views.generic import TemplateView
+from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, viewsets, permissions
 
 from celery import Celery
+
+from custom_permissions import IsGroupOrReadOnly, IsCreatorOrReadOnly
+from serializers import *
+from models import * 
 
 from datastores import *
 from datastreams.opentsdb import OpenTSDBRequest, OpenTSDBEndpoints
@@ -22,17 +26,83 @@ from metrilyxconfig import config
 
 from pprint import pprint
 
-class SchemaView(APIView):
-	def get(self, request, model_type):
-		if model_type in ("heatmap", "page"):
-			abspath = os.path.join(config['schema_path'], "page.json")
+class UserViewSet(viewsets.ModelViewSet):
+	permission_classes = (permissions.IsAuthenticated,)
+	queryset = User.objects.all()
+	serializer_class = UserSerializer
+
+
+class GroupViewSet(viewsets.ModelViewSet):
+	permission_classes = (permissions.IsAuthenticated,)
+	queryset = Group.objects.all()
+	serializer_class = GroupSerializer
+
+
+class MapViewSet(viewsets.ModelViewSet):
+	serializer_class = MapModelSerializer
+	permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+			IsGroupOrReadOnly, IsCreatorOrReadOnly)
+
+	def pre_save(self, obj):
+		obj.user = self.request.user
+
+class GraphMapViewSet(MapViewSet):
+	
+	queryset = MapModel.objects.filter(model_type="graph")
+
+	def pre_save(self, obj):
+		super(GraphMapViewSet,self).pre_save(obj)
+		obj.model_type = "graph"
+
+	def retrieve(self, request, pk=None):
+		export_model = request.GET.get('export', None)
+		if export_model == None:
+			return super(GraphMapViewSet, self).retrieve(request,pk)
 		else:
-			abspath = os.path.join(config['schema_path'], model_type+".json")
-		obj = jsonFromFile(abspath)
-		if model_type == "graph":
-			obj['_id'] = "".join(str(uuid.uuid4()).split("-"))
-		
-		return Response(obj)
+			graphmap = get_object_or_404(MapModel, model_type='graph', _id=pk)
+			serializer = MapModelSerializer(graphmap)
+			request.accepted_media_type = "application/json; indent=4"
+			return Response(serializer.data, headers={
+				'Content-Disposition': 'attachment; filename: %s.json' %(pk),
+				'Content-Type': 'application/json'
+				})
+
+class HeatMapViewSet(MapViewSet):
+	
+	queryset = MapModel.objects.filter(model_type="heat")
+
+	def pre_save(self, obj):
+		super(HeatMapViewSet,self).pre_save(obj)
+		obj.model_type = "heat"
+		## extract queries before saving model
+
+	def retrieve(self, request, pk=None):
+		export_model = request.GET.get('export', None)
+		if export_model == None:
+			return super(HeatMapViewSet, self).retrieve(request,pk)
+		else:
+			heatmap = get_object_or_404(MapModel,model_type='heat', _id=pk)
+			serializer = MapModelSerializer(heatmap)
+			request.accepted_media_type = "application/json; indent=4"
+			return Response(serializer.data, headers={
+				'Content-Disposition': 'attachment; filename: %s.json' %(pk),
+				'Content-Type': 'application/json'
+				})
+
+### REFACTOR EVERYTHING BELOW ###
+class SchemaViewSet(viewsets.ViewSet):
+
+	def list(self, request):
+		schemas = [ os.path.splitext(x)[0] for x in os.listdir(config['schema_path']) ]
+		return Response(schemas)
+
+	def retrieve(self, request, pk=None):
+		try:
+			schema = json.load(open(os.path.join(config['schema_path'], pk+".json" )))
+			return Response(schema)
+		except Exception,e:
+			return Response({"error": str(e)})
+
 
 class PageView(APIView):
 	modelstore = FileModelStore(config['model_path'])
@@ -85,11 +155,11 @@ class PageView(APIView):
 		#return Response(status=status.HTTP_204_NO_CONTENT)
 		rslt = self.modelstore.removeModel(page_id)
 		return Response(rslt)
-
+"""
 class HeatmapView(PageView):
 	modelstore = FileModelStore(config['heatmaps']['store_path'])
 	hmdb = config['heatmaps']['db_path']
-	"""
+	'''
 	def get(self, request, heatmap_id=None):
 		if heatmap_id == None or heatmap_id == "":
 			rslt = self.modelstore.listModels()	
@@ -97,7 +167,7 @@ class HeatmapView(PageView):
 			rslt = self.modelstore.getModel(heatmap_id)
 
 		return Response(rslt)
-	"""
+	'''
 	def __extract_heat_queries(self, request):
 		req_obj = json.loads(request.body)
 		out = []
@@ -141,7 +211,7 @@ class HeatmapView(PageView):
 	def delete(self, request, page_id):
 		rslt = super(HeatmapView, self).delete(request, page_id)		
 		return rslt
-
+"""
 class HeatView(APIView):
 	def get(self, request, heat_id=None):
 		obj = jsonFromFile(config['heatmaps']['db_path'])
