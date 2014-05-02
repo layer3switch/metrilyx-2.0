@@ -16,6 +16,10 @@ ChartOptions.prototype.chartDefaults = function() {
             spacingTop: 5,
             spacingBottom: 5
         },
+        yAxis: {
+            startOnTick: false,
+            minPadding: 0.03
+        },        
         title: {
             text: ''
         },
@@ -71,6 +75,8 @@ ChartOptions.prototype.__plotBands = function() {
     return {
         gridLineWidth: 1,
         gridLineColor: "#ccc",
+        minPadding: 0.03,
+        startOnTick: false,
     };
 }
 ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
@@ -136,6 +142,7 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
             gridLineColor: "#ccc",
         }
     }, extraOpts, true);
+    console.log(opts);
     opts.yAxis = this.__plotBands();
     opts.series = this._sfmt.lineSeries();
     return opts;
@@ -274,6 +281,8 @@ function getPlotBands(thresholds) {
     return  {
         gridLineWidth: 1,
         gridLineColor: "#ccc",
+        minPadding: 0.03,
+        startOnTick: false,
         plotBands: [
             {
                 from: thresholds['info'],
@@ -317,6 +326,7 @@ function formatDataHighcharts(graphSeries) {
 function dataHasErrors(gObj) {
     for(var s in gObj.series) {
         if(gObj.series[s].data.error !== undefined) {
+            console.log(gObj.series[s].data.error);
             if(gObj.series[s].data.error.message) msg = gObj.series[s].data.error.message.substring(0,50)+"...";
             else msg = gObj.series[s].data.error.substring(0,50)+"...";
             
