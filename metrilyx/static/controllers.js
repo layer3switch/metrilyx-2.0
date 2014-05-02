@@ -6,7 +6,7 @@ metrilyxControllers.controller('staticsController', ['$scope', '$route', '$route
 		//console.log('tutorials')
 		clearAllTimeouts();
 		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
-		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit_panel.html";
+		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit-panel.html";
 
 		$scope.loadHome = function() {
 			$location.path('/graph').search({});
@@ -84,7 +84,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$('.modal-backdrop').remove();
 
 		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
-		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit_panel.html";
+		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit-panel.html";
 		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
 		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/query-editor.html";
 		$scope.graphHtml 		= connectionPool.nextConnection()+"/partials/graph.html";
@@ -158,7 +158,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 						}
 					});
 				} else if($routeParams.heatmapId) {
-					Heatmap.get({pageId: $routeParams.heatmapId}, function(result) {
+					Heatmap.getModel({pageId: $routeParams.heatmapId}, function(result) {
 						if(result.error) {
 							console.log(result);
 						} else {
@@ -171,7 +171,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			}
 		});
 		$scope.onPartialComponentLoad = function() {
-			// this is to account for processing time //
+			// setTimeout is to account for processing time //
 			setTimeout(function() {
 				if($scope.editMode === ' edit-mode') {
 					$('input.edit-comp').attr('disabled', false);
@@ -388,6 +388,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			if(rslt.error) {
 				flashAlertsBar();
 			} else {
+				/*
 				var currpath;
 				if($scope.modelType === "") {
 					currpath = "#/"+$scope.model._id;
@@ -400,6 +401,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				} else {
 					location.hash = $scope.model._id;
 				}
+				*/
 			}
 		}
 		$scope.saveModel = function(args) {
@@ -409,9 +411,11 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 					_saveModelCallback(result);
 				});
 			} else {
-				Heatmap.editModel($scope.model, function(result) {
-					_saveModelCallback(result);
-				});
+				Heatmap.editModel({'pageId': $scope.model._id}, $scope.model, 
+					function(result) {
+						_saveModelCallback(result);
+					}
+				);
 			}
 		}
 		$scope.setPlotBands = function(graph) {
@@ -453,7 +457,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.editMode 		= " edit-mode";
 		
 		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
-		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit_panel.html";
+		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit-panel.html";
 		$scope.pageHeaderHtml 	= connectionPool.nextConnection()+"/partials/page-header.html";
 		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
 		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/query-editor.html";
