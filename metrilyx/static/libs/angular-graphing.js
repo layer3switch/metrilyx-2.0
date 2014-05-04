@@ -430,7 +430,7 @@ angular.module('timeframe', [])
 					if(newValue == "absolute") {
 						scope.setTimeType(newValue);
 						//scope.setTimeType(scope.timeType);
-						if(scope.modelType !== 'graph') scope.setUpdatesEnabled(false);
+						if(scope.modelType !== 'adhoc') scope.setUpdatesEnabled(false);
 							d = new Date();
 							endTime = Math.ceil(d.getTime()/1000);
 							startTime = endTime - relativeToAbsoluteTime(oldValue);
@@ -439,7 +439,7 @@ angular.module('timeframe', [])
 							scope.setEndTime(endTime);
 							$('[ng-model=startTime]').data("DateTimePicker").setDate(new Date(endTime*1000));
 					} else {
-						if(scope.modelType === 'graph') {
+						if(scope.modelType === 'adhoc') {
 							scope.setTimeType(newValue);
 							scope.reloadGraph();
 						} else {

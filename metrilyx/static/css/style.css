@@ -3,7 +3,8 @@ body {
 	margin: 0;
 	overflow: none;
 	padding:0;
-	font-family:"Trebuchet MS", Helvetica, sans-serif !important;
+	/*font-family:"Trebuchet MS", Helvetica, sans-serif !important;*/
+	font-family: Arial, Helvetica, sans-serif !important;
 }
 a {
 	text-decoration: none !important;
@@ -73,7 +74,8 @@ select[ng-model="timeType"] {
 	padding-top: 3px !important;
 }
 .page-mast {
-	background: rgba(55,55,55,0.8);
+	/*background: rgba(55,55,55,0.8);*/
+	background-color: rgba(33,33,33,0.8);
 	border-bottom: 1px solid rgba(77,77,77,0.8);
 	padding: 9px;
 	color: #ddd;
@@ -224,7 +226,8 @@ input.form-control.md {
 	padding:5px;
 	border-radius:3px;
 	border: 1px solid rgba(0,0,0,0);
-	color: rgba(255,255,255,0.35);
+	/*color: rgba(255,255,255,0.35);*/
+	color: #343434;
 }
 .edit-panel-item.header {
 	border-bottom: 1px solid rgba(88,88,88,0.5);
@@ -360,10 +363,11 @@ input[ng-model='model.name'].edit-mode {
 	color: #aaa;
 	border-bottom: 1px solid rgba(0,0,0,0);
     border-top: 1px solid rgba(0,0,0,0);
+    cursor: pointer;
 }
 .page-list-item:hover {
 	background-color: #505050;
-    border-radius: 30px;
+    border-radius: 26px;
     color: #428bca !important;
 }
 [ng-repeat="pageModel in pageModels"] {
@@ -867,4 +871,23 @@ input.form-control.trans {
 [ng-include="graphHtml"] {
 	border: 1px solid #eee;
 	border-bottom: none;
+}
+.page-tag {
+	border-radius: 3px;
+	border:1px solid #ccc;
+	padding:5px;
+	padding-left:10px;
+	margin-left:2px;
+	margin-right:2px;
+	color: #555;
+}
+.tags-panel {
+	color:#555;
+	display: none;
+}
+.tags-panel.edit-mode {
+	display: block !important;
+}
+#add-page-tag {
+	color: #666;
 }

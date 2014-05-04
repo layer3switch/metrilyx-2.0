@@ -142,7 +142,6 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
             gridLineColor: "#ccc",
         }
     }, extraOpts, true);
-    console.log(opts);
     opts.yAxis = this.__plotBands();
     opts.series = this._sfmt.lineSeries();
     return opts;

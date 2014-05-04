@@ -14,29 +14,72 @@ metrilyxControllers.controller('staticsController', ['$scope', '$route', '$route
 		}
 	}
 ]);
-metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Heatmap',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap) {
+metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Heatmap','Tags',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap, Tags) {
 		$scope.modelsList = [];
 		$scope.modelType = "";
 		$scope.modelQuery = "";
-		Model.listModels(function(result) {
-			$scope.modelsList = result;
-		});
+		$scope.browseBy = "name"; // name, tags //
+		$scope.selectedTag = "";
+
 		$scope.loadHeatmapList = function(elem) {
 			$('.model-list-btn').removeClass('list-active');
 			$(elem).addClass('list-active');
-			Heatmap.listModels(function(result) {
-				$scope.modelType = "heatmap/";
-				$scope.modelsList = result;
-			});
+			$scope.modelType = 'heatmap/';
+			$scope.loadList();
 		}
 		$scope.loadPagemodelList = function(elem) {
 			$('.model-list-btn').removeClass('list-active');
 			$(elem).addClass('list-active');
-			Model.listModels(function(result) {
-				$scope.modelType = "";
-				$scope.modelsList = result;
-			});
+			$scope.modelType = '';
+			$scope.loadList();
+		}
+		$scope.onChangeBrowseBy = function() {
+			$scope.loadList();
+		}
+		$scope.listItemClicked = function(obj) {
+			if($scope.browseBy == 'tags' && $scope.selectedTag == '') {
+				if($scope.modelType == 'heatmap/') {	
+					Tags.listModelsByTag({'model_type': 'heat'}, {'tagname':obj.name}, function(result){
+						$scope.modelsList = result;
+					});
+				} else {
+					Tags.listModelsByTag({'model_type': 'graph'}, {'tagname':obj.name}, function(result){
+						$scope.modelsList = result;
+					});
+				}
+				$('#tag-back-btn').show();
+				$scope.selectedTag = obj.name;
+			} else {
+				//console.log(obj);
+				location.hash = "#/"+$scope.modelType+obj._id;
+			}
+		}
+		$scope.loadList = function() {
+			$scope.selectedTag = '';
+			if($scope.modelType === 'heatmap/') mtype = 'heat';
+			else mtype = 'graph';
+			switch($scope.browseBy) {
+				case "name":
+					if($scope.modelType === 'heatmap/') {
+						Heatmap.listModels(function(result) {
+							$scope.modelsList = result;
+						});
+					} else {
+						Model.listModels(function(result) {
+							$scope.modelsList = result;
+						});
+					}
+					break;
+				case "tags":
+					Tags.listTags({'model_type': mtype}, function(result) {
+						$scope.modelsList = result;
+					});
+					break;
+				default:
+					break;
+			};
+			$('#tag-back-btn').hide();
 		}
 		$scope.importModel = function(fileList) {
 			var freader = new FileReader();
@@ -61,6 +104,8 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 			};
 			freader.readAsText(fileList[0]);
 		}
+
+		$scope.loadList();	
 	}
 ]);
 metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph','Heatmap',
@@ -150,7 +195,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			} else {
 				// initial page load
 				if($routeParams.pageId) {
-					Model.get({pageId: $routeParams.pageId}, function(result) {
+					Model.getModel({pageId: $routeParams.pageId}, function(result) {
 						if(result.error) {
 							console.log(result);
 						} else {
@@ -180,6 +225,18 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				}
 			}, 150);
 		}
+		$scope.addNewTags = function(elemSelector) {
+			tagstr = $(elemSelector).val();
+			var tagsArr = tagstr.split(",");
+			for(var t in tagsArr) {
+				ctag = tagsArr[t].replace(/\s+$/,'');
+				ctag = ctag.replace(/^\s+/,'');
+				if($scope.model.tags.indexOf(ctag) < 0) 
+					$scope.model.tags.push(ctag);
+			}
+			$('#add-page-tag').modal('hide');
+			$(elemSelector).val('');
+		}
 		$scope.updateGlobalTag = function(tagkey, tagval) {
 			$scope.globalTags[tagkey] = tagval;
 			$scope.setGlobalTags($scope.globalTags);
@@ -200,7 +257,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.delayLoadPageModel = function(pageId, cb) {
 			clearAllTimeouts();
 			setTimeout(function() {
-				Model.get({pageId: pageId}, function(result) {
+				Model.getModel({pageId: pageId}, function(result) {
 					if(result.error) {
 						console.log(result);
 					} else {
@@ -377,7 +434,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 					_removeModelCallback(result);
 				});
 			} else {
-				console.log($scope.model._id);
+				//console.log($scope.model._id);
 				Heatmap.removeModel({pageId: $scope.model._id}, {}, function(result) {
 					_removeModelCallback(result);
 				});
@@ -388,7 +445,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			if(rslt.error) {
 				flashAlertsBar();
 			} else {
-				/*
 				var currpath;
 				if($scope.modelType === "") {
 					currpath = "#/"+$scope.model._id;
@@ -401,7 +457,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				} else {
 					location.hash = $scope.model._id;
 				}
-				*/
 			}
 		}
 		$scope.saveModel = function(args) {
@@ -452,7 +507,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph',
 	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Graph) {
 
-		$scope.modelType 		= "graph";
+		$scope.modelType 		= "adhoc";
 		$scope.timeType 		= "1h-ago";
 		$scope.editMode 		= " edit-mode";
 		

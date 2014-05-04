@@ -1,7 +1,8 @@
 
 import os
-import uuid
 import json
+import requests
+
 
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect
@@ -10,9 +11,11 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status, viewsets, permissions
+from rest_framework import status, viewsets, permissions, filters
 
 from celery import Celery
+
+import metrilyx
 
 from custom_permissions import IsGroupOrReadOnly, IsCreatorOrReadOnly
 from serializers import *
@@ -43,8 +46,12 @@ class MapViewSet(viewsets.ModelViewSet):
 	permission_classes = (permissions.IsAuthenticatedOrReadOnly,
 			IsGroupOrReadOnly, IsCreatorOrReadOnly)
 
+	filter_backends = (filters.SearchFilter,)
+	search_fields = ('name', '_id', 'tags',)
+
 	def pre_save(self, obj):
 		obj.user = self.request.user
+
 
 class GraphMapViewSet(MapViewSet):
 	
@@ -67,6 +74,7 @@ class GraphMapViewSet(MapViewSet):
 				'Content-Type': 'application/json'
 				})
 
+
 class HeatMapViewSet(MapViewSet):
 	
 	queryset = MapModel.objects.filter(model_type="heat")
@@ -81,7 +89,7 @@ class HeatMapViewSet(MapViewSet):
 		if export_model == None:
 			return super(HeatMapViewSet, self).retrieve(request,pk)
 		else:
-			heatmap = get_object_or_404(MapModel,model_type='heat', _id=pk)
+			heatmap = get_object_or_404(MapModel, model_type='heat', _id=pk)
 			serializer = MapModelSerializer(heatmap)
 			request.accepted_media_type = "application/json; indent=4"
 			return Response(serializer.data, headers={
@@ -89,7 +97,7 @@ class HeatMapViewSet(MapViewSet):
 				'Content-Type': 'application/json'
 				})
 
-### REFACTOR EVERYTHING BELOW ###
+
 class SchemaViewSet(viewsets.ViewSet):
 
 	def list(self, request):
@@ -99,119 +107,69 @@ class SchemaViewSet(viewsets.ViewSet):
 	def retrieve(self, request, pk=None):
 		try:
 			schema = json.load(open(os.path.join(config['schema_path'], pk+".json" )))
+			if pk == 'graph':
+				schema['_id'] = metrilyx.new_uuid()
 			return Response(schema)
 		except Exception,e:
 			return Response({"error": str(e)})
 
+class TagViewSet(viewsets.ViewSet):
 
-class PageView(APIView):
-	modelstore = FileModelStore(config['model_path'])
-	## Retrieve
-	def get(self, request, page_id=None):
-		if page_id == None or page_id == "":
-			rslt = self.modelstore.listModels()
-		else:	
-			rslt = self.modelstore.getModel(page_id)
-		
-		export = request.QUERY_PARAMS.get("export", False)
-		if export:
-			request.accepted_media_type = "application/json; indent=4"
-			return Response(rslt, headers={
-				'Content-Disposition': 'attachment; filename: %s.json' %(page_id),
-				'Content-Type': 'application/json'
-				})
-		return Response(rslt)
-
-	def __sanitize_series(self, req_obj):
-		for row in req_obj['layout']:
-			for col in row:
-				for pod in col:
-					for graph in pod['graphs']:
-						for s in graph['series']:
-							if s.get('loading'): del s['loading']
-		return req_obj
-
-	## Add
-	def post(self, request, page_id=None):
-		j_req_obj = json.loads(request.body)
-		req_obj = self.__sanitize_series(j_req_obj)
-		rslt = self.modelstore.addModel(req_obj)
-		return Response(rslt)
-
-	## Overwrite or Add
-	def put(self, request, page_id=None):
-		j_req_obj = json.loads(request.body)
-		req_obj = self.__sanitize_series(j_req_obj)
-		#return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-		rslt = self.modelstore.editModel(req_obj)
-		pprint(rslt)
-		if rslt.get("error"):
-			print rslt.get("error")
-			rslt = self.modelstore.addModel(req_obj)
-		return Response(rslt)
-
-	## Delete
-	def delete(self, request, page_id):
-		#return Response(status=status.HTTP_204_NO_CONTENT)
-		rslt = self.modelstore.removeModel(page_id)
-		return Response(rslt)
-"""
-class HeatmapView(PageView):
-	modelstore = FileModelStore(config['heatmaps']['store_path'])
-	hmdb = config['heatmaps']['db_path']
-	'''
-	def get(self, request, heatmap_id=None):
-		if heatmap_id == None or heatmap_id == "":
-			rslt = self.modelstore.listModels()	
-		else:	
-			rslt = self.modelstore.getModel(heatmap_id)
-
-		return Response(rslt)
-	'''
-	def __extract_heat_queries(self, request):
-		req_obj = json.loads(request.body)
+	def __get_unique_tags(self, model_type=''):
+		if model_type != '':
+			objs = MapModel.objects.filter(model_type=model_type).values_list('tags',flat=True).distinct()
+		else:
+			objs = MapModel.objects.values_list('tags',flat=True).distinct()
+		objs = [ json.loads(o) for o in objs ]
+		objs = [ o for o in objs if len(o) > 0 ]
 		out = []
-		for row in req_obj['layout']:
-			for col in row:
-				for pod in col:
-					for graph in pod['graphs']:
-						for serie in graph['series']:
-							q = serie['query']
-							if q.get('rate'):
-								qbase = "%(aggregator)s:rate:%(metric)s" %(q)
-							else:	
-								qbase = "%(aggregator)s:%(metric)s" %(q)
-							tags = ",".join([ "%s=%s" %(k,v) for k,v in q['tags'].items() ])
-							out.append({
-								"_id": "%s{%s}" %(qbase, tags),
-								"query": "%s{%s}" %(qbase, tags),
-								"name": pod['name']
-								})
-		return out
+		for o in objs:
+			out += [ t for t in o if t not in out ]
+		return sorted(out)
 
-	def __write_to_db(self, request):
-		qlist = self.__extract_heat_queries(request)
-		db = jsonFromFile(self.hmdb)
-		for ql in qlist:
-			db[ql['_id']] = ql
-		return jsonToFile(db, self.hmdb)
+	def list(self, request):
+		model_type = request.GET.get('model_type', '')
+		tags = self.__get_unique_tags(model_type)
+		return Response([ {'name': t } for t in tags ])
+	
+	def retrieve(self, request, pk=None):
+		model_type = request.GET.get('model_type', '')
+	
+		if model_type == '':
+			objs = MapModel.objects.filter(tags__contains=pk)
+		else:	
+			objs = MapModel.objects.filter(tags__contains=pk, model_type=model_type)
+		serializer = MapModelSerializer(objs, many=True)
+		return Response(serializer.data)
 
-	def put(self, request, page_id=None):
-		rslt = super(HeatmapView, self).put(request, page_id)
-		## check for errors
-		pprint(self.__write_to_db(request))
-		return rslt
+class SearchViewSet(viewsets.ViewSet): 
+	tsdb_suggest_url = "http://%s:%d/api/suggest?max=%d" %(config['tsdb']['uri'], 
+				config['tsdb']['port'], config['tsdb']['suggest_limit'])
 
-	def post(self, request, page_id=None):
-		rslt = super(HeatmapView, self).post(request, page_id)
-		## check for errors
-		pprint(self.__write_to_db(request))
-		return rslt
+	def list(self, request):
+		return Response(['graphmaps', 'heatmaps', 'metrics', 'tagk', 'tagv'])
 
-	def delete(self, request, page_id):
-		rslt = super(HeatmapView, self).delete(request, page_id)		
-		return rslt
-"""
+	def retrieve(self, request, pk=None):
+		query = request.GET.get('q', '')
+		if query == '':
+			response = []
+		elif pk == 'graphmaps':
+			models_obj = MapModel.objects.filter(name__contains=query, model_type='graph')
+			serializer_obj = MapModelSerializer(models_obj, many=True)
+			response = serializer_obj.data
+		elif pk == 'heatmaps':
+			models_obj = MapModel.objects.filter(name__contains=query, model_type='heat')
+			serializer_obj = MapModelSerializer(models_obj, many=True)
+			response = serializer_obj.data
+		elif pk in ('metrics','tagk','tagv'):
+			request_url = "%s&type=%s&q=%s" %(self.tsdb_suggest_url, pk, query)
+			resp = requests.get(request_url)
+			response = resp.json()
+		else:
+			response = {"error": "Invalid search: %s" %(pk)}
+		return Response(response)
+
+#### REFACTOR ####
 class HeatView(APIView):
 	def get(self, request, heat_id=None):
 		obj = jsonFromFile(config['heatmaps']['db_path'])
@@ -271,11 +229,12 @@ class GraphView(APIView):
 		tsd_req = OpenTSDBRequest(req_obj)
 		return Response(tsd_req.data)
 
+"""
 class SearchView(APIView):
-	"""
+	'''
 		Search for pages, metrics, tag keys and tag values.
 		Metrics and tag key-value pairs use OpenTSDB's interface.
-	"""
+	'''
 	tsdb_endpoints = OpenTSDBEndpoints()
 
 	def get(self, request, request_prefix):
@@ -288,4 +247,4 @@ class SearchView(APIView):
 			hjc = HttpJsonClient(config['tsdb']['uri'], config['tsdb']['port'])
 			rslt = hjc.GET(self.tsdb_endpoints.suggest+"?max="+str(config['tsdb']['suggest_limit'])+"&type="+search_type+"&q="+search_query)
 			return Response(rslt)
-
+"""

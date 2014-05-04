@@ -32,4 +32,23 @@
 		    </div><!-- /.modal-content -->
 		</div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->
+	<div class="modal fade" id="add-page-tag">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		        	<h4 class="modal-title">New Page Tag</b></h4>
+				</div>
+				<div class="modal-body">
+					<span class="pad10"><i class="glyphicon glyphicon-tags"></i></span>
+					<span class="padr10" style="font-weight:bold;">Tags</span>
+					<input type="text" style="width:80%" id="new-tag-name" placeholder="tag1,tag2,tag3">
+				</div>
+				<div class="modal-footer" style="margin-top:0px">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary" ng-click="addNewTags('#new-tag-name')">Add</button>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>

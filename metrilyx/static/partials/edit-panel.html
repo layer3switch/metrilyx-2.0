@@ -1,5 +1,5 @@
 <div class="edit-comp{{editMode}}" id="edit-panel">
-	<div ng-if="modelType!=='graph'">
+	<div ng-if="modelType!=='adhoc'">
 		<div class="marginlr5 padb10 text-center" style="border-bottom:1px solid #555;padding-top:12px;">
 			<span class="edit-panel-btn pointer interactive padr10" title="Delete" data-toggle="modal" data-target="#confirm-delete">
 				<div class="iblk">
@@ -13,7 +13,7 @@
 					<div class="edit-panel-btn-label">Save</div>
 				</div>
 			</span>
-			<a ng-if="modelType===''" href="/api/page/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json" class="edit-panel-btn pointer interactive" title="Export">
+			<a ng-if="modelType===''" href="/api/graphmaps/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json" class="edit-panel-btn pointer interactive" title="Export">
 				<div class="iblk">
 					<div><i class="glyphicon glyphicon-export"></i></div>
 					<div class="edit-panel-btn-label">Export</div>

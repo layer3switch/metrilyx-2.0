@@ -77,7 +77,7 @@ metrilyxServices.factory('Metrics', ['$http', 'Auth', function($http, Auth) {
 			if(query == "") {
 				callback([]);  
 			} else {
-           		$http.get("/api/search?type=metrics&q="+query).success(callback);
+           		$http.get("/api/search/metrics?q="+query).success(callback);
 			}
         },
 		getByAlphabet: function(alpha, callback) {
@@ -96,11 +96,11 @@ metrilyxServices.factory('Metrics', ['$http', 'Auth', function($http, Auth) {
 metrilyxServices.factory('Model', ['$resource', 'Auth',
 	function($resource, Auth) {
 		//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
-		return $resource('/api/page/:pageId', {}, {
-			get: {method:'GET', params:{modelId:'@pageId'}, isArray:false},
+		return $resource('/api/graphmaps/:pageId', {}, {
+			getModel: {method:'GET', params:{modelId:'@pageId'}, isArray:false},
 			listModels:{method:'GET', isArray:true},
 			saveModel: {method:'POST', isArray:false},
-			editModel: {method:'PUT', isArray:false},
+			editModel: {method:'PUT', params:{pageId:'@pageId'}, isArray:false},
 			removeModel:{method:'DELETE', params:{pageId:'@pageId'} }
 		});														 
 	}
@@ -117,7 +117,14 @@ metrilyxServices.factory('Heatmap', ['$resource',
 		});														 
 	}
 ]);
-
+metrilyxServices.factory('Tags', ['$resource', 
+	function($resource) {
+		return $resource('/api/tags/:tagname', {}, {
+			listTags: {method:'GET', isArray:true},
+			listModelsByTag: {method:'GET', params: {tagname:'@tagname'},isArray:true},
+		});
+	}
+]);
 metrilyxServices.factory('Schema', ['$resource', 'Auth',
 	function($resource, Auth) {
 		//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
@@ -184,8 +191,8 @@ metrilyxServices.factory('Heat', [ '$http',function($http) {
 				callback(result);
 			}).
 			error(function(data, status, arg1, arg2) {
-				console.log(status);
-				console.log(arg2);
+				console.error(status);
+				console.error(arg2);
 			});
 		},
 	};

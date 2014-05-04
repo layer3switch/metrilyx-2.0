@@ -2,6 +2,7 @@
 from django.db import models
 import jsonfield
 
+import metrilyx
 from metrilyxconfig import config
 
 from pprint import pprint
@@ -42,6 +43,8 @@ class MapModel(models.Model):
 				for pod in col:
 					if pod.get('graphs'):
 						for graph in pod['graphs']:
+							if not graph.get('_id') or graph.get('_id') == "":
+								graph['_id'] = metrilyx.new_uuid()
 							if graph.get('series'):
 								for s in graph['series']:
 									if s.get('loading'): del s['loading']
