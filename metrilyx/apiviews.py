@@ -127,7 +127,7 @@ class TagViewSet(viewsets.ViewSet):
 			out += [ t for t in o if t not in out ]
 		return sorted(out)
 
-	def list(self, request):
+	def list(self, request, pk=None):
 		model_type = request.GET.get('model_type', '')
 		tags = self.__get_unique_tags(model_type)
 		return Response([ {'name': t } for t in tags ])
