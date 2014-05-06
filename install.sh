@@ -34,7 +34,7 @@ setup_app_dirs() {
 	( id celery 2>&1 ) > /dev/null || useradd celery;
 	chgrp celery ${APP_HOME};
 }
-setup_startup_config() {
+setup_celery_startup() {
 	cp -a etc/rc.d/init.d/* /etc/rc.d/init.d/;
 	if [ ! -f /etc/sysconfig/celeryd ]; then 
 		cp etc/sysconfig/celeryd /etc/sysconfig/;
@@ -88,60 +88,58 @@ setup_app_config() {
 }
 install_app(){
 	clean;
-
 	backup_curr_install;
-	
 	echo "- Installing app..."
 	setup_app_dirs;
 	setup_app_config;
 	
 }
 app_postinstall() {
-	if [[ -f "/etc/debian_version" ]]; then
-		a2enmod rewrite;
-		a2enmod headers;
-	elif [[ -f "/etc/redhat-release" ]]; then
-		setup_startup_config;
+	if [[ -f "/etc/redhat-release" ]]; then
+		setup_celery_startup;
 	fi
 	# apache restart
 }
-install_web_config() {
+configure_apache() {
 	echo "- Installing web components..."
 	if [[ -f "/etc/debian_version" ]]; then
 		cp etc/httpd/conf.d/metrilyx.conf /etc/apache2/sites-available/ && rm /etc/apache2/sites-enabled/*.conf && a2ensite metrilyx;
 		sed -i "s/#Require all granted/Require all granted/g" /etc/apache2/sites-available/metrilyx.conf;
+		a2enmod rewrite;
+		a2enmod headers;
 	elif [[ -f "/etc/redhat-release" ]]; then
 		cp etc/httpd/conf.d/metrilyx.conf /etc/httpd/conf.d/;
 		chown -R $HTTP_USER ${APP_HOME};
 	fi
 }
-initpostgres() {
+init_postgres() {
 	/etc/init.d/postgresql-9.3 initdb;
 	/etc/init.d/postgresql-9.3 start;
 	chkconfig postgresql-9.3 on;
 }
-initdjango() {
+init_django() {
 	cd ${APP_HOME};
 	echo "- Removing current db data..."
 	rm -rf ./metrilyx.sqlite3 ./celerybeat-schedule.db;
 	python ./manage.py syncdb;
 	python ./manage.py createinitialrevisions;
-	chown ${HTTP_USER}:${HTTP_USER} ./metrilyx.sqlite3;
+	[[ -f "./metrilyx.sqlite3" ]] && chown ${HTTP_USER}:${HTTP_USER} ./metrilyx.sqlite3;
 	# apache restart
 }
 ##### Main ####
 
-runuser=$(whoami)
-if [ "$runuser" != "root" ]; then
+if [ "$(whoami)" != "root" ]; then
 	echo "Must be root!";
 	exit 1;
 fi
 
-if [ "$1" == "" ]; then
+if [ "$1" == "all" ]; then
 	install_deps;
 	install_app;
-	install_web_config;
+	configure_apache;
 	app_postinstall;
+
+	init_postgres && init_django;
 	# apache restart
 else
 	$1;
