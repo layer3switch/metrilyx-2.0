@@ -55,8 +55,15 @@ ConnectionPool.prototype.nextConnection = function() {
 	this.counter++;
 	return this.urls[idx];
 }
+
 var connectionPool = new ConnectionPool(CONN_POOL_CFG.urls);
 var asyncConnPool = new ConnectionPool(CONN_POOL_CFG.async_urls);
+var config = {
+	modelstore: {
+		username: 'admin',
+		password: 'password'
+	}
+};
 
 var metrilyxServices = angular.module('metrilyxServices', ['ngResource']);
 metrilyxServices.factory('Auth', ['$http', function ($http) {
@@ -73,10 +80,10 @@ metrilyxServices.factory('Auth', ['$http', function ($http) {
 metrilyxServices.factory('Metrics', ['$http', 'Auth', function($http, Auth) {
     return {
         suggest: function(query, callback) {
-           	//Auth.clearCredentials();
 			if(query == "") {
 				callback([]);  
 			} else {
+           		Auth.clearCredentials();
            		$http.get("/api/search/metrics?q="+query).success(callback);
 			}
         },
@@ -84,7 +91,7 @@ metrilyxServices.factory('Metrics', ['$http', 'Auth', function($http, Auth) {
 			 if(alpha == "") {
 				 callback([]);
 			 } else {
-				 //Auth.clearCredentials();
+				 Auth.clearCredentials();
 				 $http.get("/api/search?type=metrics&q="+alpha.toLowerCase()).
                		success(function(result){
 						 callback(result);
@@ -95,8 +102,8 @@ metrilyxServices.factory('Metrics', ['$http', 'Auth', function($http, Auth) {
 }]);
 metrilyxServices.factory('Model', ['$resource', 'Auth',
 	function($resource, Auth) {
-		//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
-		return $resource('/api/graphmaps/:pageId', {}, {
+		Auth.setCredentials(config.modelstore.username, config.modelstore.password);
+		return $resource(connectionPool.nextConnection()+'/api/graphmaps/:pageId', {}, {
 			getModel: {method:'GET', params:{modelId:'@pageId'}, isArray:false},
 			listModels:{method:'GET', isArray:true},
 			saveModel: {method:'POST', isArray:false},
@@ -105,10 +112,10 @@ metrilyxServices.factory('Model', ['$resource', 'Auth',
 		});														 
 	}
 ]);
-metrilyxServices.factory('Heatmap', ['$resource',
-	function($resource) {
-		//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
-		return $resource('/api/heatmaps/:pageId', {}, {
+metrilyxServices.factory('Heatmap', ['$resource', 'Auth',
+	function($resource, Auth) {
+		Auth.setCredentials(config.modelstore.username, config.modelstore.password);
+		return $resource(connectionPool.nextConnection()+'/api/heatmaps/:pageId', {}, {
 			getModel: 	{method:'GET',params:{modelId:'@pageId'},isArray:false},
 			editModel: 	{method:'PUT',params:{pageId:'@pageId'},isArray:false},
 			removeModel:{method:'DELETE',params:{pageId:'@pageId'}},
@@ -117,9 +124,10 @@ metrilyxServices.factory('Heatmap', ['$resource',
 		});														 
 	}
 ]);
-metrilyxServices.factory('Tags', ['$resource', 
-	function($resource) {
-		return $resource('/api/tags/:tagname', {}, {
+metrilyxServices.factory('Tags', ['$resource', 'Auth',
+	function($resource, Auth) {
+		Auth.clearCredentials();
+		return $resource(connectionPool.nextConnection()+'/api/tags/:tagname', {}, {
 			listTags: {method:'GET', isArray:true},
 			listModelsByTag: {method:'GET', params: {tagname:'@tagname'},isArray:true},
 		});
@@ -128,6 +136,7 @@ metrilyxServices.factory('Tags', ['$resource',
 metrilyxServices.factory('Schema', ['$resource', 'Auth',
 	function($resource, Auth) {
 		//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
+		Auth.clearCredentials();
 		return $resource(connectionPool.nextConnection()+'/api/schemas/:modelType', {}, {
 			get: {method:'GET', params:{modelType:'@modelType'}, isArray:false}										 
 		});
@@ -138,6 +147,7 @@ metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 	return {
 		getData: function(query, callback) {	
 			//Auth.setCredentials(config.modelstore.username,config.modelstore.password);
+			Auth.clearCredentials();
 			var poolUrl = "";
 			$http({
 				method: 'POST',
@@ -167,9 +177,11 @@ metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 }]);
 
 metrilyxServices.factory('Heat', [ '$http',function($http) {
+	
 	return {
 		getData: function(query, callback) {
 			//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
+			Auth.clearCredentials();
 			var qstr = "";
 			if(query.rate) {
 				qstr += query.aggregator+":rate:"+query.metric;
