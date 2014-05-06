@@ -14,9 +14,16 @@
 	    	"taskmeta_collection": "taskmeta_collection"
 		}
 	},
+	"databases":{
+		"default": {
+			"ENGINE": "django.db.backends.sqlite3",
+            "NAME": "metrilyx.sqlite3"
+		}
+	},
 	"celery": {
 		"tasks": [
 			"metrilyx.heatmap_tasks"
 		]
-	}
+	},
+	"debug": false
 }
