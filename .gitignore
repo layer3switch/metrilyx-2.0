@@ -3,6 +3,8 @@
 celerybeat-schedule*
 metrilyx.conf
 config.js
+pagemodels
+heatmaps
 
 # Python #
 ##########
