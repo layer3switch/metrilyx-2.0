@@ -3,7 +3,7 @@
 INSTALL_ROOT="/opt";
 INSTALL_TIME=$(date '+%d%b%Y_%H%M%S');
 APP_HOME="${INSTALL_ROOT}/metrilyx";
-PYPKGS="uuid Django djangorestframework django-filter django-cors-headers pymongo celery";
+PYPKGS="uuid Django djangorestframework django-filter django-cors-headers django-reversion pymongo celery requests jsonfield psycopg2";
 
 if [[ -f "/etc/redhat-release" ]]; then
 	HTTPD="httpd"
@@ -103,7 +103,7 @@ app_postinstall() {
 	elif [[ -f "/etc/redhat-release" ]]; then
 		setup_startup_config;
 	fi
-	#/etc/init.d/${HTTPD} restart;
+	# apache restart
 }
 install_web_config() {
 	echo "- Installing web components..."
@@ -115,6 +115,20 @@ install_web_config() {
 		chown -R $HTTP_USER ${APP_HOME};
 	fi
 }
+initpostgres() {
+	/etc/init.d/postgresql-9.3 initdb;
+	/etc/init.d/postgresql-9.3 start;
+	chkconfig postgresql-9.3 on;
+}
+initdjango() {
+	cd ${APP_HOME};
+	echo "- Removing current db data..."
+	rm -rf ./metrilyx.sqlite3 ./celerybeat-schedule.db;
+	python ./manage.py syncdb;
+	python ./manage.py createinitialrevisions;
+	chown ${HTTP_USER}:${HTTP_USER} ./metrilyx.sqlite3;
+	# apache restart
+}
 ##### Main ####
 
 runuser=$(whoami)
@@ -123,12 +137,16 @@ if [ "$runuser" != "root" ]; then
 	exit 1;
 fi
 
-install_deps;
-install_app;
-install_web_config;
-app_postinstall;
+if [ "$1" == "" ]; then
+	install_deps;
+	install_app;
+	install_web_config;
+	app_postinstall;
+	# apache restart
+else
+	$1;
+fi
 
-/etc/init.d/${HTTPD} restart;
 
 echo ""
 echo " ** Heatmaps are still in beta phase, currently requiring a frequent restart."
