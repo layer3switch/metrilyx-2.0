@@ -36,7 +36,7 @@ angular.module('pageLayout', [])
 						});
 					}
 					// populate graphs array with an empty stub graph //
-					if(ngModel.$modelValue.graphs.length <= 0) {
+					if(newValue.graphs && newValue.graphs.length <= 0) {
 						Schema.get({modelType: 'graph'}, function(result) {
 							ngModel.$modelValue.graphs.push(result);
 						});
@@ -54,7 +54,6 @@ angular.module('pageLayout', [])
 							});
 						}
 					}
-
 				}, true);
 			}
 		};
@@ -65,7 +64,7 @@ angular.module('pageLayout', [])
 			require: '?ngModel',
 			link: function(scope, elem, attrs, ngModel) {
 				if(!ngModel) return;
-
+/*
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
@@ -76,6 +75,7 @@ angular.module('pageLayout', [])
 						$(elem).sortable({disabled: true});
 					}
 				}, true);
+*/
 			}
 		};
 	}])
@@ -109,12 +109,12 @@ angular.module('pageLayout', [])
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
-					
 					if(scope.editMode == " edit-mode") {
 						//console.log(elem);
+						/*
 						$(elem).find('.graph-metrics-panel').each(function(){
 							$(this).collapse('show');
-						});
+						});*/
 						scope.enableDragDrop();
 					} else {
 						scope.disableDragDrop();
@@ -143,15 +143,12 @@ angular.module('pageLayout', [])
 					evt.stopPropagation();
 					//console.log(ngModel.$modelValue);
 				});
-
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
 					// remove empty rows //
 					for(var i in newValue) {
-						if(newValue[i].length <= 0) {
-							newValue.splice(i,1);
-						}
+						if(newValue[i].length <= 0) newValue.splice(i,1);
 					}
 					if(newValue.length != oldValue.length) {
 						// reflow if column count changes //
@@ -188,16 +185,12 @@ angular.module('pageLayout', [])
 					scope.$apply();
 					//console.log(ngModel.$modelValue);
 				});
-
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
 					// remove empty rows //
-					//console.log("newValue", newValue);
 					for(var i in newValue) {
-						if(newValue[i] == null || newValue[i].length <= 0) {
-							newValue.splice(i,1);
-						}
+						if(newValue[i] == null || newValue[i].length <= 0) newValue.splice(i,1);
 					}
 				}, true);
 			}
