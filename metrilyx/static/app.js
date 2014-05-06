@@ -122,7 +122,7 @@ app.directive('tagkeyvalue', function() {
 	            		q = tvals[tvals.length-1];
 	            		if(q === '') return;
 	            	}
-	            	$.getJSON('/api/search','type='+stype+'&q='+q, response);
+	            	$.getJSON('/api/search/'+stype,'q='+q, response);
 	        	},
 	        	messages: {
 	            	noResults: '',
