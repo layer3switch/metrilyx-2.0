@@ -462,15 +462,29 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.saveModel = function(args) {
 			//console.log($scope.model);
 			if($scope.modelType == "") {
-				Model.editModel($scope.model, function(result) {
-					_saveModelCallback(result);
-				});
-			} else {
-				Heatmap.editModel({'pageId': $scope.model._id}, $scope.model, 
-					function(result) {
+				if($routeParams.pageId == 'new') {
+					Model.saveModel($scope.model, function(result) {
 						_saveModelCallback(result);
-					}
-				);
+					});
+				} else {
+					Model.editModel({'pageId': $scope.model._id}, $scope.model, function(result) {
+						_saveModelCallback(result);
+					});
+				}
+			} else {
+				if($routeParams.heatmapId == 'new') {
+					Heatmap.saveModel($scope.model, 
+						function(result) {
+							_saveModelCallback(result);
+						}
+					);
+				} else {
+					Heatmap.editModel({'pageId': $scope.model._id}, $scope.model, 
+						function(result) {
+							_saveModelCallback(result);
+						}
+					);
+				}
 			}
 		}
 		$scope.setPlotBands = function(graph) {
