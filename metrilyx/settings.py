@@ -1,8 +1,14 @@
 # Django settings for metrilyx project.
+import os 
+from metrilyxconfig import config
 
-APPEND_SLASH = False
+## this could be set to config['debug'] but that will require ALLOWED_HOSTS
+## to populated accordingly
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+APPEND_SLASH = False
 CORS_ORIGIN_ALLOW_ALL = True
 
 ADMINS = (
@@ -11,17 +17,7 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'metrilyx.sqlite3',                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
-    }
-}
+DATABASES = config['databases']
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.6/ref/settings/#allowed-hosts
@@ -63,8 +59,8 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
+#STATIC_ROOT = os.path.join(BASE_DIR, 'metrilyx/static')
 STATIC_ROOT = ''
-
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
@@ -74,6 +70,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    os.path.join(BASE_DIR, 'metrilyx/static'),
 )
 
 # List of finder classes that know how to find static files in
@@ -120,10 +117,10 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer',),
     'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',),
     # This will activate auth on the api endpoints.
-    #'DEFAULT_AUTHENTICATION_CLASSES': (
-    #    'rest_framework.authentication.BasicAuthentication',
-    #    'rest_framework.authentication.SessionAuthentication',
-    #)
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    )
 }
 INSTALLED_APPS = (
     'django.contrib.auth',
