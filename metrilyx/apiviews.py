@@ -146,7 +146,7 @@ class SearchViewSet(viewsets.ViewSet):
 	tsdb_suggest_url = "http://%s:%d/api/suggest?max=%d" %(config['tsdb']['uri'], 
 				config['tsdb']['port'], config['tsdb']['suggest_limit'])
 
-	def list(self, request):
+	def list(self, request, pk=None):
 		return Response(['graphmaps', 'heatmaps', 'metrics', 'tagk', 'tagv'])
 
 	def retrieve(self, request, pk=None):
