@@ -116,11 +116,15 @@ class SchemaViewSet(viewsets.ViewSet):
 class TagViewSet(viewsets.ViewSet):
 
 	def __get_unique_tags(self, model_type=''):
+		## distinct() is not handled properly when using json in postgres
 		if model_type != '':
-			objs = MapModel.objects.filter(model_type=model_type).values_list('tags',flat=True).distinct()
+			objs = MapModel.objects.filter(model_type=model_type).values_list('tags',flat=True)
 		else:
-			objs = MapModel.objects.values_list('tags',flat=True).distinct()
-		objs = [ json.loads(o) for o in objs ]
+			objs = MapModel.objects.values_list('tags',flat=True)
+		## this is to handle db's that dont' support json types
+		if len(objs) < 1:
+			return []
+		if type(objs[0]) in (str,unicode): objs = [ json.loads(o) for o in objs ]
 		objs = [ o for o in objs if len(o) > 0 ]
 		out = []
 		for o in objs:
