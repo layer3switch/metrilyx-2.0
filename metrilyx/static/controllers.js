@@ -532,7 +532,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/query-editor.html";
 
 		$scope.metricListSortOpts 	= dndconfig.metricList;
-
+		
 		$scope.metricQueryResult = [];
 		$scope.tagsOnPage = {};
 		$scope.graph = {};
@@ -613,11 +613,9 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.removeTag = function(tags, tagkey) {
 			delete tags[tagkey];
 		}
-
 		$scope.setStatus = function(serieIdx, status) {
 			$scope.graph.series[serieIdx].loading = status;
 		}
-
 		$scope.baseQuery = function(graphObj) {
 			var q = {
 				_id: graphObj._id,
