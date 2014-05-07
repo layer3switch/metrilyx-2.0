@@ -141,7 +141,13 @@ if [ "$1" == "all" ]; then
 
 	init_postgres && init_django;
 	# apache restart
+elif [ "$1" == "app" ]; then
+	install_deps;
+	install_app;
+	configure_apache;
+	app_postinstall;
 else
+	echo "Executing $1...";
 	$1;
 fi
 
