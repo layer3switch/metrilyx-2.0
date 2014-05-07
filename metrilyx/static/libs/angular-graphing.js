@@ -64,7 +64,6 @@ angular.module('pageLayout', [])
 			require: '?ngModel',
 			link: function(scope, elem, attrs, ngModel) {
 				if(!ngModel) return;
-/*
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
@@ -75,7 +74,6 @@ angular.module('pageLayout', [])
 						$(elem).sortable({disabled: true});
 					}
 				}, true);
-*/
 			}
 		};
 	}])
@@ -103,18 +101,11 @@ angular.module('pageLayout', [])
 							JSON.parse(JSON.stringify(scope.droppablePodSchema[0])));
 					}
 					scope.$apply();
-					
-					//console.log(ngModel.$modelValue);
 				});
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
 					if(scope.editMode == " edit-mode") {
-						//console.log(elem);
-						/*
-						$(elem).find('.graph-metrics-panel').each(function(){
-							$(this).collapse('show');
-						});*/
 						scope.enableDragDrop();
 					} else {
 						scope.disableDragDrop();
@@ -141,7 +132,6 @@ angular.module('pageLayout', [])
 					}
 					scope.$apply();
 					evt.stopPropagation();
-					//console.log(ngModel.$modelValue);
 				});
 				scope.$watch(function() {
 					return ngModel.$modelValue;
@@ -231,8 +221,7 @@ angular.module('graphing', [])
 					hc = $("[data-graph-id='"+newVal._id+"']").highcharts();
 					if(hc == undefined) {
 						$("[data-graph-id='"+newVal._id+"']").html(
-							"<table class='gif-loader-table'><tr><td> \
-							<img src='/imgs/loader.gif'></td></tr></table>");
+							"<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
 						scope.setStatus(newVal.series.length-1, 'loading');
 						scope.setURL(newVal);
 						getGraphData(newVal, function(result) {
@@ -399,7 +388,6 @@ angular.module('timeframe', [])
 								scope.setEndTime(etime);
 								$('[ng-model=startTime]').data("DateTimePicker").setEndDate(e.date);
 							}
-							//$(elem).data("DateTimePicker").setDate(d);
 							scope.$apply();		
 						} catch(e) {
 							console.log(e);
