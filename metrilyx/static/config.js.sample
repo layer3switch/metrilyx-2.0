@@ -9,6 +9,12 @@
  * pool to improve load times and user experience
  *
  */
-CONN_POOL_CFG = {
+var CONN_POOL_CFG = {
 	urls: []
+};
+var AUTHCONFIG = {
+	modelstore: {
+		username: 'admin',
+		password: 'password'
+	}
 };

@@ -58,12 +58,6 @@ ConnectionPool.prototype.nextConnection = function() {
 
 var connectionPool = new ConnectionPool(CONN_POOL_CFG.urls);
 var asyncConnPool = new ConnectionPool(CONN_POOL_CFG.async_urls);
-var config = {
-	modelstore: {
-		username: 'admin',
-		password: 'password'
-	}
-};
 
 var metrilyxServices = angular.module('metrilyxServices', ['ngResource']);
 metrilyxServices.factory('Auth', ['$http', function ($http) {
@@ -73,6 +67,9 @@ metrilyxServices.factory('Auth', ['$http', function ($http) {
         },
         clearCredentials: function () {
             delete $http.defaults.headers.common.Authorization;
+        },
+        authHeaders: function(username, password) {
+        	return {'Authorization': 'Basic ' + btoa(username + ':' + password)}
         }
     };
 }]);
@@ -102,25 +99,69 @@ metrilyxServices.factory('Metrics', ['$http', 'Auth', function($http, Auth) {
 }]);
 metrilyxServices.factory('Model', ['$resource', 'Auth',
 	function($resource, Auth) {
-		Auth.setCredentials(config.modelstore.username, config.modelstore.password);
-		return $resource(connectionPool.nextConnection()+'/api/graphmaps/:pageId', {}, {
-			getModel: {method:'GET', params:{modelId:'@pageId'}, isArray:false},
-			listModels:{method:'GET', isArray:true},
-			saveModel: {method:'POST', isArray:false},
-			editModel: {method:'PUT', params:{pageId:'@pageId'}, isArray:false},
-			removeModel:{method:'DELETE', params:{pageId:'@pageId'} }
+		return $resource('/api/graphmaps/:pageId', {}, {
+			getModel: {
+				method:'GET', 
+				params:{modelId:'@pageId'}, 
+				isArray:false}
+			,
+			listModels:{
+				method:'GET', 
+				isArray:true
+			},
+			saveModel: {
+				method:'POST', 
+				isArray:false, 
+				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
+											AUTHCONFIG.modelstore.password) 
+			},
+			editModel: {
+				method:'PUT', 
+				params:{pageId:'@pageId'}, 
+				isArray:false, 
+				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
+											AUTHCONFIG.modelstore.password) 
+			},
+			removeModel:{
+				method:'DELETE', 
+				params:{pageId:'@pageId'}, 
+				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
+											AUTHCONFIG.modelstore.password) 
+			}
 		});														 
 	}
 ]);
 metrilyxServices.factory('Heatmap', ['$resource', 'Auth',
 	function($resource, Auth) {
-		Auth.setCredentials(config.modelstore.username, config.modelstore.password);
-		return $resource(connectionPool.nextConnection()+'/api/heatmaps/:pageId', {}, {
-			getModel: 	{method:'GET',params:{modelId:'@pageId'},isArray:false},
-			editModel: 	{method:'PUT',params:{pageId:'@pageId'},isArray:false},
-			removeModel:{method:'DELETE',params:{pageId:'@pageId'}},
-			saveModel: 	{method:'POST',isArray:false},
-			listModels: {method:'GET',isArray:true},
+		return $resource('/api/heatmaps/:pageId', {}, {
+			getModel: 	{
+				method:'GET',
+				params:{modelId:'@pageId'},
+				isArray:false
+			},
+			editModel: 	{
+				method:'PUT',
+				params:{pageId:'@pageId'},
+				isArray:false, 
+				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
+											AUTHCONFIG.modelstore.password)
+			},
+			removeModel:{
+				method:'DELETE',
+				params:{pageId:'@pageId'}, 
+				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
+											AUTHCONFIG.modelstore.password)
+			},
+			saveModel: 	{
+				method:'POST',
+				isArray:false, 
+				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
+											AUTHCONFIG.modelstore.password)
+			},
+			listModels: {
+				method:'GET',
+				isArray:true
+			},
 		});														 
 	}
 ]);
@@ -135,7 +176,6 @@ metrilyxServices.factory('Tags', ['$resource', 'Auth',
 ]);
 metrilyxServices.factory('Schema', ['$resource', 'Auth',
 	function($resource, Auth) {
-		//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
 		Auth.clearCredentials();
 		return $resource(connectionPool.nextConnection()+'/api/schemas/:modelType', {}, {
 			get: {method:'GET', params:{modelType:'@modelType'}, isArray:false}										 
@@ -145,8 +185,7 @@ metrilyxServices.factory('Schema', ['$resource', 'Auth',
 
 metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 	return {
-		getData: function(query, callback) {	
-			//Auth.setCredentials(config.modelstore.username,config.modelstore.password);
+		getData: function(query, callback) {
 			Auth.clearCredentials();
 			var poolUrl = "";
 			$http({
@@ -180,7 +219,6 @@ metrilyxServices.factory('Heat', [ '$http',function($http) {
 	
 	return {
 		getData: function(query, callback) {
-			//Auth.setCredentials(config.modelstore.username, config.modelstore.password);
 			Auth.clearCredentials();
 			var qstr = "";
 			if(query.rate) {
