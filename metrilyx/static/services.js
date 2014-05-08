@@ -215,11 +215,10 @@ metrilyxServices.factory('Graph', [ '$http','Auth', function($http, Auth) {
 	};
 }]);
 
-metrilyxServices.factory('Heat', [ '$http',function($http) {
+metrilyxServices.factory('Heat', [ '$http', function($http) {
 	
 	return {
 		getData: function(query, callback) {
-			Auth.clearCredentials();
 			var qstr = "";
 			if(query.rate) {
 				qstr += query.aggregator+":rate:"+query.metric;
