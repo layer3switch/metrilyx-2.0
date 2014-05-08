@@ -242,7 +242,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$scope.setGlobalTags($scope.globalTags);
 		}
 		$scope.setGlobalTags = function(gblTags) {
-			tagsLoc = dictToCommaSepStr(gblTags, ":");
+			tagsLoc = dictToCommaSepStr(gblTags, "=");
 			tmp = $location.search();
 			if(tagsLoc == "") {
 				if(tmp.tags) {
@@ -451,11 +451,10 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				} else {
 					currpath = "#/" + $scope.modelType + $scope.model._id;
 				}
-				console.log(currpath);
 				if(location.hash === currpath) {
 					location.reload(true);
 				} else {
-					location.hash = $scope.model._id;
+					location.hash = currpath;
 				}
 			}
 		}
