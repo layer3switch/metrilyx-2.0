@@ -82,7 +82,6 @@ class HeatMapViewSet(MapViewSet):
 	def pre_save(self, obj):
 		super(HeatMapViewSet,self).pre_save(obj)
 		obj.model_type = "heat"
-		## extract queries before saving model
 
 	def retrieve(self, request, pk=None):
 		export_model = request.GET.get('export', None)
@@ -175,9 +174,7 @@ class SearchViewSet(viewsets.ViewSet):
 
 class HeatView(APIView):
 	def get(self, request, heat_id=None):
-		"""
-		Send all queries
-		"""
+		# list heat queries
 		if heat_id == None:
 			objs = HeatQuery.objects.all()
 			serializer  = HeatQuerySerializer(objs, many=True)

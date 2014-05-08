@@ -12,31 +12,6 @@ from metrilyx.models import HeatQuery
 
 from httpclients import OpenTSDBClient
 
-
-
-"""
-def get_heatmap_jobs(cfg):
-	heat_cfg = json.load(open(cfg, "rb"))
-	jobs = {}
-	for q in heat_cfg.keys():
-		query_str = "start=%s&m=%s" %(config['heatmaps']['analysis_interval'], q)
-		jobs[q] = query_str
-	return jobs
-
-def heatmaps_schedule(cfg, task_str):
-	sched = {}
-	jobs = get_heatmap_jobs(cfg)
-	#pprint(jobs)
-	for k,v in jobs.items():
-		sched[k] = {
-			"task": task_str,
-			"schedule": crontab(minute='*/1'),
-			"options": { "task_id": k },
-			"args": (v,)
-			}
-	return sched
-"""
-
 @task
 def heatmap(query, top=10):
 	"""
@@ -71,10 +46,7 @@ def run_heat_queries(top=10):
 	hqueries = HeatQuery.objects.all()
 	for hq in hqueries:
 		querystr = "start=%s&m=%s" %(config['heatmaps']['analysis_interval'], hq.query)
-		#print querystr
-		#heatmap.delay(querystr,top)
 		heatmap.apply_async((querystr,top), task_id=hq._id)
-	#return []
 	return { "message": "Submitted %d queries" %(len(hqueries)) }
 
 
