@@ -1,0 +1,10 @@
+uuid
+pymongo
+django
+djangorestframework
+django-filter
+django-cors-headers
+django-reversion
+celery
+requests
+jsonfield
