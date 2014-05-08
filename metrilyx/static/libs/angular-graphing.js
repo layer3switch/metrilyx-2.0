@@ -106,6 +106,8 @@ angular.module('pageLayout', [])
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
 					if(scope.editMode == " edit-mode") {
+						$(elem).find('.graph-metrics-panel').each(
+							function() { $(this).collapse('show'); });
 						scope.enableDragDrop();
 					} else {
 						scope.disableDragDrop();
