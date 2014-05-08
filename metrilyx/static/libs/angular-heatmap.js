@@ -20,7 +20,7 @@ angular.module('heatmaps', [])
 				scope.$watch(function() {
 					return ctrl.$modelValue;
 				}, function(newValue, oldValue) {
-					if(newValue.series !== undefined) return;
+					if(newValue.series === undefined) return;
 					if(newValue.series.length < 1) return;
 					Heat.getData(newValue.series[0].query,
 						function(result) {
