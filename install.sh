@@ -3,7 +3,6 @@
 INSTALL_ROOT="/opt";
 INSTALL_TIME=$(date '+%d%b%Y_%H%M%S');
 APP_HOME="${INSTALL_ROOT}/metrilyx";
-PYPKGS="uuid Django djangorestframework django-filter django-cors-headers django-reversion pymongo celery requests jsonfield psycopg2";
 
 if [[ -f "/etc/redhat-release" ]]; then
 	HTTPD="httpd"
@@ -41,27 +40,16 @@ setup_celery_startup() {
 	fi	
 }
 
-### DECOMMISSION ###
-install_os_deps() {
-	echo "-- Installing OS dependencies...."
-	for pkg in ${PKGS}; do
-		$PKG_LISTER | egrep "${PKG_S_PREFIX}${pkg}" || $PKG_INSTALLER ${pkg};
-	done;
-};
 install_pydeps() {
 	echo "-- Installing python dependencies..."
 	which pip || easy_install pip;
-	for pypkg in $PYPKGS; do
+	for pypkg in $(cat PYPACKAGES); do
 		pip list | grep ${pypkg} || pip install ${pypkg};
 	done;
-};
-install_deps() {
-	install_os_deps;
-	install_pydeps;
 }
-### END DECOMMISSION ###
 
 backup_curr_install() {
+	clean;
 	if [ -d "${INSTALL_ROOT}/metrilyx" ]; then
 		echo "- Backing up existing installation...";
 		mv ${APP_HOME} ${APP_HOME}-${INSTALL_TIME};
@@ -80,8 +68,6 @@ setup_app_config() {
 		fi
 		echo "  dashboards..."
 		cp -a ${APP_HOME}-${INSTALL_TIME}/pagemodels ${APP_HOME}/;
-		#echo "  heatmap index..."
-		#cp -f ${APP_HOME}-${INSTALL_TIME}/heatmaps.json ${APP_HOME}/heatmaps.json;
 		echo "  heatmaps..."
 		cp -a ${APP_HOME}-${INSTALL_TIME}/heatmaps ${APP_HOME}/;
 	else
@@ -91,8 +77,6 @@ setup_app_config() {
 	fi
 }
 install_app(){
-	clean;
-	backup_curr_install;
 	echo "- Installing app..."
 	setup_app_dirs;
 	setup_app_config;
@@ -138,15 +122,17 @@ if [ "$(whoami)" != "root" ]; then
 fi
 
 if [ "$1" == "all" ]; then
-	install_deps;
+	install_pydeps;
+	backup_curr_install;
 	install_app;
 	configure_apache;
 	app_postinstall;
-
-	init_postgres && init_django;
+	echo "(todo): Install and init postgres"
+	#init_postgres && init_django;
 	# apache restart
 elif [ "$1" == "app" ]; then
-	#install_deps;
+	install_pydeps;
+	backup_curr_install;
 	install_app;
 	configure_apache;
 	app_postinstall;
