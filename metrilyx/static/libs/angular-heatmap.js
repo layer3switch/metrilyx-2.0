@@ -9,6 +9,7 @@ angular.module('heatmaps', [])
 				var heatmapInterval = setInterval(function() {
 					if(ctrl.$modelValue && ctrl.$modelValue.series.length > 0) {
 						Heat.getData(ctrl.$modelValue.series[0].query, function(result) {
+							// check for errors
 							ctrl.$modelValue.series[0].data = assignSeverity(result['data'], ctrl.$modelValue.thresholds);
 						});	
 					}
@@ -18,6 +19,7 @@ angular.module('heatmaps', [])
 				}, function(newValue, oldValue) {
 					if(newValue.series.length < 1) return;
 					Heat.getData(newValue.series[0].query,function(result) {
+						// check for errors
 						newValue.series[0].data = assignSeverity(result['data'], newValue.thresholds);
 					});
 				}, true);

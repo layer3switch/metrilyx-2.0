@@ -1,9 +1,14 @@
 from django.contrib.auth.models import User, Group
 
-from models import MapModel
+from models import MapModel, HeatQuery
 import custom_fields
 
 from rest_framework import serializers
+
+class HeatQuerySerializer(serializers.HyperlinkedModelSerializer):
+	class Meta:
+		model = HeatQuery
+		fields = ('_id','name','query')
 
 class MapModelSerializer(serializers.HyperlinkedModelSerializer):
 	user = serializers.Field(source='user.username')

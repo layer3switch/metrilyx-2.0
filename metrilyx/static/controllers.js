@@ -491,6 +491,9 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			setPlotBands(graph);
 			$('#'+graph._id+'-thresholds').collapse('hide');
 		}
+		$scope.removeTag = function(tags, tagkey) {
+			delete tags[tagkey];
+		}
 		$scope.loadHome = function() {
 			$location.path('/graph').search({});
 			$route.reload();

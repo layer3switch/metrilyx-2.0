@@ -173,23 +173,29 @@ class SearchViewSet(viewsets.ViewSet):
 			response = {"error": "Invalid search: %s" %(pk)}
 		return Response(response)
 
-#### REFACTOR ####
 class HeatView(APIView):
 	def get(self, request, heat_id=None):
-		obj = jsonFromFile(config['heatmaps']['db_path'])
 		"""
 		Send all queries
 		"""
 		if heat_id == None:
-			return Response([ v for k,v in obj.items() ])
+			objs = HeatQuery.objects.all()
+			serializer  = HeatQuerySerializer(objs, many=True)
+			out = serializer.data
 		else:
 			app = Celery('metrilyx')
 			app.config_from_object('metrilyx.heatmapsconfig')
 			rslt = app.AsyncResult(heat_id)
-			out = [ v for k,v in obj.items() if k == heat_id ][0]
-			out['data'] = rslt.get()
-			return Response(out)
 
+			hquery = get_object_or_404(HeatQuery, _id=heat_id)
+			serializer = HeatQuerySerializer(hquery)
+			out = serializer.data
+			out['data'] = rslt.get()
+
+		return Response(out)
+
+
+#### REFACTOR ####
 class GraphView(APIView):
 	pie_graph_interval_rel = "5m-ago"
 	pie_graph_interval_secs = 300
@@ -233,22 +239,3 @@ class GraphView(APIView):
 		tsd_req = OpenTSDBRequest(req_obj)
 		return Response(tsd_req.data)
 
-"""
-class SearchView(APIView):
-	'''
-		Search for pages, metrics, tag keys and tag values.
-		Metrics and tag key-value pairs use OpenTSDB's interface.
-	'''
-	tsdb_endpoints = OpenTSDBEndpoints()
-
-	def get(self, request, request_prefix):
-		#print params_str
-		search_type = request.GET.get('type', None)
-		search_query = request.GET.get('q', '')
-		if search_type == "page":
-			return Response([ os.path.splitext(f)[0] for f in os.listdir(config['model_path']) if search_query in f ])
-		else:
-			hjc = HttpJsonClient(config['tsdb']['uri'], config['tsdb']['port'])
-			rslt = hjc.GET(self.tsdb_endpoints.suggest+"?max="+str(config['tsdb']['suggest_limit'])+"&type="+search_type+"&q="+search_query)
-			return Response(rslt)
-"""
