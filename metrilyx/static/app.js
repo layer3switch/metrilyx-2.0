@@ -254,7 +254,7 @@ app.directive('keyValuePairs', function() {
 	            		q = tvals[tvals.length-1];
 	            		if(q === '') return;
 	            	}
-	            	$.getJSON('/api/search','type='+stype+'&q='+q, response);
+	            	$.getJSON('/api/search/'+stype,'&q='+q, response);
 	        	},
 	        	messages: {
 	            	noResults: '',
@@ -265,8 +265,9 @@ app.directive('keyValuePairs', function() {
 	        		var tagstring = $(elem).val();
 	        		ttagstr = getTagsString(tagstring, ui.item.value, "select");
 	        		if(ttagstr !== undefined) {
-	        			$(elem).val(ttagstr);
-	        			event.preventDefault();
+						ngModel.$setViewValue(ttagstr);
+						$(elem).val(ttagstr);
+	        			event.preventDefault();	
 	        		}
 	        	},
 	        	focus: function(event, ui) {
@@ -287,13 +288,7 @@ app.directive('keyValuePairs', function() {
 					ngModel.$setValidity('keyValuePairs', true);
           			return {};
 				}
-				/*
-				if(viewValue.search(/;$/) < 0 ) {
-					ngModel.$setValidity('keyValuePairs', false);
-					return ngModel.$modelValue;
-				}
-				*/
-				//a = viewValue.replace(/;$/,'').split(",");
+
 				a = viewValue.split(",");
 				var mVal = {};
 				for (var i in a) {
@@ -334,15 +329,19 @@ function dictToCommaSepStr(obj, delim) {
  * args: key1=val1,key2=val2
  * return: { key1: val1, key2: val2 }
  */
-function commaSepStrToDict(tagsStr) {
+function commaSepStrToDict(tagsStr, delim) {
+	if(delim === undefined) delim = "=";
 	if(tagsStr == "") return {};
 	d = {};
 	kvpairs = tagsStr.replace(/;$/, '').split(",");
+	//kvpairs = tagsStr.split(",");
 	for(var i in kvpairs) {
-		kv = kvpairs[i].split(":");
+		kv = kvpairs[i].split(delim);
+		if(kv.length != 2) continue;
 		if(kv[0] == "") continue;
 		d[kv[0]] = kv[1];
 	}
+	if(equalObjects(d,{})) return;
 	return d;
 }
 function clearAllTimeouts() {
