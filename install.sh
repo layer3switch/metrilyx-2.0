@@ -40,6 +40,8 @@ setup_celery_startup() {
 		cp etc/sysconfig/celeryd /etc/sysconfig/;
 	fi	
 }
+
+### DECOMMISSION ###
 install_os_deps() {
 	echo "-- Installing OS dependencies...."
 	for pkg in ${PKGS}; do
@@ -57,6 +59,8 @@ install_deps() {
 	install_os_deps;
 	install_pydeps;
 }
+### END DECOMMISSION ###
+
 backup_curr_install() {
 	if [ -d "${INSTALL_ROOT}/metrilyx" ]; then
 		echo "- Backing up existing installation...";
@@ -76,8 +80,8 @@ setup_app_config() {
 		fi
 		echo "  dashboards..."
 		cp -a ${APP_HOME}-${INSTALL_TIME}/pagemodels ${APP_HOME}/;
-		echo "  heatmap index..."
-		cp -f ${APP_HOME}-${INSTALL_TIME}/heatmaps.json ${APP_HOME}/heatmaps.json;
+		#echo "  heatmap index..."
+		#cp -f ${APP_HOME}-${INSTALL_TIME}/heatmaps.json ${APP_HOME}/heatmaps.json;
 		echo "  heatmaps..."
 		cp -a ${APP_HOME}-${INSTALL_TIME}/heatmaps ${APP_HOME}/;
 	else
@@ -142,7 +146,7 @@ if [ "$1" == "all" ]; then
 	init_postgres && init_django;
 	# apache restart
 elif [ "$1" == "app" ]; then
-	install_deps;
+	#install_deps;
 	install_app;
 	configure_apache;
 	app_postinstall;
