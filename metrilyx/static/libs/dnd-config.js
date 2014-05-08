@@ -14,10 +14,6 @@ var dndconfig = {
 		appendTo:"body",
 		zindex: 999999,
 		disabled:true,
-		remove: function(event, ui) {
-			// this allows to copy the item rather than move it.
-			event.preventDefault();
-		}
 	},
 	/* graph in graphs */
 	graph: {

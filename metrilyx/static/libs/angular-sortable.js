@@ -73,6 +73,8 @@ angular.module('ui.sortable', [])
                 },
                 _isCanceled: false
               };
+              // Metrilyx additions
+              if(attrs.dragCopy !== undefined) ui.item.sortable.index = ui.item.index();
               if(ui.item.sortable.index < 0) ui.item.sortable.index = 0;
             };
 
@@ -180,9 +182,11 @@ angular.module('ui.sortable', [])
               // so the next list can retrive it
               if (!ui.item.sortable.isCanceled()) {
                 scope.$apply(function () {
-                  console.log(ui.item.sortable.index);
-                  ui.item.sortable.moved = ngModel.$modelValue.splice(
-                    ui.item.sortable.index, 1)[0];
+                  if(attrs.dragCopy !== undefined) {
+                    ui.item.sortable.moved = ngModel.$modelValue[ui.item.sortable.index];
+                  } else {
+                    ui.item.sortable.moved = ngModel.$modelValue.splice(ui.item.sortable.index, 1)[0];
+                  }
                 });
               }
             };
