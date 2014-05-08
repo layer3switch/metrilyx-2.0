@@ -15,6 +15,6 @@ var CONN_POOL_CFG = {
 var AUTHCONFIG = {
 	modelstore: {
 		username: 'admin',
-		password: 'password'
+		password: 'metrilyx'
 	}
 };
