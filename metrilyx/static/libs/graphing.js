@@ -422,6 +422,8 @@ function graphing_upsertSeries(args) {
                         if(newData != false) {
                             //params: data, redraw, animation, updatePoints
                             hcg.series[i].setData(newData, false, null, false);
+                        } else {
+                            console.log("metric", hcg.series[i].options.name, args.series[j].data[d].alias);
                         }
                         break;
                     }
@@ -454,7 +456,7 @@ function getNewDataAlignedSeries(dataName, currData, newData) {
     currEndTime = currData[currData.length-1][0];
 
     if(newEndTime < currEndTime) return false;
-    if((newStartTime > currStartTime) && (newStartTime < currEndTime)) {
+    if((newStartTime > currStartTime) && (newStartTime <= currEndTime)) {
         var timeAdded = newEndTime - currEndTime;
         //console.log("Time added:", timeAdded)
         var shiftedStartTime = currStartTime + timeAdded;
