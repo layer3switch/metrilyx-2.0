@@ -30,7 +30,7 @@ class OpenTSDBEndpoints(object):
 
 
 """
-Sample request:
+Sample graph request:
 
 {u'_id': u'5a55b84b86124b9fae664464e93244a6',
  u'graphType': u'line',
@@ -42,7 +42,12 @@ Sample request:
 						 u'tags': {u'class': u'*'}},
 			  u'yTransform': u''}],
  u'size': u'medium',
- u'start': u'5m-ago'}
+ u'thresholds': {
+ 	u'danger': 0,
+ 	u'warning': 0,
+ 	u'info':0
+ },
+ u'start': u'10m-ago'}
 
 """
 class OpenTSDBRequest(GraphRequest):
