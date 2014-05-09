@@ -416,14 +416,12 @@ function graphing_upsertSeries(args) {
                         if(hcg.series[i].options.data.length <= 0) {
                             newData = args.series[j].data[d].dps;
                         } else {
-                            newData = getNewDataAlignedSeries(hcg.series[i].options.data, args.series[j].data[d].dps);                   
+                            newData = getNewDataAlignedSeries(hcg.series[i].options.name, 
+                                hcg.series[i].options.data, args.series[j].data[d].dps);                   
                         }
-                        //console.log('total', newData.length);
-                        if(!newData) {
-                            //console.log("no new data:",hcg.series[i].name);
-                        } else {
-                            //console.log("updating series:",hcg.series[i].name);
-                            hcg.series[i].setData(newData, false);
+                        if(newData != false) {
+                            //params: data, redraw, animation, updatePoints
+                            hcg.series[i].setData(newData, false, null, false);
                         }
                         break;
                     }
@@ -443,18 +441,22 @@ function graphing_upsertSeries(args) {
         hcg.redraw();
     }
 }
-function getNewDataAlignedSeries(currData, newData) {
+function getNewDataAlignedSeries(dataName, currData, newData) {
     if(newData.length <= 0) return false;
     //if(!currData) return newData;
+    //console.log("curr start", currData[0]);
 
     newStartTime = newData[0][0];
     newEndTime = newData[newData.length-1][0];
+    
+    /* highcharts stores as object or array */
     currStartTime = currData[0][0];
     currEndTime = currData[currData.length-1][0];
 
     if(newEndTime < currEndTime) return false;
-    if(newStartTime > currStartTime) {
+    if((newStartTime > currStartTime) && (newStartTime < currEndTime)) {
         var timeAdded = newEndTime - currEndTime;
+        //console.log("Time added:", timeAdded)
         var shiftedStartTime = currStartTime + timeAdded;
         // remove overlapping old data //
         while(currData[currData.length-1][0] >= newStartTime) {
@@ -467,7 +469,12 @@ function getNewDataAlignedSeries(currData, newData) {
         }
         return currData.concat(newData);
     } else {
-        return newData;
+        console.log(dataName);
+        console.log("curr data",new Date(currStartTime),new Date(currEndTime));
+        console.log("data out of range", new Date(newStartTime),new Date(newEndTime));
+        //return currData
+        //return newData;
+        return false;
     }
 }
 /*
