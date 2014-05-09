@@ -31,13 +31,15 @@ Metrilyx will run on any system that supports the packages below.  It has primar
 	python-setuptools
 
 #### Python Packages:
-	celery
-	Django
+	uuid
+	django
+	djangorestframework
 	django-filter
 	django-cors-headers
-	Markdown
-	djangorestframework
-	uuid
+	django-reversion
+	celery
+	requests
+	jsonfield
 
 ### Installation
 The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below, to auto-install the complete application including dependencies. The default install destination is **/opt/metrilyx**.	
