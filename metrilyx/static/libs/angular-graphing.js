@@ -276,8 +276,9 @@ angular.module('graphing', [])
 				function getUpdates() {
 					if(ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
 						console.log("issuing update...");
+						// 12m-ago seems to be the magic no. otherwise data does not line up //
 						var q = {
-							start: "10m-ago",
+							start: "12m-ago",
 							size: ngModel.$modelValue.size,
 							_id: ngModel.$modelValue._id,
 							series: ngModel.$modelValue.series,
@@ -291,7 +292,7 @@ angular.module('graphing', [])
 					if(currTimer) clearTimeout(currTimer);
 					currTimer = setTimeout(function() { 
 						getUpdates();
-					}, 50000);
+					}, 45000);
 				}
 				function changeGraphType(graph) {
 					var q = scope.baseQuery(graph);
