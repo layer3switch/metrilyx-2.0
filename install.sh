@@ -7,17 +7,9 @@ APP_HOME="${INSTALL_ROOT}/metrilyx";
 if [[ -f "/etc/redhat-release" ]]; then
 	HTTPD="httpd"
 	HTTP_USER="apache"
-	#PKGS="libuuid gcc uuid ${HTTPD} mod_wsgi python-setuptools python-devel mongo-10gen mongo-10gen-server"
-	#PKG_INSTALLER="yum -y install"
-	#PKG_LISTER="rpm -qa"
-	#PKG_S_PREFIX="^"
 elif [[ -f "/etc/debian_version" ]]; then
 	HTTPD="apache2"
 	HTTP_USER="www-data"
-	#PKGS="libuuid1 gcc uuid ${HTTPD} libapache2-mod-wsgi python-setuptools python-dev mongodb mongodb-server"
-	#PKG_INSTALLER="apt-get install -y"
-	#PKG_LISTER="dpkg -l"
-	#PKG_S_PREFIX="ii\s+"
 else
 	echo "Currently only RedHat/Debian based distro are supported.  Please install manually.";
 	exit 1;
@@ -60,14 +52,15 @@ backup_curr_install() {
 	fi;
 }
 configure_app() {
-	echo "- Importing existing data..."
+	echo "- Importing existing data...";
 	echo "  configs...";
 	if [ -f "${APP_HOME}-${INSTALL_TIME}/etc/metrilyx/metrilyx.conf" ]; then
-		cp ${APP_HOME}-${INSTALL_TIME}/etc/metrilyx/metrilyx.conf ${APP_HOME}/etc/metrilyx/metrilyx.conf;
-	else
-		cp etc/metrilyx/metrilyx.conf.sample ${APP_HOME}/etc/metrilyx/metrilyx.conf;
-		${EDITOR:-vi} ${APP_HOME}/etc/metrilyx/metrilyx.conf;
-	if 
+        cp ${APP_HOME}-${INSTALL_TIME}/etc/metrilyx/metrilyx.conf ${APP_HOME}/etc/metrilyx/metrilyx.conf;
+    else
+        cp etc/metrilyx/metrilyx.conf.sample ${APP_HOME}/etc/metrilyx/metrilyx.conf;
+        ${EDITOR:-vi} ${APP_HOME}/etc/metrilyx/metrilyx.conf;
+    fi
+
 	if [ -f "${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js" ]; then
 		cp ${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js ${APP_HOME}/metrilyx/static/config.js;
 	else
@@ -75,11 +68,12 @@ configure_app() {
 	fi
 
 	echo "  dashboards..."
-	cp -a ${APP_HOME}-${INSTALL_TIME}/pagemodels ${APP_HOME}/;
+	[ -d "${APP_HOME}-${INSTALL_TIME}/pagemodels" ] && cp -a ${APP_HOME}-${INSTALL_TIME}/pagemodels ${APP_HOME}/;
 	
 	echo "  heatmaps..."
-	cp -a ${APP_HOME}-${INSTALL_TIME}/heatmaps ${APP_HOME}/;
+	[ -d "${APP_HOME}-${INSTALL_TIME}/pagemodels" ] && cp -a ${APP_HOME}-${INSTALL_TIME}/heatmaps ${APP_HOME}/;
 }
+
 configure_apache() {
 	echo "- Installing web components..."
 	if [[ -f "/etc/debian_version" ]]; then
