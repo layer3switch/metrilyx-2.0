@@ -2,15 +2,24 @@ Metrilyx v2.1.0
 ===============
 Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database used to store large amounts of data.  It allows for analyzing, cross cutting and viewing of time series data in a simple manner.
 
-#### Overview
+#### Features:
+- Ability to group pages based on tags.
+- Ability to generate heatmaps against a metric.
+- Ability to import and export pages.
+- Updated graphing library to Highstock 2.0.1
+- Improved the ability to move pods around on a page.
+- Various performance improvements and bug fixes.
+
+#### Screenshots
+##### Overview
 ![Alt text](metrilyx/static/imgs/readme/screenshot_1.png)
-#### Page listing
+##### Page listing
 ![Alt text](metrilyx/static/imgs/readme/screenshot_2.png)
-#### Edit Mode
+##### Edit Mode
 ![Alt text](metrilyx/static/imgs/readme/screenshot_3.png)
  
 ### Requirements
-Metrilyx will run on any system that supports the packages below.  It has primarily been tested on RedHat based flavors of Linux.
+Metrilyx will run on any system that supports the packages mentioned below.  It has primarily been tested on RedHat based flavors of Linux.
 
 #### OS Packages:
 ##### RHEL:
@@ -41,27 +50,21 @@ Metrilyx will run on any system that supports the packages below.  It has primar
 	requests
 	jsonfield
 
+In order to use heatmaps you will also need a mongodb server.
+
+
 ### Installation
-The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below, to auto-install the complete application including dependencies. The default install destination is **/opt/metrilyx**.	
+The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below to install the application after the above mentioned requirements have been satisfied. The default install destination is **/opt/metrilyx**.	
+
+- Install the required OS packages based on your OS's package manager.
+- Issue the following command to install the application:
 	
-	[</path/to/downloaded/app>]$./install.sh
+	[</path/to/downloaded/app>]$ ./install.sh app
 	
 
-This will install all required OS packages as well as python packages and apache configs.
+Assuming all required packages are installed, the script will install the required python modules, apache configs depending on your distribution and prompt you to edit the configuration file.
 
-For **other distributions**, follow the instructions below:
-
-	- Install the required OS packages based on your OS's package manager.
-	
-	- Install all required python modules as mentioned above.
-	
-	- Copy etc/httpd/conf.d/metrilyx.conf to your webservers config directory. Usually /etc/httpd/conf.d/ for **RedHat** and /etc/apache2/sites-available/ for **Debian** based distributions.
-	
-	- Set the permissions to /opt/metrilyx to the appropriate web server user.   
-
-	- Edit the configuration (more below).
-
-	- Restart the webserver.
+After you have completed editing the configuration file restart Apache.
 
 ### Configuration
 The default installation directory is /opt/metrilyx (i.e %{metrilyx_home}).
@@ -69,7 +72,7 @@ The default installation directory is /opt/metrilyx (i.e %{metrilyx_home}).
 ##### Path 
 %{metrilyx_home}/etc/metrilyx/metrilyx.conf
 
-A sample config file is provided.  The configuration file is in JSON format.  To begin you can copy the sample config to the path mentioned above and fill in the uri and port.
+A sample configuration file has been provided.  The configuration file is in JSON format.  
 	
 	{
 		"tsdb": {
@@ -77,7 +80,12 @@ A sample config file is provided.  The configuration file is in JSON format.  To
 			"port": 80,
 			"suggest_limit": 100
 		},
-		"model_path": <absolute path to models directory>,
+		"databases":{
+			"default": {
+				"ENGINE": "django.db.backends.sqlite3",
+            	"NAME": "metrilyx.sqlite3"
+			}
+		},
 		"heatmaps": {
 			"analysis_interval": "1m-ago",
 			"transport": "mongodb",
@@ -92,7 +100,8 @@ A sample config file is provided.  The configuration file is in JSON format.  To
 			"tasks": [
 				"metrilyx.heatmap_tasks"
 			]
-		}
+		},
+		"debug": false
 	}
 	
 ##### tsdb.uri
@@ -104,14 +113,11 @@ OpenTSDB http port (default: 4242)
 ##### tsdb.suggest_limit
 OpenTSDB suggest max result limit. 
 
-##### model_path
-Path to directory where JSON page models (i.e. dashboards) will be stored.  Optional (default: /opt/metrilyx/pagemodels)
-
-After you've installed and configured metrilyx, click on the "tutorials" link towards the bottom-center of the page for a general overview and basic tutorial on how to get started.
-
 ##### heatmaps
-This configuration option is only need if you plan to use heatmaps. If you choose to enable this feature the only needed change is the mongodb information relative to your setup.
+This configuration option is only need if you plan to use heatmaps. If you choose to enable this feature the only needed change is the mongodb information relative to your setup i.e. host, port, and database
 
+##### databases
+The default uses sqlite.  Other databases can also be used.  We have testing with postgresql.  This requires a seperate set of tasks that will be included later.
 
 ### Heat Maps
 Heatmaps are used to view your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10.  This is usually the tag containing a value of '*'.
@@ -127,7 +133,28 @@ In order to use heatmaps, you will need a mongodb server.  Heatmap computations 
 	/etc/init.d/celeryd start
 
 
+#### Importing models
+You will need to import page models from v2.0 to v2.1 as 2.1 now uses a database to store the models.  During the installation process, the installer backups the current installation with a timestamp.
+
+You can import models from the UI but you may also import them via CLI.  You can issue the following command to import a json page model (i.e. graphmap).
+
+	curl -u amdin:metrilyx http://localhost/api/graphmaps -H "Content-Type:application/json" -d @<path/to/json/model>
+
+This will import a graphmap (i.e. page).  To import a heatmap you can use the following endpoint:
+
+	curl -u amdin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @<path/to/heatmap/model>
+	
+To import all existing graphmaps from v2.0, issue the following commands:
+
+	cd /opt/metrilyx-<timestamp>/pagemodels
+	for i in $(ls);do curl -u amdin:metrilyx http://localhost/api/graphmaps -H "Content-Type:application/json" -d @./$i; done
+	
+Similarly to import all existing heatmaps from v2.0, issue the following commands:
+
+	cd /opt/metrilyx-<timestamp>/heatmaps
+	for i in $(ls);do curl -u amdin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @./$i; done
+
 #### Notes
-- The default username and password for the site are admin and password respectively. These should almost never be required and are specifically needed by the REST interface.
-- If you would like to change the password, change to the application installation directory.  Remove the file called **metrilyx.sqlite3** and run **python manage.py syncdb**.  This should prompt you to create a new admin user.  Type 'yes', and follow the prompts to create a new username and password.
+- The default username and password for the site are admin and metrilyx respectively. Changing these will cause the application to stop functioning as other configurations also need to be updated.
+- If you would like to change the password, change to the application installation directory.  Remove the file called **metrilyx.sqlite3** and run **python manage.py syncdb**.  This should prompt you to create a new admin user.  Type 'yes', and follow the prompts to create a new username and password.  You will also need to update the config.js appropriately.
 - Please be aware that although the project has a MIT license, the graphing library is under the creative commons license.
