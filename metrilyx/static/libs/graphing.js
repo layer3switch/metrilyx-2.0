@@ -422,8 +422,6 @@ function graphing_upsertSeries(args) {
                         if(newData != false) {
                             //params: data, redraw, animation, updatePoints
                             hcg.series[i].setData(newData, false, null, false);
-                        } else {
-                            console.log("metric", hcg.series[i].options.name, args.series[j].data[d].alias);
                         }
                         break;
                     }
@@ -455,6 +453,7 @@ function getNewDataAlignedSeries(dataName, currData, newData) {
     currStartTime = currData[0][0];
     currEndTime = currData[currData.length-1][0];
 
+
     if(newEndTime < currEndTime) return false;
     if((newStartTime > currStartTime) && (newStartTime <= currEndTime)) {
         var timeAdded = newEndTime - currEndTime;
@@ -471,9 +470,9 @@ function getNewDataAlignedSeries(dataName, currData, newData) {
         }
         return currData.concat(newData);
     } else {
-        console.log(dataName);
-        console.log("curr data",new Date(currStartTime),new Date(currEndTime));
-        console.log("data out of range", new Date(newStartTime),new Date(newEndTime));
+        console.log(dataName, "out of range");
+        console.log("curr data:",new Date(currStartTime),new Date(currEndTime));
+        console.log("new  data:", new Date(newStartTime),new Date(newEndTime), newData.length);
         //return currData
         //return newData;
         return false;
