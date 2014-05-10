@@ -455,7 +455,7 @@ function getNewDataAlignedSeries(dataName, currData, newData) {
 
 
     if(newEndTime < currEndTime) return false;
-    if((newStartTime > currStartTime) && (newStartTime <= currEndTime)) {
+    if((newStartTime > currStartTime) && (newStartTime < currEndTime)) {
         var timeAdded = newEndTime - currEndTime;
         //console.log("Time added:", timeAdded)
         var shiftedStartTime = currStartTime + timeAdded;
