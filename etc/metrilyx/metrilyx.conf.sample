@@ -17,7 +17,7 @@
 	"databases":{
 		"default": {
 			"ENGINE": "django.db.backends.sqlite3",
-            "NAME": "metrilyx.sqlite3"
+            "NAME": "/opt/metrilyx/metrilyx.sqlite3"
 		}
 	},
 	"celery": {
