@@ -3,6 +3,7 @@ Metrilyx v2.1.0
 Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database used to store large amounts of data.  It allows for analyzing, cross cutting and viewing of time series data in a simple manner.
 
 #### Features:
+- Page Models now stored in a database rather than flat files.
 - Ability to group pages based on tags.
 - Ability to generate heatmaps against a metric.
 - Ability to import and export pages.
@@ -49,6 +50,8 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 	celery
 	requests
 	jsonfield
+	twisted
+	autobahn
 
 In order to use heatmaps you will also need a mongodb server.
 
@@ -77,9 +80,9 @@ A sample configuration file has been provided.  The configuration file is in JSO
 	{
 		"tsdb": {
 			"uri":"tsdb.example.com",
-			"port": 80,
+			"port": 4242,
 			"suggest_limit": 100
-		},
+		}
 		"databases":{
 			"default": {
 				"ENGINE": "django.db.backends.sqlite3",
@@ -108,7 +111,7 @@ A sample configuration file has been provided.  The configuration file is in JSO
 OpenTSDB http host
 
 ##### tsdb.port
-OpenTSDB http port (default: 4242)
+OpenTSDB port
 
 ##### tsdb.suggest_limit
 OpenTSDB suggest max result limit. 
@@ -117,7 +120,7 @@ OpenTSDB suggest max result limit.
 This configuration option is only need if you plan to use heatmaps. If you choose to enable this feature the only needed change is the mongodb information relative to your setup i.e. host, port, and database
 
 ##### databases
-The default uses sqlite.  Other databases can also be used.  We have testing with postgresql.  This requires a seperate set of tasks that will be included later.
+The default installation uses sqlite.  Other databases can also be used.  We have testing and run a setup using postgresql.  This requires a seperate set of tasks that will be included later.
 
 ### Heat Maps
 Heatmaps are used to view your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10.  This is usually the tag containing a value of '*'.
