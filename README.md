@@ -61,11 +61,9 @@ The provided install script will work with both **RedHat** and **Debian** based 
 - Issue the following command to install the application:
 	
 	[< /path/to/downloaded/app >]$ ./install.sh app
-	
 
-Assuming all required packages are installed, the script will install the required python modules, apache configs depending on your distribution and prompt you to edit the configuration file.
-
-After you have completed editing the configuration file restart Apache.
+- Assuming all required OS packages are present, the script will install the required python modules, apache configs (based on distribution) and prompt you to edit the configuration file.
+- After you have completed editing the configuration file restart Apache.
 
 ### Configuration
 The default installation directory is /opt/metrilyx (i.e %{metrilyx_home}).
