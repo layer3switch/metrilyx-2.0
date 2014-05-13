@@ -215,6 +215,25 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				}
 			}
 		});
+		
+        $scope.wssock = getWebSocket();
+        $scope.wssock.onopen = function() {
+          console.log("Connected to wsuri (using WebSocket extensions: [" + $scope.wssock.extensions + "])");
+          //sock.send(JSON.stringify({'init':1}));
+       	}
+       	$scope.wssock.onclose = function(e) {
+          console.log("Connection closed (wasClean = " + e.wasClean + ", code = " + e.code + ", reason = '" + e.reason + "')");
+          $scope.wssock = null;
+       	}
+       	$scope.wssock.onmessage = function(e) {
+       		var data = JSON.parse(e.data);
+       		var ce = new CustomEvent(data._id, {'detail': data });
+       		$scope.wssock.dispatchEvent(ce);
+       	}
+        $scope.requestData = function(query) {
+        	$scope.wssock.send(JSON.stringify(query));
+        }
+
 		$scope.onPartialComponentLoad = function() {
 			// setTimeout is to account for processing time //
 			setTimeout(function() {
@@ -323,9 +342,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$scope.updatesEnabled = value;
 		}
 		$scope.setStartTime = function(sTime) {
-			if($scope.endTime) {
-				if($scope.sTime > $scope.endTime) return;
-			}
+			if($scope.endTime && ($scope.sTime > $scope.endTime)) return;
 			$scope.startTime = sTime;
 		}
 		$scope.setEndTime = function(eTime) {
@@ -361,6 +378,24 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				});
 			}, 500);
 		}
+		$scope.getTimeWindow = function() {
+			if($scope.timeType == "absolute"){
+				if($scope.endTime) 
+					return {
+						end: $scope.endTime, 
+						start: $scope.startTime
+					};
+				return {
+					start: $scope.startTime, 
+					end: Math.ceil((new Date()).getTime()/1000)
+				};
+			} else {
+				return {
+					start: Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime($scope.timeType)),
+					end: Math.ceil((new Date()).getTime()/1000)
+				};
+			}
+		}
 		$scope.baseQuery = function(graphObj) {
 			var q = {
 				_id: graphObj._id,
@@ -368,12 +403,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				tags: $scope.globalTags,
 				thresholds: graphObj.thresholds
 			};
-			if($scope.timeType == "absolute") {
-				q['start'] = $scope.startTime;
-				if($scope.endTime) q.end = $scope.endTime;
-			} else {
-				q['start'] = $scope.timeType;
-			}
+			$.extend(q, $scope.getTimeWindow(),true);
 			return q;
 		}
 		$scope.disableDragDrop = function() {
@@ -501,27 +531,25 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$('.adhoc-metric-editor').hide();
 			if(gobj.series.length < 1) return;
 
-			for(var s in gobj.series) {
-				gobj.series[s].loading = "loading";
-			}
+			//for(var s in gobj.series) {
+			//	gobj.series[s].loading = "loading";
+			//}
 			//$scope.setURL(gobj);
 
 			q = $scope.baseQuery(gobj)
 			q.series = gobj.series;
-			Graph.getData(q, function(result) {
-				graphing_newGraph(result);
-				for(var s in gobj.series) {
-					gobj.series[s].loading = "done-loading";
-					for(var d in result.series[s].data) {
-						$scope.updateTagsOnPage(result.series[s].data[d].tags);
-					}
-				}
-			});
+			$scope.requestData(q);
+			// destroy current graph //
+			$('[data-graph-id='+gobj._id+']').highcharts().destroy();
+			$('[data-graph-id='+gobj._id+']').html(
+				"<table class='gif-loader-table'><tr><td> \
+				<img src='/imgs/loader.gif'></td></tr></table>");
 		}
 }]);
 
 metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph',
 	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Graph) {
+		$scope.wssock 			= getWebSocket();
 
 		$scope.modelType 		= "adhoc";
 		$scope.timeType 		= "1h-ago";
@@ -538,6 +566,8 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.metricQueryResult = [];
 		$scope.tagsOnPage = {};
 		$scope.graph = {};
+
+		var QUEUED_REQS = [];
 
 		if($routeParams.editMode==="false") {
 			$scope.editMode = "";
@@ -618,6 +648,24 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.setStatus = function(serieIdx, status) {
 			$scope.graph.series[serieIdx].loading = status;
 		}
+		$scope.getTimeWindow = function() {
+			if($scope.timeType == "absolute"){
+				if($scope.endTime) 
+					return {
+						end: $scope.endTime, 
+						start: $scope.startTime
+					};
+				return {
+					start: $scope.startTime, 
+					end: Math.ceil((new Date()).getTime()/1000)
+				};
+			} else {
+				return {
+					start: Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime($scope.timeType)),
+					end: Math.ceil((new Date()).getTime()/1000)
+				};
+			}
+		}
 		$scope.baseQuery = function(graphObj) {
 			var q = {
 				_id: graphObj._id,
@@ -625,14 +673,33 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				tags: {},
 				thresholds: graphObj.thresholds
 			};
-			if($scope.timeType == "absolute") {
-				q['start'] = $scope.startTime;
-				if($scope.endTime) q.end = $scope.endTime;
-			} else {
-				q['start'] = $scope.timeType;
-			}
+			$.extend(q, $scope.getTimeWindow(),true);
 			return q;
 		}
+
+        $scope.wssock.onopen = function() {
+          console.log("Connected to wsuri (using WebSocket extensions: [" + $scope.wssock.extensions + "])");
+          //console.log("Processing queue...");
+          while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());
+       	}
+       	$scope.wssock.onclose = function(e) {
+          console.log("Connection closed (wasClean = " + e.wasClean + ", code = " + e.code + ", reason = '" + e.reason + "')");
+          $scope.wssock = null;
+       	}
+       	$scope.wssock.onmessage = function(e) {
+       		var data = JSON.parse(e.data);
+       		var ce = new CustomEvent(data._id, {'detail': data });
+       		$scope.wssock.dispatchEvent(ce);
+       	}
+        $scope.requestData = function(query) {
+        	try {
+				$scope.wssock.send(JSON.stringify(query));	
+        	} catch(e) {
+        		//console.log(e);
+        		// in connecting state.
+        		if(e.code === 11) QUEUED_REQS.push(JSON.stringify(query));
+        	}
+        }
 		$scope.setURL = function(obj) {
 			var outarr = [];
 			for(var s in obj.series) {
@@ -686,6 +753,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				} else {
 					top[k].push(obj[k]);
 				}
+				console.log(obj[k]);
 			}
 			$scope.tagsOnPage = top;
 		}
@@ -693,23 +761,21 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			if(!gobj) gobj = $scope.graph;
 			$('.adhoc-metric-editor').hide();
 			if(gobj.series.length < 1) return;
-
+			/*
 			for(var s in gobj.series) {
 				gobj.series[s].loading = "loading";
 			}
+			*/
 			$scope.setURL(gobj);
 
 			q = $scope.baseQuery(gobj)
 			q.series = gobj.series;
-			Graph.getData(q, function(result) {
-				graphing_newGraph(result);
-				for(var s in gobj.series) {
-					gobj.series[s].loading = "done-loading";
-					for(var d in result.series[s].data) {
-						$scope.updateTagsOnPage(result.series[s].data[d].tags);
-					}
-				}
-			});
+			$scope.requestData(q);
+			// destroy current graph //
+			try { $('[data-graph-id='+gobj._id+']').highcharts().destroy(); } catch(e) {};
+			$('[data-graph-id='+gobj._id+']').html(
+				"<table class='gif-loader-table'><tr><td> \
+				<img src='/imgs/loader.gif'></td></tr></table>");
 		}
 
 		$scope.disableDragDrop = function() {

@@ -193,12 +193,13 @@ class HeatView(APIView):
 
 
 #### REFACTOR ####
+"""
 class GraphView(APIView):
 	pie_graph_interval_rel = "5m-ago"
 	pie_graph_interval_secs = 300
 
 	def __calibrate_piegraph(self, req_obj):
-		"""
+		'''
 		In the case of pie graphs cut the query time down to 
 		2 mins.
 
@@ -206,7 +207,7 @@ class GraphView(APIView):
 			req_obj	: original http request object
 		Returns:
 			Modified request object with trimmed time
-		"""
+		'''
 		if req_obj['graphType'] == "pie":
 			#print req_obj['start']
 			if type(req_obj['start']) != int and "-ago" in req_obj['start']:
@@ -224,15 +225,15 @@ class GraphView(APIView):
 		return req_obj
 	
 	def post(self, request, graph_query=None):
-		"""
+		'''
 		Handles graph data requests.
 		
 		Returns: 
 			graph model, with data 
-		"""
+		'''
 		req_obj = json.loads(request.body)
 		## pie charts only needs a smaller subset
 		req_obj = self.__calibrate_piegraph(req_obj)
 		tsd_req = OpenTSDBRequest(req_obj)
 		return Response(tsd_req.data)
-
+"""

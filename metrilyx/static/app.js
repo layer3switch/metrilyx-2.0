@@ -312,6 +312,17 @@ app.directive('keyValuePairs', function() {
 		}
 	};
 });
+function getWebSocket(wsuri) {
+	wsuri = "ws://localhost:9000?compressed=true";
+    if ("WebSocket" in window) {
+       return new WebSocket(wsuri);
+    } else if ("MozWebSocket" in window) {
+       return new MozWebSocket(wsuri);
+    } else {
+       log("Browser does not support WebSocket!");
+       return null;
+    }
+}
 /*
  * args: { key1: val1, key2: val2 }
  * return: key1=val1,key2=val2

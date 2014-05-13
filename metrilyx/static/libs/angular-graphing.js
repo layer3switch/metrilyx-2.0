@@ -191,6 +191,116 @@ angular.module('pageLayout', [])
 
 /* graph initialization and loading */
 angular.module('graphing', [])
+	.directive('wsHighstockGraph', [ function() {
+		return {
+			restrict: 'A',
+			require: '?ngModel',
+			link: function(scope, elem, attrs, ngModel) {
+				if(!ngModel) return;
+
+				var currTimer;
+				var evtListenerAdded = false;
+
+				function getUpdateQuery() {
+					return { 
+						start: Math.floor(((new Date()).getTime() - 900000)/1000),
+						size: ngModel.$modelValue.size,
+						_id: ngModel.$modelValue._id,
+						series: ngModel.$modelValue.series,
+						graphType: ngModel.$modelValue.graphType,
+						tags: scope.globalTags
+					};
+				}
+				function getUpdates() {
+					if(ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
+						console.log("issuing update...");
+						// 12m-ago seems to be the magic no. otherwise data does not line up //
+						q = getUpdateQuery();
+						scope.requestData(q);
+					}
+					if(currTimer) clearTimeout(currTimer);
+					currTimer = setTimeout(function() { 
+						getUpdates();
+					}, 45000);
+				}
+
+				function processRecievedData(event) {
+					var data = event.detail;
+					// skip if it does not belong to this graph //
+					// no longer needed as event fired by _id
+					//if(data._id != ngModel.$modelValue._id) return;
+					tWin = scope.getTimeWindow();
+					var mg = new MetrilyxGraph(data, tWin.start, tWin.end);
+					mg.applyData();
+					
+					var sTags = (new SeriesFormatter(data.series)).seriesTags();
+					scope.$apply(function() { scope.updateTagsOnPage(sTags) });
+				}
+
+				if(scope.editMode == " edit-mode") {
+					$(elem).find("input[ng-model*=name]").each(function() {
+						$(this).attr('disabled', false);
+					});
+				} else {
+					scope.disableDragDrop();
+				}
+				getUpdates();
+				
+				scope.$watch(function() {
+					return ngModel.$modelValue;
+				}, function(graph, oldValue) {
+					if(!evtListenerAdded && graph._id) {
+						console.log("adding event listener:", graph._id);
+						scope.wssock.addEventListener(graph._id, processRecievedData);
+						evtListenerAdded = true;
+					}
+					if(!graph.series) return;
+					if(graph.series.length <= 0 && oldValue.series && oldValue.series.length <= 0) return;
+					if(!equalObjects(graph.thresholds, oldValue.thresholds)) return;
+					
+					// initial populate //
+					hc = $("[data-graph-id='"+graph._id+"']").highcharts();
+					if(hc == undefined) {
+						$("[data-graph-id='"+graph._id+"']").html(
+							"<table class='gif-loader-table'><tr><td> \
+							<img src='/imgs/loader.gif'></td></tr></table>");
+
+						var q = scope.baseQuery(graph);
+						q.series = graph.series;
+						scope.requestData(q);
+						if(scope.modelType == 'adhoc') scope.setURL(graph);
+						return;
+					}
+					// handle graph change //
+					if(graph.graphType != oldValue.graphType) {
+						console.log("graph type changed. re-rendering");
+						scope.reloadGraph(graph);
+						return;
+					};
+					
+					// check length //
+					if(graph.series.length == oldValue.series.length) {
+						return;
+					} else if(graph.series.length > oldValue.series.length) {
+						//console.log("add new series");
+						var q = scope.baseQuery(graph);	
+						q.series = [ graph.series[graph.series.length-1] ];
+						scope.requestData(q);
+						if(scope.modelType == 'adhoc') scope.setURL(graph);
+					} else {
+						//console.log("removing series");
+						graphing_removeSeries(graph);
+						if(scope.modelType == 'adhoc') scope.setURL(graph);
+					}
+				}, true);
+				// clear timeout's //
+				scope.$on("$destroy", function( event ) {
+                	clearTimeout(currTimer);
+                	scope.wssock.removeEventListener("graphdata", processRecievedData);
+                });
+			}
+		};	
+	}])
 	.directive('highstockAdhocGraph', ['Graph', function(Graph) {
 		return {
 			restrict: 'A',
@@ -263,22 +373,14 @@ angular.module('graphing', [])
 			require: '?ngModel',
 			link: function(scope, elem, attrs, ngModel) {
 				if(!ngModel) return;
-				// returns query with complete time window
-				// enable all inputs in edit mode //
-				if(scope.editMode == " edit-mode") {
-					$(elem).find("input[ng-model*=name]").each(function() {
-						$(this).attr('disabled', false);
-					});
-				} else {
-					scope.disableDragDrop();
-				}
+
 				var currTimer;
 				function getUpdates() {
 					if(ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
 						console.log("issuing update...");
 						// 12m-ago seems to be the magic no. otherwise data does not line up //
 						var q = { 
-							start: (new Date()).getTime() - 720000,
+							start: Math.floor(((new Date()).getTime() - 720000)/1000),
 							size: ngModel.$modelValue.size,
 							_id: ngModel.$modelValue._id,
 							series: ngModel.$modelValue.series,
@@ -303,6 +405,13 @@ angular.module('graphing', [])
 					});
 				}
 
+				if(scope.editMode == " edit-mode") {
+					$(elem).find("input[ng-model*=name]").each(function() {
+						$(this).attr('disabled', false);
+					});
+				} else {
+					scope.disableDragDrop();
+				}
 				getUpdates();
 				
 				scope.$watch(function() {
