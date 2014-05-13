@@ -22,7 +22,6 @@ from serializers import *
 from models import * 
 
 from datastores import *
-from datastreams.opentsdb import OpenTSDBRequest, OpenTSDBEndpoints
 from httpclients import HttpJsonClient
 
 from metrilyxconfig import config
@@ -137,7 +136,6 @@ class TagViewSet(viewsets.ViewSet):
 	
 	def retrieve(self, request, pk=None):
 		model_type = request.GET.get('model_type', '')
-	
 		if model_type == '':
 			objs = MapModel.objects.filter(tags__contains=pk)
 		else:	
@@ -146,8 +144,7 @@ class TagViewSet(viewsets.ViewSet):
 		return Response(serializer.data)
 
 class SearchViewSet(viewsets.ViewSet): 
-	tsdb_suggest_url = "http://%s:%d/api/suggest?max=%d" %(config['tsdb']['uri'], 
-				config['tsdb']['port'], config['tsdb']['suggest_limit'])
+	tsdb_suggest_url = "%(uri)s%(search_endpoint)s?max=%(suggest_limit)d" %(config['dataproviders']['tsdb'])
 
 	def list(self, request, pk=None):
 		return Response(['graphmaps', 'heatmaps', 'metrics', 'tagk', 'tagv'])

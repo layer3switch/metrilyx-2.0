@@ -108,8 +108,8 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 		$scope.loadList();	
 	}
 ]);
-metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph','Heatmap',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Graph, Heatmap) {
+metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap) {
 		if($routeParams.heatmapId) {
 			$scope.modelType = "heatmap/";
 		} else {
@@ -547,8 +547,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		}
 }]);
 
-metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Graph',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Graph) {
+metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model) {
 		$scope.wssock 			= getWebSocket();
 
 		$scope.modelType 		= "adhoc";
