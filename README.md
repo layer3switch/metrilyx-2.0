@@ -50,8 +50,6 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 	celery
 	requests
 	jsonfield
-	twisted
-	autobahn
 
 In order to use heatmaps you will also need a mongodb server.
 
