@@ -60,7 +60,7 @@ The provided install script will work with both **RedHat** and **Debian** based 
 - Install the required OS packages based on your OS's package manager.
 - Issue the following command to install the application:
 	
-	[< /path/to/downloaded/app >]$ ./install.sh app
+	[ /path/to/downloaded/app ]$ **./install.sh app**
 
 - Assuming all required OS packages are present, the script will install the required python modules, apache configs (based on distribution) and prompt you to edit the configuration file.
 - After you have completed editing the configuration file restart Apache.
