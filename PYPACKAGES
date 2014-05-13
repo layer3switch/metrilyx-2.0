@@ -8,3 +8,5 @@ django-reversion
 celery
 requests
 jsonfield
+twisted
+autobahn
