@@ -25,6 +25,7 @@ install_app() {
 	chmod g+w ${APP_HOME};
 	( id celery 2>&1 ) > /dev/null || useradd celery;
 	chgrp celery ${APP_HOME};
+	[ -f "${APP_HOME}/metrilyx.sqlite3" ] && chown ${HTTP_USER} ${APP_HOME}/metrilyx.sqlite3
 }
 
 setup_celery_startup() {
