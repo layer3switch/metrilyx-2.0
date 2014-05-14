@@ -89,7 +89,7 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 					jobj = JSON.parse(evt.target.result);
 					if($scope.modelType === "heatmap/") {
 						Heatmap.saveModel(jobj, function(rslt) {
-							setGlobalAlerts(rslt);
+							setGlobalAlerts({'message': 'Saved '+rslt._id});
 							flashAlertsBar();
 						});
 					} else {
