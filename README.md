@@ -137,21 +137,21 @@ You will need to import page models from v2.0 to v2.1 as 2.1 now uses a database
 
 You can import models from the UI but you may also import them via CLI.  You can issue the following command to import a json page model (i.e. graphmap).
 
-	curl -u amdin:metrilyx http://localhost/api/graphmaps -H "Content-Type:application/json" -d @<path/to/json/model>
+	curl -u admin:metrilyx http://localhost/api/graphmaps -H "Content-Type:application/json" -d @<path/to/json/model>
 
 This will import a graphmap (i.e. page).  To import a heatmap you can use the following endpoint:
 
-	curl -u amdin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @<path/to/heatmap/model>
+	curl -u admin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @<path/to/heatmap/model>
 	
 To import all existing graphmaps from v2.0, issue the following commands:
 
 	cd /opt/metrilyx-<timestamp>/pagemodels
-	for i in $(ls);do curl -u amdin:metrilyx http://localhost/api/graphmaps -H "Content-Type:application/json" -d @./$i; done
+	for i in $(ls);do curl -u admin:metrilyx http://localhost/api/graphmaps -H "Content-Type:application/json" -d @./$i; done
 	
 Similarly to import all existing heatmaps from v2.0, issue the following commands:
 
 	cd /opt/metrilyx-<timestamp>/heatmaps
-	for i in $(ls);do curl -u amdin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @./$i; done
+	for i in $(ls);do curl -u admin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @./$i; done
 
 #### Notes
 - The default username and password for the site are admin and metrilyx respectively. Changing these will cause the application to stop functioning as other configurations also need to be updated.
