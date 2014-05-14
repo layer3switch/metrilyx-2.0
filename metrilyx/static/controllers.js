@@ -595,10 +595,11 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 							'aggregator': met[0],
 							'rate': rate,
 							'metric': met[met.length-1],
-							'tags': commaSepStrToDict(arr[2])
+							'tags': commaSepStrToDict(arr[2], ":")
 						}
 					});
 				}
+				//console.log(graphModel);
 				$scope.graph = graphModel;
 				$scope.reloadGraph();
 			} else {
