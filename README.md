@@ -66,13 +66,14 @@ The provided install script will work with both **RedHat** and **Debian** based 
 - After you have completed editing the configuration file restart Apache.
 
 ### Configuration
-The default installation directory is /opt/metrilyx (i.e %{metrilyx_home}).
+There are 2 configuration files:
+1. **/opt/metrilyx/etc/metrilyx/metrilyx.conf**: server side configuration
+2. **/opt/metrilyx/metrilyx/static/config.js**: client side configuration
 
-##### Path 
-%{metrilyx_home}/etc/metrilyx/metrilyx.conf
+A sample configuration files have been provided for both.  The server side configuration file is in JSON format.
 
-A sample configuration file has been provided.  The configuration file is in JSON format.  
-	
+#### Sample metrilyx.conf:
+
 	{
 		"tsdb": {
 			"uri":"tsdb.example.com",
@@ -92,7 +93,7 @@ A sample configuration file has been provided.  The configuration file is in JSO
 		    	"host": "127.0.0.1",
 		    	"port": 27017,
 		    	"database": "jobs", 
-		    	"taskmeta_collection": "clry_taskmeta_collection"
+		    	"taskmeta_collection": "taskmeta_collection"
 			}
 		},
 		"celery": {
@@ -102,7 +103,7 @@ A sample configuration file has been provided.  The configuration file is in JSO
 		},
 		"debug": false
 	}
-	
+
 ##### tsdb.uri
 OpenTSDB http host
 
@@ -117,6 +118,27 @@ This configuration option is only need if you plan to use heatmaps. If you choos
 
 ##### databases
 The default installation uses sqlite.  Other databases can also be used.  We have testing and run a setup using postgresql.  This requires a seperate set of tasks that will be included later.
+
+
+#### Sample config.js:
+	
+	var CONN_POOL_CFG = {
+		urls: [],
+	};
+	// Auth information until auth is integrated into the UI. //
+	var AUTHCONFIG = {
+		modelstore: {
+			username: 'admin',
+			password: 'metrilyx'
+		}
+	};
+
+##### CONN_POOL_CFG
+URL's to round robin against when making ajax requests.  This provides a major performance improvement in terms of user experience.  This is to circumvent browser limitations on the number remote calls that can be made to a given domain.  These can be CNAME's to the same webserver.
+
+##### ATUHCONFIG
+This is temporary until authentication has been enabled through out the application.  This will be removed after user auth has been enabled and exposed.
+
 
 ### Heat Maps
 Heatmaps are used to view your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10.  This is usually the tag containing a value of '*'.
