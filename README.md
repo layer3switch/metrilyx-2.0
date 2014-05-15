@@ -67,8 +67,9 @@ The provided install script will work with both **RedHat** and **Debian** based 
 
 ### Configuration
 There are 2 configuration files:
-1. **/opt/metrilyx/etc/metrilyx/metrilyx.conf**: server side configuration
-2. **/opt/metrilyx/metrilyx/static/config.js**: client side configuration
+
+1. **/opt/metrilyx/etc/metrilyx/metrilyx.conf** (server side)
+2. **/opt/metrilyx/metrilyx/static/config.js** (client side)
 
 A sample configuration files have been provided for both.  The server side configuration file is in JSON format.
 
