@@ -122,11 +122,12 @@ The default installation uses sqlite.  Other databases can also be used.  We hav
 
 
 #### Sample config.js:
+This configuration is in javascript format.
 	
 	var CONN_POOL_CFG = {
 		urls: [],
 	};
-	// Auth information until auth is integrated into the UI. //
+
 	var AUTHCONFIG = {
 		modelstore: {
 			username: 'admin',
