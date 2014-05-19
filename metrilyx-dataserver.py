@@ -21,7 +21,7 @@ from metrilyx.dataserver.dataproviders import TSDBDataProvider
 LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s]: %(message)s"
 
 class TSDBGraphServerProtocol(GraphServerProtocol):
-	dataprovider = TSDBDataProvider(config['dataproviders']['tsdb'])
+	dataprovider = TSDBDataProvider(config['dataproviders'][0])
 
 
 def spawn_websocket_server(uri, logLevel, externalPort=None):
