@@ -5,11 +5,11 @@ INSTALL_TIME=$(date '+%d%b%Y_%H%M%S');
 APP_HOME="${INSTALL_ROOT}/metrilyx";
 
 if [[ -f "/etc/redhat-release" ]]; then
-	HTTPD="httpd"
-	HTTP_USER="apache"
+	HTTPD="nginx"
+	HTTP_USER="nginx"
 elif [[ -f "/etc/debian_version" ]]; then
-	HTTPD="apache2"
-	HTTP_USER="www-data"
+	HTTPD="nginx"
+	HTTP_USER="nginx"
 else
 	echo "Currently only RedHat/Debian based distro are supported.  Please install manually.";
 	exit 1;
@@ -58,14 +58,15 @@ configure_app() {
         cp ${APP_HOME}-${INSTALL_TIME}/etc/metrilyx/metrilyx.conf ${APP_HOME}/etc/metrilyx/metrilyx.conf;
     else
         cp etc/metrilyx/metrilyx.conf.sample ${APP_HOME}/etc/metrilyx/metrilyx.conf;
-        ${EDITOR:-vi} ${APP_HOME}/etc/metrilyx/metrilyx.conf;
     fi
+    ${EDITOR:-vi} ${APP_HOME}/etc/metrilyx/metrilyx.conf;
 
 	if [ -f "${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js" ]; then
 		cp ${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js ${APP_HOME}/metrilyx/static/config.js;
 	else
 		cp ${APP_HOME}/metrilyx/static/config.js.sample ${APP_HOME}/metrilyx/static/config.js;
 	fi
+	${EDITOR:-vi} ${APP_HOME}/metrilyx/static/config.js;
 
 	echo "  dashboards..."
 	[ -d "${APP_HOME}-${INSTALL_TIME}/pagemodels" ] && cp -a ${APP_HOME}-${INSTALL_TIME}/pagemodels ${APP_HOME}/;
@@ -74,17 +75,10 @@ configure_app() {
 	[ -d "${APP_HOME}-${INSTALL_TIME}/pagemodels" ] && cp -a ${APP_HOME}-${INSTALL_TIME}/heatmaps ${APP_HOME}/;
 }
 
-configure_apache() {
+configure_webserver() {
 	echo "- Installing web components..."
-	if [[ -f "/etc/debian_version" ]]; then
-		cp etc/httpd/conf.d/metrilyx.conf /etc/apache2/sites-available/ && rm /etc/apache2/sites-enabled/*.conf && a2ensite metrilyx;
-		sed -i "s/#Require all granted/Require all granted/g" /etc/apache2/sites-available/metrilyx.conf;
-		a2enmod rewrite;
-		a2enmod headers;
-	elif [[ -f "/etc/redhat-release" ]]; then
-		cp etc/httpd/conf.d/metrilyx.conf /etc/httpd/conf.d/;
-		chown -R $HTTP_USER ${APP_HOME};
-	fi
+	cp etc/nginx/conf.d/metrilyx.conf /etc/nginx/conf.d/;
+	chown -R $HTTP_USER ${APP_HOME};
 }
 init_postgres() {
 	/etc/init.d/postgresql-9.3 initdb;
@@ -112,7 +106,7 @@ if [ "$1" == "app" ]; then
 	backup_curr_install;
 	install_app;
 	configure_app;
-	configure_apache;
+	configure_webserver;
 	setup_celery_startup;
 else
 	echo "Executing $1...";
