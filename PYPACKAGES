@@ -10,3 +10,4 @@ requests
 jsonfield
 twisted
 autobahn
+uwsgi
