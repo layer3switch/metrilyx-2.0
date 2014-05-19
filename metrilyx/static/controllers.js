@@ -229,7 +229,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
        	$scope.wssock.onmessage = function(e) {
        		var data = JSON.parse(e.data);
        		if(data.error) {
-       			console.warning(data);
+       			console.warn(data);
        			setGlobalAlerts(data);
        			flashAlertsBar();
        			return;
@@ -696,7 +696,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
        	$scope.wssock.onmessage = function(e) {
        		var data = JSON.parse(e.data);
        		if(data.error) {
-       			console.warning(data);
+       			console.warn(data);
        			setGlobalAlerts(data);
        			flashAlertsBar();
        			return;
