@@ -144,7 +144,7 @@ class TagViewSet(viewsets.ViewSet):
 		return Response(serializer.data)
 
 class SearchViewSet(viewsets.ViewSet): 
-	tsdb_suggest_url = "%(uri)s%(search_endpoint)s?max=%(suggest_limit)d" %(config['dataproviders']['tsdb'])
+	tsdb_suggest_url = "%(uri)s%(search_endpoint)s?max=%(suggest_limit)d" %(config['dataproviders'][0])
 
 	def list(self, request, pk=None):
 		return Response(['graphmaps', 'heatmaps', 'metrics', 'tagk', 'tagv'])
@@ -187,50 +187,3 @@ class HeatView(APIView):
 			out['data'] = rslt.get()
 
 		return Response(out)
-
-
-#### REFACTOR ####
-"""
-class GraphView(APIView):
-	pie_graph_interval_rel = "5m-ago"
-	pie_graph_interval_secs = 300
-
-	def __calibrate_piegraph(self, req_obj):
-		'''
-		In the case of pie graphs cut the query time down to 
-		2 mins.
-
-		Args:
-			req_obj	: original http request object
-		Returns:
-			Modified request object with trimmed time
-		'''
-		if req_obj['graphType'] == "pie":
-			#print req_obj['start']
-			if type(req_obj['start']) != int and "-ago" in req_obj['start']:
-				req_obj['start'] = self.pie_graph_interval_rel
-			else:
-				start = int(req_obj['start'])			
-				if req_obj.get('end'):
-					end = int(req_obj['end'])
-					if (end - start) > self.pie_graph_interval_secs:
-						req_obj['start'] = end - self.pie_graph_interval_secs
-				else:
-					now = int(time.time())
-					if (now - start) > self.pie_graph_interval_secs:
-						req_obj['start'] = now - self.pie_graph_interval_secs
-		return req_obj
-	
-	def post(self, request, graph_query=None):
-		'''
-		Handles graph data requests.
-		
-		Returns: 
-			graph model, with data 
-		'''
-		req_obj = json.loads(request.body)
-		## pie charts only needs a smaller subset
-		req_obj = self.__calibrate_piegraph(req_obj)
-		tsd_req = OpenTSDBRequest(req_obj)
-		return Response(tsd_req.data)
-"""
