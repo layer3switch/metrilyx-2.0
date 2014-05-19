@@ -312,14 +312,13 @@ app.directive('keyValuePairs', function() {
 		}
 	};
 });
-function getWebSocket(wsuri) {
-	wsuri = "ws://localhost:9000?compressed=true";
+function getWebSocket() {
     if ("WebSocket" in window) {
-       return new WebSocket(wsuri);
+       return new WebSocket(WS_URI);
     } else if ("MozWebSocket" in window) {
-       return new MozWebSocket(wsuri);
+       return new MozWebSocket(WS_URI);
     } else {
-       log("Browser does not support WebSocket!");
+       console.error("Browser does not support WebSockets!");
        return null;
     }
 }
