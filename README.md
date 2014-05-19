@@ -1,8 +1,17 @@
-Metrilyx v2.1.0
+Metrilyx v2.2.0
 ===============
 Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database used to store large amounts of data.  It allows for analyzing, cross cutting and viewing of time series data in a simple manner.
 
 #### Features:
+##### v2.2.0
+- Major performance improvements
+	- Data delivery system now completely **asynchronous**.
+	- Data provided through **websockets**.
+	- In flight data **compression** (permessage-deflate).
+- **Nginx** used as reverse proxy rather than apache.
+- Support for **distributed** and **HA** setup.
+
+##### v2.1.0
 - Ability to group pages based on tags.
 - Ability to generate heatmaps against a metric.
 - Ability to import and export pages.
@@ -25,19 +34,17 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 ##### RHEL:
 	libuuid
 	uuid
-	httpd
-	mod_wsgi
+	nginx
 	python-setuptools
 	python-devel
 	gcc
 	
 ##### Debian:
 	libuuid1 
-	uuid-runtime 
-	apache2-mpm-worker 
-	libapache2-mod-wsgi 
+	uuid-runtime
 	make 
 	python-setuptools
+	nginx
 
 #### Python Packages:
 	uuid
@@ -49,6 +56,7 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 	celery
 	requests
 	jsonfield
+	uwsgi
 
 In order to use heatmaps you will also need a mongodb server.
 
@@ -64,28 +72,33 @@ The provided install script will work with both **RedHat** and **Debian** based 
 
 Assuming all required packages are installed, the script will install the required python modules, apache configs depending on your distribution and prompt you to edit the configuration file.
 
-After you have completed editing the configuration file restart Apache.
+After you have completed editing the configuration file start the modelmanager and dataserver processes, then restart nginx
+	
+	/etc/init.d/metrilyx-dataserver start
+	
+	/etc/init.d/metrilyx-modelmanager start
+
+	/etc/init.d/nginx restart
 
 ### Configuration
-The default installation directory is /opt/metrilyx (i.e %{metrilyx_home}).
+The default installation directory is /opt/metrilyx.
 
 ##### Path 
-%{metrilyx_home}/etc/metrilyx/metrilyx.conf
+/opt/metrilyx/etc/metrilyx/metrilyx.conf
 
 A sample configuration file has been provided.  The configuration file is in JSON format.  
 	
 	{
-		"tsdb": {
-			"uri":"tsdb.example.com",
-			"port": 80,
+		"dataproviders": [{
+			"uri":"http://tsdb.example.com",
+			"query_endpoint": "/api/query",
+			"search_endpoint": "api/suggest",
 			"suggest_limit": 100
-		},
-		"databases":{
-			"default": {
-				"ENGINE": "django.db.backends.sqlite3",
-            	"NAME": "metrilyx.sqlite3"
-			}
-		},
+		}],
+		"databases":[{
+			"ENGINE": "django.db.backends.sqlite3",
+            "NAME": "metrilyx.sqlite3"
+		}],
 		"heatmaps": {
 			"analysis_interval": "1m-ago",
 			"transport": "mongodb",
@@ -93,7 +106,7 @@ A sample configuration file has been provided.  The configuration file is in JSO
 		    	"host": "127.0.0.1",
 		    	"port": 27017,
 		    	"database": "jobs", 
-		    	"taskmeta_collection": "clry_taskmeta_collection"
+		    	"taskmeta_collection": "taskmeta_collection"
 			}
 		},
 		"celery": {
@@ -134,25 +147,25 @@ In order to use heatmaps, you will need a mongodb server.  Heatmap computations 
 
 
 #### Importing models
-You will need to import page models from v2.0 to v2.1 as 2.1 now uses a database to store the models.  During the installation process, the installer backups the current installation with a timestamp.
+You will need to import page models from v2.0 to v2.1 as 2.1 uses a database to store the models.  During the installation process, the installer backups the current installation with a timestamp.
 
 You can import models from the UI but you may also import them via CLI.  You can issue the following command to import a json page model (i.e. graphmap).
 
-	curl -u amdin:metrilyx http://localhost/api/graphmaps -H "Content-Type:application/json" -d @<path/to/json/model>
+	curl -u admin:metrilyx http://localhost/api/graphmaps -H "Content-Type:application/json" -d @<path/to/json/model>
 
-This will import a graphmap (i.e. page).  To import a heatmap you can use the following endpoint:
+The above will import a graphmap (i.e. page).  To import a heatmap you can use the following endpoint:
 
-	curl -u amdin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @<path/to/heatmap/model>
+	curl -u admin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @<path/to/heatmap/model>
 	
 To import all existing graphmaps from v2.0, issue the following commands:
 
-	cd /opt/metrilyx-<timestamp>/pagemodels
-	for i in $(ls);do curl -u amdin:metrilyx http://localhost/api/graphmaps -H "Content-Type:application/json" -d @./$i; done
+	$ cd /opt/metrilyx-<timestamp>/pagemodels
+	$ for i in $(ls);do curl -u admin:metrilyx http://localhost/api/graphmaps -H "Content-Type:application/json" -d @./$i; done
 	
 Similarly to import all existing heatmaps from v2.0, issue the following commands:
 
-	cd /opt/metrilyx-<timestamp>/heatmaps
-	for i in $(ls);do curl -u amdin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @./$i; done
+	$ cd /opt/metrilyx-<timestamp>/heatmaps
+	$ for i in $(ls);do curl -u admin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @./$i; done
 
 #### Notes
 - The default username and password for the site are admin and metrilyx respectively. Changing these will cause the application to stop functioning as other configurations also need to be updated.
