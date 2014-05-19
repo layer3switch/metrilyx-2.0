@@ -1,3 +1,4 @@
+
 class BaseDataProvider(object):
 	def __init__(self, config):
 		for k,v in config.items():

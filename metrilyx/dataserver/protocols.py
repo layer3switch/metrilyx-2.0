@@ -1,4 +1,5 @@
 
+import logging
 import json
 from pprint import pprint 
 
@@ -8,6 +9,8 @@ from autobahn.websocket.compress import PerMessageDeflateOffer, \
 										PerMessageDeflateOfferAccept
 
 from transforms import MetrilyxSerie
+
+logger = logging.getLogger(__name__)
 
 ## Enable WebSocket extension "permessage-deflate".
 ## Function to accept offers from the client ..
@@ -20,10 +23,10 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 	REQUIRED_REQUEST_KEYS = ('_id', 'start', 'graphType', 'series',)
 
 	def onConnect(self, request):
-		print("WebSocket connection request by {}".format(request.peer))
+		logger.info("WebSocket connection request by %s" %(str(request.peer)))
 
 	def onOpen(self):
-		print("WebSocket connection opened. extensions: {}".format(self.websocket_extensions_in_use))
+		logger.info("WebSocket connection opened. extensions: %s" %(self.websocket_extensions_in_use))
 
 	def checkMessage(self, payload, isBinary):
 		if not isBinary:
@@ -32,13 +35,16 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 				for k in self.REQUIRED_REQUEST_KEYS:
 					if not obj.has_key(k):
 						self.sendMessage(json.dumps({"error": "Invalid key: '%s'" %(k)}))
+						logger.warning("Invalid key '%s'" %(k))
 						return {"error": "Invalid key: '%s'" %(k)}
 				return obj
 			except Exception, e:
 				self.sendMessage(json.dumps({'error': str(e)}))
+				logger.error(str(e))
 				return {'error': str(e)}
 		else:
 			self.sendMessage(json.dumps({'error': 'Binary data not support!'}))
+			logger.warning("Binary data not supported!")
 			return {'error': 'Binary data not support!'}
 
 class GraphServerProtocol(BaseGraphServerProtocol):
@@ -56,11 +62,13 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		self.sendMessage(json.dumps(graph_meta))
 
 	def ds_response_errback(self, error, graph_meta=None):
+		logger.error("Callback error: %s" %(str(error)))
 		self.sendMessage(json.dumps(
 			self.dataprovider.response_errback(error, graph_meta)))
 
 	def __submit_parallel_queries(self, req_obj):
 		for (url, meta) in self.dataprovider.get_queries(req_obj):
+			#log.debug("Submitting request: %s" %(url))
 			d = getPage(url)
 			d.addCallback(self.ds_response_callback, meta)
 			d.addErrback(self.ds_response_errback, meta)
@@ -69,8 +77,9 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		request_obj = self.checkMessage(payload, isBinary)
 		if not request_obj.get("error"):
 			## all checks passed - proceed
+			logger.info("Request %(_id)s start=%(start)s" %(request_obj))
 			self.__submit_parallel_queries(request_obj)
 		else:
-			print "Invalid request object:", str(request_obj)
+			logger.error("Invalid request object: %s" %(str(request_obj)))
 
 
