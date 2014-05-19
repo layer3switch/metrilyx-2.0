@@ -89,12 +89,12 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 					jobj = JSON.parse(evt.target.result);
 					if($scope.modelType === "heatmap/") {
 						Heatmap.saveModel(jobj, function(rslt) {
-							setGlobalAlerts(rslt);
+							setGlobalAlerts({message: 'Saved '+rslt._id});
 							flashAlertsBar();
 						});
 					} else {
 						Model.saveModel(jobj, function(rslt) {
-							setGlobalAlerts(rslt);
+							setGlobalAlerts({message: 'Saved '+rslt._id});
 							flashAlertsBar();
 						});
 					}
@@ -144,6 +144,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.columnSortOpts 		= dndconfig.column;
 		$scope.rowSortOpts 			= dndconfig.row;
 		$scope.layoutSortOpts 		= dndconfig.layout;
+
+		$scope.wssock = getWebSocket();
 
 		// set default to relative time //
 		$scope.timeType = "1h-ago";
@@ -216,7 +218,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			}
 		});
 		
-        $scope.wssock = getWebSocket();
         $scope.wssock.onopen = function() {
           console.log("Connected to wsuri (using WebSocket extensions: [" + $scope.wssock.extensions + "])");
           //sock.send(JSON.stringify({'init':1}));
@@ -227,6 +228,12 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
        	}
        	$scope.wssock.onmessage = function(e) {
        		var data = JSON.parse(e.data);
+       		if(data.error) {
+       			console.warning(data);
+       			setGlobalAlerts(data);
+       			flashAlertsBar();
+       			return;
+       		}
        		var ce = new CustomEvent(data._id, {'detail': data });
        		$scope.wssock.dispatchEvent(ce);
        	}
@@ -688,6 +695,12 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
        	}
        	$scope.wssock.onmessage = function(e) {
        		var data = JSON.parse(e.data);
+       		if(data.error) {
+       			console.warning(data);
+       			setGlobalAlerts(data);
+       			flashAlertsBar();
+       			return;
+       		}
        		var ce = new CustomEvent(data._id, {'detail': data });
        		$scope.wssock.dispatchEvent(ce);
        	}
