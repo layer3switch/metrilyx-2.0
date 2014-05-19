@@ -3,7 +3,9 @@ import logging
 import json
 from pprint import pprint 
 
-from twisted.web.client import getPage
+from twisted.internet import reactor
+from twisted.web.client import getPage, HTTPClientFactory, _makeGetterFactory
+
 from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.websocket.compress import PerMessageDeflateOffer, \
 										PerMessageDeflateOfferAccept
@@ -11,6 +13,17 @@ from autobahn.websocket.compress import PerMessageDeflateOffer, \
 from transforms import MetrilyxSerie
 
 logger = logging.getLogger(__name__)
+
+"""
+def advancedGetPage(url, contextFactory=None, *args, **kwargs):
+	return _makeGetterFactory(
+		url,
+		HTTPClientFactory,
+		contextFactory=contextFactory,
+		*args, **kwargs)
+
+		# factory.deferred.addCallback....
+"""
 
 ## Enable WebSocket extension "permessage-deflate".
 ## Function to accept offers from the client ..
@@ -55,20 +68,17 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		graph_meta['series'][0]['data'] = self.dataprovider.response_callback(
 															json.loads(response))
 		
-		#pprint(graph_meta)
 		## apply metrilyx transforms
 		mserie = MetrilyxSerie(graph_meta['series'][0])
 		graph_meta['series'][0]['data'] = mserie.data
 		self.sendMessage(json.dumps(graph_meta))
 
 	def ds_response_errback(self, error, graph_meta=None):
-		logger.error("Callback error: %s" %(str(error)))
-		self.sendMessage(json.dumps(
-			self.dataprovider.response_errback(error, graph_meta)))
+		response = self.dataprovider.response_errback(error, graph_meta)
+		self.sendMessage(json.dumps(response))
 
 	def __submit_parallel_queries(self, req_obj):
 		for (url, meta) in self.dataprovider.get_queries(req_obj):
-			#log.debug("Submitting request: %s" %(url))
 			d = getPage(url)
 			d.addCallback(self.ds_response_callback, meta)
 			d.addErrback(self.ds_response_errback, meta)

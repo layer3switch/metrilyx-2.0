@@ -1,4 +1,11 @@
 
+import json
+import logging
+
+from pprint import pprint
+
+logger = logging.getLogger(__name__)
+
 class BaseDataProvider(object):
 	def __init__(self, config):
 		for k,v in config.items():
@@ -37,11 +44,15 @@ class BaseDataProvider(object):
 		return response
 
 	def response_errback(self, error, graph_meta=None):
-		print error.getErrorMessage()
-		return {
-			"error": error.getErrorMessage(),
-			"data": graph_meta
-			}
+		try:
+			err_obj = json.loads(error.value.response)['error']
+		except Exception,e:
+			err_obj = {'message': str(error.value.response)}
+		
+		graph_meta['series'][0]['data'] = {"error": err_obj['message'][:100]}
+		logger.error("BaseDataProvider.response_errback: %s %s" %(
+			str(graph_meta['series'][0]['query']), graph_meta['series'][0]['data']['error']))
+		return graph_meta
 
 	def time_window(self, request):
 		time_win = {}
