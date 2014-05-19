@@ -1,0 +1,63 @@
+#!/bin/sh
+#
+# chkconfig: 234 90 10
+# description: OpenStack Notification Monitor
+#
+
+. /etc/rc.d/init.d/functions
+
+NAME="metrilyx-modelmanager"
+BIN=uwsgi
+APP_HOME="/opt/metrilyx"
+LOGFILE=/var/log/${NAME}.log
+PGREP="/usr/bin/pgrep -f"
+
+DEFAULT_OPTS="--ini ${APP_HOME}/etc/metrilyx/uwsgi.conf"
+
+start() {
+	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+	if [ "$PIDS" == "" ]; then
+		${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
+		${PGREP} "${BIN} ${DEFAULT_OPTS}" && echo "${NAME} started";
+	else
+		echo -n "Already running... ${PIDS}";
+	fi
+}
+status() {
+	${PGREP} "${BIN} ${DEFAULT_OPTS}" && echo "${NAME} running" || echo "${NAME} not running";
+}
+stop() {
+	echo -n "Stopping... "
+	${PGREP} "${BIN} ${DEFAULT_OPTS}" > /tmp/metrilyx-modelmanager.pid;
+	${BIN} --stop /tmp/metrilyx-modelmanager.pid;
+	rm -rf /tmp/metrilyx-modelmanager.pid;
+	echo "[ok]"
+}
+reload() {
+	echo -n "Reloading... "
+	${PGREP} "${BIN} ${DEFAULT_OPTS}" > /tmp/metrilyx-modelmanager.pid;
+	${BIN} --reload /tmp/metrilyx-modelmanager.pid
+	rm -rf /tmp/metrilyx-modelmanager.pid;
+	echo "[ok]"
+}
+
+case "$1" in
+	start)
+		start;
+		;;
+	stop)
+		stop;
+		;;
+	status)
+		status;
+		;;
+	reload)
+		reload;
+		;;
+	restart)
+		$0 stop
+		sleep 3
+		$0 start
+		;;
+esac
+exit 0

@@ -1,0 +1,63 @@
+#!/bin/sh
+#
+# chkconfig: 234 90 10
+# description: Metrilyx Data Server.  This provides data via websockets.
+#
+
+. /etc/rc.d/init.d/functions
+
+NAME="metrilyx-dataserver"
+APP_HOME="/opt/metrilyx"
+BIN=${APP_HOME}/${NAME}.py
+LOGFILE=/var/log/${NAME}.log
+PGREP="/usr/bin/pgrep -f"
+
+## set -c to 0 spawn servers based on the number of cpus/cores
+DEFAULT_OPTS="-e 80 -c 0"
+
+start() {
+	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+	if [ "$PIDS" == "" ]; then
+		echo -n "$0 starting... "
+		${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
+		${PGREP} "${BIN} ${DEFAULT_OPTS}" && echo "[ok]" || echo "[failed]";
+	else
+		echo -n "$0 already running... ${PIDS}";
+	fi
+}
+status() {
+	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+	if [ "$PIDS" == "" ]; then
+		echo "${NAME} not running";
+	else:
+		echo "${NAME} running... ${PIDS}"
+	fi
+}
+stop() {
+	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | sort -r`;
+	for pid in $PIDS; do
+		kill $pid;
+	done
+	${PGREP} "${BIN} ${DEFAULT_OPTS}" || echo "${NAME} stopped";
+}
+
+case "$1" in
+	start)
+		start;
+		;;
+	stop)
+		stop;
+		;;
+	status)
+		status;
+		;;
+	restart)
+		$0 stop
+		sleep 3
+		$0 start
+		;;
+	*)
+		echo "$0 [start|stop|restart|status]"
+		exit 1;
+esac
+exit 0
