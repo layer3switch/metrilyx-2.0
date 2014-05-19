@@ -236,7 +236,7 @@ angular.module('graphing', [])
 					return ngModel.$modelValue;
 				}, function(graph, oldValue) {
 					if(!evtListenerAdded && graph._id) {
-						console.log("adding event listener:", graph._id);
+						//console.log("adding event listener:", graph._id);
 						scope.wssock.addEventListener(graph._id, processRecievedData);
 						evtListenerAdded = true;
 					}
@@ -259,7 +259,7 @@ angular.module('graphing', [])
 					}
 					// handle graph change //
 					if(graph.graphType != oldValue.graphType) {
-						console.log("graph type changed. re-rendering");
+						//console.log("graph type changed. re-rendering");
 						scope.reloadGraph(graph);
 						return;
 					};
