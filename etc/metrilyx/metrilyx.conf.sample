@@ -1,12 +1,10 @@
 {
-	"dataproviders": {
-		"tsdb": {
-			"uri": "<OpenTSDB host>",
-			"query_endpoint": "/api/query",
-			"search_endpoint": "/api/suggest",
-			"suggest_limit": 100
-		}
-	},
+	"dataproviders": [{
+		"uri": "<OpenTSDB host>",
+		"query_endpoint": "/api/query",
+		"search_endpoint": "/api/suggest",
+		"suggest_limit": 100
+	}],
 	"heatmaps": {
 		"analysis_interval": "1m-ago",
 		"transport": "mongodb",
@@ -17,12 +15,10 @@
 	    	"taskmeta_collection": "taskmeta_collection"
 		}
 	},
-	"databases":{
-		"default": {
-			"ENGINE": "django.db.backends.sqlite3",
-            "NAME": "/opt/metrilyx/metrilyx.sqlite3"
-		}
-	},
+	"databases":[{
+		"ENGINE": "django.db.backends.sqlite3",
+        "NAME": "/opt/metrilyx/metrilyx.sqlite3"
+	}],
 	"celery": {
 		"tasks": [
 			"metrilyx.heatmap_tasks"
