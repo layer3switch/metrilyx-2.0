@@ -99,6 +99,34 @@ angular.module('filters',[]).
 		    if(tstr == '?tags=') return "";
 		    return tstr.replace(/\,$/,'%3B');
 		}
+	}).filter('loadedSeries', function() {
+		return function(graph) {
+			hcg = $("[data-graph-id='"+graph._id+"']").highcharts();
+			if(hcg === undefined) return 0;
+			var cnt = 0;
+			if(graph.graphType === 'pie') {
+				for(var i in graph.series) {
+					for(var j in hcg.series) {
+						for(var d in hcg.series[j].data) {
+							if(equalObjects(hcg.series[j].data[d].query,graph.series[i].query)) {
+								cnt++;
+								break;
+							}
+						}
+					}
+				}
+			} else {
+				for(var i in graph.series) {
+					for(var j in hcg.series) {
+						if(equalObjects(hcg.series[j].options.query,graph.series[i].query)) {
+							cnt++;
+							break;
+						}
+					}
+				}
+			}
+			return cnt;
+		}
 	});
 app.directive('tagkeyvalue', function() {
 	return {

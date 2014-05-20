@@ -9,6 +9,9 @@
 					<i class="glyphicon glyphicon-trash"></i>
 				</a>
 			</span>
+			<span class="input-group-addon nobg">
+				<span style="color:#ccc">{{graph|loadedSeries}} / {{graph.series.length}}</span>
+			</span>
 		</div>
 		<div ng-if="graph.graphType!='pie'" class="marginlr5 marginb5 collapse" ng-include="thresholdsHtml" id="{{graph._id}}-thresholds"></div>
 		<div class="padlr10 padt5 padb10 pod-controls edit-comp{{editMode}}">
