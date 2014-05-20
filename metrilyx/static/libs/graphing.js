@@ -328,10 +328,11 @@ function getPlotBands(thresholds) {
 function dataHasErrors(gObj) {
     for(var s in gObj.series) {
         if(gObj.series[s].data.error !== undefined) {
-            console.log(gObj.series[s].data.error);
+            //console.log(gObj.series[s].data.error);
             if(gObj.series[s].data.error.message) msg = gObj.series[s].data.error.message.substring(0,50)+"...";
             else msg = gObj.series[s].data.error.substring(0,50)+"...";
-            
+            console.warn(msg);
+            $("[data-graph-error='"+gObj._id+"']").html(gObj.series[s].query.metric+": "+msg);
             return { 
                 "error": {
                     "message": msg,
@@ -361,11 +362,7 @@ function graphing_newGraph(graph) {
     var renderTo = "[data-graph-id='"+graph._id+"']"; 
     // check data
     dhe = dataHasErrors(graph);
-    if(dhe) {
-        $(renderTo).html("<span class='graph-error'><b>"+dhe.error.metric+": </b>"+dhe.error.message+"</span>");
-        console.log("error:", dhe.error);
-        return;
-    }
+    if(dhe) return;
     var copts = new ChartOptions(graph);
     
     if(graph.graphType == "pie") {
@@ -499,6 +496,8 @@ function getNewDataAlignedSeries(dataName, currData, newData) {
         graphObj: graph metadata along with series data.  can be a partial graph
 */
 function renderGraph(graphObj) {
+    dhe = dataHasErrors(graphObj);
+    if(dhe) return;
     graphing_upsertSeries(graphObj);
 }
 

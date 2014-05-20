@@ -9,9 +9,6 @@
 					<i class="glyphicon glyphicon-trash"></i>
 				</a>
 			</span>
-			<span class="input-group-addon nobg">
-				<span style="color:#ccc">{{graph|loadedSeries}} / {{graph.series.length}}</span>
-			</span>
 		</div>
 		<div ng-if="graph.graphType!='pie'" class="marginlr5 marginb5 collapse" ng-include="thresholdsHtml" id="{{graph._id}}-thresholds"></div>
 		<div class="padlr10 padt5 padb10 pod-controls edit-comp{{editMode}}">
@@ -43,6 +40,16 @@
 		<table class='gif-loader-table' style="color:#ccc"><tr><td>
 			Drag metrics here from search
 		</td></tr></table>
+	</div>
+	<!-- graph footer -->
+	<div class="small">
+		<span class="btn-group dropup">
+			<span style="font-weight:bold;color:#888" class="padlr10 pointer interactive" data-toggle="dropdown">{{graph|loadedSeries}} / {{graph.series.length}}</span>
+			<ul class="dropdown-menu">
+				<li ng-repeat="serie in graph.series" ng-attr-class="padlr10 padtb5 {{isSerieLoaded(graph, serie) || 'metric-not-loaded' }}">{{serie.query|metricQuery}}</li>
+	        </ul>
+        </span>
+        <span data-graph-error="{{graph._id}}" class="graph-error"></span>
 	</div>
 	<!--
 	<div class="graph-controls edit-comp{{editMode}} graph-metrics-panel collapse">

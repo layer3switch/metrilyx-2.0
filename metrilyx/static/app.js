@@ -99,7 +99,19 @@ angular.module('filters',[]).
 		    if(tstr == '?tags=') return "";
 		    return tstr.replace(/\,$/,'%3B');
 		}
+	}).filter('metricQuery', function() {
+		return function(query) {
+			if(query.rate) {
+				return query.aggregator+":rate:"+query.metric;
+			} else {
+				return query.aggregator+":"+query.metric;
+			}
+		}
 	}).filter('loadedSeries', function() {
+		/*
+			Returns number of queries loaded in highcharts.  In other words,
+			which queries have returned data.
+		*/
 		return function(graph) {
 			hcg = $("[data-graph-id='"+graph._id+"']").highcharts();
 			if(hcg === undefined) return 0;

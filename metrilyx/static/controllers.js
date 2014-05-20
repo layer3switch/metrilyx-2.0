@@ -240,7 +240,26 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
         $scope.requestData = function(query) {
         	$scope.wssock.send(JSON.stringify(query));
         }
-
+        $scope.isSerieLoaded = function(graph, serie) {
+        	hcg = $("[data-graph-id='"+graph._id+"']").highcharts();
+        	if(hcg === undefined) return false;
+        	if(graph.graphType === 'pie') {
+				for(var j in hcg.series) {
+					for(var d in hcg.series[j].data) {
+						if(equalObjects(hcg.series[j].data[d].query,serie.query)) {
+							return true;
+						}
+					}
+				}
+			} else {
+				for(var j in hcg.series) {
+					if(equalObjects(hcg.series[j].options.query,serie.query)) {
+						return true;
+					}
+				}
+			}
+			return false;
+        }
 		$scope.onPartialComponentLoad = function() {
 			// setTimeout is to account for processing time //
 			setTimeout(function() {
