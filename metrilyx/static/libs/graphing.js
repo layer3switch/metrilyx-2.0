@@ -1,3 +1,23 @@
+// TODO below here needs fixing //
+function highchartsSeries(dataObj, dataQuery, graphType) {
+    if(graphType === 'pie') {
+        return {
+            name: dataObj.alias,
+            y: dataObj.dps[0][1],
+            tags: dataObj.tags,
+            query: dataQuery
+        };
+    } else {
+        return {
+            lineWidth: 1,
+            name: dataObj.alias,
+            data: dataObj.dps,
+            query: dataQuery,
+            tags: dataObj.tags // for tracking uniqueness of series //
+        };
+    }
+}
+
 function MetrilyxGraph(graphObj, timeWin) {
     this.start = timeWin.start;
     this.end = timeWin.end;
@@ -203,13 +223,8 @@ SeriesFormatter.prototype.pieSeries = function() {
             if(this.metSeries[i].data[d].dps.length <=0) {
                 console.warn("(pie) No data for:", this.metSeries[i].alias);
             } else {
-                /* 
-                 * Use the first datapoint rather than last as 
-                 * the tail end of tsd data is inaccurate.
-                 * i.e dps[0][1]
-                 */
-               // pieData.push([ this.metSeries[i].data[d].alias, dps[0][1] ]);
-               pieData.push({name:this.metSeries[i].data[d].alias, y:dps[0][1]});
+                pieData.push(highchartsSeries(
+                    this.metSeries[i].data[d], this.metSeries[i].query, "pie"));
             }
         }
     }
@@ -249,9 +264,7 @@ function graphing_replaceSeries(result, redraw) {
         // if tags change more series can be return
         // upsert if this is the case
         if(!found) {
-            s = highchartsSeries(tr);
-            s.query = result.series[0].query;
-            hcg.addSeries(s, false);
+            hcg.addSeries(highchartsSeries(tr,result.series[0].query), false);
         }
     }
     if(redraw) hcg.redraw();
@@ -312,29 +325,6 @@ function getPlotBands(thresholds) {
         ]
     };
 }
-
-// TODO below here needs fixing //
-function highchartsSeries(dataObj) {
-    return {
-        lineWidth: 1,
-        name: dataObj.alias,
-        data: dataObj.dps,
-        tags: dataObj.tags // for tracking uniqueness of series //
-    };
-}
-/* use alias as name */
-function formatDataHighcharts(graphSeries) {
-    out = [];
-    for(var i in graphSeries) {
-        for(var d in graphSeries[i].data) {
-            hsd = highchartsSeries(graphSeries[i].data[d]);
-            hsd.query = graphSeries[i].query;
-            out.push(hsd);
-        }
-    }
-    //console.log(out);
-    return out;
-}
 function dataHasErrors(gObj) {
     for(var s in gObj.series) {
         if(gObj.series[s].data.error !== undefined) {
@@ -368,7 +358,6 @@ function setPlotBands(graph) {
  *      complete graph object
  */
 function graphing_newGraph(graph) {
-    //console.log(graph.graphType,":",graph._id);
     var renderTo = "[data-graph-id='"+graph._id+"']"; 
     // check data
     dhe = dataHasErrors(graph);
@@ -410,33 +399,31 @@ function graphing_upsertSeries(args) {
         for(var j in args.series) {
             var found = false;
             for(var d in hcg.series[0].options.data) {
-                if(equalObjects(args.series[j].data[0].tags, hcg.series[0].options.tags)&&args.series[j].data[0].alias==hcg.series[0].options.data[d].name) {
+                if(equalObjects(args.series[j].data[0].tags, hcg.series[0].options.data[d].tags)&&args.series[j].data[0].alias==hcg.series[0].options.data[d].name) {
+                    //console.log(args.series[j].data[0].alias, hcg.series[0].options.data[d].name);
                     found = true;        
                     if(Object.prototype.toString.call(args.series[j].data) === '[object Object]') {
                         if(args.series[j].data.error) {
-                            console.warn("graphing_upsertSeries tsdb error:", args.series[j].data.error.message.substring(0,100));
+                            consol.warn("graphing_upsertSeries tsdb error:", (JSON.stringify(args.series[j].data.error)).substring(0,100));
+                            //console.warn("graphing_upsertSeries tsdb error:", args.series[j].data.error.message.substring(0,100));
                             break;
                         }
                     }
-                    hcg.series[0].options.data.splice(d,1,{
-                        name: args.series[j].data[0].alias, 
-                        y: args.series[j].data[0].dps[0][1]
-                    });
+                    hcg.series[0].options.data.splice(d,1,
+                        highchartsSeries(args.series[j].data[0], hcg.series[0].options.data[d].query, "pie"));
                     hcg.series[0].setData(hcg.series[0].options.data);
                     break;
                 }
             }
             if(!found) {
-                hcg.series[0].addPoint({
-                    name: args.series[j].data[0].alias, 
-                    y:args.series[j].data[0].dps[0][1]
-                });
+                hcg.series[0].addPoint(
+                    highchartsSeries(args.series[j].data[0], args.series[j].query, "pie"));
             }
         }
         hcg.redraw();
         return;
-    }
-    // line graph//
+    } // END graphType == 'pie' //
+    // BEGIN line graph//
     for(var j in args.series) {
         for(var d in args.series[j].data) {
             // find series in highcharts //
@@ -448,7 +435,8 @@ function graphing_upsertSeries(args) {
                         found = true;
                         if(Object.prototype.toString.call(args.series[j].data) === '[object Object]') {
                             if(args.series[j].data.error) {
-                                console.warn("graphing_upsertSeries tsdb error:", args.series[j].data.error.message.substring(0,100));
+                                consol.warn("graphing_upsertSeries tsdb error:", (JSON.stringify(args.series[j].data.error)).substring(0,100));
+                                //console.warn("graphing_upsertSeries tsdb error:", args.series[j].data.error.message.substring(0,100));
                                 break;
                             }
                         }
@@ -456,6 +444,7 @@ function graphing_upsertSeries(args) {
                         if(hcg.series[i].options.data.length <= 0) {
                             newData = args.series[j].data[d].dps;
                         } else {
+                            // name , currData, newData //
                             newData = getNewDataAlignedSeries(hcg.series[i].options.name, 
                                     hcg.series[i].options.data, args.series[j].data[d].dps);                   
                         }
@@ -464,13 +453,11 @@ function graphing_upsertSeries(args) {
                     }
                 } // END hcg.series //
             } catch(e) {
-                console.log(args.series[j].query);
-                console.log(e)
+                console.log("graphing_upsertSeries", args.series[j].query, e);
             }
             if(!found) {
-                hsd = highchartsSeries(args.series[0].data[d]);
-                hsd.query = args.series[0].query;
-                hcg.addSeries(hsd, false);
+                hcg.addSeries(
+                    highchartsSeries(args.series[0].data[d], args.series[0].query), false);
             }
         }
         hcg.redraw();
@@ -512,11 +499,6 @@ function getNewDataAlignedSeries(dataName, currData, newData) {
         graphObj: graph metadata along with series data.  can be a partial graph
 */
 function renderGraph(graphObj) {
-    //if(graphObj.graphType == 'pie') {
-        //console.log("creating new pie graph:", graphObj._id);
-    //    graphing_newGraph(graphObj);
-    //} else {
-        graphing_upsertSeries(graphObj);
-   // }
+    graphing_upsertSeries(graphObj);
 }
 
