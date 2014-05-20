@@ -3,7 +3,8 @@
 		"uri": "<OpenTSDB host>",
 		"query_endpoint": "/api/query",
 		"search_endpoint": "/api/suggest",
-		"suggest_limit": 100
+		"suggest_limit": 100,
+		"timeout": 0
 	}],
 	"heatmaps": {
 		"analysis_interval": "1m-ago",

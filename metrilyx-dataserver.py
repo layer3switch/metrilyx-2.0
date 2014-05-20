@@ -22,7 +22,7 @@ LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s]: %(message)s"
 
 class TSDBGraphServerProtocol(GraphServerProtocol):
 	dataprovider = TSDBDataProvider(config['dataproviders'][0])
-
+	timeout = config['dataproviders'][0]['timeout']
 
 def spawn_websocket_server(uri, logLevel, externalPort=None):
 	if logLevel == "DEBUG":

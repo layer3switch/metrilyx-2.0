@@ -63,6 +63,7 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 class GraphServerProtocol(BaseGraphServerProtocol):
 	## set dataprovider in subclass
 	dataprovider = None
+	timeout = 0
 
 	def ds_response_callback(self, response, graph_meta=None):
 		graph_meta['series'][0]['data'] = self.dataprovider.response_callback(
@@ -79,7 +80,7 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 
 	def __submit_parallel_queries(self, req_obj):
 		for (url, meta) in self.dataprovider.get_queries(req_obj):
-			d = getPage(url)
+			d = getPage(url, timeout=self.timeout)
 			d.addCallback(self.ds_response_callback, meta)
 			d.addErrback(self.ds_response_errback, meta)
 
