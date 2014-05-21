@@ -29,7 +29,7 @@ status() {
 	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
 	if [ "$PIDS" == "" ]; then
 		echo "${NAME} not running";
-	else:
+	else
 		echo "${NAME} running... ${PIDS}"
 	fi
 }
