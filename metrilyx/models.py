@@ -70,9 +70,16 @@ class MapModel(models.Model):
 						for serie in graph['series']:
 							yield self.__get_heat_query(serie['query'], pod['name'])
 
+	def __sanitize_id(self):
+		self._id = self._id.replace(".", "_")
+		self._id = self._id.replace(" ", "_")
+		self._id = self._id.replace("/", "_")
+		self._id = self._id.replace("\\", "_")
+
 	def save(self, *args, **kwargs):
 		if self.name == "":
 			self.name = self._id
+		self.__sanitize_id()
 		self.__sanitize_layout()
 		## extract and save heat queries before saving the heatmap
 		if self.model_type == "heat":
