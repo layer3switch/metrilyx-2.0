@@ -45,7 +45,7 @@
 	<div class="small">
 		<span class="btn-group dropup">
 			<span style="font-weight:bold;color:#888" class="padlr10 pointer interactive" data-toggle="dropdown">{{graph|loadedSeries}} / {{graph.series.length}}</span>
-			<ul class="dropdown-menu">
+			<ul class="dropdown-menu" style="margin-bottom:5px;margin-top:5px;">
 				<li ng-repeat="serie in graph.series" ng-attr-class="padlr10 padtb5 {{isSerieLoaded(graph, serie) || 'metric-not-loaded' }}">{{serie.query|metricQuery}}</li>
 	        </ul>
         </span>
