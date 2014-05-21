@@ -52,6 +52,14 @@ backup_curr_install() {
 		mv ${APP_HOME} ${APP_HOME}-${INSTALL_TIME};
 	fi;
 }
+copy_configs() {
+	cp etc/metrilyx/metrilyx.conf.sample ${APP_HOME}/etc/metrilyx/metrilyx.conf;
+	${EDITOR:-vi} ${APP_HOME}/etc/metrilyx/metrilyx.conf;
+	cp ${APP_HOME}/metrilyx/static/config.js.sample ${APP_HOME}/metrilyx/static/config.js;
+
+	[ -d "${APP_HOME}-${INSTALL_TIME}/pagemodels" ] && cp -a ${APP_HOME}-${INSTALL_TIME}/pagemodels ${APP_HOME}/;
+	[ -d "${APP_HOME}-${INSTALL_TIME}/heatmaps" ] && cp -a ${APP_HOME}-${INSTALL_TIME}/heatmaps ${APP_HOME}/;
+}
 configure_app() {
 	echo "- Importing existing data...";
 	echo "  configs...";
@@ -72,7 +80,7 @@ configure_app() {
 	[ -d "${APP_HOME}-${INSTALL_TIME}/pagemodels" ] && cp -a ${APP_HOME}-${INSTALL_TIME}/pagemodels ${APP_HOME}/;
 	
 	echo "  heatmaps..."
-	[ -d "${APP_HOME}-${INSTALL_TIME}/pagemodels" ] && cp -a ${APP_HOME}-${INSTALL_TIME}/heatmaps ${APP_HOME}/;
+	[ -d "${APP_HOME}-${INSTALL_TIME}/heatmaps" ] && cp -a ${APP_HOME}-${INSTALL_TIME}/heatmaps ${APP_HOME}/;
 }
 
 configure_apache() {
@@ -112,7 +120,8 @@ if [ "$1" == "app" ]; then
 	install_pydeps;
 	backup_curr_install;
 	install_app;
-	configure_app;
+	copy_configs;
+	#configure_app;
 	configure_apache;
 	setup_celery_startup;
 else
@@ -121,6 +130,8 @@ else
 fi
 
 
+echo ""
+echo " ** CONFIGURATION OPTIONS CHANGED **"
 echo ""
 echo " ** If you choose to use heatmaps set the config options"
 echo " ** (/opt/metrilyx/etc/metrilyx/metrilyx.conf) and start celerybeat and celeryd."
