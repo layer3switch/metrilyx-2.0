@@ -87,7 +87,8 @@ configure_apache() {
 	echo "- Installing web components..."
 	if [[ -f "/etc/debian_version" ]]; then
 		cp etc/httpd/conf.d/metrilyx.conf /etc/apache2/sites-available/ && rm /etc/apache2/sites-enabled/*.conf && a2ensite metrilyx;
-		#sed -i "s/#Require all granted/Require all granted/g" /etc/apache2/sites-available/metrilyx.conf;
+		# ubuntu 13.10
+		sed -i "s/#Require all granted/Require all granted/g" /etc/apache2/sites-available/metrilyx.conf;
 		a2enmod rewrite;
 		a2enmod headers;
 	elif [[ -f "/etc/redhat-release" ]]; then
