@@ -21,7 +21,7 @@
 # abnormally in the absence of a valid process ID.
 #set -e
 VERSION=10.0
-echo "celery init v${VERSION}."
+#echo "celery init v${VERSION}."
 
 if [ $(id -u) -ne 0 ]; then
     echo "Error: This program can only be used by the root user."
@@ -98,7 +98,7 @@ if test -f "$EXTRA_CONFIG"; then
     . "$EXTRA_CONFIG"
 fi
 
-echo "Using configuration: $scripts"
+#echo "Using configuration: $scripts"
 
 CELERY_BIN=${CELERY_BIN:-"celery"}
 DEFAULT_USER="celery"
@@ -246,6 +246,14 @@ start_beat () {
                 --pidfile="$CELERYBEAT_PID_FILE"
 }
 
+status() {
+    PID=`pgrep -f "celery beat" | xargs`
+    if [ "$PID" == "" ]; then
+        echo "celerybeat not running";
+    else
+        echo "celerybeat running... $PIDS";
+    fi
+}
 
 
 case "$1" in
@@ -257,6 +265,9 @@ case "$1" in
     stop)
         check_paths
         stop_beat
+    ;;
+    status)
+        status
     ;;
     reload|force-reload)
         echo "Use start+stop"
