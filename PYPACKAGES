@@ -9,5 +9,5 @@ celery
 requests
 jsonfield
 twisted
-autobahn
 uwsgi
+autobahn
