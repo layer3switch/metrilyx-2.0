@@ -128,6 +128,7 @@ This configuration option is only need if you plan to use heatmaps. If you choos
 ##### databases
 The default uses sqlite.  Other databases can also be used.  We have testing with postgresql.  This requires a seperate set of tasks that will be included later.
 
+
 #### /opt/metrilyx/metrilyx/static/config.js
 This is the client side configuration file. A sample for this configuration has also been provided.
 
