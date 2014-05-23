@@ -139,7 +139,7 @@ This does not need to be changed.  This is a placeholder for a future feature to
 Client accessible ip address or fqdn.  This is the address used by the websocket client.  This is the only required option in this configuration file.
 
 ##### WS_URI
-The websocket URI used by the client.  This is made up of the SERVER_NAME and connection options.  This does not need to be edited.
+The websocket URI used by the client.  This is made up of the **SERVER_NAME** and connection options.  This does not need to be edited.
 
 ### Heat Maps
 Heatmaps are used to view your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10.  This is usually the tag containing a value of '*'.
