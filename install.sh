@@ -24,6 +24,10 @@ install_app() {
 	chmod g+w ${APP_HOME};
 	( id celery 2>&1 ) > /dev/null || useradd celery;
 	chgrp celery ${APP_HOME};
+	if [ -f "${APP_HOME}/celerybeat-schedule.db" ]; then
+		chmod g+w ${APP_HOME}/celerybeat-schedule.db
+		chgrp celery ${APP_HOME}/celerybeat-schedule.db
+	fi
 }
 setup_startup_scripts() {
 	if [[ -f "/etc/redhat-release" ]]; then
