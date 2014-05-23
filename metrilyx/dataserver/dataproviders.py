@@ -44,8 +44,8 @@ class BaseDataProvider(object):
 		return response
 
 	def response_errback(self, error, graph_meta=None):
-		for k,v in error.__dict__.items():
-			print k,v
+		#for k,v in error.__dict__.items():
+		#	print k,v
 
 		try:
 			err_obj = json.loads(error.value.response)['error']
