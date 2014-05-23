@@ -55,13 +55,14 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 ### Installation
 The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below to install the application after the above mentioned requirements have been satisfied. The default install destination is **/opt/metrilyx**.	
 
-- Install the required OS packages based on your OS's package manager.
+- Install the required OS packages.
 - Issue the following command to install the application:
 	
-	[</path/to/downloaded/app>]$ ./install.sh app
-	
+	$ git clone https://github.com/Ticketmaster/metrilyx-2.0.git
+	$ cd metrilyx-2.0
+	$ ./install.sh app
 
-Assuming all required packages are installed, the script will install the required python modules, apache configs depending on your distribution and prompt you to edit the configuration file.
+Assuming all required OS packages are installed, the script will install the needed python modules, nginx configs depending on your distribution and prompt you to edit the metrilyx configuration file.
 
 After you have completed editing the configuration file, start the modelmanager and dataserver processes, then restart nginx.  Also start celeryd and celerybeat which consume and run periodic jobs repsectively.
 	
@@ -75,7 +76,7 @@ After you have completed editing the configuration file, start the modelmanager 
 
 	/etc/init.d/celerybeat start
 
-The default nginx configuration may conflict with the metrilyx one.  In this case you'll need to disable the default one or edit the configuration file to accomodate the metrilyx nginx configuration.
+The default system nginx configuration may conflict with the metrilyx one.  In this case you'll need to disable the default one or edit the configuration file to accomodate the metrilyx nginx configuration.
 
 ### Configuration
 The default installation directory is /opt/metrilyx.
