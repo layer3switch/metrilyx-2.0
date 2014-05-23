@@ -4,7 +4,7 @@
 # description: Metrilyx Data Server.  This provides data via websockets.
 #
 
-. /etc/rc.d/init.d/functions
+[ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
 
 NAME="metrilyx-dataserver"
 APP_HOME="/opt/metrilyx"
@@ -15,19 +15,29 @@ PGREP="/usr/bin/pgrep -f"
 ## set -c to 0 spawn servers based on the number of cpus/cores
 DEFAULT_OPTS="-e 80 -c 0"
 
+RETVAL=0
+
 start() {
 	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
-	if [ "$PIDS" == "" ]; then
+	if [ "$PIDS" = "" ]; then
 		echo -n "$0 starting... "
 		${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
-		${PGREP} "${BIN} ${DEFAULT_OPTS}" && echo "[ok]" || echo "[failed]";
+		sleep 1;
+		PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+		if [ "$PIDS" = "" ]; then
+			echo "[failed]";
+			RETVAL=2;
+		else
+			echo "[ok]";
+		fi
 	else
 		echo -n "$0 already running... ${PIDS}";
+		RETVAL=1
 	fi
 }
 status() {
 	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
-	if [ "$PIDS" == "" ]; then
+	if [ "$PIDS" = "" ]; then
 		echo "${NAME} not running";
 	else
 		echo "${NAME} running... ${PIDS}"

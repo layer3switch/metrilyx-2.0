@@ -4,7 +4,7 @@
 # description: OpenStack Notification Monitor
 #
 
-. /etc/rc.d/init.d/functions
+[ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
 
 NAME="metrilyx-modelmanager"
 BIN=uwsgi
@@ -14,31 +14,47 @@ PGREP="/usr/bin/pgrep -f"
 
 DEFAULT_OPTS="--ini ${APP_HOME}/etc/metrilyx/uwsgi.conf"
 
+RETVAL=0
+
 start() {
 	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
-	if [ "$PIDS" == "" ]; then
+	if [ "$PIDS" = "" ]; then
+		echo -n "${NAME} starting... "
 		${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
-		${PGREP} "${BIN} ${DEFAULT_OPTS}" && echo "${NAME} started";
+		sleep 1;
+		PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+		if [ "$PIDS" = "" ]; then
+			echo "[failed]";
+			RETVAL=2;
+		else
+			echo "[ok]";
+		fi
 	else
-		echo -n "Already running... ${PIDS}";
+		echo -n "${NAME} running... ${PIDS}";
+		RETVAL=1;
 	fi
 }
 status() {
-	${PGREP} "${BIN} ${DEFAULT_OPTS}" && echo "${NAME} running" || echo "${NAME} not running";
+	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+	if [ "$PIDS" = "" ]; then
+		echo "${NAME} not running";
+	else
+		echo "${NAME} running... $PIDS";
+	fi
 }
 stop() {
 	echo -n "Stopping... "
 	${PGREP} "${BIN} ${DEFAULT_OPTS}" > /tmp/metrilyx-modelmanager.pid;
 	${BIN} --stop /tmp/metrilyx-modelmanager.pid;
 	rm -rf /tmp/metrilyx-modelmanager.pid;
-	echo "[ok]"
+	echo "[ok]";
 }
 reload() {
-	echo -n "Reloading... "
+	echo -n "Reloading... ";
 	${PGREP} "${BIN} ${DEFAULT_OPTS}" > /tmp/metrilyx-modelmanager.pid;
 	${BIN} --reload /tmp/metrilyx-modelmanager.pid
 	rm -rf /tmp/metrilyx-modelmanager.pid;
-	echo "[ok]"
+	echo "[ok]";
 }
 
 case "$1" in
@@ -60,4 +76,4 @@ case "$1" in
 		$0 start
 		;;
 esac
-exit 0
+exit $RETVAL
