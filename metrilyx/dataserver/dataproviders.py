@@ -44,6 +44,9 @@ class BaseDataProvider(object):
 		return response
 
 	def response_errback(self, error, graph_meta=None):
+		for k,v in error.__dict__.items():
+			print k,v
+
 		try:
 			err_obj = json.loads(error.value.response)['error']
 		except Exception,e:
@@ -51,7 +54,7 @@ class BaseDataProvider(object):
 		
 		graph_meta['series'][0]['data'] = {"error": err_obj['message'][:100]}
 		logger.error("BaseDataProvider.response_errback: %s %s" %(
-			str(graph_meta['series'][0]['query']), graph_meta['series'][0]['data']['error']))
+			str(graph_meta['series'][0]['query']), err_obj['message']))
 		return graph_meta
 
 	def time_window(self, request):

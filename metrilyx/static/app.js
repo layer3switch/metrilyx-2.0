@@ -245,6 +245,34 @@ app.directive('tagkeyvalue', function() {
 		}
 	};
 });
+app.directive('pageId', function() {
+	return {
+		restrict: 'A',
+		require: '?ngModel',
+		link: function(scope, elem, attrs, ctrl) {
+			if(!ctrl) return;
+			// view -- > model //
+			ctrl.$parsers.unshift(function(viewValue) {
+				if(viewValue == "") {
+					ctrl.$setValidity('pageId', false);
+					return ctrl.$modelValue;
+				}
+				if(viewValue.search(/(\.|\s|\\|\/)/) > 0) {
+					ctrl.$setValidity('pageId', false);
+					setGlobalAlerts({
+						error: "Invalid ID",
+						message:"ID's cannot contain '.', '\\', '/', and spaces"
+					});
+					flashAlertsBar();
+					return ctrl.$modelValue;
+				} else {
+					ctrl.$setValidity('pageId', true);
+					return viewValue;
+				}
+			});
+		}
+	};
+});
 /*
  * Parse tags object to 'tag1=val1,tag2=val2;'
  * Error checking and validity setting.

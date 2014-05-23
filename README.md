@@ -4,7 +4,7 @@ Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database us
 
 #### Features:
 ##### v2.2.0
-- Major performance improvements
+- Major performance improvements.
 	- Data delivery system now completely **asynchronous**.
 	- Data provided through **websockets**.
 	- In flight data **compression** (permessage-deflate).
@@ -32,19 +32,10 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 
 #### OS Packages:
 ##### RHEL:
-	libuuid
-	uuid
-	nginx
-	python-setuptools
-	python-devel
-	gcc
+	yum -y install libuuid uuid nginx python-setuptools python-devel gcc mongodb
 	
 ##### Debian:
-	libuuid1 
-	uuid-runtime
-	make 
-	python-setuptools
-	nginx
+	apt-get install libuuid1 uuid-runtime nginx python-setuptools python-dev libpython-dev make mongodb
 
 #### Python Packages:
 	uuid
@@ -53,13 +44,13 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 	django-filter
 	django-cors-headers
 	django-reversion
+	twisted	
 	celery
 	requests
 	jsonfield
 	uwsgi
-
-In order to use heatmaps you will also need a mongodb server.
-
+	pymongo
+	autobahn
 
 ### Installation
 The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below to install the application after the above mentioned requirements have been satisfied. The default install destination is **/opt/metrilyx**.	
@@ -72,13 +63,17 @@ The provided install script will work with both **RedHat** and **Debian** based 
 
 Assuming all required packages are installed, the script will install the required python modules, apache configs depending on your distribution and prompt you to edit the configuration file.
 
-After you have completed editing the configuration file start the modelmanager and dataserver processes, then restart nginx
+After you have completed editing the configuration file, start the modelmanager and dataserver processes, then restart nginx.  Also start celeryd and celerybeat which consume and run periodic jobs repsectively.
 	
 	/etc/init.d/metrilyx-dataserver start
 	
 	/etc/init.d/metrilyx-modelmanager start
 
 	/etc/init.d/nginx restart
+
+	/etc/init.d/celeryd start
+
+	/etc/init.d/celerybeat start
 
 ### Configuration
 The default installation directory is /opt/metrilyx.

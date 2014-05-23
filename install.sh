@@ -9,7 +9,7 @@ if [[ -f "/etc/redhat-release" ]]; then
 	HTTP_USER="nginx"
 elif [[ -f "/etc/debian_version" ]]; then
 	HTTPD="nginx"
-	HTTP_USER="nginx"
+	HTTP_USER="www-data"
 else
 	echo "Currently only RedHat/Debian based distro are supported.  Please install manually.";
 	exit 1;
@@ -18,7 +18,6 @@ fi
 clean() {
 	find . -name '*.pyc' -exec rm -rf '{}' \;
 }
-
 install_app() {
 	mkdir -p ${APP_HOME};
 	cp -a . ${APP_HOME}/;
@@ -26,16 +25,26 @@ install_app() {
 	( id celery 2>&1 ) > /dev/null || useradd celery;
 	chgrp celery ${APP_HOME};
 }
-
-setup_celery_startup() {
+setup_startup_scripts() {
 	if [[ -f "/etc/redhat-release" ]]; then
 		cp -a etc/rc.d/init.d/* /etc/rc.d/init.d/;
 		if [ ! -f /etc/sysconfig/celeryd ]; then 
 			cp etc/sysconfig/celeryd /etc/sysconfig/;
-		fi	
+		fi
+		for service in celeryd celerybeat metrilyx-dataserver metrilyx-modelmanager; do
+			chkconfig $service on;
+		done
+	fi
+	if [[ -f "/etc/debian_version" ]]; then
+		cp -a etc/rc.d/init.d/* /etc/init.d/;
 	fi
 }
-
+configure_uwsgi() {
+	if [ -f "/etc/debian_version" ]; then
+		sed -i -e "s/^uid.*=.*/uid = www\-data/g" ${APP_HOME}/etc/metrilyx/uwsgi.conf;
+		sed -i -e "s/^gid.*=.*/uid = www\-data/g" ${APP_HOME}/etc/metrilyx/uwsgi.conf;
+	fi
+}
 install_pydeps() {
 	echo "-- Installing python dependencies..."
 	which pip || easy_install pip;
@@ -43,7 +52,6 @@ install_pydeps() {
 		pip list | grep ${pypkg} || pip install ${pypkg};
 	done;
 }
-
 backup_curr_install() {
 	clean;
 	if [ -d "${APP_HOME}" ]; then
@@ -51,34 +59,30 @@ backup_curr_install() {
 		mv ${APP_HOME} ${APP_HOME}-${INSTALL_TIME};
 	fi;
 }
-configure_app() {
-	echo "- Importing existing data...";
-	echo "  configs...";
-	if [ -f "${APP_HOME}-${INSTALL_TIME}/etc/metrilyx/metrilyx.conf" ]; then
-        cp ${APP_HOME}-${INSTALL_TIME}/etc/metrilyx/metrilyx.conf ${APP_HOME}/etc/metrilyx/metrilyx.conf;
-    else
-        cp etc/metrilyx/metrilyx.conf.sample ${APP_HOME}/etc/metrilyx/metrilyx.conf;
-    fi
-    ${EDITOR:-vi} ${APP_HOME}/etc/metrilyx/metrilyx.conf;
-
-	if [ -f "${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js" ]; then
-		cp ${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js ${APP_HOME}/metrilyx/static/config.js;
-	else
-		cp ${APP_HOME}/metrilyx/static/config.js.sample ${APP_HOME}/metrilyx/static/config.js;
-	fi
+init_configs() {
+	cp etc/metrilyx/metrilyx.conf.sample ${APP_HOME}/etc/metrilyx/metrilyx.conf;
+	${EDITOR:-vi} ${APP_HOME}/etc/metrilyx/metrilyx.conf;
+	cp ${APP_HOME}/metrilyx/static/config.js.sample ${APP_HOME}/metrilyx/static/config.js;
 	${EDITOR:-vi} ${APP_HOME}/metrilyx/static/config.js;
-
-	echo "  dashboards..."
-	[ -d "${APP_HOME}-${INSTALL_TIME}/pagemodels" ] && cp -a ${APP_HOME}-${INSTALL_TIME}/pagemodels ${APP_HOME}/;
-	
-	echo "  heatmaps..."
-	[ -d "${APP_HOME}-${INSTALL_TIME}/pagemodels" ] && cp -a ${APP_HOME}-${INSTALL_TIME}/heatmaps ${APP_HOME}/;
 }
-
 configure_webserver() {
 	echo "- Installing web components..."
 	cp etc/nginx/conf.d/metrilyx.conf /etc/nginx/conf.d/;
 	chown -R $HTTP_USER ${APP_HOME};
+}
+## BEGIN cli args
+import_configs() {
+	lastInstall=$(ls -t /opt/ | grep 'metrilyx-' | xargs | awk "{print \$1}")
+	if [ "$lastInstall" != "" ]; then
+		echo "- Importing existing data...";
+		echo "  configs...";
+		if [ -f "${APP_HOME}-${INSTALL_TIME}/etc/metrilyx/metrilyx.conf" ]; then
+	        cp /opt/${lastInstall}/etc/metrilyx/metrilyx.conf ${APP_HOME}/etc/metrilyx/metrilyx.conf; 
+	   	fi
+		if [ -f "${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js" ]; then
+			cp /opt/${lastInstall}/metrilyx/static/config.js ${APP_HOME}/metrilyx/static/config.js;
+		fi
+	fi
 }
 init_postgres() {
 	/etc/init.d/postgresql-9.3 initdb;
@@ -94,6 +98,7 @@ init_django() {
 	[[ -f "./metrilyx.sqlite3" ]] && chown ${HTTP_USER}:${HTTP_USER} ./metrilyx.sqlite3;
 	# apache restart
 }
+## END cli args
 ##### Main ####
 
 if [ "$(whoami)" != "root" ]; then
@@ -105,9 +110,10 @@ if [ "$1" == "app" ]; then
 	install_pydeps;
 	backup_curr_install;
 	install_app;
-	configure_app;
+	init_configs;
 	configure_webserver;
-	setup_celery_startup;
+	configure_uwsgi;
+	setup_startup_scripts;
 else
 	echo "Executing $1...";
 	$1;

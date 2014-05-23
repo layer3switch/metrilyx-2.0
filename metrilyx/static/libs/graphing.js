@@ -331,8 +331,9 @@ function dataHasErrors(gObj) {
             //console.log(gObj.series[s].data.error);
             if(gObj.series[s].data.error.message) msg = gObj.series[s].data.error.message.substring(0,50)+"...";
             else msg = gObj.series[s].data.error.substring(0,50)+"...";
-            console.warn(msg);
-            $("[data-graph-error='"+gObj._id+"']").html(gObj.series[s].query.metric+": "+msg);
+            console.warn(gObj.series[s].query.metric, msg);
+            $("[data-graph-status='"+gObj._id+"']").html(
+                "<span class='graph-error'>"+gObj.series[s].query.metric+": "+msg+"</span>");
             return { 
                 "error": {
                     "message": msg,

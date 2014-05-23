@@ -651,7 +651,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 							'aggregator': met[0],
 							'rate': rate,
 							'metric': met[met.length-1],
-							'tags': commaSepStrToDict(arr[2])
+							'tags': commaSepStrToDict(arr[2],":")
 						}
 					});
 				}
@@ -727,8 +727,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
         	try {
 				$scope.wssock.send(JSON.stringify(query));	
         	} catch(e) {
-        		//console.log(e);
-        		// in connecting state.
+        		// in CONNECTING state. //
         		if(e.code === 11) QUEUED_REQS.push(JSON.stringify(query));
         	}
         }
@@ -775,19 +774,28 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.updateTagsOnPage = function(obj) {
 			var top = $scope.tagsOnPage;
 			for(var k in obj) {
-				if(top[k] == undefined) {
-					top[k] = ["*"];
-					top[k].push(obj[k]);
-					continue;
-				}
-				if(top[k].indexOf(obj[k]) >= 0) {
-					continue;
+				if(Object.prototype.toString.call(obj[k]) === '[object Array]') {
+					if(top[k] == undefined) {
+						top[k] = obj[k];
+						top[k].push("*");
+					} else {
+						for(var i in obj[k]) {
+							if(top[k].indexOf(obj[k][i]) < 0) top[k].push(obj[k][i]);
+						}
+					}
 				} else {
-					top[k].push(obj[k]);
+					if(top[k] == undefined) {
+						top[k] = ["*"];
+						top[k].push(obj[k]);
+					} else if(top[k].indexOf(obj[k]) < 0) {
+						top[k].push(obj[k]);
+					}
 				}
-				console.log(obj[k]);
 			}
+			// this may be very expensive //
+			for(var k in top) top[k].sort();
 			$scope.tagsOnPage = top;
+			//console.log($scope.tagsOnPage);
 		}
 		$scope.reloadGraph = function(gobj) {
 			if(!gobj) gobj = $scope.graph;
