@@ -238,7 +238,12 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
        		$scope.wssock.dispatchEvent(ce);
        	}
         $scope.requestData = function(query) {
-        	$scope.wssock.send(JSON.stringify(query));
+        	try {
+				$scope.wssock.send(JSON.stringify(query));	
+        	} catch(e) {
+        		// in CONNECTING state. //
+        		if(e.code === 11) QUEUED_REQS.push(JSON.stringify(query));
+        	}
         }
         $scope.isSerieLoaded = function(graph, serie) {
         	hcg = $("[data-graph-id='"+graph._id+"']").highcharts();
