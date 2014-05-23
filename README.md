@@ -75,6 +75,8 @@ After you have completed editing the configuration file, start the modelmanager 
 
 	/etc/init.d/celerybeat start
 
+The default nginx configuration may conflict with the metrilyx one.  In this case you'll need to disable the default one or edit the configuration file to accomodate the metrilyx nginx configuration.
+
 ### Configuration
 The default installation directory is /opt/metrilyx.
 
