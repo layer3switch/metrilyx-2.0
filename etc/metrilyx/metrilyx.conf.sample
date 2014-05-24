@@ -1,6 +1,6 @@
 {
 	"dataproviders": [{
-		"uri": "<OpenTSDB host>",
+		"uri": "http://<OpenTSDB host>",
 		"query_endpoint": "/api/query",
 		"search_endpoint": "/api/suggest",
 		"suggest_limit": 100,
