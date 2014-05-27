@@ -126,7 +126,7 @@ OpenTSDB suggest max result limit.
 This configuration option is only need if you plan to use heatmaps. If you choose to enable this feature the only needed change is the mongodb information relative to your setup i.e. host, port, and database
 
 ##### databases
-The default uses sqlite.  Other databases can also be used.  We have testing with postgresql.  This requires a seperate set of tasks that will be included later.
+The are 2 configurations provided - sqlite and postgres.  The first one in the list will be the one used.  The default uses sqlite.  Postgresql can also be used.  To use postgres move that configuration option to the top of the list.  Using postgres requires the **psycopg2** python package.
 
 
 #### /opt/metrilyx/metrilyx/static/config.js
