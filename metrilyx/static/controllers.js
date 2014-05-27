@@ -110,6 +110,8 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 ]);
 metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap',
 	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap) {
+		var QUEUED_REQS = [];
+		
 		if($routeParams.heatmapId) {
 			$scope.modelType = "heatmap/";
 		} else {
