@@ -1,9 +1,10 @@
 {
 	"dataproviders": [{
+		"name": "OpenTSDB",
 		"uri": "http://<OpenTSDB host>",
 		"query_endpoint": "/api/query",
 		"search_endpoint": "/api/suggest",
-		"suggest_limit": 100,
+		"suggest_limit": 50,
 		"timeout": 0
 	}],
 	"heatmaps": {
@@ -19,6 +20,13 @@
 	"databases":[{
 		"ENGINE": "django.db.backends.sqlite3",
         "NAME": "/opt/metrilyx/metrilyx.sqlite3"
+	},{
+		"ENGINE": "django.db.backends.postgresql_psycopg2",
+		"NAME": "metrilyx",
+		"HOST": "127.0.0.1",
+		"PORT": "5432",
+		"USER": "metuser",
+		"PASSWORD": "metpass"
 	}],
 	"celery": {
 		"tasks": [
