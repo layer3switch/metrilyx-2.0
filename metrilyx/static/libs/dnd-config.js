@@ -14,6 +14,11 @@ var dndconfig = {
 		appendTo:"body",
 		zindex: 999999,
 		disabled:true,
+		stop: function(event, ui) {
+			var ce = new CustomEvent("refresh-metric-list", 
+				{'detail': 'metric list needs a refresh' });
+       		document.getElementById('edit-panel').dispatchEvent(ce);
+		}
 	},
 	/* graph in graphs */
 	graph: {

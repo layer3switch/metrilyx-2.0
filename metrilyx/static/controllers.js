@@ -111,7 +111,7 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap',
 	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap) {
 		var QUEUED_REQS = [];
-		
+
 		if($routeParams.heatmapId) {
 			$scope.modelType = "heatmap/";
 		} else {
@@ -267,7 +267,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			}
 			return false;
         }
-		$scope.onPartialComponentLoad = function() {
+		$scope.onPageHeaderLoad = function() {
 			// setTimeout is to account for processing time //
 			setTimeout(function() {
 				if($scope.editMode === ' edit-mode') {
@@ -276,6 +276,13 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 					$('input.edit-comp').attr('disabled', true); 
 				}
 			}, 150);
+		}
+		$scope.onEditPanelLoad = function() {
+			document.getElementById('edit-panel').addEventListener('refresh-metric-list',
+				function() {
+					$scope.searchForMetric($('[ng-model=metricQuery]').val());
+				}
+			);
 		}
 		$scope.addNewTags = function(elemSelector) {
 			tagstr = $(elemSelector).val();
@@ -355,9 +362,12 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				'this.metricQuery' must be used rather than '$scope.metricQuery' because 
 				edit-panel is ng-include so a new scope gets created.
 			*/
-			if(this.metricQuery == "") return;
-			Metrics.suggest(this.metricQuery, function(result) {
-				$scope.metricQuery = this.metricQuery;
+			var qstr;
+			if(args && args !== "") qstr = args;
+			if(this.metricQuery && this.metricQuery !== "") qstr = this.metricQuery;
+			if(qstr == "" || qstr == undefined) return;
+			Metrics.suggest(qstr, function(result) {
+				$scope.metricQuery = qstr;
 				Schema.get({modelType:'metric'}, function(graphModel) {
 					var arr = [];
 					for(var i in result) {
@@ -675,6 +685,14 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		} else {
 			$scope.metricListSortOpts.disabled = false;
 		}
+		$scope.onEditPanelLoad = function() {
+			console.log('refresh');
+			document.getElementById('edit-panel').addEventListener('refresh-metric-list',
+				function() {
+					$scope.searchForMetric($('[ng-model=metricQuery]').val());
+				}
+			);
+		}
 		$scope.removeTag = function(tags, tagkey) {
 			delete tags[tagkey];
 		}
@@ -859,9 +877,12 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		}
 
 		$scope.searchForMetric = function(args) {
-			if(this.metricQuery == "") return;
-			Metrics.suggest(this.metricQuery, function(result) {
-				$scope.metricQuery = this.metricQuery;
+			var qstr;
+			if(args && args !== "") qstr = args;
+			if(this.metricQuery && this.metricQuery !== "") qstr = this.metricQuery;
+			if(qstr == "" || qstr == undefined) return;
+			Metrics.suggest(qstr, function(result) {
+				$scope.metricQuery = qstr;
 				Schema.get({modelType:'metric'}, function(graphModel) {
 					var arr = [];
 					for(var i in result) {
