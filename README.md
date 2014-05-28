@@ -136,10 +136,27 @@ This is the client side configuration file. A sample for this configuration has 
 This does not need to be changed.  This is a placeholder for a future feature to allow user authentication.
 
 ##### SERVER_NAME
-Client accessible ip address or fqdn.  This is the address used by the websocket client.  This is the only required option in this configuration file.
+Client accessible FQDN of the server.  This is the address used by the client to make the websocket connection.  This must be the hostname of the machine it's running on or else client connections will fail.  This is the only required option in this configuration file.
 
 ##### WS_URI
 The websocket URI used by the client.  This is made up of the **SERVER_NAME** and connection options.  This does not need to be edited.
+
+
+#### Nginx
+The metrilyx nginx configuration is install at **/etc/nginx/conf.d/metrilyx.conf**.  The default nginx configuration may conflict with the metrilyx configuration and should be disabled. The name of the default file will be different depending on the operating system you are using.
+
+	$ mv /etc/nginx/conf.d/default.conf{,.disabled}
+	
+Metrilyx can still function without these configuration changes but it is recommended these options be configured for scalability and performance.
+
+	upstream dataprovider {
+		server 127.0.0.1:9000
+		#server 127.0.0.1:9001
+		#server 127.0.0.1:9002
+		#server 127.0.0.1:9003
+	}
+
+This configuration option should be edited to match the number of metrilyx-dataserver instances running.  Uncomment each line for a given instance with the corresponding port number.
 
 ### Heat Maps
 Heatmaps are used to view your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10.  This is usually the tag containing a value of '*'.
