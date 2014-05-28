@@ -20,7 +20,7 @@ RETVAL=0
 start() {
 	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
 	if [ "$PIDS" = "" ]; then
-		echo -n "$0 starting... "
+		echo -n "${NAME} starting... "
 		${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
 		sleep 1;
 		PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
@@ -31,7 +31,7 @@ start() {
 			echo "[ok]";
 		fi
 	else
-		echo -n "$0 already running... ${PIDS}";
+		echo -n "${NAME} already running... ${PIDS}";
 		RETVAL=1
 	fi
 }
