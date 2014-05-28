@@ -1,10 +1,13 @@
 
+import re
 import json
 import logging
 
 from pprint import pprint
 
 logger = logging.getLogger(__name__)
+
+re_504 = re.compile("(504 gateway time.+out)", re.IGNORECASE)
 
 class BaseDataProvider(object):
 	def __init__(self, config):
@@ -52,7 +55,11 @@ class BaseDataProvider(object):
 		except Exception,e:
 			err_obj = {'message': str(error.value.response)}
 		
-		graph_meta['series'][0]['data'] = {"error": err_obj['message'][:100]}
+		m = re_504.search(err_obj['message'])
+		if m != None:
+			graph_meta['series'][0]['data'] = {"error": m.group(1)}
+		else:
+			graph_meta['series'][0]['data'] = {"error": err_obj['message'][:100]}
 		logger.error("BaseDataProvider.response_errback: %s %s" %(
 			str(graph_meta['series'][0]['query']), err_obj['message']))
 		return graph_meta
