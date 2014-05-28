@@ -339,6 +339,7 @@ input[ng-model='model.name'].edit-mode {
 	opacity: 0;
 	display: none;
 	text-align: center;
+	color: #666;
 }
 [ng-model='model._id'].edit-mode {
 	display: inline-block;
