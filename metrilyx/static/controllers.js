@@ -91,11 +91,13 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 						Heatmap.saveModel(jobj, function(rslt) {
 							setGlobalAlerts({message: 'Saved '+rslt._id});
 							flashAlertsBar();
+							document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
 						});
 					} else {
 						Model.saveModel(jobj, function(rslt) {
 							setGlobalAlerts({message: 'Saved '+rslt._id});
 							flashAlertsBar();
+							document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
 						});
 					}
 				} catch(e) {
