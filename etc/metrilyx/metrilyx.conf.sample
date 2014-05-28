@@ -5,7 +5,7 @@
 		"query_endpoint": "/api/query",
 		"search_endpoint": "/api/suggest",
 		"suggest_limit": 50,
-		"timeout": 0
+		"timeout": 180
 	}],
 	"heatmaps": {
 		"analysis_interval": "1m-ago",
