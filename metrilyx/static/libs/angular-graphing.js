@@ -282,7 +282,7 @@ angular.module('graphing', [])
 
 				scope.$on("$destroy", function( event ) {
                 	clearTimeout(currTimer);
-                	scope.wssock.removeEventListener("graphdata", processRecievedData);
+                	if(scope.wssock != null) scope.wssock.removeEventListener("graphdata", processRecievedData);
                 });
 			}
 		};	
