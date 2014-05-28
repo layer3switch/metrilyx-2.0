@@ -106,11 +106,13 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 		}
 
 		$scope.loadList();	
+		document.getElementById('side-panel').addEventListener('refresh-model-list', function(evt){$scope.loadList();});
 	}
 ]);
 metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap',
 	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap) {
 		var QUEUED_REQS = [];
+		$scope.wssock = getWebSocket();
 
 		if($routeParams.heatmapId) {
 			$scope.modelType = "heatmap/";
@@ -147,7 +149,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.rowSortOpts 			= dndconfig.row;
 		$scope.layoutSortOpts 		= dndconfig.layout;
 
-		$scope.wssock = getWebSocket();
+		
 
 		// set default to relative time //
 		$scope.timeType = "1h-ago";
@@ -499,6 +501,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				} else {
 					location.hash = "#/heatmap/new";
 				}
+				document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
 			}
 		}
 		$scope.removeModel = function(callback) {
@@ -524,6 +527,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				} else {
 					currpath = "#/" + $scope.modelType + $scope.model._id;
 				}
+				document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
 				if(location.hash === currpath) {
 					location.reload(true);
 				} else {
@@ -588,11 +592,15 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				"<table class='gif-loader-table'><tr><td> \
 				<img src='/imgs/loader.gif'></td></tr></table>");
 		}
+		$scope.$on('$destroy', function() {
+			try {$scope.wssock.close();} catch(e){};
+		});
 }]);
 
 metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model',
 	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model) {
-		$scope.wssock 			= getWebSocket();
+		var QUEUED_REQS = [];
+		$scope.wssock = getWebSocket();
 
 		$scope.modelType 		= "adhoc";
 		$scope.timeType 		= "1h-ago";
@@ -609,8 +617,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.metricQueryResult = [];
 		$scope.tagsOnPage = {};
 		$scope.graph = {};
-
-		var QUEUED_REQS = [];
 
 		if($routeParams.editMode==="false") {
 			$scope.editMode = "";
@@ -686,7 +692,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			$scope.metricListSortOpts.disabled = false;
 		}
 		$scope.onEditPanelLoad = function() {
-			console.log('refresh');
 			document.getElementById('edit-panel').addEventListener('refresh-metric-list',
 				function() {
 					$scope.searchForMetric($('[ng-model=metricQuery]').val());
@@ -826,11 +831,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			if(!gobj) gobj = $scope.graph;
 			$('.adhoc-metric-editor').hide();
 			if(gobj.series.length < 1) return;
-			/*
-			for(var s in gobj.series) {
-				gobj.series[s].loading = "loading";
-			}
-			*/
 			$scope.setURL(gobj);
 
 			q = $scope.baseQuery(gobj)
@@ -939,6 +939,8 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			$scope.setURL($scope.graph);
 			$route.reload();
 		}
-	}
-]);
+		$scope.$on('$destroy', function() {
+			try {$scope.wssock.close();} catch(e){};
+		});
+}]);
 
