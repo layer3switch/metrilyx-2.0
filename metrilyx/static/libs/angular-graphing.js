@@ -230,7 +230,8 @@ angular.module('graphing', [])
 				} else {
 					scope.disableDragDrop();
 				}
-				getUpdates();
+				// start updates after 50 seconds //
+				setTimeout(function() {getUpdates();},50000);
 				
 				scope.$watch(function() {
 					return ngModel.$modelValue;
