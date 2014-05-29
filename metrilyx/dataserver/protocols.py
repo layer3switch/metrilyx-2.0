@@ -65,7 +65,7 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 	dataprovider = None
 	timeout = 0
 
-	def ds_response_callback(self, response, graph_meta=None):
+	def ds_response_callback(self, response, url, graph_meta=None):
 		graph_meta['series'][0]['data'] = self.dataprovider.response_callback(
 															json.loads(response))
 		
@@ -74,15 +74,15 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		graph_meta['series'][0]['data'] = mserie.data
 		self.sendMessage(json.dumps(graph_meta))
 
-	def ds_response_errback(self, error, graph_meta=None):
+	def ds_response_errback(self, error, url, graph_meta=None):
 		response = self.dataprovider.response_errback(error, graph_meta)
 		self.sendMessage(json.dumps(response))
 
 	def __submit_parallel_queries(self, req_obj):
 		for (url, meta) in self.dataprovider.get_queries(req_obj):
 			d = getPage(url, timeout=self.timeout)
-			d.addCallback(self.ds_response_callback, meta)
-			d.addErrback(self.ds_response_errback, meta)
+			d.addCallback(self.ds_response_callback, url, meta)
+			d.addErrback(self.ds_response_errback, url, meta)
 
 	def onMessage(self, payload, isBinary):
 		request_obj = self.checkMessage(payload, isBinary)
@@ -93,4 +93,10 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		else:
 			logger.error("Invalid request object: %s" %(str(request_obj)))
 
+	"""
+	def onClose(self, wasClean, code, reason):
+		for k in self.active_queries.keys():
+			self.active_queries[k].cancel()
+			del self.active_queries[k]
+	"""
 
