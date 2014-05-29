@@ -914,7 +914,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 					hc = $(this).highcharts();
 					if(hc != undefined) hc.reflow();
 				});
-			}, 300);
+			}, 350);
 		}
 		$scope.setStartTime = function(sTime) {
 			if($scope.endTime) {
