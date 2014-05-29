@@ -1,26 +1,26 @@
-	<div class="page-mast">
-		<div class="row">
-			<div class="col-md-6">
-				<span class="page-list-btn pointer interactive" title="Page List" onclick="$('.shift').toggleClass('right');">
-					<i class="glyphicon glyphicon-list"></i>
-				</span>
-				<span>
-					<a href="javascript:void(0)" ng-click="loadHome()" style="color:#ddd" class="interactive">
-						<span class="pad5" style="font-size:22px;font-weight:bold;">metrilyx</span>
-						<span style="opacity: 0.7">v2.2.0b</span>
-					</a>
-				</span>
-			</div>
-			<div class="col-md-6">
-				<div ng-if="modelType=='' && editMode!==' edit-mode'">
-					<div class="input-group" title="Tags to be applied to all graphs. These tags do not get saved with the model.">
-						<span class="input-group-addon" style="background:none;color:#ccc;border-color:#777!important">Global Tags</span>
-						<input type="text" ng-model="globalTags" key-value-pairs class="form-control dark" style="border-color: #707070 !important;">
-						<div class="input-group-btn">
-        					<button type="button" class="btn btn-default interactive" ng-click="setGlobalTags(globalTags)" style="background:none;padding-top:9px;padding-bottom:9px;border-color:#777!important"><i class="glyphicon glyphicon-ok"></i></button>
-      					</div>
-					</div>
+<div class="page-mast">
+	<div class="row">
+		<div class="col-md-6">
+			<span class="page-list-btn pointer interactive" title="Page List" onclick="$('.shift').toggleClass('right');">
+				<i class="glyphicon glyphicon-list"></i>
+			</span>
+			<span>
+				<a href="javascript:void(0)" ng-click="loadHome()" style="color:#ddd" class="interactive">
+					<span class="pad5" style="font-size:22px;font-weight:bold;">metrilyx</span>
+					<span style="opacity:0.5">v2.2.0</span>
+				</a>
+			</span>
+		</div>
+		<div class="col-md-6">
+			<div ng-if="modelType=='' && editMode!==' edit-mode'">
+				<div class="input-group" title="Tags to be applied to all graphs. These tags do not get saved with the model.">
+					<span class="input-group-addon" style="background:none;color:#ccc;border-color:#777!important">Global Tags</span>
+					<input type="text" ng-model="globalTags" key-value-pairs class="form-control dark" style="border-color: #707070 !important;">
+					<div class="input-group-btn">
+    					<button type="button" class="btn btn-default interactive" ng-click="setGlobalTags(globalTags)" style="background:none;padding-top:9px;padding-bottom:9px;border-color:#777!important"><i class="glyphicon glyphicon-ok"></i></button>
+  					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+</div>
