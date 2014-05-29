@@ -499,6 +499,7 @@ function getNewDataAlignedSeries(dataName, currData, newData) {
 function renderGraph(graphObj) {
     dhe = dataHasErrors(graphObj);
     if(dhe) return;
+    $("[data-graph-status='"+graphObj._id+"']").html("");
     graphing_upsertSeries(graphObj);
 }
 
