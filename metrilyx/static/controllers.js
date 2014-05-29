@@ -596,6 +596,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		}
 		$scope.$on('$destroy', function() {
 			try {$scope.wssock.close();} catch(e){};
+			$scope.wssock = null;
 		});
 }]);
 
@@ -943,6 +944,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		}
 		$scope.$on('$destroy', function() {
 			try {$scope.wssock.close();} catch(e){};
+			$scope.wssock = null;
 		});
 }]);
 
