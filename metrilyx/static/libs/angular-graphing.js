@@ -210,7 +210,7 @@ angular.module('graphing', [])
 					if(currTimer) clearTimeout(currTimer);
 					currTimer = setTimeout(function() { 
 						getUpdates();
-					}, 45000);
+					}, 50000);
 				}
 
 				function processRecievedData(event) {
