@@ -228,7 +228,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
           while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());
        	}
        	$scope.wssock.onclose = function(e) {
-          console.log("Closed (wasClean = " + e.wasClean + ", code = " + e.code + ", reason = '" + e.reason + "')");
+          console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
           $scope.wssock = null;
        	}
        	$scope.wssock.onmessage = function(e) {
@@ -741,7 +741,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
           while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());
        	}
        	$scope.wssock.onclose = function(e) {
-          console.log("Closed (wasClean = " + e.wasClean + ", code = " + e.code + ", reason = '" + e.reason + "')");
+          console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
           $scope.wssock = null;
        	}
        	$scope.wssock.onmessage = function(e) {
