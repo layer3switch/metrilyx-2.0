@@ -14,6 +14,8 @@ class BaseDataProvider(object):
 		for k,v in config.items():
 			setattr(self, k, v)
 
+class PerformanceDataProvider(BaseDataProvider):
+
 	def graph_metadata(self, request, serie):
 		"""
 		Return: Graph metadata for a given request
@@ -90,7 +92,7 @@ class BaseDataProvider(object):
 				serie['query']['tags'][k] = v
 		return request
 
-class TSDBDataProvider(BaseDataProvider):
+class TSDBDataProvider(PerformanceDataProvider):
 
 	def __get_serie_query(self, obj):
 		if obj.get('rate'):
