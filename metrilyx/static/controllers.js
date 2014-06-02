@@ -151,8 +151,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.rowSortOpts 			= dndconfig.row;
 		$scope.layoutSortOpts 		= dndconfig.layout;
 
-		
-
 		// set default to relative time //
 		$scope.timeType = "1h-ago";
 		// relative time or 'absolute' //
@@ -225,11 +223,12 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		});
 		
         $scope.wssock.onopen = function() {
-          console.log("Connected to wsuri (using WebSocket extensions: [" + $scope.wssock.extensions + "])");
-          //sock.send(JSON.stringify({'init':1}));
+          console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
+          console.log("Queued requests:",QUEUED_REQS.length);
+          while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());
        	}
        	$scope.wssock.onclose = function(e) {
-          console.log("Connection closed (wasClean = " + e.wasClean + ", code = " + e.code + ", reason = '" + e.reason + "')");
+          console.log("Closed (wasClean = " + e.wasClean + ", code = " + e.code + ", reason = '" + e.reason + "')");
           $scope.wssock = null;
        	}
        	$scope.wssock.onmessage = function(e) {
@@ -737,12 +736,12 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		}
 
         $scope.wssock.onopen = function() {
-          console.log("Connected to wsuri (using WebSocket extensions: [" + $scope.wssock.extensions + "])");
-          //console.log("Processing queue...");
+          console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
+          console.log("Queued requests:",QUEUED_REQS.length);
           while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());
        	}
        	$scope.wssock.onclose = function(e) {
-          console.log("Connection closed (wasClean = " + e.wasClean + ", code = " + e.code + ", reason = '" + e.reason + "')");
+          console.log("Closed (wasClean = " + e.wasClean + ", code = " + e.code + ", reason = '" + e.reason + "')");
           $scope.wssock = null;
        	}
        	$scope.wssock.onmessage = function(e) {
@@ -761,7 +760,11 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				$scope.wssock.send(JSON.stringify(query));	
         	} catch(e) {
         		// in CONNECTING state. //
-        		if(e.code === 11) QUEUED_REQS.push(JSON.stringify(query));
+        		if(e.code === 11) {
+        			QUEUED_REQS.push(JSON.stringify(query));
+        		} else {
+        			console.error(e)
+        		}
         	}
         }
 		$scope.setURL = function(obj) {
