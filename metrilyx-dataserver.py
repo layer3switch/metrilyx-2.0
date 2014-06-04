@@ -14,8 +14,9 @@ from twisted.python import log
 from autobahn.twisted.websocket import WebSocketServerFactory, listenWS
 
 from metrilyx.metrilyxconfig import config
-from metrilyx.dataserver.protocols import GraphServerProtocol, acceptedCompression
-from metrilyx.dataserver.dataproviders import TSDBDataProvider
+from metrilyx.dataserver.protocols import GraphServerProtocol, \
+					AnnoEventGraphServerProtocol, acceptedCompression
+from metrilyx.dataserver.dataproviders import TSDBDataProvider, AnnoEventDataProvider
 
 
 LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s]: %(message)s"
@@ -23,6 +24,11 @@ LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s]: %(message)s"
 class TSDBGraphServerProtocol(GraphServerProtocol):
 	dataprovider = TSDBDataProvider(config['dataproviders'][0])
 	timeout = config['dataproviders'][0]['timeout']
+
+class ESAnnoEventGraphServerProtocol(AnnoEventGraphServerProtocol):
+	dataprovider = TSDBDataProvider(config['dataproviders'][0])
+	timeout = config['dataproviders'][0]['timeout']	
+	annoEventDataProvider = AnnoEventDataProvider(config['dataproviders'][1])
 
 def spawn_websocket_server(uri, logLevel, externalPort=None):
 	if logLevel == "DEBUG":
@@ -36,7 +42,8 @@ def spawn_websocket_server(uri, logLevel, externalPort=None):
 		factory = WebSocketServerFactory(uri, debug=isDebug, 
 										externalPort=externalPort)
 
-	factory.protocol = TSDBGraphServerProtocol
+	#factory.protocol = TSDBGraphServerProtocol
+	factory.protocol = ESAnnoEventGraphServerProtocol
 	factory.setProtocolOptions(
 			perMessageCompressionAccept=acceptedCompression)
 	

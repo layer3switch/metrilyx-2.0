@@ -3,6 +3,31 @@ import logging
 
 log = logging.getLogger(__name__)
 
+def absoluteTime(relTime):
+	'''
+		Args:
+			relTime: relative time or absolute time in seconds
+		Returns relative/absoluteTime time in microseconds
+	'''
+	if type(relTime) != str or "-ago" not in relTime:
+		return relTime*1000000
+
+	val = int(relTime.split("-")[0][:-1])
+	unit = relTime.split("-")[0][-1]
+	
+	if unit == 's':
+		retVal = time.time() - val
+	elif unit == 'm':
+		retVal = time.time() - (val*60000000)
+	elif unit == 'h':
+		retVal = time.time() - (val*3600000000)
+	elif unit == 'd':
+		retVal = time.time() - (val*86400000000)
+	elif unit == 'w':
+		retVal = time.time() - (val*604800000000)
+	return retVal
+
+
 class MetrilyxSerie(object):
 	"""
 	This makes an object containing the original series data (request) with the tsdb

@@ -3,6 +3,9 @@ import re
 import json
 import logging
 
+from ..httpclients import AsyncHttpJsonRequest
+from transforms import absoluteTime
+
 from pprint import pprint
 
 logger = logging.getLogger(__name__)
@@ -51,7 +54,7 @@ class PerformanceDataProvider(BaseDataProvider):
 	def response_errback(self, error, graph_meta=None):
 		#for k,v in error.__dict__.items():
 		#	print k,v
-
+		logger.error(str(error))
 		try:
 			err_obj = json.loads(error.value.response)['error']
 		except Exception,e:
@@ -113,3 +116,29 @@ class TSDBDataProvider(PerformanceDataProvider):
 
 		url = "%s%s" %(base_url, self.__get_serie_query(query_obj))
 		return str(url)
+
+class AnnoEventDataProvider(BaseDataProvider):
+
+	def get_queries(self, graphMeta):
+		url = str("%s/%s/%s" %(self.uri, self.index, self.search_endpoint))
+		for serie in graphMeta['series']:
+			for data in serie['data']:
+				q = {'query':{'filtered':{'filter':{'bool':{'must':[{
+									'term': data['tags']}]}}}}}
+				if graphMeta.has_key('end'):
+					q['query']['filtered']['filter']['bool']['must'].append({
+						'range':{
+							'timestamp': {
+								'gte':absoluteTime(graphMeta['start']), 
+								'lte': absoluteTime(graphMeta['end'])
+							}
+						}
+					})
+				else:
+					q['query']['filtered']['filter']['bool']['must'].append({
+						'range':{
+							'timestamp': {'gte': absoluteTime(graphMeta['start'])}
+						}
+					})
+				yield (url, q)
+

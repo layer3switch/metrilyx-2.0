@@ -10,6 +10,7 @@ from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.websocket.compress import PerMessageDeflateOffer, \
 										PerMessageDeflateOfferAccept
 
+from ..httpclients import AsyncHttpJsonRequest
 from transforms import MetrilyxSerie
 
 logger = logging.getLogger(__name__)
@@ -100,3 +101,30 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 			del self.active_queries[k]
 	"""
 
+class AnnoEventGraphServerProtocol(GraphServerProtocol):
+	annoEventDataProvider = None
+
+	def ds_response_callback(self, response, url, graph_meta=None):
+		graph_meta['series'][0]['data'] = self.dataprovider.response_callback(
+															json.loads(response))
+		
+		#self.annoEventDataProvider.annoevents(graph_meta)
+		self.__fetchAnnoEvents(graph_meta)
+		
+		## apply metrilyx transforms
+		mserie = MetrilyxSerie(graph_meta['series'][0])
+		graph_meta['series'][0]['data'] = mserie.data
+		self.sendMessage(json.dumps(graph_meta))
+
+	def ae_response_callback(self, data):
+		try:
+			dct = json.loads(data)
+			#pprint(len(dct['hits']['hits']))
+		except Exception,e:
+			print e
+
+	def __fetchAnnoEvents(self, graphMeta):
+		for (url, meta) in self.annoEventDataProvider.get_queries(graphMeta):
+			a = AsyncHttpJsonRequest(uri=url, method='GET', body=meta)
+			a.addResponseCallback(self.ae_response_callback)
+			print meta

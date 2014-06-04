@@ -30,7 +30,7 @@ def jsonToFile(obj, filepath):
 			"error": str(e),
 			"message": str(e)
 			}
-
+			
 class FileModelStore(object):
 	def __init__(self, repo_path, log_hdl=None):
 		self.store_type = "file"

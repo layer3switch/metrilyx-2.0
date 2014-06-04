@@ -152,6 +152,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.rowSortOpts 			= dndconfig.row;
 		$scope.layoutSortOpts 		= dndconfig.layout;
 
+		$scope.annoEventTypes = ANNO_EVENT_TYPES;
+
 		// set default to relative time //
 		$scope.timeType = "1h-ago";
 		// relative time or 'absolute' //
@@ -605,6 +607,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		var QUEUED_REQS = [];
 		$scope.wssock = getWebSocket();
 
+		$scope.annoEventTypes 	= ANNO_EVENT_TYPES;
 		$scope.modelType 		= "adhoc";
 		$scope.timeType 		= "1h-ago";
 		$scope.editMode 		= " edit-mode";

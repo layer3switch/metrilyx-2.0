@@ -22,29 +22,60 @@
 			</select>
 		</span>
 	</div>
-	<div class="padtb10 padlr5 text-right" style="border-top: 1px solid #898989;">
+	<div class="padtb10 padlr5 text-right" style="border-top: 1px solid #898989;border-bottom: 1px solid #898989;">
+		<div class="padb10 small text-left">Thresholds:</div>
 		<div>
 			<div class="threshold-label" style="color:rgba(200,74,71,1);">Danger:</div>
-			<input type="text" ng-model="graph.thresholds.danger.max" style="width:94px" class="dark danger">
+			<input type="text" ng-model="graph.thresholds.danger.max" class="threshold-input dark danger">
 			<span class="small" style="color:#aaa"> to </span>
-			<input type="text" ng-model="graph.thresholds.danger.min" style="width:94px" class="dark danger">
+			<input type="text" ng-model="graph.thresholds.danger.min" class="threshold-input dark danger">
 		</div>
 		<div>
 			<div class="threshold-label" style="color:rgba(224,158,73,1);">Warn:</div>
-			<input type="text" ng-model="graph.thresholds.warning.max" style="width:94px" class="dark warning">
+			<input type="text" ng-model="graph.thresholds.warning.max" class="threshold-input dark warning">
 			<span class="small" style="color:#aaa"> to </span>
-			<input type="text" ng-model="graph.thresholds.warning.min" style="width:94px" class="dark warning">
+			<input type="text" ng-model="graph.thresholds.warning.min" class="threshold-input dark warning">
 		</div>
 		<div>
 			<div class="threshold-label" style="color:rgba(99,177,211,1);">Info:</div>
-			<input type="text" ng-model="graph.thresholds.info.max" style="width:94px" class="dark info">
+			<input type="text" ng-model="graph.thresholds.info.max" class="threshold-input dark info">
 			<span class="small" style="color:#aaa"> to </span>
-			<input type="text" ng-model="graph.thresholds.info.min" style="width:94px" class="dark info">
+			<input type="text" ng-model="graph.thresholds.info.min" class="threshold-input dark info">
+		</div>
+		<div ng-if="modelType!=='heatmap/'" class="set-threshold-btn pointer" ng-click="setPlotBands(graph)" title="Set thresholds">
+			<span>Apply Thresholds</span>
 		</div>
 	</div>
-	<div ng-if="modelType!=='heatmap/'" class="set-threshold-btn pointer" ng-click="setPlotBands(graph)" title="Set thresholds">
-		<span>Set Thresholds</span>
-	</div>
+	<div class="padtb10 padlr5">
+		<div class="padb15 padt5 small">Annotation Events :</div>
+		<div>
+	    	<div class="metric-control-label text-left marginb5">Tags :</div>
+	    	<ul style="margin-bottom:5px;padding-left:10px">
+				<li ng-repeat="(tk,tv) in graph.annoEvents.tags" class="padtb3">
+	    			<div class="input-group input-group-sm">
+	    				<span class="input-group-addon trans">{{tk}}</span>
+	    				<input ng-model="graph.annoEvents.tags[tk]" type="text" title="Edit tag values" class="form-control trans">
+	    				<span class="input-group-addon trans interactive pointer" ng-click="removeTag(graph.annoEvents.tags, tk);">		
+	    					<i class="glyphicon glyphicon-remove"></i>
+	    				</span>
+	    			</div>
+				</li>
+			</ul>
+	    </div>
+	    <div class="input-group input-group-sm padb10 padl10">
+	    	<input type="text" class="form-control dark" ng-model="graph.annoEvents.tags" tagkeyvalue style="border-color:#888 !important">
+	    	<span class="input-group-addon" style="background:none;color:#ccc;border-color:#888;">
+	    		<i class="glyphicon glyphicon-search"></i>
+	    	</span>
+	    </div>
+	    <div>
+			<div class="small">Types :</div>
+			<div class="pad5">
+				<span ng-repeat="evtType in annoEventTypes">
+					<input type="checkbox"><span class="padlr5 small">{{evtType}}</span>
+				</span>
+			</div>
+		</div>
 	</div>
 	<!--
 	<div class="text-right">

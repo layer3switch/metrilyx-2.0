@@ -1,13 +1,19 @@
 
 
 import httplib
-try:
-    import json
-except:
-    import simplejson as json
+import json
 
 import StringIO
 import gzip
+
+from zope.interface import implements
+
+from twisted.internet import reactor
+from twisted.web.client import Agent
+from twisted.web.http_headers import Headers
+from twisted.web.iweb import IBodyProducer
+from twisted.internet.defer import Deferred, succeed
+from twisted.internet.protocol import Protocol
 
 from pprint import pprint
 
@@ -146,6 +152,77 @@ class OpenTSDBClient(object):
             #print q
             return OpenTSDBResponse(hjc.GET("/api/query?"+q))
         
+class JsonBodyProducer(object):
+    implements(IBodyProducer)
+
+    def __init__(self, body):
+        self.body = json.dumps(body)
+        self.length = len(self.body)
+
+    def startProducing(self, consumer):
+        consumer.write(self.body)
+        return succeed(None)
+
+    def pauseProducing(self):
+        pass
+
+    def stopProducing(self):
+        pass
+
+class AsyncHttpResponseProtocol(Protocol):
+    def __init__(self, finished_deferred):
+        self.finished = finished_deferred
+        self.remaining = 1024 * 10
+        self.data = ""
+
+    def dataReceived(self, bytes):
+        if self.remaining:
+            self.data += bytes
+            self.remaining -= len(bytes[:self.remaining])
+
+    def connectionLost(self, reason):
+        #print 'Finished receiving body:', reason.getErrorMessage()
+        self.finished.callback(self.data)
+
+class AsyncHttpJsonRequest(object):
+    '''
+        Supports json request payload on both HTTP GET and POST
+    '''
+    def __init__(self, **kwargs):
+        # uri, method, body
+        for k,v in kwargs.items():
+            setattr(self, k, v)
+        if not kwargs.has_key('body'):
+            self.body = None
+        else:
+            self.body = JsonBodyProducer(self.body)
+        if not kwargs.has_key('method'):
+            self.method = 'GET'
+
+        self.agent = Agent(reactor)
+        d = self.agent.request(
+            self.method,
+            self.uri,
+            Headers({
+                'User-Agent': ['AsyncHttpJsonRequest'],
+                'Content-Type': ['application/json']    
+            }),
+            self.body)
+
+        d.addCallback(self.__readResponseCallback)
+        d.addErrback(self.__readErrorCallback)
+
+        self.__deferredResponse = Deferred()
+
+    def __readResponseCallback(self, response):
+        response.deliverBody(AsyncHttpResponseProtocol(self.__deferredResponse))
+        return self.__deferredResponse
+
+    def __readErrorCallback(self, error):
+        print error.getErrorMessage()
+
+    def addResponseCallback(self, callback):
+        self.__deferredResponse.addCallback(callback)
 
 
 
