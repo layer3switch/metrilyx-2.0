@@ -1,6 +1,6 @@
 
 function relativeToAbsoluteTime(timeStr) {
-	numUnit = timeStr.match(/([0-9]+)(m|h|w)-ago$/);
+	numUnit = timeStr.match(/([0-9]+)(m|h|d|w)-ago$/);
 	num = parseInt(numUnit[1]);
 	switch(numUnit[2]) {
 		case "m":
