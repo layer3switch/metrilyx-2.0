@@ -143,6 +143,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.podHtml 			= connectionPool.nextConnection()+"/partials/pod.html";
 		$scope.pageHeaderHtml 	= connectionPool.nextConnection()+"/partials/page-header.html";
 		$scope.jsonHtml 		= connectionPool.nextConnection()+"/partials/json.html";
+		$scope.graphControlsHtml= connectionPool.nextConnection()+"/partials/graph-controls.html";
 
 		$scope.metricListSortOpts 	= dndconfig.metricList;
 		$scope.graphSortOpts 		= dndconfig.graph;

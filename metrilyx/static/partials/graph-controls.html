@@ -1,0 +1,53 @@
+<div class="text-left graph-controls" style="color:#ccc">
+	<div class="padt10 padlr10 text-right" style="padding-bottom:8px;">
+		<span class="pointer interactive" onclick="$(this).parent().parent().parent().hide()">
+			<i class="glyphicon glyphicon-remove"></i>
+		</span>
+	</div>
+	<div class="pad5">
+	<div class="padtb10 padlr5" style="border-top: 1px solid #898989;">
+		<span class="padr10">
+			<span class="small">Graph Size :</span>
+			<select ng-model="graph.size" ng-change="reflow()" class="dark">
+				<option value="small">small</option>
+				<option value="medium">medium</option>
+				<option value="large">large</option>
+			</select>
+		</span>
+		<span class="padlr10">
+			<span class="small">Graph Type :</span>
+			<select ng-model="graph.graphType" class="dark"> 
+				<option value="line">line</option>
+				<option value="pie">pie</option>	
+			</select>
+		</span>
+	</div>
+	<div class="padtb10 padlr5 text-right" style="border-top: 1px solid #898989;">
+		<div>
+			<div class="threshold-label" style="color:rgba(200,74,71,1);">Danger:</div>
+			<input type="text" ng-model="graph.thresholds.danger.max" style="width:94px" class="dark danger">
+			<span class="small" style="color:#aaa"> to </span>
+			<input type="text" ng-model="graph.thresholds.danger.min" style="width:94px" class="dark danger">
+		</div>
+		<div>
+			<div class="threshold-label" style="color:rgba(224,158,73,1);">Warn:</div>
+			<input type="text" ng-model="graph.thresholds.warning.max" style="width:94px" class="dark warning">
+			<span class="small" style="color:#aaa"> to </span>
+			<input type="text" ng-model="graph.thresholds.warning.min" style="width:94px" class="dark warning">
+		</div>
+		<div>
+			<div class="threshold-label" style="color:rgba(99,177,211,1);">Info:</div>
+			<input type="text" ng-model="graph.thresholds.info.max" style="width:94px" class="dark info">
+			<span class="small" style="color:#aaa"> to </span>
+			<input type="text" ng-model="graph.thresholds.info.min" style="width:94px" class="dark info">
+		</div>
+	</div>
+	<div ng-if="modelType!=='heatmap/'" class="set-threshold-btn pointer" ng-click="setPlotBands(graph)" title="Set thresholds">
+		<span>Set Thresholds</span>
+	</div>
+	</div>
+	<!--
+	<div class="text-right">
+		<span class="interactive pointer" ng-click="reloadGraph(graph);" title="Refresh"><i class="glyphicon glyphicon-refresh" style="font-weight:bold"></i></span>
+	</div>-->
+</div>
