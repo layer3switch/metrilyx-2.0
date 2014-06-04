@@ -9,8 +9,11 @@ function relativeToAbsoluteTime(timeStr) {
 		case "h":
 			return num*3600;
 			break;
+		case "d":
+			return num*86400
+			break;
 		case "w":
-			return num*86400;
+			return num*604800;
 			break;
 		default:
 			break;
