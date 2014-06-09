@@ -59,7 +59,9 @@ The provided install script will work with both **RedHat** and **Debian** based 
 - Issue the following command to install the application:
 	
 	$ git clone https://github.com/Ticketmaster/metrilyx-2.0.git
+	
 	$ cd metrilyx-2.0
+	
 	$ ./install.sh app
 
 Assuming all required OS packages are installed, the script will install the needed python modules, nginx configs depending on your distribution and prompt you to edit the metrilyx configuration file.
@@ -89,7 +91,8 @@ A sample configuration file has been provided.  The configuration file is in JSO
 			"uri":"http://tsdb.example.com",
 			"query_endpoint": "/api/query",
 			"search_endpoint": "api/suggest",
-			"suggest_limit": 100
+			"suggest_limit": 50,
+			"timeout": 180
 		}],
 		"databases":[{
 			"ENGINE": "django.db.backends.sqlite3",
