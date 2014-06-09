@@ -28,6 +28,7 @@ install_app() {
 		chmod g+w ${APP_HOME}/celerybeat-schedule.db
 		chgrp celery ${APP_HOME}/celerybeat-schedule.db
 	fi
+	[ -f "${APP_HOME}/metrilyx.sqlite3" ] && chown ${HTTP_USER} ${APP_HOME}/metrilyx.sqlite3
 }
 setup_startup_scripts() {
 	if [[ -f "/etc/redhat-release" ]]; then

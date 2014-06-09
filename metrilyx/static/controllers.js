@@ -89,7 +89,7 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 					jobj = JSON.parse(evt.target.result);
 					if($scope.modelType === "heatmap/") {
 						Heatmap.saveModel(jobj, function(rslt) {
-							setGlobalAlerts({message: 'Saved '+rslt._id});
+							setGlobalAlerts({'message': 'Saved '+rslt._id});
 							flashAlertsBar();
 							document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
 						});
@@ -676,10 +676,15 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 							'aggregator': met[0],
 							'rate': rate,
 							'metric': met[met.length-1],
+<<<<<<< HEAD
 							'tags': commaSepStrToDict(arr[2],":")
+=======
+							'tags': commaSepStrToDict(arr[2], ":")
+>>>>>>> 21032e801fc52c0ffdfafd72f28d6e7183d7197c
 						}
 					});
 				}
+				//console.log(graphModel);
 				$scope.graph = graphModel;
 				$scope.reloadGraph();
 			} else {

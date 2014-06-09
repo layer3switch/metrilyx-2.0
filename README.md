@@ -3,7 +3,6 @@ Metrilyx v2.2.0
 Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database used to store large amounts of data.  It allows for analyzing, cross cutting and viewing of time series data in a simple manner.
 
 #### Features:
-##### v2.2.0
 - Major performance improvements.
 	- Data delivery system now completely **asynchronous**.
 	- Data provided through **websockets**.
@@ -12,6 +11,7 @@ Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database us
 - Support for **distributed** and **HA** setup.
 
 ##### v2.1.0
+- Page Models now stored in a database rather than flat files.
 - Ability to group pages based on tags.
 - Ability to generate heatmaps against a metric.
 - Ability to import and export pages.
@@ -20,9 +20,9 @@ Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database us
 - Various performance improvements and bug fixes.
 
 #### Screenshots
-##### Overview
+##### Adhoc Graphs
 ![Alt text](metrilyx/static/imgs/readme/screenshot_1.png)
-##### Page listing
+##### Dashboards
 ![Alt text](metrilyx/static/imgs/readme/screenshot_2.png)
 ##### Edit Mode
 ![Alt text](metrilyx/static/imgs/readme/screenshot_3.png)
@@ -37,7 +37,7 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 ##### Debian:
 	apt-get install libuuid1 uuid-runtime nginx python-setuptools python-dev libpython-dev make mongodb
 
-#### Python Packages:
+### Python Packages:
 	uuid
 	django
 	djangorestframework
@@ -112,12 +112,12 @@ A sample configuration file has been provided.  The configuration file is in JSO
 		},
 		"debug": false
 	}
-	
+
 ##### tsdb.uri
 OpenTSDB http host
 
 ##### tsdb.port
-OpenTSDB http port (default: 4242)
+OpenTSDB port
 
 ##### tsdb.suggest_limit
 OpenTSDB suggest max result limit. 
@@ -179,7 +179,7 @@ You can import models from the UI but you may also import them via CLI.  You can
 
 	curl -u admin:metrilyx http://localhost/api/graphmaps -H "Content-Type:application/json" -d @<path/to/json/model>
 
-The above will import a graphmap (i.e. page).  To import a heatmap you can use the following endpoint:
+This will import a graphmap (i.e. page).  To import a heatmap you can use the following endpoint:
 
 	curl -u admin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @<path/to/heatmap/model>
 	
