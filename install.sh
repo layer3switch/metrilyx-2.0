@@ -56,6 +56,8 @@ install_pydeps() {
 	for pypkg in $(cat PYPACKAGES); do
 		pip list | grep ${pypkg} || pip install ${pypkg};
 	done;
+	pip uninstall autobahn;
+	pip install autobahn;
 }
 backup_curr_install() {
 	clean;
