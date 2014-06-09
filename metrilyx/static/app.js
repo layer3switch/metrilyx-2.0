@@ -140,6 +140,45 @@ angular.module('filters',[]).
 			return cnt;
 		}
 	});
+app.directive('eventTypes', function() {
+	return {
+		restrict: 'A',
+		require: '?ngModel',
+		link: function(scope, elem, attrs, ctrl) {
+			if(!ctrl) return;
+			ctrl.$formatters.push(function(modelValue){return "";});
+			ctrl.$parsers.unshift(function(viewValue){return ctrl.$modelValue;});
+			$(elem).autocomplete({
+				source: ANNO_EVENT_TYPES,
+				messages: {
+	            	noResults: '',
+	            	results: function() {}
+	        	},
+	        	minLength:1,
+	        	select: function( event, ui ) {
+	        		console.log(ctrl.$modelValue);
+	        		for(var i in ctrl.$modelValue) {
+	        			if(ctrl.$modelValue[i] === ui.item.value) {
+	        				$(elem).val('');
+	        				event.preventDefault();	
+	        				return;	
+	        			}
+	        		}
+	        		scope.$apply(ctrl.$modelValue.push(ui.item.value));
+	        		$(elem).val('');
+	        		event.preventDefault();
+	        	}
+			});
+			$(elem).keyup(function(e) {
+				if(e.keyCode === 13) {
+					// clear input & close autocomplete on 'enter' //
+					$(elem).val('');
+					$(elem).autocomplete('close');	
+				}
+			});
+		}
+	};
+});
 app.directive('tagkeyvalue', function() {
 	return {
 		restrict: 'A',

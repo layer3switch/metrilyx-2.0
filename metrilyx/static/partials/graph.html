@@ -1,113 +1,71 @@
-	<div>
-		<div class="input-group padlr5" style="width:100%;">
-			<!--<a ng-if="graph.graphType!='pie'" href="javascript:void(0)" data-target="#{{graph._id}}-thresholds" data-toggle="collapse" class="input-group-addon nobg interactive" title="Thresholds">
-				<i class="glyphicon glyphicon-chevron-down"></i>
+<div class="graph-container">
+	<div class="graph-face front{{editMode}}">
+		<div class="input-group input-group-sm" style="width:100%">
+			<a href="javascript:void(0)" class="input-group-addon nobg interactive" onclick="$(this).next().show()">
+				<i class="glyphicon glyphicon-cog" style="font-size:14px;"></i>
 			</a>
-			-->
-			<span class="input-group-addon nobg">
-				<a href="javascript:void(0)" title="Configuration" class="interactive" style="color:#666;" onclick="$(this).next().show();">
-					<i class="glyphicon glyphicon-cog"></i>
-				</a>
-				<div ng-include="graphControlsHtml" style="display:none"></div>
-			</span>
+			<div ng-include="graphControlsHtml" style="display:none"></div>
 			<input type="text" ng-model="graph.name" class="edit-comp{{editMode}} form-control" placeholder="Graph Name" disabled="true">
-			<span class="input-group-addon nobg">
-				<a href="javascript:void(0)" title="Remove Graph" class="interactive graph-rm-btn edit-comp{{editMode}}" style="color:#666;" ng-click="pod.graphs.splice(pod.graphs.indexOf(graph),1);reflow();">
-					<i class="glyphicon glyphicon-trash"></i>
-				</a>
+			<span class="input-group-addon nobg interactive" ng-click="reloadGraph(graph);" title="Refresh">
+				<i class="glyphicon glyphicon-refresh" style="font-size:12px;color:#666;font-weight:bold"></i>
 			</span>
 		</div>
-		<!--
-		<div ng-if="graph.graphType!='pie'" class="marginlr5 marginb5 collapse" ng-include="thresholdsHtml" id="{{graph._id}}-thresholds"></div>
-		<div class="padlr10 padt5 padb10 pod-controls edit-comp{{editMode}}">
-			<div class="row" style="margin:0;color:#666;font-size:12px;">
-				<div class="col-md-6 text-left" title="Graph Type">
-					<span style="color:#999">Type :</span>
-					<select ng-model="graph.graphType" class="select-input"> 
-						<option value="line">line</option>
-						<option value="pie">pie</option>	
-					</select>
-				</div>
-				<div class="col-md-6 text-right" title="Vertical graph size">
-					<span>
-						<span style="color:#999">Size :</span>
-						<select ng-model="graph.size" ng-change="reflow()" class="select-input">
-							<option value="small">small</option>
-							<option value="medium">medium</option>
-							<option value="large">large</option>
+			<!--
+			<div ng-if="graph.graphType!='pie'" class="marginlr5 marginb5 collapse" ng-include="thresholdsHtml" id="{{graph._id}}-thresholds"></div>
+			<div class="padlr10 padt5 padb10 pod-controls edit-comp{{editMode}}">
+				<div class="row" style="margin:0;color:#666;font-size:12px;">
+					<div class="col-md-6 text-left" title="Graph Type">
+						<span style="color:#999">Type :</span>
+						<select ng-model="graph.graphType" class="select-input"> 
+							<option value="line">line</option>
+							<option value="pie">pie</option>	
 						</select>
-					</span>
-					<span class="interactive pointer padl10" ng-click="reloadGraph(graph);" title="Refresh"><i class="glyphicon glyphicon-refresh" style="font-weight:bold"></i></span>
+					</div>
+					<div class="col-md-6 text-right" title="Vertical graph size">
+						<span>
+							<span style="color:#999">Size :</span>
+							<select ng-model="graph.size" ng-change="reflow()" class="select-input">
+								<option value="small">small</option>
+								<option value="medium">medium</option>
+								<option value="large">large</option>
+							</select>
+						</span>
+						<span class="interactive pointer padl10" ng-click="reloadGraph(graph);" title="Refresh"><i class="glyphicon glyphicon-refresh" style="font-weight:bold"></i></span>
+					</div>
 				</div>
 			</div>
-		</div>
+			-->
+			<!--
+		<div ng-if="editMode===' edit-mode'" ng-include="queryEditorHtml" class="text-center"></div>
 		-->
-	</div>
-	<div ng-if="editMode===' edit-mode'" ng-include="queryEditorHtml" class="text-center"></div>
-	<div class="graph {{graph.size}} text-center animated"  style="width:100%" data-graph-id="{{graph._id}}" ui-sortable ng-model="graph.series">
-		<table class='gif-loader-table' style="color:#ccc"><tr><td>
-			Drag metrics here from search
-		</td></tr></table>
-	</div>
-	<!-- graph footer -->
-	<div class="small padtb5 row" style="margin:0;background-color:none">
-		<div class="col-md-2">
-			<span class="btn-group dropup" style="position:relative;top:3px;">
-				<span class="metric-loaded-btn interactive" data-toggle="dropdown" title="Metrics successfully loaded">{{graph|loadedSeries}} / {{graph.series.length}}</span>
-				<ul class="dropdown-menu" style="margin-bottom:5px;margin-top:5px;font-size:11px;">
-					<li ng-repeat="serie in graph.series" ng-attr-class="padlr10 padtb5 {{isSerieLoaded(graph, serie) || 'metric-not-loaded' }}">{{serie.query|metricQuery}}</li>
-		        </ul>
-	        </span>
-        </div>
-        <div class="col-md-10">
-        	<span data-graph-status="{{graph._id}}"></span>
-        </div>
-	</div>
-	<!--
-	<div class="graph-controls edit-comp{{editMode}} graph-metrics-panel collapse">
-		<div ng-repeat="metric in graph.series">
-			<div class="pad10" style="overflow-x:hidden;text-wrap:none;white-space:nowrap">
-				<span class="metric-control-header">{{metric.query.metric}}</span>
-				<a href="javascript:void(0)" class="pull-right" ng-click="graph.series.splice(graph.series.indexOf(metric), 1);">
-					<i class="glyphicon glyphicon-trash icon-lite"></i>
+		<div class="graph {{graph.size}} text-center animated"  style="width:100%" data-graph-id="{{graph._id}}" ui-sortable ng-model="graph.series">
+			<table class='gif-loader-table' style="color:#ccc"><tr><td>
+				Drag metrics here from search
+			</td></tr></table>
+		</div>
+		<!-- graph footer -->
+		<div class="small padtb5 row" style="margin:0;background-color:none">
+			<div class="col-md-2">
+				<span class="btn-group dropup" style="position:relative;top:3px;">
+					<span class="metric-loaded-btn interactive" data-toggle="dropdown" title="Metrics successfully loaded">{{graph|loadedSeries}} / {{graph.series.length}}</span>
+					<ul class="dropdown-menu" style="margin-bottom:5px;margin-top:5px;font-size:11px;">
+						<li ng-repeat="serie in graph.series" ng-attr-class="padlr10 padtb5 {{isSerieLoaded(graph, serie) || 'metric-not-loaded' }}">{{serie.query|metricQuery}}</li>
+			        </ul>
+		        </span>
+	        </div>
+	        <div class="col-md-10">
+	        	<span data-graph-status="{{graph._id}}"></span>
+	        </div>
+		</div>
+
+		<div class="graph-face back{{editMode}}">
+			<div ng-include="queryEditorHtml" style="width:100%"></div>
+			<div class="query-editor-footer">
+				<a href="javascript:void(0)" title="Remove Graph" class="btn-danger graph-rm-btn edit-comp{{editMode}}" style="font-size:12px;" ng-click="pod.graphs.splice(pod.graphs.indexOf(graph),1);reflow();">
+					<i class="glyphicon glyphicon-trash" style="font-weight:bold"></i>
+					<span class="pad5">Delete</span>
 				</a>
 			</div>
-			<div class="padl15 padr10 padb10">
-				<div>
-					<span class="metric-control-label">aggregator</span>
-					<span class="select-container left-caret aggr">
-						<span class="caret"></span>
-						<select ng-model="metric.query.aggregator" class="dark select-input">
-							<option value="min">min</option>
-							<option value="avg">avg</option>
-							<option value="sum">sum</option>
-							<option value="max">max</option>
-						</select>
-					</span>
-					<span class="pull-right">
-						<span class="metric-control-label">rate</span>
-						<input type="checkbox" ng-model="metric.query.rate">
-					</span>
-				</div>
-				<div style="margin-top:4px">
-					<span class="input-group input-group-sm">
-						<div class="input-group-addon nobg metric-control-label" title="Series name shown in legend">alias</div>
-						<input type="text" ng-model="metric.alias" class="form-control dark">
-					</span>
-				</div>
-				<div style="margin-top:4px">
-					<span class="input-group input-group-sm">
-						<span class="input-group-addon nobg metric-control-label">tags</span>
-						<input type="text" class="form-control dark" ng-model="metric.query.tags" key-value-pairs="true">
-					</span>
-				</div>
-				<div style="margin-top:4px">
-					<span class="input-group input-group-sm">
-						<span class="input-group-addon nobg metric-control-label" title="Function applied to each datapoint">yTransform</span>
-						<input type="text" ng-model="metric.yTransform" class="form-control dark" placeholder="lambda x: x/1024">
-					</span>
-				</div>
-			</div>
 		</div>
 	</div>
-	-->
+</div>

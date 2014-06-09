@@ -221,8 +221,8 @@ class AsyncHttpJsonRequest(object):
     def __readErrorCallback(self, error):
         print error.getErrorMessage()
 
-    def addResponseCallback(self, callback):
-        self.__deferredResponse.addCallback(callback)
+    def addResponseCallback(self, callback, *cbargs):
+        self.__deferredResponse.addCallback(callback, *cbargs)
 
 
 

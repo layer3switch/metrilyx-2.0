@@ -119,26 +119,29 @@ class TSDBDataProvider(PerformanceDataProvider):
 
 class AnnoEventDataProvider(BaseDataProvider):
 
-	def get_queries(self, graphMeta):
+	def get_queries(self, graph):
 		url = str("%s/%s/%s" %(self.uri, self.index, self.search_endpoint))
-		for serie in graphMeta['series']:
-			for data in serie['data']:
-				q = {'query':{'filtered':{'filter':{'bool':{'must':[{
-									'term': data['tags']}]}}}}}
-				if graphMeta.has_key('end'):
-					q['query']['filtered']['filter']['bool']['must'].append({
-						'range':{
-							'timestamp': {
-								'gte':absoluteTime(graphMeta['start']), 
-								'lte': absoluteTime(graphMeta['end'])
-							}
-						}
-					})
-				else:
-					q['query']['filtered']['filter']['bool']['must'].append({
-						'range':{
-							'timestamp': {'gte': absoluteTime(graphMeta['start'])}
-						}
-					})
-				yield (url, q)
+		#'should': [{'term':{'type': 'ACL'}}],
+		q = {
+			"query":{"filtered":{"filter":{"bool":{		
+					"must": [{"term": graph['annoEvents']['tags']}]
+			}}}},
+			"sort": "timestamp"
+		}
+
+		if graph.has_key('end'):
+			q['query']['filtered']['filter']['bool']['must'].append({
+				'range':{'timestamp': {
+						'gte':absoluteTime(graph['start']), 
+						'lte': absoluteTime(graph['end'])
+					}
+				}
+			})
+		else:
+			q['query']['filtered']['filter']['bool']['must'].append({
+				'range':{
+					'timestamp': {'gte': absoluteTime(graph['start'])}
+				}
+			})
+		yield (url, q)
 

@@ -27,6 +27,25 @@ def absoluteTime(relTime):
 		retVal = time.time() - (val*604800000000)
 	return retVal
 
+class EventannoSerie(object):
+	def __init__(self, serie):
+		self._serie = serie
+		self.__microToMilli()
+
+	@property
+	def data(self):
+		return [ {
+			'x': s['timestamp'],
+			'text': s['message'],
+			'title': s['type']
+		} for s in self._serie ]
+
+	
+	def __microToMilli(self):
+		for s in self._serie:
+			s['timestamp'] = s['timestamp']/1000
+
+
 
 class MetrilyxSerie(object):
 	"""

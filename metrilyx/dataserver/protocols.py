@@ -11,7 +11,7 @@ from autobahn.websocket.compress import PerMessageDeflateOffer, \
 										PerMessageDeflateOfferAccept
 
 from ..httpclients import AsyncHttpJsonRequest
-from transforms import MetrilyxSerie
+from transforms import MetrilyxSerie, EventannoSerie
 
 logger = logging.getLogger(__name__)
 
@@ -79,18 +79,25 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		response = self.dataprovider.response_errback(error, graph_meta)
 		self.sendMessage(json.dumps(response))
 
-	def __submit_parallel_queries(self, req_obj):
+
+	def submitPerfQueries(self, req_obj):
 		for (url, meta) in self.dataprovider.get_queries(req_obj):
 			d = getPage(url, timeout=self.timeout)
 			d.addCallback(self.ds_response_callback, url, meta)
 			d.addErrback(self.ds_response_errback, url, meta)
+
+	def submit_parallel_queries(self, req_obj):
+		'''
+		This gets called when a message is recieved
+		'''
+		self.submitPerfQueries(req_obj)
 
 	def onMessage(self, payload, isBinary):
 		request_obj = self.checkMessage(payload, isBinary)
 		if not request_obj.get("error"):
 			## all checks passed - proceed
 			logger.info("Request %(_id)s start=%(start)s" %(request_obj))
-			self.__submit_parallel_queries(request_obj)
+			self.submit_parallel_queries(request_obj)
 		else:
 			logger.error("Invalid request object: %s" %(str(request_obj)))
 
@@ -104,27 +111,37 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 class AnnoEventGraphServerProtocol(GraphServerProtocol):
 	annoEventDataProvider = None
 
-	def ds_response_callback(self, response, url, graph_meta=None):
-		graph_meta['series'][0]['data'] = self.dataprovider.response_callback(
-															json.loads(response))
-		
-		#self.annoEventDataProvider.annoevents(graph_meta)
-		self.__fetchAnnoEvents(graph_meta)
-		
-		## apply metrilyx transforms
-		mserie = MetrilyxSerie(graph_meta['series'][0])
-		graph_meta['series'][0]['data'] = mserie.data
-		self.sendMessage(json.dumps(graph_meta))
+	def submit_parallel_queries(self, req_obj):
+		'''
+		This gets called when a message is recieved
+		'''
+		self.submitPerfQueries(req_obj)
+		self.__fetchAnnoEvents(req_obj)
 
-	def ae_response_callback(self, data):
+	def ae_response_callback(self, data, query, graph):
 		try:
 			dct = json.loads(data)
-			#pprint(len(dct['hits']['hits']))
+			if dct.has_key('error'):
+				print dct['error']
+				return
+			eas = EventannoSerie([ h['_source'] for h in dct['hits']['hits'] ])
+			if len(eas.data) < 1:
+				return
+			out = {
+				'_id': graph['_id'],
+				'annoEvents': graph['annoEvents'],
+				}
+			out['annoEvents']['data'] = eas.data
+			self.sendMessage(json.dumps(out))
 		except Exception,e:
-			print e
+			print "ERROR", e
 
 	def __fetchAnnoEvents(self, graphMeta):
-		for (url, meta) in self.annoEventDataProvider.get_queries(graphMeta):
-			a = AsyncHttpJsonRequest(uri=url, method='GET', body=meta)
-			a.addResponseCallback(self.ae_response_callback)
-			print meta
+		#if len(graphMeta['annoEvents']['types']) < 1 or \
+		#			len(graphMeta['annoEvents']['tags'].keys()) < 1: 
+		if len(graphMeta['annoEvents']['tags'].keys()) < 1:
+			return
+		for (url, query) in self.annoEventDataProvider.get_queries(graphMeta):
+			a = AsyncHttpJsonRequest(uri=url, method='GET', body=query)
+			a.addResponseCallback(self.ae_response_callback, query, graphMeta)
+			#print meta

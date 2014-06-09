@@ -137,7 +137,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
 		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit-panel.html";
 		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
-		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/query-editor.html";
+		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/query-editor2.html";
 		$scope.graphHtml 		= connectionPool.nextConnection()+"/partials/graph.html";
 		$scope.heatGraphHtml 	= connectionPool.nextConnection()+"/partials/heat-graph.html"
 		$scope.podHtml 			= connectionPool.nextConnection()+"/partials/pod.html";
@@ -450,7 +450,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				_id: graphObj._id,
 				graphType: graphObj.graphType,
 				tags: $scope.globalTags,
-				thresholds: graphObj.thresholds
+				thresholds: graphObj.thresholds,
+				annoEvents: graphObj.annoEvents
 			};
 			$.extend(q, $scope.getTimeWindow(),true);
 			return q;
@@ -733,7 +734,8 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				_id: graphObj._id,
 				graphType: graphObj.graphType,
 				tags: {},
-				thresholds: graphObj.thresholds
+				thresholds: graphObj.thresholds,
+				annoEvents: graphObj.annoEvents
 			};
 			$.extend(q, $scope.getTimeWindow(),true);
 			return q;

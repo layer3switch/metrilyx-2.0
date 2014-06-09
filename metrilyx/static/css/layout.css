@@ -147,6 +147,9 @@ input.pad0 {
 .padb10 {
 	padding-bottom: 10px;
 }
+.padb12 {
+	padding-bottom: 12px;
+}
 .padb15 {
 	padding-bottom: 15px;
 }
@@ -176,6 +179,9 @@ input.pad0 {
 }
 .padl5 {
 	padding-left: 5px;
+}
+.padl7 {
+	padding-left: 7px;
 }
 .padl8 {
 	padding-left: 8px;
@@ -213,6 +219,10 @@ input.pad0 {
 .padtb10 {
 	padding-bottom: 10px;
 	padding-top: 10px;
+}
+.padtb12 {
+	padding-bottom: 12px;
+	padding-top: 12px;
 }
 .padtb20 {
 	padding-bottom: 20px;

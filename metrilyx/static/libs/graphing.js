@@ -31,13 +31,73 @@ MetrilyxGraph.prototype.applyData = function() {
         renderGraph(this.graphdata);
     }
 }
+function MetrilyxAnnotation(obj) {
+    this._data = obj;
+}
+MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
+    var ndata = [];
+    for(var i in chrt.series[serieIdx].data) {
+        if(chrt.series[serieIdx].data[i].x < this._data.annoEvents.data[0].x) {
+            ndata.push({
+                x: chrt.series[serieIdx].data[i].x,
+                title: chrt.series[serieIdx].data[i].title,
+                text: chrt.series[serieIdx].data[i].text
+            });
+        }
+        break;
+    }
+    for(var i in this._data.annoEvents.data) {
+        ndata.push(this._data.annoEvents.data[i]);
+    }
+    chrt.series[serieIdx].setData(ndata);
+}
+MetrilyxAnnotation.prototype.newChart = function() {
+    var copts = new ChartOptions(this._data,true);
+    var opts = copts.lineChartDefaults();
+    
+    Highcharts.setOptions({ global: { useUTC:false } });
+    Highcharts.seriesTypes.line.prototype.drawPoints = (function 
+    (func) {
+        return function () {
+            return false;
+        };
+    } (Highcharts.seriesTypes.line.prototype.drawPoints));
+    $("[data-graph-id='"+this._data._id+"']").highcharts("StockChart",opts);
+}
+MetrilyxAnnotation.prototype.applyData = function() {
+    var chrt = $("[data-graph-id='"+this._data._id+"']").highcharts();
+    if(chrt === undefined) {
+        this.newChart();
+    } else {   
+        var idx = -1;
+        for(var i in chrt.series) {
+            if(chrt.series[i].type === 'flags') {
+                idx = i;
+                break;
+            }
+        }
+        if(idx < 0) {
+            var sf = new SeriesFormatter(this._data.annoEvents.data);
+            chrt.addSeries(sf.eventannoSerie());
+        } else {
+            this.appendData(chrt, idx);
+        }
+    }
+}
+
 /*
  * Preps data from server (metrilyx graph objects) for highcharts
  */
-function ChartOptions(metGraphObj) {
+function ChartOptions(metGraphObj,flagSeries) {
     this._graph = metGraphObj;
-    //console.log(this._graph.series);
-    this._sfmt = new SeriesFormatter(this._graph.series);
+    if(flagSeries) {
+        this.flagSeries = true;
+        this._sfmt = new SeriesFormatter(this._graph.annoEvents.data);
+    } else {
+        this.flagSeries = false;
+        //console.log(this._graph.series);
+        this._sfmt = new SeriesFormatter(this._graph.series);
+    }
 }
 ChartOptions.prototype.chartDefaults = function() {
     return {
@@ -79,16 +139,26 @@ ChartOptions.prototype.pieChartDefaults = function() {
             spacingBottom: 5
         },
         tooltip: {
-            pointFormat: '<b>{point.y}</b>'
+            useHTML: true,
+            shared: true,
+            shadow: false,
+            borderColor: '#666',
+            backgroundColor: 'rgba(90,90,90,0.9)',
+            headerFormat: '<span>{point.key}</span><br/>',
+            pointFormat: '<table style="margin-top:5px;font-weight:bold;font-size:11px;color:#ddd"><tr><td>{point.y}</td></tr></table>',
+            style: {
+                color: '#ddd',
+                fontSize: '11px'
+            }
         },
         plotOptions: {
             pie: {
+                innerSize: 40,
                 allowPointSelect: true,
                 cursor: 'pointer',
                 dataLabels: {
                     enabled: true,
                     format: '<b>{point.name}</b>: {point.percentage:.1f} %'
-                    /*format: "<b>{point.value}</b>"*/
                 }
             }
         }
@@ -113,16 +183,16 @@ ChartOptions.prototype.__plotBands = function() {
     };
 }
 ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
-    opts = this.chartDefaults();
+    var opts = this.chartDefaults();
     $.extend(opts, {
         chart: {
-            spacingTop: 0,
+            spacingTop: 5,
+            spacingBottom: 5,
             zoomType: 'xy',
             borderRadius: 0,
             borderWidth: 0,
             spacingLeft: 5,
             spacingRight: 5,
-            spacingBottom: 5,
         },
         legend: {
             enabled: true,
@@ -134,7 +204,9 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
                 fontSize: "10px",
                 fontWeight: "normal",
             },
-            maxHeight: 40,
+            maxHeight: 50,
+            margin: 5,
+            padding:5,
             navigation: {
                 arrowSize: 9,
                 style: {
@@ -145,9 +217,31 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
         },
         tooltip: {
             crosshairs: [true,true],
+            borderColor: '#666',
+            backgroundColor: 'rgba(90,90,90,0.9)',
             valueDecimals: 2,
             shadow: false,
-            animation: false
+            animation: false,
+            useHTML: true,
+            formatter: function() {
+                if(this.point) {
+                    var s = '<span style="color:#ddd"><small>'+ (new Date(this.x)).toDateString() +'</small><br>';
+                    s += "<span style='padding-top:7px;font-size:11px;'><span style='color:"+this.point.series.color+"'>&#8226; </span>" + this.point.text +"</span></span>";
+                } else {
+                    var s = '<small style="color:#ddd">'+ (new Date(this.x)).toDateString() +'</small>';
+                    s += '<table style="font-size:11px;color:#ddd;min-width:220px;margin-top:5px;">';
+                    var sortedPoints = this.points.sort(function(a, b){
+                        return ((a.y > b.y) ? -1 : ((a.y < b.y) ? 1 : 0));
+                    });
+                    $.each(sortedPoints , function(i, point) {
+                        //&#8226; 
+                        s += '<tr><td style="color:'+point.series.color+'">'+ point.series.name +'</td>';
+                        s += '<td style="text-align:right;padding-left:3px">'+ (point.y).toFixed(2) + '</td></tr>';
+                    });
+                    s += '</table>';
+                }
+                return s;
+            }
         },
         scrollbar: {
             enabled: false
@@ -173,10 +267,15 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
         xAxis: {
             gridLineWidth: 1,
             gridLineColor: "#ccc",
+            opposite: true
         }
     }, extraOpts, true);
     opts.yAxis = this.__plotBands();
-    opts.series = this._sfmt.lineSeries();
+    if(this.flagSeries) {
+        $.extend(opts,{'series':this._sfmt.eventannoSerie()},true);
+    } else {
+        $.extend(opts,{'series':this._sfmt.lineSeries()},true);
+    }
     return opts;
 }
 function SeriesFormatter(metSeries) {
@@ -199,6 +298,21 @@ SeriesFormatter.prototype.seriesTags = function() {
         }
     }
     return tags;
+}
+SeriesFormatter.prototype.eventannoSerie = function() {
+    return {
+        name:'Annotations',
+        type:'flags',
+        data: this.metSeries,
+        shape: 'squarepin',
+        fillColor: '#428bca',
+        color: '#428bca',
+        style: {
+            color: '#f0f0f0'
+        },
+        y: 7,
+        stackDistance: 20
+    };
 }
 SeriesFormatter.prototype.lineSeries = function() {
     out = [];
@@ -398,7 +512,6 @@ function graphing_upsertSeries(args) {
             var found = false;
             for(var d in hcg.series[0].options.data) {
                 if(equalObjects(args.series[j].data[0].tags, hcg.series[0].options.data[d].tags)&&args.series[j].data[0].alias==hcg.series[0].options.data[d].name) {
-                    //console.log(args.series[j].data[0].alias, hcg.series[0].options.data[d].name);
                     found = true;        
                     if(Object.prototype.toString.call(args.series[j].data) === '[object Object]') {
                         if(args.series[j].data.error) {
@@ -407,7 +520,7 @@ function graphing_upsertSeries(args) {
                             break;
                         }
                     }
-                    hcg.series[0].options.data.splice(d,1,
+                    hcg.series[0].options.data.splice(d, 1,
                         highchartsSeries(args.series[j].data[0], hcg.series[0].options.data[d].query, "pie"));
                     hcg.series[0].setData(hcg.series[0].options.data);
                     break;

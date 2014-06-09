@@ -197,7 +197,8 @@ angular.module('graphing', [])
 						_id: ngModel.$modelValue._id,
 						series: ngModel.$modelValue.series,
 						graphType: ngModel.$modelValue.graphType,
-						tags: scope.globalTags
+						tags: scope.globalTags,
+						annoEvents: ngModel.$modelValue.annoEvents
 					};
 				}
 				function getUpdates() {
@@ -215,6 +216,10 @@ angular.module('graphing', [])
 
 				function processRecievedData(event) {
 					var data = event.detail;
+					if(data.annoEvents.data) {
+						anno = new MetrilyxAnnotation(data);
+						anno.applyData();
+					}
 					tWin = scope.getTimeWindow();
 					var mg = new MetrilyxGraph(data, tWin.start, tWin.end);
 					mg.applyData();
