@@ -1,3 +1,36 @@
+// TODO below here needs fixing //
+function highchartsSeries(dataObj, dataQuery, graphType) {
+    if(graphType === 'pie') {
+        return {
+            name: dataObj.alias,
+            y: dataObj.dps[0][1],
+            tags: dataObj.tags,
+            query: dataQuery
+        };
+    } else {
+        return {
+            lineWidth: 1,
+            name: dataObj.alias,
+            data: dataObj.dps,
+            query: dataQuery,
+            tags: dataObj.tags // for tracking uniqueness of series //
+        };
+    }
+}
+
+function MetrilyxGraph(graphObj, timeWin) {
+    this.start = timeWin.start;
+    this.end = timeWin.end;
+    this.graphdata = graphObj;
+    this.uigraph = $("[data-graph-id='"+this.graphdata._id+"']").highcharts();
+}
+MetrilyxGraph.prototype.applyData = function() {
+    if(this.uigraph === undefined) {
+        graphing_newGraph(this.graphdata);
+    } else {
+        renderGraph(this.graphdata);
+    }
+}
 /*
  * Preps data from server (metrilyx graph objects) for highcharts
  */
@@ -190,12 +223,8 @@ SeriesFormatter.prototype.pieSeries = function() {
             if(this.metSeries[i].data[d].dps.length <=0) {
                 console.warn("(pie) No data for:", this.metSeries[i].alias);
             } else {
-                /* 
-                 * Use the first datapoint rather than last as 
-                 * the tail end of tsd data is inaccurate.
-                 * i.e dps[0][1]
-                 */
-                pieData.push([ this.metSeries[i].data[d].alias, dps[0][1] ]);
+                pieData.push(highchartsSeries(
+                    this.metSeries[i].data[d], this.metSeries[i].query, "pie"));
             }
         }
     }
@@ -228,17 +257,14 @@ function graphing_replaceSeries(result, redraw) {
         for(var hs in hcg.series) {
             if(tr.alias == hcg.series[hs].name && equalObjects(hcg.series[hs].options.tags, tr.tags)) {
                 found = true;
-                hcg.series[hs].setData(tr.dps,true);
-                //console.log(tr.alias);
+                hcg.series[hs].setData(tr.dps,true,null, false);
                 break;
             }
         }
         // if tags change more series can be return
         // upsert if this is the case
         if(!found) {
-            s = highchartsSeries(tr);
-            s.query = result.series[0].query;
-            hcg.addSeries(s, false);
+            hcg.addSeries(highchartsSeries(tr,result.series[0].query), false);
         }
     }
     if(redraw) hcg.redraw();
@@ -299,36 +325,15 @@ function getPlotBands(thresholds) {
         ]
     };
 }
-
-// TODO below here needs fixing //
-function highchartsSeries(dataObj) {
-    return {
-        lineWidth: 1,
-        name: dataObj.alias,
-        data: dataObj.dps,
-        tags: dataObj.tags // for tracking uniqueness of series //
-    };
-}
-/* use alias as name */
-function formatDataHighcharts(graphSeries) {
-    out = [];
-    for(var i in graphSeries) {
-        for(var d in graphSeries[i].data) {
-            hsd = highchartsSeries(graphSeries[i].data[d]);
-            hsd.query = graphSeries[i].query;
-            out.push(hsd);
-        }
-    }
-    //console.log(out);
-    return out;
-}
 function dataHasErrors(gObj) {
     for(var s in gObj.series) {
         if(gObj.series[s].data.error !== undefined) {
-            console.log(gObj.series[s].data.error);
+            //console.log(gObj.series[s].data.error);
             if(gObj.series[s].data.error.message) msg = gObj.series[s].data.error.message.substring(0,50)+"...";
             else msg = gObj.series[s].data.error.substring(0,50)+"...";
-            
+            console.warn(gObj.series[s].query.metric, msg);
+            $("[data-graph-status='"+gObj._id+"']").html(
+                "<span class='graph-error'>"+gObj.series[s].query.metric+": "+msg+"</span>");
             return { 
                 "error": {
                     "message": msg,
@@ -355,15 +360,10 @@ function setPlotBands(graph) {
  *      complete graph object
  */
 function graphing_newGraph(graph) {
-    //console.log(graph.graphType,":",graph._id);
     var renderTo = "[data-graph-id='"+graph._id+"']"; 
     // check data
     dhe = dataHasErrors(graph);
-    if(dhe) {
-        $(renderTo).html("<span class='graph-error'><b>"+dhe.error.metric+": </b>"+dhe.error.message+"</span>");
-        console.log("error:", dhe.error);
-        return;
-    }
+    if(dhe) return;
     var copts = new ChartOptions(graph);
     
     if(graph.graphType == "pie") {
@@ -389,12 +389,39 @@ function graphing_newGraph(graph) {
 function graphing_upsertSeries(args) {
     //console.log(args);
     var hcg = $("[data-graph-id='"+args._id+"']").highcharts();
-    // return if graph is not defined.
-    // this could be due to an error while creating the graph (graphing_newGraph)
     if(hcg == undefined) {
         console.log("graph uninitialized: not upserting. name", args.name, "type", args.graphType,"_id", args._id);
         return;
     }
+    if(args.graphType === 'pie') {
+        for(var j in args.series) {
+            var found = false;
+            for(var d in hcg.series[0].options.data) {
+                if(equalObjects(args.series[j].data[0].tags, hcg.series[0].options.data[d].tags)&&args.series[j].data[0].alias==hcg.series[0].options.data[d].name) {
+                    //console.log(args.series[j].data[0].alias, hcg.series[0].options.data[d].name);
+                    found = true;        
+                    if(Object.prototype.toString.call(args.series[j].data) === '[object Object]') {
+                        if(args.series[j].data.error) {
+                            consol.warn("graphing_upsertSeries tsdb error:", (JSON.stringify(args.series[j].data.error)).substring(0,100));
+                            //console.warn("graphing_upsertSeries tsdb error:", args.series[j].data.error.message.substring(0,100));
+                            break;
+                        }
+                    }
+                    hcg.series[0].options.data.splice(d,1,
+                        highchartsSeries(args.series[j].data[0], hcg.series[0].options.data[d].query, "pie"));
+                    hcg.series[0].setData(hcg.series[0].options.data);
+                    break;
+                }
+            }
+            if(!found) {
+                hcg.series[0].addPoint(
+                    highchartsSeries(args.series[j].data[0], args.series[j].query, "pie"));
+            }
+        }
+        hcg.redraw();
+        return;
+    } // END graphType == 'pie' //
+    // BEGIN line graph//
     for(var j in args.series) {
         for(var d in args.series[j].data) {
             // find series in highcharts //
@@ -402,13 +429,12 @@ function graphing_upsertSeries(args) {
             try {
                 for(var i in hcg.series) {
                     // series found //
-                    //console.log(hcg.series[i].tags, i);
                     if(equalObjects(args.series[j].query, hcg.series[i].options.query) && equalObjects(args.series[j].data[d].tags, hcg.series[i].options.tags)) {
                         found = true;
-                        //console.log("series found in graph: ", hcg.series[i].name);
                         if(Object.prototype.toString.call(args.series[j].data) === '[object Object]') {
                             if(args.series[j].data.error) {
-                                console.warn("graphing_upsertSeries tsdb error:", args.series[j].data.error.message.substring(0,100));
+                                consol.warn("graphing_upsertSeries tsdb error:", (JSON.stringify(args.series[j].data.error)).substring(0,100));
+                                //console.warn("graphing_upsertSeries tsdb error:", args.series[j].data.error.message.substring(0,100));
                                 break;
                             }
                         }
@@ -416,43 +442,33 @@ function graphing_upsertSeries(args) {
                         if(hcg.series[i].options.data.length <= 0) {
                             newData = args.series[j].data[d].dps;
                         } else {
+                            // name , currData, newData //
                             newData = getNewDataAlignedSeries(hcg.series[i].options.name, 
-                                hcg.series[i].options.data, args.series[j].data[d].dps);                   
+                                    hcg.series[i].options.data, args.series[j].data[d].dps);                   
                         }
-                        if(newData != false) {
-                            //params: data, redraw, animation, updatePoints
-                            hcg.series[i].setData(newData, false, null, false);
-                        }
+                        if(newData != false) hcg.series[i].setData(newData, false, null, false);
                         break;
                     }
                 } // END hcg.series //
             } catch(e) {
-                console.log(args.series[j].query);
-                console.log(e)
+                console.log("graphing_upsertSeries", args.series[j].query, e);
             }
             if(!found) {
-                //console.log("upserting series:", args.series[j].data[d].alias);
-                hsd = highchartsSeries(args.series[0].data[d]);
-                hsd.query = args.series[0].query;
-                hcg.addSeries(hsd, false);
+                hcg.addSeries(
+                    highchartsSeries(args.series[0].data[d], args.series[0].query), false);
             }
         }
-        //var seriesData = formatDataHighcharts(args.series[j]);
         hcg.redraw();
     }
 }
 function getNewDataAlignedSeries(dataName, currData, newData) {
     if(newData.length <= 0) return false;
     //if(!currData) return newData;
-    //console.log("curr start", currData[0]);
-
     newStartTime = newData[0][0];
     newEndTime = newData[newData.length-1][0];
     
-    /* highcharts stores as object or array */
     currStartTime = currData[0][0];
     currEndTime = currData[currData.length-1][0];
-
 
     if(newEndTime < currEndTime) return false;
     if((newStartTime > currStartTime) && (newStartTime < currEndTime)) {
@@ -472,9 +488,7 @@ function getNewDataAlignedSeries(dataName, currData, newData) {
     } else {
         console.log(dataName, "out of range");
         console.log("curr data:",new Date(currStartTime),new Date(currEndTime));
-        console.log("new  data:", new Date(newStartTime),new Date(newEndTime), newData.length);
-        //return currData
-        //return newData;
+        console.log("new  data:", new Date(newStartTime),new Date(newEndTime), "dps", newData.length);
         return false;
     }
 }
@@ -483,11 +497,9 @@ function getNewDataAlignedSeries(dataName, currData, newData) {
         graphObj: graph metadata along with series data.  can be a partial graph
 */
 function renderGraph(graphObj) {
-    if(graphObj.graphType == 'pie') {
-        //console.log("creating new pie graph:", graphObj._id);
-        graphing_newGraph(graphObj);
-    } else {
-        graphing_upsertSeries(graphObj);
-    }
+    dhe = dataHasErrors(graphObj);
+    if(dhe) return;
+    $("[data-graph-status='"+graphObj._id+"']").html("");
+    graphing_upsertSeries(graphObj);
 }
 

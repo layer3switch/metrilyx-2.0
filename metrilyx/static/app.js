@@ -99,6 +99,46 @@ angular.module('filters',[]).
 		    if(tstr == '?tags=') return "";
 		    return tstr.replace(/\,$/,'%3B');
 		}
+	}).filter('metricQuery', function() {
+		return function(query) {
+			if(query.rate) {
+				return query.aggregator+":rate:"+query.metric;
+			} else {
+				return query.aggregator+":"+query.metric;
+			}
+		}
+	}).filter('loadedSeries', function() {
+		/*
+			Returns number of queries loaded in highcharts.  In other words,
+			which queries have returned data.
+		*/
+		return function(graph) {
+			hcg = $("[data-graph-id='"+graph._id+"']").highcharts();
+			if(hcg === undefined) return 0;
+			var cnt = 0;
+			if(graph.graphType === 'pie') {
+				for(var i in graph.series) {
+					for(var j in hcg.series) {
+						for(var d in hcg.series[j].data) {
+							if(equalObjects(hcg.series[j].data[d].query,graph.series[i].query)) {
+								cnt++;
+								break;
+							}
+						}
+					}
+				}
+			} else {
+				for(var i in graph.series) {
+					for(var j in hcg.series) {
+						if(equalObjects(hcg.series[j].options.query,graph.series[i].query)) {
+							cnt++;
+							break;
+						}
+					}
+				}
+			}
+			return cnt;
+		}
 	});
 app.directive('tagkeyvalue', function() {
 	return {
@@ -200,6 +240,34 @@ app.directive('tagkeyvalue', function() {
 				} else {
 					ctrl.$setValidity('tagkeyvalue', false);
 					return ctrl.$modelValue;
+				}
+			});
+		}
+	};
+});
+app.directive('pageId', function() {
+	return {
+		restrict: 'A',
+		require: '?ngModel',
+		link: function(scope, elem, attrs, ctrl) {
+			if(!ctrl) return;
+			// view -- > model //
+			ctrl.$parsers.unshift(function(viewValue) {
+				if(viewValue == "") {
+					ctrl.$setValidity('pageId', false);
+					return ctrl.$modelValue;
+				}
+				if(viewValue.search(/(\.|\s|\\|\/)/) > 0) {
+					ctrl.$setValidity('pageId', false);
+					setGlobalAlerts({
+						error: "Invalid ID",
+						message:"ID's cannot contain '.', '\\', '/', and spaces"
+					});
+					flashAlertsBar();
+					return ctrl.$modelValue;
+				} else {
+					ctrl.$setValidity('pageId', true);
+					return viewValue;
 				}
 			});
 		}
@@ -312,6 +380,16 @@ app.directive('keyValuePairs', function() {
 		}
 	};
 });
+function getWebSocket() {
+    if ("WebSocket" in window) {
+       return new WebSocket(WS_URI);
+    } else if ("MozWebSocket" in window) {
+       return new MozWebSocket(WS_URI);
+    } else {
+       console.error("Browser does not support WebSockets!");
+       return null;
+    }
+}
 /*
  * args: { key1: val1, key2: val2 }
  * return: key1=val1,key2=val2

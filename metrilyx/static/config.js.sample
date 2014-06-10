@@ -12,9 +12,16 @@
 var CONN_POOL_CFG = {
 	urls: []
 };
+/* Auth config until auth is enabled */
 var AUTHCONFIG = {
 	modelstore: {
 		username: 'admin',
-		password: 'metrilyx'
+		password: 'password'
 	}
 };
+/* 
+ * SERVER_NAME should be filled with the hostname of the web server
+ */
+var SERVER_NAME = "";
+/* WebSocket URI */
+var WS_URI = "ws://"+SERVER_NAME+"/api/data?compressed=true";

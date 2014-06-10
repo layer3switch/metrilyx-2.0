@@ -1,8 +1,16 @@
-Metrilyx v2.1.0
+Metrilyx v2.2.0
 ===============
 Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database used to store large amounts of data.  It allows for analyzing, cross cutting and viewing of time series data in a simple manner.
 
 #### Features:
+- Major performance improvements.
+	- Data delivery system now completely **asynchronous**.
+	- Data provided through **websockets**.
+	- In flight data **compression** (permessage-deflate).
+- **Nginx** used as reverse proxy rather than apache.
+- Support for **distributed** and **HA** setup.
+
+##### v2.1.0
 - Page Models now stored in a database rather than flat files.
 - Ability to group pages based on tags.
 - Ability to generate heatmaps against a metric.
@@ -22,23 +30,12 @@ Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database us
 ### Requirements
 Metrilyx will run on any system that supports the packages mentioned below.  It has primarily been tested on RedHat based flavors of Linux.
 
-### OS Packages:
-#### RHEL:
-	libuuid
-	uuid
-	httpd
-	mod_wsgi
-	python-setuptools
-	python-devel
-	gcc
+#### OS Packages:
+##### RHEL:
+	yum -y install libuuid uuid nginx python-setuptools python-devel gcc mongodb
 	
-#### Debian:
-	libuuid1 
-	uuid-runtime 
-	apache2-mpm-worker 
-	libapache2-mod-wsgi 
-	make 
-	python-setuptools
+##### Debian:
+	apt-get install libuuid1 uuid-runtime nginx python-setuptools python-dev libpython-dev make mongodb
 
 ### Python Packages:
 	uuid
@@ -47,46 +44,60 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 	django-filter
 	django-cors-headers
 	django-reversion
+	twisted	
 	celery
 	requests
 	jsonfield
-
-In order to use heatmaps you will also need a mongodb server.
-
+	uwsgi
+	pymongo
+	autobahn
 
 ### Installation
 The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below to install the application after the above mentioned requirements have been satisfied. The default install destination is **/opt/metrilyx**.	
 
-- Install the required OS packages based on your OS's package manager.
+- Install the required OS packages.
 - Issue the following command to install the application:
 	
-	[ /path/to/downloaded/app ]$ **./install.sh app**
+	$ git clone https://github.com/Ticketmaster/metrilyx-2.0.git
+	
+	$ cd metrilyx-2.0
+	
+	$ ./install.sh app
 
-- Assuming all required OS packages are present, the script will install the required python modules, apache configs (based on distribution) and prompt you to edit the configuration file.
-- After you have completed editing the configuration file restart Apache.
+Assuming all required OS packages are installed, the script will install the needed python modules, nginx configs depending on your distribution and prompt you to edit the metrilyx configuration file.
+
+After you have completed editing the configuration file, start the modelmanager and dataserver processes, then restart nginx.  Also start celeryd and celerybeat which consume and run periodic jobs repsectively.
+	
+	/etc/init.d/metrilyx-dataserver start
+	
+	/etc/init.d/metrilyx-modelmanager start
+
+	/etc/init.d/nginx restart
+
+	/etc/init.d/celeryd start
+
+	/etc/init.d/celerybeat start
+
+The default system nginx configuration may conflict with the metrilyx one.  In this case you'll need to disable the default one or edit the configuration file to accomodate the metrilyx nginx configuration.
 
 ### Configuration
-There are 2 configuration files:
+The default installation directory is /opt/metrilyx.
 
-1. **/opt/metrilyx/etc/metrilyx/metrilyx.conf** (server side)
-2. **/opt/metrilyx/metrilyx/static/config.js** (client side)
-
-A sample configuration files have been provided for both.  The server side configuration file is in JSON format.
-
-#### Sample metrilyx.conf:
-
+#### /opt/metrilyx/etc/metrilyx/metrilyx.conf
+A sample configuration file has been provided.  The configuration file is in JSON format.  
+	
 	{
-		"tsdb": {
-			"uri":"tsdb.example.com",
-			"port": 4242,
-			"suggest_limit": 100
-		}
-		"databases":{
-			"default": {
-				"ENGINE": "django.db.backends.sqlite3",
-            	"NAME": "metrilyx.sqlite3"
-			}
-		},
+		"dataproviders": [{
+			"uri":"http://tsdb.example.com",
+			"query_endpoint": "/api/query",
+			"search_endpoint": "api/suggest",
+			"suggest_limit": 50,
+			"timeout": 180
+		}],
+		"databases":[{
+			"ENGINE": "django.db.backends.sqlite3",
+            "NAME": "metrilyx.sqlite3"
+		}],
 		"heatmaps": {
 			"analysis_interval": "1m-ago",
 			"transport": "mongodb",
@@ -118,29 +129,37 @@ OpenTSDB suggest max result limit.
 This configuration option is only need if you plan to use heatmaps. If you choose to enable this feature the only needed change is the mongodb information relative to your setup i.e. host, port, and database
 
 ##### databases
-The default installation uses sqlite.  Other databases can also be used.  We have testing and run a setup using postgresql.  This requires a seperate set of tasks that will be included later.
+The are 2 configurations provided - sqlite and postgres.  The first one in the list will be the one used.  The default uses sqlite.  Postgresql can also be used.  To use postgres move that configuration option to the top of the list.  Using postgres requires the **psycopg2** python package.
 
 
-#### Sample config.js:
-This configuration is in javascript format.
+#### /opt/metrilyx/metrilyx/static/config.js
+This is the client side configuration file. A sample for this configuration has also been provided.
+
+##### AUTHCONFIG
+This does not need to be changed.  This is a placeholder for a future feature to allow user authentication.
+
+##### SERVER_NAME
+Client accessible FQDN of the server.  This is the address used by the client to make the websocket connection.  This must be the hostname of the machine it's running on or else client connections will fail.  This is the only required option in this configuration file.
+
+##### WS_URI
+The websocket URI used by the client.  This is made up of the **SERVER_NAME** and connection options.  This does not need to be edited.
+
+
+#### Nginx
+The metrilyx nginx configuration is install at **/etc/nginx/conf.d/metrilyx.conf**.  The default nginx configuration may conflict with the metrilyx configuration and should be disabled. The name of the default file will be different depending on the operating system you are using.
+
+	$ mv /etc/nginx/conf.d/default.conf{,.disabled}
 	
-	var CONN_POOL_CFG = {
-		urls: [],
-	};
+Metrilyx can still function without these configuration changes but it is recommended these options be configured for scalability and performance.
 
-	var AUTHCONFIG = {
-		modelstore: {
-			username: 'admin',
-			password: 'metrilyx'
-		}
-	};
+	upstream dataprovider {
+		server 127.0.0.1:9000
+		#server 127.0.0.1:9001
+		#server 127.0.0.1:9002
+		#server 127.0.0.1:9003
+	}
 
-##### CONN_POOL_CFG
-URL's to round robin against when making ajax requests.  This provides a major performance improvement in terms of user experience.  This is to circumvent browser limitations on the number remote calls that can be made to a given domain.  These can be CNAME's to the same webserver.
-
-##### ATUHCONFIG
-This is temporary until authentication has been enabled through out the application.  This will be removed after user auth has been enabled and exposed.
-
+This configuration option should be edited to match the number of metrilyx-dataserver instances running.  Uncomment each line for a given instance with the corresponding port number.
 
 ### Heat Maps
 Heatmaps are used to view your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10.  This is usually the tag containing a value of '*'.
@@ -157,7 +176,7 @@ In order to use heatmaps, you will need a mongodb server.  Heatmap computations 
 
 
 #### Importing models
-You will need to import page models from v2.0 to v2.1 as 2.1 now uses a database to store the models.  During the installation process, the installer backups the current installation with a timestamp.
+You will need to import page models from v2.0 to v2.1 as 2.1 uses a database to store the models.  During the installation process, the installer backups the current installation with a timestamp.
 
 You can import models from the UI but you may also import them via CLI.  You can issue the following command to import a json page model (i.e. graphmap).
 
@@ -169,13 +188,13 @@ This will import a graphmap (i.e. page).  To import a heatmap you can use the fo
 	
 To import all existing graphmaps from v2.0, issue the following commands:
 
-	cd /opt/metrilyx-<timestamp>/pagemodels
-	for i in $(ls);do curl -u admin:metrilyx http://localhost/api/graphmaps -H "Content-Type:application/json" -d @./$i; done
+	$ cd /opt/metrilyx-<timestamp>/pagemodels
+	$ for i in $(ls);do curl -u admin:metrilyx http://localhost/api/graphmaps -H "Content-Type:application/json" -d @./$i; done
 	
 Similarly to import all existing heatmaps from v2.0, issue the following commands:
 
-	cd /opt/metrilyx-<timestamp>/heatmaps
-	for i in $(ls);do curl -u admin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @./$i; done
+	$ cd /opt/metrilyx-<timestamp>/heatmaps
+	$ for i in $(ls);do curl -u admin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @./$i; done
 
 #### Notes
 - The default username and password for the site are admin and metrilyx respectively. Changing these will cause the application to stop functioning as other configurations also need to be updated.

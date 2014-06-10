@@ -5,6 +5,7 @@ metrilyx.conf
 config.js
 pagemodels
 heatmaps
+metrilyx.sqlite3
 
 # Python #
 ##########

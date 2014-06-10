@@ -35,7 +35,7 @@
 						<div ng-switch="modelType">
 							<div ng-switch-when="">
 								<div ng-repeat="graph in pod.graphs" class="col-md-{{pod.graphs.length|columnWidth}}">
-									<div ng-include="graphHtml" ng-model="graph" highstock-graph></div><!-- gidx, pidx, cidx, ridx -->
+									<div ng-include="graphHtml" ng-model="graph" class="{{pod.orientation}}" ws-highstock-graph></div>
 								</div>
 							</div>
 							<!-- heatmap request -->
@@ -50,7 +50,7 @@
 						<div ng-switch="modelType">
 							<div ng-switch-when="">
 								<div ng-repeat="graph in pod.graphs" class="col-md-12">
-									<div ng-include="graphHtml" class="edit-comp{{editMode}}" ng-model="graph" highstock-graph></div>
+									<div ng-include="graphHtml" class="edit-comp{{editMode}} {{pod.orientation}}" ng-model="graph" ws-highstock-graph></div>
 								</div>
 							</div>
 							<!-- heatmap request -->

@@ -1,125 +1,30 @@
 
-from multiprocessing import Pool
-import math
+import logging
 
-from ..httpclients import HttpJsonClient
-from ..datastreams import GraphRequest
-from ..metrilyxconfig import config
+log = logging.getLogger(__name__)
 
-from pprint import pprint
-
-
-
-class OpenTSDBEndpoints(object):
-	"""
-	Endpoints for OpenTSDB v2.0
-	"""
-	s = 			'/s'
-	aggregators = 	'/api/aggregators'
-	annotation = 	'/api/annotation'
-	dropcaches = 	'/api/dropcaches'
-	put = 			'/api/put'
-	query = 		'/api/query'
-	search = 		'/api/search'
-	serializers = 	'/api/serializers'
-	stats = 		'/api/stats'
-	suggest = 		'/api/suggest'
-	tree = 			'/api/tree'
-	uid = 			'/api/uid'
-	version = 		'/api/version'
-
-
-"""
-Sample graph request:
-
-{u'_id': u'5a55b84b86124b9fae664464e93244a6',
- u'graphType': u'line',
- u'name': u'',
- u'series': [{u'alias': u'%(tags.class)s',
-			  u'query': {u'aggregator': u'sum',
-						 u'metric': u'apache.bytes',
-						 u'rate': True,
-						 u'tags': {u'class': u'*'}},
-			  u'yTransform': u''}],
- u'size': u'medium',
- u'thresholds': {
- 	u'danger': 0,
- 	u'warning': 0,
- 	u'info':0
- },
- u'start': u'10m-ago'}
-
-"""
-class OpenTSDBRequest(GraphRequest):
-	"""
-		Args:
-			metrilyx_request	: request containing graph info and tsdb query info
-			data_callback		: callback for each unique series
-	"""
-	endpoints = OpenTSDBEndpoints()
-	tsd_host = config['tsdb']['uri']
-	tsd_port = config['tsdb']['port']
-
-	def __init__(self, metrilyx_request, data_callback=None):
-		super(OpenTSDBRequest,self).__init__(metrilyx_request)
-		self.data_callback = data_callback
-		for serie in self.series:
-			serie = self.__fetch_serie(serie)
-
-	def __fetch_serie(self, serie):
-		hjc = HttpJsonClient(self.tsd_host, self.tsd_port)
-		tsd_data = hjc.POST(self.endpoints.query, self.__serieQuery(serie, self.tags))
-		if type(tsd_data) == dict and tsd_data.get("error"):
-			serie['data'] = tsd_data
-		else:
-			m_serie = MetrilyxSeries(serie, tsd_data, self.data_callback)
-			serie['data'] = m_serie.data
-		return serie
-
-	def __extendTags(self, tags1, global_tags):
-		"""
-			Over write all tags with global_tags if present
-		"""
-		out = tags1
-		for k,v in global_tags.items():
-			out[k] = v
-		return out
-
-	def __serieQuery(self, one_serie, global_tags=None):
-		if global_tags != None:
-			one_serie['query']['tags'] = self.__extendTags(one_serie['query']['tags'],global_tags)
-		q = {
-			"queries": [ one_serie['query'] ],
-			"start": self.request['start']
-			}
-		if self.request.get('end'):
-			q['end'] = self.request['end']
-		return q
-
-class MetrilyxSeries(object):
+class MetrilyxSerie(object):
 	"""
 	This makes an object containing the original series data (request) with the tsdb
 	data appropriately added in.
 
 	Args:
 		serie 			: single serie component of a graph (i.e. the metric query to tsdb)
-		data 			: response data from tsdb
 		data_callback	: callback for each unique series
 	"""
-	def __init__(self, serie, tsd_data, data_callback=None):
-		self._data = tsd_data
-		self._data_callback = data_callback
-		#pprint(data)
+	def __init__(self, serie, data_callback=None):
 		self._serie = serie
+		self._data = serie['data']
+		self._data_callback = data_callback
+
 		if type(self._data) == dict and self._data.get('error'):
-			self.error = data.get('error')
+				self.error = self._data.get('error')
 		else:
 			self.error = False
 
 	@property
 	def data(self):
 		if self.error: return { "error": self.error }
-		#pprint(self._serie)
 		data = []
 		for r in self._data:
 			data.append(self.__process_serie(r))
@@ -128,10 +33,15 @@ class MetrilyxSeries(object):
 	def __apply_ytransform(self, dataset, yTransform):
 		if yTransform == "":
 			return dataset
-		dps = []
-		for ts, val in dataset:
-			dps.append(( ts, eval(yTransform)(val) ))
-		return dps
+		## eval causes a hang.
+		try:
+			dps = []
+			for ts, val in dataset:
+				dps.append(( ts, eval(yTransform)(val) ))
+			return dps
+		except Exception,e:
+			log.warn("could not apply yTransform: %s", str(e))
+			return dataset
 
 	def __process_serie(self, dataset):
 		#data = response
@@ -143,18 +53,16 @@ class MetrilyxSeries(object):
 		try:
 			dataset['dps'] = self.__convert_timestamp(dataset['dps'])
 		except Exception,e:
-			print "----- ERROR -----"
-			pprint(e)
-			pprint(dataset['metric'])
-			print "-----------------"
+			log.error("could not normalize datapoints: %s %s" %(dataset['metric'], str(e)))
 
+		### todo: add tsdb performance header
+		#dataset['perf'] = self._serie['perf']
 		dataset['dps'] = self.__apply_ytransform(dataset['dps'], self._serie['yTransform'])
 		### normalize alias (i.e. either lambda function or string formatting)
 		dataset['alias'] = self.__normalize_alias(self._serie['alias'], {
 			'tags': dataset['tags'],
 			'metric': dataset['metric']
 			})
-
 		### scan tags to make unique series alias (looks for * and | operators)
 		uq = self.__determine_uniqueness(self._serie['query'])
 		nstr = ""
@@ -162,7 +70,7 @@ class MetrilyxSeries(object):
 			talias = "%(" + u + ")s"
 			if talias not in self._serie['alias']:
 				nstr += " " + talias
-		### apply the unique tag/s and re-normalize
+		### apply the unique tag and normalize
 		if nstr and not self._serie['alias'].startswith("!"):
 			dataset['alias'] = self.__normalize_alias(self._serie['alias']+nstr, {
 				'tags': dataset['tags'],
@@ -170,7 +78,7 @@ class MetrilyxSeries(object):
 				})
 
 		## any custom callback for resulting data set 
-		## e.g. scrape metadata here.
+		## e.g. scrape metadata
 		if self._data_callback != None:
 			self._data_callback(dataset)
 
@@ -178,6 +86,7 @@ class MetrilyxSeries(object):
 		if self._serie['query']['rate']:
 			#print "removing negative rates"
 			dataset['dps'] = self.__remove_negative_rates(dataset['dps'])
+
 		return dataset
 
 	def __determine_uniqueness(self, query):
@@ -209,21 +118,22 @@ class MetrilyxSeries(object):
 			alias_str 	string to format
 			obj 		dict containing atleast 'tags' and 'metric' keys
 		"""
-		#pprint(obj['tags'])
 		flat_obj = self.__flatten_dict(obj)
 
 		# When alias_str starts with ! we will do an eval for lambda processing
 		if alias_str.startswith("!"):
-			return eval(alias_str[1:])(flat_obj)
+			try:
+				return eval(alias_str[1:])(flat_obj)
+			except Exception,e:
+				log.warn("could not transform alias: %s %s" %(obj['metric'], str(e)))
 
 		try:
-			#print alias_str %(obj)
 			return alias_str %(flat_obj)
 		except KeyError:
 			return obj['metric']
 		except Exception, e:
-			print e
-			return str(e)
+			log.error("could not normalize alias: %s %s" %(obj['metric'], str(e)))
+			return alias_str
 
 	def __sig_figs(self, num):
 		"""
@@ -251,4 +161,3 @@ class MetrilyxSeries(object):
 			data 	tsdb dps structure
 		"""
 		return [ (ts,val) for ts,val in data if val >= 0 ]
-
