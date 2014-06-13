@@ -305,6 +305,7 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
 ChartOptions.prototype.areaChartDefaults = function(extraOpts) {
     var opts = this.lineChartDefaults(extraOpts);
     $.extend(opts.chart, {'type': 'area'}, true);
+    if(opts.plotOptions.area.stacking) delete opts.plotOptions.area.stacking;
     return opts;
 }
 ChartOptions.prototype.stackChartDefaults = function(extraOpts) {
