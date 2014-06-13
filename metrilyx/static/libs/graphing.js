@@ -191,7 +191,6 @@ ChartOptions.prototype.pieChartDefaults = function(extraOpts) {
             borderColor: '#666',
             backgroundColor: 'rgba(90,90,90,0.9)',
             formatter: function() {
-                console.log(this.point);
                 var s = '<span style="color:'+this.point.color+'">'+this.point.name+'</span><br/>';
                 s += '<table style="margin-top:5px;font-weight:bold;font-size:11px;color:#ddd"><tr><td>'+this.point.y+'</td></tr></table>';
                 return s;
