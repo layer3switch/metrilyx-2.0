@@ -3,6 +3,7 @@ import os
 import json
 import requests
 
+from elasticsearch import Elasticsearch
 
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect
@@ -23,6 +24,8 @@ from models import *
 
 from datastores import *
 from httpclients import HttpJsonClient
+from dataserver.dataproviders import AnnoEventDataProvider
+from annotations import Annotator
 
 from metrilyxconfig import config
 
@@ -95,6 +98,11 @@ class HeatMapViewSet(MapViewSet):
 				'Content-Type': 'application/json'
 				})
 
+class EventTypeViewSet(viewsets.ModelViewSet):
+	queryset = EventType.objects.all()
+	serializer_class = EventTypeSerializer
+	permission_classes = (permissions.IsAdminUser, 
+		permissions.DjangoModelPermissionsOrAnonReadOnly)
 
 class SchemaViewSet(viewsets.ViewSet):
 
@@ -110,6 +118,59 @@ class SchemaViewSet(viewsets.ViewSet):
 			return Response(schema)
 		except Exception,e:
 			return Response({"error": str(e)})
+
+
+class AnnotationViewSet(APIView):
+	REQUIRED_QUERY_PARAMS = ('start','types','tags')
+	# this api is used for synchronous calls
+	esearch = Elasticsearch()
+	dp = AnnoEventDataProvider(config['dataproviders'][1])
+	annotator = Annotator()
+
+	def __checkRequest(self, request):
+		for rp in self.REQUIRED_QUERY_PARAMS:
+			if rp not in request.keys():
+				return {'error':'%s key required' %(rp)}
+		if type(request['tags']) is not dict:
+			return {'error': 'Invalid tags'}
+		return request
+
+
+	def get(self, request, pk=None):
+		'''
+			request object:
+				types:
+				tags:
+				start:
+				end: (optional)
+		'''
+		reqBody = self.__checkRequest(json.loads(request.body))
+		if reqBody.has_key('error'):
+			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
+
+		# always yield's 1 when split=False
+		for (url, eventTypes, query) in self.dp.getQueries(reqBody,split=False):
+			essRslt = self.esearch.search(
+				index=config['dataproviders'][1]['index'], body=query)
+			## TODO: potentially need to add error checking 
+			rslt = [r['_source'] for r in essRslt['hits']['hits']]
+			return Response(rslt)
+	
+	def post(self, request, pk=None):
+		reqBody = self.annotator.annotation(json.loads(request.body))
+		if reqBody.has_key('error'):
+			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
+		annoObj = self.annotator.annotation(reqBody)
+		annoStr = self.annotator.annotation(annoStr)
+		print reqBody
+		return Response({})
+	'''
+	def put(self, request, pk=None):
+		reqBody = self.__checkRequest(json.loads(request.body))
+		if reqBody.has_key('error'):
+			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
+		return Response({})
+	'''
 
 class TagViewSet(viewsets.ViewSet):
 

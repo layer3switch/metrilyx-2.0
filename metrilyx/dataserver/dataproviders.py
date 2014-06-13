@@ -118,30 +118,46 @@ class TSDBDataProvider(PerformanceDataProvider):
 		return str(url)
 
 class AnnoEventDataProvider(BaseDataProvider):
-
-	def get_queries(self, graph):
-		url = str("%s/%s/%s" %(self.uri, self.index, self.search_endpoint))
-		#'should': [{'term':{'type': 'ACL'}}],
-		q = {
-			"query":{"filtered":{"filter":{"bool":{		
-					"must": [{"term": graph['annoEvents']['tags']}]
-			}}}},
-			"sort": "timestamp"
-		}
-
-		if graph.has_key('end'):
-			q['query']['filtered']['filter']['bool']['must'].append({
-				'range':{'timestamp': {
-						'gte':absoluteTime(graph['start']), 
-						'lte': absoluteTime(graph['end'])
-					}
-				}
-			})
+	
+	def timestampQuery(self, request):
+		if request.has_key('end'):
+			return {'range':{'timestamp':{
+				'gte': absoluteTime(request['start']), 
+				'lte': absoluteTime(request['end'])
+				}}}
 		else:
-			q['query']['filtered']['filter']['bool']['must'].append({
-				'range':{
-					'timestamp': {'gte': absoluteTime(graph['start'])}
-				}
-			})
-		yield (url, q)
+			return {'range':{'timestamp':{
+				'gte': absoluteTime(request['start'])
+				}}}
 
+	def tagsQuery(self, request):
+		return [ {'term':{k:v}} for k,v in request['tags'].items() ]
+
+	def eventTypeQuery(self, eventType):
+		return {'term': {'eventType': str(eventType).lower()}}
+
+	def getQueries(self, request, split=True):
+		'''
+		Args:
+			split: splits query by type (i.e. 1 for each type)
+		'''
+		url = str("%s/%s/%s" %(self.uri, self.index, self.search_endpoint))
+		# 'and' queries passed to 'must' 
+		andQueries = [ self.timestampQuery(request) ] + self.tagsQuery(request)
+
+		if split:
+			for eventType in request['types']:
+				q = {"query":{"filtered":{"filter":{"bool":{		
+						"must": andQueries + [ self.eventTypeQuery(eventType) ]
+					}}}},
+					"sort": "timestamp"
+				}
+				yield (url, eventType, q)
+		else:
+			q = {"query":{"filtered":{"filter":{"bool":{		
+						"must": andQueries,
+						"should": [self.eventTypeQuery(et) for et in request['types']]
+					}}}},
+					"sort": "timestamp"
+				}
+			yield (url, request['types'], q)

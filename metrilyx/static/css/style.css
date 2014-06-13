@@ -73,6 +73,11 @@ select[ng-model="timeType"] {
 	padding: 5px !important;
 	padding-top: 3px !important;
 }
+[ng-model="serie.yTransform"],
+[ng-model="serie.alias"] {
+	font-family: "Courier New", Courier, monospace !important;
+	font-size: 13px !important;
+}
 .page-mast {
 	/*background: rgba(55,55,55,0.8);*/
 	background: rgba(44,44,44,0.8);
@@ -292,10 +297,18 @@ input[ng-model='metricQuery'] {
 	min-height: 20px;
 	/*border-top: 1px solid rgba(44,44,44,0.6);*/
 }
-[ng-repeat="metric in metricQueryResult"] {
+[ng-repeat='metric in metricQueryResult'] {
 	/*white-space: nowrap;
 	text-wrap: none;*/
 	word-wrap:break-word;
+}
+[ng-repeat='evtType in graph.annoEvents.types'].removable-tag {
+	border:1px solid #888;
+	border-radius:3px;
+	float:left;
+	padding: 5px;
+	display: inline-block;
+	margin: 3px; 
 }
 input[ng-model*='name'] {
 	border: 1px solid rgba(255,255,255,0) !important;
@@ -564,7 +577,9 @@ div[class*='layout-'] {
 	color: #ddd;
 }
 .pod-header.edit-mode {
-	padding: 5px !important;
+	padding-top: 3px !important;
+	padding-left: 5px !important;
+	padding-right: 5px !important;
 }
 .pod {
 	/*background-color: #eee;*/
@@ -605,6 +620,21 @@ div.graphs [class*='col-md-'] {
 /* === .graph === */
 .graph {
 	/*background-color:#ddd;*/
+}
+.highcharts-container {
+	overflow: visible !important;
+}
+.chart-tooltip {
+    background:rgba(90,90,90,0.8) !important;
+    z-index: 1000 !important;
+    padding: 5px;
+    border-radius: 2px;
+    border:1px solid rgba(90,90,90,0.9);
+    position: relative !important;
+
+}
+.chart-tooltip.annotation {
+	margin-top: 10px;
 }
 .graph.small {
 	min-height: 190px;
@@ -778,7 +808,7 @@ input.dark.info {
 .caret.done-loading {
 	display: inline-block;
 }
-.adhoc-metric-editor {
+.metric-editor {
 	display: none;
 	position: absolute;
 	z-index: 4;
@@ -788,18 +818,24 @@ input.dark.info {
 	padding-left: 15px;
 	padding-right: 15px;
 	border-radius:0 0 2px 2px;
-	background:rgba(102,102,102,0.9);
+	background:rgba(95,95,95,0.9);
 	color:#ccc;
 	/*border: 1px solid #505050;
 	border-top: none;*/
 	/*min-height: 100%;*/
 }
+.metric-editor.adhoc {
+	top: 52px;
+}
 .graph-metric-label {
 	border-radius: 2px !important;
 	color: #666 !important;
 }
+.graph-metric-label.adhoc {
+	border-bottom: 0px solid #eee !important;
+}
 .graph-metric-label.selected {
-	background:rgba(88,88,88,0.9) !important;
+	background:rgba(80,80,80,0.9) !important;
 	color: #eee !important; 
 	border-radius: 2px 2px 0 0 !important;
 }
@@ -809,9 +845,6 @@ input.dark.info {
 .graph-metric-label:hover {
 	/*color: #428bca !important; */
 	cursor: pointer;
-}
-.graph-metric-label:hover > .tagstr-label {
-	color: #428bca !important;
 }
 .graph-metric-label-header {
 	border-top: 1px solid #bbb;
@@ -941,13 +974,15 @@ input.form-control.trans {
 	margin-bottom: 6px;
 }
 .page-tag {
-	border-radius: 3px;
-	border:1px solid #ccc;
-	padding:5px;
+	border-radius: 2px;
+	border:1px solid #555;
+	background-color: #666;
+	padding:3px;
 	padding-left:10px;
 	margin-left:2px;
 	margin-right:2px;
-	color: #555;
+	color: #ddd;
+	font-size: 13px;f
 }
 .tags-panel {
 	color:#555;
@@ -976,6 +1011,7 @@ input.form-control.trans {
 	border:1px solid #888;
 	border-radius:3px;
 	margin-top: 10px;
+	margin-bottom: 5px;
 	font-size: 13px;
 }
 .gcontrols-apply-btn:hover {
@@ -985,9 +1021,9 @@ input.form-control.trans {
 }
 input.threshold-input {
 	width: 94px;
-	line-height: 1.3 !important;
-	padding-top: 5px;
-	padding-bottom: 5px;
+	line-height: 1.2 !important;
+	padding-top: 3px;
+	padding-bottom: 3px;
 }
 
 .graph-container {
@@ -1011,7 +1047,7 @@ input.threshold-input {
   display: none;
   /*-webkit-transform: rotateY(180deg);*/
   /*padding: 5px;*/
-  background-color: rgba(255,255,255,0.86);
+  background-color: rgba(255,255,255,0.84);
   /*border: 2px solid #ddd;
   border-top: 1px solid #ddd;*/
   top:42px;
@@ -1025,7 +1061,21 @@ input.threshold-input {
 .graph-face.front.edit-mode {
 	padding-top:4px;
 }
-
+.graph-face.front.edit-mode > .input-group {
+	padding-bottom:5px;
+}
+.dropdown-menu.noshadow {
+	-moz-box-shadow: none !important;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+}
+.dropdown-menu.metric-status {
+	margin-bottom:5px;
+	margin-top:5px;
+	font-size:11px;
+	background:rgba(255,255,255,0.8);
+	color: #666;
+}
 .query-editor-footer {
 	position: absolute;
 	bottom: 10px;

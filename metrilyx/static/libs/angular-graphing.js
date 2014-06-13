@@ -217,6 +217,7 @@ angular.module('graphing', [])
 				function processRecievedData(event) {
 					var data = event.detail;
 					if(data.annoEvents.data) {
+						//console.log(data._id, data.annoEvents.evenType);
 						anno = new MetrilyxAnnotation(data);
 						anno.applyData();
 					}

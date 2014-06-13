@@ -1,4 +1,66 @@
 // TODO below here needs fixing //
+var DEFAULT_CHART_OPTS = {
+    AXIS:{
+        gridLineWidth: 1,
+        gridLineColor: "#ddd",
+        minorGridLineColor: '#f8f8f8',
+        minorTickInterval: 'auto',
+        startOnTick: false,
+    },
+    PLOT_TEXT_COLOR: '#666',
+    BASIC: {
+        colors: [
+            '#7cb5ec','#90ed7d','#f7a35c',
+            '#f15c80','#91e8e1','#8085e9', 
+            '#e4d354','#8085e8','#4CE078','#FF8BF2'],
+        chart: {
+            borderRadius: 0,
+            borderWidth: 0,
+            spacingLeft: 5,
+            spacingRight: 5,
+            spacingTop: 5,
+            spacingBottom: 5
+        },  
+        plotOptions: {
+            series: {
+                marker: {
+                    enabled: true
+                }
+            },
+            flags: {
+                cursor: 'pointer'
+            },
+            pie: {
+                innerSize: '50%',
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                }
+            },
+            area: {
+                fillOpacity: 0.5,
+                lineWidth: 1,
+                marker:{
+                    radius:0
+                }
+            },
+            spline: {
+                lineWidth: 1,
+                marker:{
+                    radius:0
+                }
+            }
+        },      
+        title: {text: ''},
+        legend: {enabled: false},
+        credits: {enabled: false}
+    }
+};
+$.extend(DEFAULT_CHART_OPTS.BASIC, {xAxis: DEFAULT_CHART_OPTS.AXIS}, true);
+$.extend(DEFAULT_CHART_OPTS.BASIC.xAxis, {opposite:true}, true);
+
 function highchartsSeries(dataObj, dataQuery, graphType) {
     if(graphType === 'pie') {
         return {
@@ -24,9 +86,12 @@ function MetrilyxGraph(graphObj, timeWin) {
     this.graphdata = graphObj;
     this.uigraph = $("[data-graph-id='"+this.graphdata._id+"']").highcharts();
 }
+MetrilyxGraph.prototype.newChart = function() {
+    graphing_newGraph(this.graphdata);
+}
 MetrilyxGraph.prototype.applyData = function() {
     if(this.uigraph === undefined) {
-        graphing_newGraph(this.graphdata);
+        this.newChart();
     } else {
         renderGraph(this.graphdata);
     }
@@ -53,8 +118,6 @@ MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
 }
 MetrilyxAnnotation.prototype.newChart = function() {
     var copts = new ChartOptions(this._data,true);
-    var opts = copts.lineChartDefaults();
-    
     Highcharts.setOptions({ global: { useUTC:false } });
     Highcharts.seriesTypes.line.prototype.drawPoints = (function 
     (func) {
@@ -62,7 +125,8 @@ MetrilyxAnnotation.prototype.newChart = function() {
             return false;
         };
     } (Highcharts.seriesTypes.line.prototype.drawPoints));
-    $("[data-graph-id='"+this._data._id+"']").highcharts("StockChart",opts);
+    $("[data-graph-id='"+this._data._id+"']").highcharts("StockChart", 
+                                            copts.chartDefaultsForType());
 }
 MetrilyxAnnotation.prototype.applyData = function() {
     var chrt = $("[data-graph-id='"+this._data._id+"']").highcharts();
@@ -70,15 +134,21 @@ MetrilyxAnnotation.prototype.applyData = function() {
         this.newChart();
     } else {   
         var idx = -1;
+        var flagIdx = [];
         for(var i in chrt.series) {
             if(chrt.series[i].type === 'flags') {
-                idx = i;
-                break;
+                flagIdx.push(i);
+                if(chrt.series[i].name === this._data.annoEvents.eventType) {
+                    //console.log(this._data.annoEvents.annoType);
+                    idx = i;
+                    break;
+                }
             }
         }
         if(idx < 0) {
             var sf = new SeriesFormatter(this._data.annoEvents.data);
-            chrt.addSeries(sf.eventannoSerie());
+            chrt.addSeries(sf.flagsSeries(this._data.annoEvents.eventType));
+            //console.log(this._data._id, this._data.annoEvents.eventType);
         } else {
             this.appendData(chrt, idx);
         }
@@ -95,38 +165,14 @@ function ChartOptions(metGraphObj,flagSeries) {
         this._sfmt = new SeriesFormatter(this._graph.annoEvents.data);
     } else {
         this.flagSeries = false;
-        //console.log(this._graph.series);
         this._sfmt = new SeriesFormatter(this._graph.series);
     }
 }
 ChartOptions.prototype.chartDefaults = function() {
-    return {
-        chart: {
-            borderRadius: 0,
-            borderWidth: 0,
-            spacingLeft: 5,
-            spacingRight: 5,
-            spacingTop: 5,
-            spacingBottom: 5
-        },
-        yAxis: {
-            startOnTick: false,
-            minPadding: 0.03
-        },        
-        title: {
-            text: ''
-        },
-        legend: {
-            enabled: false
-        },
-        credits: {
-            enabled: false
-        }
-    };
+    return DEFAULT_CHART_OPTS.BASIC;
 }
-ChartOptions.prototype.pieChartDefaults = function() {
-    opts = this.chartDefaults();
-    $.extend(opts, {
+ChartOptions.prototype.pieChartDefaults = function(extraOpts) {
+    var settings = $.extend(this.chartDefaults(), {
         chart: {
             plotBackgroundColor: null,
             plotBorderWidth: null,
@@ -151,42 +197,26 @@ ChartOptions.prototype.pieChartDefaults = function() {
                 fontSize: '11px'
             }
         },
-        plotOptions: {
-            pie: {
-                innerSize: 40,
-                allowPointSelect: true,
-                cursor: 'pointer',
-                dataLabels: {
-                    enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.1f} %'
-                }
-            }
-        }
-    }, true);
-    opts.series = this._sfmt.pieSeries();
-    return opts;
+        series: this._sfmt.pieSeries()
+    }, extraOpts);
+    return settings;
 }
 /*
     Determine if plot bands are applicable.
     Return:
-        yAxis highcharts config.
+        yAxis option for highcharts.
 */
 ChartOptions.prototype.__plotBands = function() {
     if(this._graph.thresholds) {
         return getPlotBands(this._graph.thresholds);
     }
-    return {
-        gridLineWidth: 1,
-        gridLineColor: "#ccc",
-        minPadding: 0.03,
-        startOnTick: false,
-    };
-}
+    return DEFAULT_CHART_OPTS.AXIS;
+};
 ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
     var opts = this.chartDefaults();
     $.extend(opts, {
         chart: {
-            spacingTop: 5,
+            spacingTop: 20,
             spacingBottom: 5,
             zoomType: 'xy',
             borderRadius: 0,
@@ -199,14 +229,18 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
             align: 'center',
             verticalAlign: 'bottom',
             borderWidth: 0,
+            itemDistance: 10,
+            itemMarginTop:1,
+            itemMarginBottom:1,
             itemStyle: {
                 cursor: "pointer",
                 fontSize: "10px",
                 fontWeight: "normal",
+                color: DEFAULT_CHART_OPTS.PLOT_TEXT_COLOR
             },
-            maxHeight: 50,
+            /*maxHeight: 50,*/
             margin: 5,
-            padding:5,
+            padding: 6,
             navigation: {
                 arrowSize: 9,
                 style: {
@@ -216,19 +250,20 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
             },
         },
         tooltip: {
-            crosshairs: [true,true],
-            borderColor: '#666',
-            backgroundColor: 'rgba(90,90,90,0.9)',
+            crosshairs: [{color: '#428bca'},false],
+            borderColor: 'none',
+            backgroundColor: 'none',
             valueDecimals: 2,
             shadow: false,
             animation: false,
             useHTML: true,
             formatter: function() {
                 if(this.point) {
-                    var s = '<span style="color:#ddd"><small>'+ (new Date(this.x)).toDateString() +'</small><br>';
-                    s += "<span style='padding-top:7px;font-size:11px;'><span style='color:"+this.point.series.color+"'>&#8226; </span>" + this.point.text +"</span></span>";
+                    var s = '<div class="chart-tooltip annotation" style="color:#ddd;border-color:'+this.point.series.color+'">';
+                    s += '<div class="small"><span class="padr5" style="color:'+this.point.series.color+'">'+this.point.title+"</span>"+ (new Date(this.x)).toLocaleString() +'</div>';
+                    s += "<div style='padding-top:7px;font-size:11px;'>" + this.point.text +"</div></div>";
                 } else {
-                    var s = '<small style="color:#ddd">'+ (new Date(this.x)).toDateString() +'</small>';
+                    var s = '<div class="chart-tooltip"><small style="color:#ddd">'+ (new Date(this.x)).toLocaleString() +'</small>';
                     s += '<table style="font-size:11px;color:#ddd;min-width:220px;margin-top:5px;">';
                     var sortedPoints = this.points.sort(function(a, b){
                         return ((a.y > b.y) ? -1 : ((a.y < b.y) ? 1 : 0));
@@ -238,20 +273,13 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
                         s += '<tr><td style="color:'+point.series.color+'">'+ point.series.name +'</td>';
                         s += '<td style="text-align:right;padding-left:3px">'+ (point.y).toFixed(2) + '</td></tr>';
                     });
-                    s += '</table>';
+                    s += '</table></div>';
                 }
                 return s;
             }
         },
         scrollbar: {
             enabled: false
-        },
-        plotOptions: {
-            series: {
-                marker: {
-                    enabled: true
-                }
-            }
         },
         navigation:{
             buttonOptions: {
@@ -264,19 +292,49 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
         navigator: {
             enabled: false
         },
-        xAxis: {
-            gridLineWidth: 1,
-            gridLineColor: "#ccc",
-            opposite: true
-        }
+        xAxis:DEFAULT_CHART_OPTS.AXIS
     }, extraOpts, true);
     opts.yAxis = this.__plotBands();
     if(this.flagSeries) {
-        $.extend(opts,{'series':this._sfmt.eventannoSerie()},true);
+        $.extend(opts,{'series':this._sfmt.flagsSeries()},true);
     } else {
         $.extend(opts,{'series':this._sfmt.lineSeries()},true);
     }
     return opts;
+}
+ChartOptions.prototype.areaChartDefaults = function(extraOpts) {
+    var opts = this.lineChartDefaults(extraOpts);
+    $.extend(opts.chart, {'type': 'area'}, true);
+    return opts;
+}
+ChartOptions.prototype.stackChartDefaults = function(extraOpts) {
+    var opts = this.areaChartDefaults(extraOpts);
+    $.extend(opts.plotOptions.area, {stacking:'normal'}, true);
+    return opts;
+}
+ChartOptions.prototype.splineChartDefaults = function(extraOpts) {
+    var opts = this.lineChartDefaults(extraOpts);
+    $.extend(opts.chart, {'type': 'spline'}, true);
+    return opts;
+}
+ChartOptions.prototype.chartDefaultsForType = function(extraOpts) {
+    switch(this._graph.graphType) {
+        case "pie":
+            return this.pieChartDefaults(extraOpts);
+            break;
+        case "area":
+            return this.areaChartDefaults(extraOpts);
+            break;
+        case "stacked":
+            return this.stackChartDefaults(extraOpts);
+            break;
+        case "spline":
+            return this.splineChartDefaults(extraOpts);
+            break;
+        default:
+            return this.lineChartDefaults(extraOpts);
+            break;
+    }
 }
 function SeriesFormatter(metSeries) {
     this.metSeries = metSeries;
@@ -299,19 +357,19 @@ SeriesFormatter.prototype.seriesTags = function() {
     }
     return tags;
 }
-SeriesFormatter.prototype.eventannoSerie = function() {
+SeriesFormatter.prototype.flagsSeries = function(annoName) {
     return {
-        name:'Annotations',
+        name: annoName,
         type:'flags',
         data: this.metSeries,
         shape: 'squarepin',
-        fillColor: '#428bca',
-        color: '#428bca',
+        index: 0,
         style: {
-            color: '#f0f0f0'
+            color: DEFAULT_CHART_OPTS.PLOT_TEXT_COLOR,
         },
-        y: 7,
-        stackDistance: 20
+        y: -48,
+        stackDistance: 20,
+        states : {hover : {fillColor: '#ddd'}}
     };
 }
 SeriesFormatter.prototype.lineSeries = function() {
@@ -377,9 +435,7 @@ function graphing_replaceSeries(result, redraw) {
         }
         // if tags change more series can be return
         // upsert if this is the case
-        if(!found) {
-            hcg.addSeries(highchartsSeries(tr,result.series[0].query), false);
-        }
+        if(!found) hcg.addSeries(highchartsSeries(tr,result.series[0].query), false);
     }
     if(redraw) hcg.redraw();
 }
@@ -417,12 +473,9 @@ function equalObjects(obj1, obj2) {
     return true;
 }
 function getPlotBands(thresholds) {
-    return  {
-        gridLineWidth: 1,
-        gridLineColor: "#ccc",
-        minPadding: 0.03,
-        startOnTick: false,
-        plotBands: [
+    var out = {};
+    $.extend(out, DEFAULT_CHART_OPTS.AXIS, true);
+    $.extend(out, { plotBands: [
             {
                 from: thresholds['info'],
                 to: thresholds['warning'],
@@ -437,7 +490,8 @@ function getPlotBands(thresholds) {
                 color: "rgba(187,74,71,0.3)"
             }
         ]
-    };
+        }, true);
+    return out;
 }
 function dataHasErrors(gObj) {
     for(var s in gObj.series) {
@@ -474,18 +528,14 @@ function setPlotBands(graph) {
  *      complete graph object
  */
 function graphing_newGraph(graph) {
-    var renderTo = "[data-graph-id='"+graph._id+"']"; 
     // check data
-    dhe = dataHasErrors(graph);
-    if(dhe) return;
-    var copts = new ChartOptions(graph);
+    if(dataHasErrors(graph)) return;
+    var renderTo = "[data-graph-id='"+graph._id+"']"; 
     
+    var copts = new ChartOptions(graph);
     if(graph.graphType == "pie") {
-        var opts = copts.pieChartDefaults();
-        //if(opts.series.)
-        $(renderTo).highcharts(opts);
+        $(renderTo).highcharts(copts.chartDefaultsForType());
     } else {
-        var opts = copts.lineChartDefaults();
         Highcharts.setOptions({ global: { useUTC:false } });
         Highcharts.seriesTypes.line.prototype.drawPoints = (function 
         (func) {
@@ -493,7 +543,7 @@ function graphing_newGraph(graph) {
                 return false;
             };
         } (Highcharts.seriesTypes.line.prototype.drawPoints));
-        $(renderTo).highcharts("StockChart",opts);
+        $(renderTo).highcharts("StockChart", copts.chartDefaultsForType());
     }
 }
 /*
@@ -559,7 +609,11 @@ function graphing_upsertSeries(args) {
                             newData = getNewDataAlignedSeries(hcg.series[i].options.name, 
                                     hcg.series[i].options.data, args.series[j].data[d].dps);                   
                         }
-                        if(newData != false) hcg.series[i].setData(newData, false, null, false);
+                        if(newData != false){ 
+                            hcg.series[i].setData(newData, false, null, false);
+                        } else {
+                            console.log(args.start, args.end);
+                        }
                         break;
                     }
                 } // END hcg.series //

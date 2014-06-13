@@ -3,6 +3,9 @@ import os
 import re
 import json
 
+from elasticsearch import Elasticsearch
+from metrilyx import BasicDataStructure
+
 from pprint import pprint 
 
 def jsonFromFile(filepath):
@@ -30,7 +33,19 @@ def jsonToFile(obj, filepath):
 			"error": str(e),
 			"message": str(e)
 			}
-			
+	
+class ElasticsearchDataStore(BasicDataStructure):
+	def __init__(self, config):
+		super(ElasticsearchDataStore, self).__init__(config)
+		self.ds = Elasticsearch()
+
+	def add(self, item):
+		self.ds.index(index=self.index, 
+				doc_type=item['eventType'], 
+				id=item['_id'], 
+				body=item)
+
+
 class FileModelStore(object):
 	def __init__(self, repo_path, log_hdl=None):
 		self.store_type = "file"

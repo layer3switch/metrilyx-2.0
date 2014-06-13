@@ -1,9 +1,16 @@
 from django.contrib.auth.models import User, Group
 
-from models import MapModel, HeatQuery
+from models import *
 import custom_fields
 
 from rest_framework import serializers
+
+class EventTypeSerializer(serializers.HyperlinkedModelSerializer):
+	metadata = custom_fields.JSONField(source='metadata',required=False)
+	
+	class Meta:
+		model = EventType
+		fields = ('_id','name','metadata')
 
 class HeatQuerySerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:

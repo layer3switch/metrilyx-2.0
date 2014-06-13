@@ -137,7 +137,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
 		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit-panel.html";
 		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
-		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/query-editor2.html";
+		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/pagegraph-query-editor.html";
 		$scope.graphHtml 		= connectionPool.nextConnection()+"/partials/graph.html";
 		$scope.heatGraphHtml 	= connectionPool.nextConnection()+"/partials/heat-graph.html"
 		$scope.podHtml 			= connectionPool.nextConnection()+"/partials/pod.html";
@@ -236,6 +236,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
        	}
        	$scope.wssock.onmessage = function(e) {
        		var data = JSON.parse(e.data);
+       		//console.log(data._id, data.annoEvents.eventType);
        		if(data.error) {
        			console.warn(data);
        			setGlobalAlerts(data);
@@ -592,7 +593,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			q.series = gobj.series;
 			$scope.requestData(q);
 			// destroy current graph //
-			$('[data-graph-id='+gobj._id+']').highcharts().destroy();
+			try{$('[data-graph-id='+gobj._id+']').highcharts().destroy();}catch(e){}
 			$('[data-graph-id='+gobj._id+']').html(
 				"<table class='gif-loader-table'><tr><td> \
 				<img src='/imgs/loader.gif'></td></tr></table>");
@@ -617,7 +618,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit-panel.html";
 		$scope.pageHeaderHtml 	= connectionPool.nextConnection()+"/partials/page-header.html";
 		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
-		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/query-editor.html";
+		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/adhocgraph-query-editor.html";
 
 		$scope.metricListSortOpts 	= dndconfig.metricList;
 		

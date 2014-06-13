@@ -10,34 +10,6 @@
 				<i class="glyphicon glyphicon-refresh" style="font-size:12px;color:#666;font-weight:bold"></i>
 			</span>
 		</div>
-			<!--
-			<div ng-if="graph.graphType!='pie'" class="marginlr5 marginb5 collapse" ng-include="thresholdsHtml" id="{{graph._id}}-thresholds"></div>
-			<div class="padlr10 padt5 padb10 pod-controls edit-comp{{editMode}}">
-				<div class="row" style="margin:0;color:#666;font-size:12px;">
-					<div class="col-md-6 text-left" title="Graph Type">
-						<span style="color:#999">Type :</span>
-						<select ng-model="graph.graphType" class="select-input"> 
-							<option value="line">line</option>
-							<option value="pie">pie</option>	
-						</select>
-					</div>
-					<div class="col-md-6 text-right" title="Vertical graph size">
-						<span>
-							<span style="color:#999">Size :</span>
-							<select ng-model="graph.size" ng-change="reflow()" class="select-input">
-								<option value="small">small</option>
-								<option value="medium">medium</option>
-								<option value="large">large</option>
-							</select>
-						</span>
-						<span class="interactive pointer padl10" ng-click="reloadGraph(graph);" title="Refresh"><i class="glyphicon glyphicon-refresh" style="font-weight:bold"></i></span>
-					</div>
-				</div>
-			</div>
-			-->
-			<!--
-		<div ng-if="editMode===' edit-mode'" ng-include="queryEditorHtml" class="text-center"></div>
-		-->
 		<div class="graph {{graph.size}} text-center animated"  style="width:100%" data-graph-id="{{graph._id}}" ui-sortable ng-model="graph.series">
 			<table class='gif-loader-table' style="color:#ccc"><tr><td>
 				Drag metrics here from search
@@ -45,19 +17,19 @@
 		</div>
 		<!-- graph footer -->
 		<div class="small padtb5 row" style="margin:0;background-color:none">
-			<div class="col-md-2">
+			<div class="col-md-3">
 				<span class="btn-group dropup" style="position:relative;top:3px;">
 					<span class="metric-loaded-btn interactive" data-toggle="dropdown" title="Metrics successfully loaded">{{graph|loadedSeries}} / {{graph.series.length}}</span>
-					<ul class="dropdown-menu" style="margin-bottom:5px;margin-top:5px;font-size:11px;">
+					<ul class="dropdown-menu noshadow metric-status">
 						<li ng-repeat="serie in graph.series" ng-attr-class="padlr10 padtb5 {{isSerieLoaded(graph, serie) || 'metric-not-loaded' }}">{{serie.query|metricQuery}}</li>
 			        </ul>
 		        </span>
 	        </div>
-	        <div class="col-md-10">
+	        <div class="col-md-9">
 	        	<span data-graph-status="{{graph._id}}"></span>
 	        </div>
 		</div>
-
+		<!-- graph controls -->
 		<div class="graph-face back{{editMode}}">
 			<div ng-include="queryEditorHtml" style="width:100%"></div>
 			<div class="query-editor-footer">

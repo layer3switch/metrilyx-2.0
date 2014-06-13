@@ -118,30 +118,42 @@ class AnnoEventGraphServerProtocol(GraphServerProtocol):
 		self.submitPerfQueries(req_obj)
 		self.__fetchAnnoEvents(req_obj)
 
-	def ae_response_callback(self, data, query, graph):
+	def ae_response_callback(self, data, annoType, query, graph):
 		try:
 			dct = json.loads(data)
 			if dct.has_key('error'):
-				print dct['error']
+				logger.error(str(dct))
 				return
 			eas = EventannoSerie([ h['_source'] for h in dct['hits']['hits'] ])
 			if len(eas.data) < 1:
+				logger.debug("%s %s" %(annoType, graph['_id']))
 				return
+			
 			out = {
 				'_id': graph['_id'],
 				'annoEvents': graph['annoEvents'],
+				'graphType': graph['graphType']
 				}
 			out['annoEvents']['data'] = eas.data
+			out['annoEvents']['eventType'] = annoType
 			self.sendMessage(json.dumps(out))
+			logger.info("%s %s %d" %(graph['_id'], annoType, len(eas.data)))
 		except Exception,e:
-			print "ERROR", e
+			logger.error(str(e))
 
 	def __fetchAnnoEvents(self, graphMeta):
-		#if len(graphMeta['annoEvents']['types']) < 1 or \
-		#			len(graphMeta['annoEvents']['tags'].keys()) < 1: 
-		if len(graphMeta['annoEvents']['tags'].keys()) < 1:
+		if len(graphMeta['annoEvents']['types']) < 1 or \
+					len(graphMeta['annoEvents']['tags'].keys()) < 1:
 			return
-		for (url, query) in self.annoEventDataProvider.get_queries(graphMeta):
+		request = {
+			'start': graphMeta['start']*1000000,
+			'tags': graphMeta['annoEvents']['tags'],
+			'types': graphMeta['annoEvents']['types']
+		}
+		if graphMeta.has_key('end'):
+			request['end'] = graphMeta['end']*1000000
+		for (url, eventType, query) in self.annoEventDataProvider.getQueries(request):
+			#print graphMeta['_id'], eventType
+			#print eventType, query
 			a = AsyncHttpJsonRequest(uri=url, method='GET', body=query)
-			a.addResponseCallback(self.ae_response_callback, query, graphMeta)
-			#print meta
+			a.addResponseCallback(self.ae_response_callback, eventType, query, graphMeta)

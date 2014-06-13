@@ -10,7 +10,7 @@ def absoluteTime(relTime):
 		Returns relative/absoluteTime time in microseconds
 	'''
 	if type(relTime) != str or "-ago" not in relTime:
-		return relTime*1000000
+		return relTime
 
 	val = int(relTime.split("-")[0][:-1])
 	unit = relTime.split("-")[0][-1]
@@ -37,7 +37,7 @@ class EventannoSerie(object):
 		return [ {
 			'x': s['timestamp'],
 			'text': s['message'],
-			'title': s['type']
+			'title': s['eventType']
 		} for s in self._serie ]
 
 	
