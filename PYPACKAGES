@@ -11,3 +11,4 @@ jsonfield
 twisted
 uwsgi
 autobahn
+elasticsearch
