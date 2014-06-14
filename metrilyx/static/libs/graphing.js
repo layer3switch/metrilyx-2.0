@@ -172,7 +172,7 @@ ChartOptions.prototype.chartDefaults = function() {
     return DEFAULT_CHART_OPTS.BASIC;
 }
 ChartOptions.prototype.pieChartDefaults = function(extraOpts) {
-    var settings = $.extend(this.chartDefaults(), {
+    return $.extend(this.chartDefaults(), {
         chart: {
             plotBackgroundColor: null,
             plotBorderWidth: null,
@@ -196,13 +196,12 @@ ChartOptions.prototype.pieChartDefaults = function(extraOpts) {
                 return s;
             },
             style: {
-                color: '{series.color}',
+                color: '#ddd',
                 fontSize: '11px'
             }
         },
         series: this._sfmt.pieSeries()
     }, extraOpts);
-    return settings;
 }
 /*
     Determine if plot bands are applicable.
