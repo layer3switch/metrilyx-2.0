@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # chkconfig: 234 90 10
-# description: Metrilyx Data Server.  This provides data via websockets.
+# description: Metrilyx kafka instance.  This controls kafka and zookeeper.
 #
 
 [ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
