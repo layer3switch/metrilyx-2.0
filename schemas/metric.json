@@ -1,6 +1,7 @@
 {
 	"alias": "",
 	"yTransform": "",
+	"paneIndex": 0,
 	"query": {
 		"metric": "",
 		"aggregator": "sum",
