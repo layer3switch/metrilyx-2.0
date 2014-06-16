@@ -126,7 +126,7 @@ class AnnoEventGraphServerProtocol(GraphServerProtocol):
 				return
 			eas = EventannoSerie([ h['_source'] for h in dct['hits']['hits'] ])
 			if len(eas.data) < 1:
-				logger.debug("%s %s" %(annoType, graph['_id']))
+				logger.info("%s %s" %(annoType, graph['_id']))
 				return
 			
 			out = {
@@ -137,7 +137,7 @@ class AnnoEventGraphServerProtocol(GraphServerProtocol):
 			out['annoEvents']['data'] = eas.data
 			out['annoEvents']['eventType'] = annoType
 			self.sendMessage(json.dumps(out))
-			logger.info("%s %s %d" %(graph['_id'], annoType, len(eas.data)))
+			logger.info("Event annotation: sha1=%s type=%s count=%d" %(graph['_id'], annoType, len(eas.data)))
 		except Exception,e:
 			logger.error(str(e))
 
