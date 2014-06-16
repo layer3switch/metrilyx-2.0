@@ -452,10 +452,13 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				graphType: graphObj.graphType,
 				tags: $scope.globalTags,
 				thresholds: graphObj.thresholds,
-				annoEvents: graphObj.annoEvents
+				annoEvents: graphObj.annoEvents,
+				multiPane: graphObj.multiPane,
+				panes: graphObj.panes,
+				totalSeries: graphObj.series.length
 			};
-			$.extend(q, $scope.getTimeWindow(),true);
-			return q;
+			//console.log('series', graphObj.series.length);
+			return $.extend(true, q, $scope.getTimeWindow());
 		}
 		$scope.disableDragDrop = function() {
 			$('[ui-sortable]').each(function() {

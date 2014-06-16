@@ -1,9 +1,9 @@
 <div class="text-left graph-controls" style="color:#ccc">
-	<div class="padtb10 padlr10" style="background:rgba(0,0,0,0.1);">
+	<div class="padtb10 padlr10" style="background:rgba(0,0,0,0.1);border-radius: 3px 3px 0 0">
 		<span class="pointer interactive" onclick="$(this).parent().parent().parent().hide()" title="Close"><i class="glyphicon glyphicon-cog"></i></span>
 	</div>
-	<div class="padlr10 padtb5" style="border-top: 1px solid #666;">
-		<span class="padr10">
+	<div class="padlr10 padtb6" style="border-top: 1px solid #666;">
+		<span class="padr5">
 			<span class="small">Size :</span>
 			<select ng-model="graph.size" ng-change="reflow()" class="dark">
 				<option value="small">small</option>
@@ -11,7 +11,7 @@
 				<option value="large">large</option>
 			</select>
 		</span>
-		<span class="padlr10">
+		<span class="padlr5">
 			<span class="small">Type :</span>
 			<select ng-model="graph.graphType" class="dark"> 
 				<option value="line">line</option>

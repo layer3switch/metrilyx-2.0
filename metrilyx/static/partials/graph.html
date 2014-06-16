@@ -1,11 +1,11 @@
 <div class="graph-container">
 	<div class="graph-face front{{editMode}}">
-		<div class="input-group input-group-sm" style="width:100%">
+		<div class="input-group input-group-sm text-center" style="width:100%">
 			<a href="javascript:void(0)" class="input-group-addon nobg interactive" onclick="$(this).next().show()">
 				<i class="glyphicon glyphicon-cog" style="font-size:14px;"></i>
 			</a>
 			<div ng-include="graphControlsHtml" style="display:none"></div>
-			<input type="text" ng-model="graph.name" class="edit-comp{{editMode}} form-control" placeholder="Graph Name" disabled="true">
+			<span class="form-control" style="border:none;-webkit-box-shadow:none"><strong>{{graph.name}}</strong></span>
 			<span class="input-group-addon nobg interactive" ng-click="reloadGraph(graph);" title="Refresh">
 				<i class="glyphicon glyphicon-refresh" style="font-size:12px;color:#666;font-weight:bold"></i>
 			</span>
@@ -18,7 +18,7 @@
 		<!-- graph footer -->
 		<div class="small padtb5 row" style="margin:0;background-color:none">
 			<div class="col-md-3">
-				<span class="btn-group dropup" style="position:relative;top:3px;">
+				<span class="btn-group metrics-loaded-list dropup" style="position:relative;top:3px;">
 					<span class="metric-loaded-btn interactive" data-toggle="dropdown" title="Metrics successfully loaded">{{graph|loadedSeries}} / {{graph.series.length}}</span>
 					<ul class="dropdown-menu noshadow metric-status">
 						<li ng-repeat="serie in graph.series" ng-attr-class="padlr10 padtb5 {{isSerieLoaded(graph, serie) || 'metric-not-loaded' }}">{{serie.query|metricQuery}}</li>
@@ -30,13 +30,57 @@
 	        </div>
 		</div>
 		<!-- graph controls -->
-		<div class="graph-face back{{editMode}}">
+		<div class="graph-face back{{editMode}} animated" onclick="$('.graph-face.back.edit-mode').css('z-index', 0);$(this).css('z-index',1000);">
+			<div class="padtb10 padl5 padr4" style="background:rgb(95,95,95);border-bottom:1px solid #505050;border-radius:2px 2px 0 0">
+				<div class="input-group input-group-sm" style="width:100%">
+					<a href="javascript:void(0)" class="input-group-addon nobg" onclick="$(this).next().show()" style="padding-right:15px;">
+						<i class="glyphicon glyphicon-cog interactive" style="font-size:14px;color:#ccc;"></i>
+					</a>
+					<div ng-include="graphControlsHtml" style="display:none"></div>
+					<input type="text" ng-model="graph.name" class="form-control dark" placeholder="Graph Name" style="border:1px solid #707070!important">
+					<span class="input-group-addon nobg" title="Preview"  style="padding-left:15px;" data-toggle="collapse" data-target="[data-query-set='{{graph._id}}']">
+						<i class="interactive glyphicon glyphicon-chevron-down" style="font-size:12px;color:#ccc;font-weight:bold"></i>
+					</span>
+				</div>
+			</div>
+			<div data-query-set="{{graph._id}}" class="collapse in">
+			<div ng-if="graph.graphType!=='pie'"  class="text-left padlr10 small" style="border-top:1px solid #636363;border-bottom:1px solid #454545">
+				<div class="padtb10">
+					<span class="padl5 padr10"><b>Mult-paned layout</b></span>
+					<span class="pull-right padr4"><input type="checkbox" ng-model="graph.multiPane"></span>
+				</div>
+				<div ng-if="graph.multiPane">
+					<ul class="animated padb5" style="margin-bottom:0px;">
+						<li ng-repeat="pane in graph.panes track by $index" class="padtb2">
+							<span>
+								<span class="padr10" style="color:#ccc">Pane <b>{{$index}}</b></span>
+								<input type="text" placeholder="Pane name" style="background:none!important" class="dark" ng-model="graph.panes[$index]">
+								<span ng-if="$index>1">
+									<a href="javascript:void(0)" class="interactive" style="color:#ccc" ng-click="graph.panes.splice($index,1)" title="Remove pane">
+										<i class="glyphicon glyphicon-minus"></i>
+									</a>
+								</span>
+							</span>
+						</li>
+						<li ng-if="graph.panes.length<graph.series.length" class="padt5" title="Add new pane">
+							<a href="javascript:void(0)" class="interactive" style="color:#ddd" ng-click="graph.panes.push('')">
+								<span><i class="glyphicon glyphicon-plus"></i></span>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
 			<div ng-include="queryEditorHtml" style="width:100%"></div>
 			<div class="query-editor-footer">
-				<a href="javascript:void(0)" title="Remove Graph" class="btn-danger graph-rm-btn edit-comp{{editMode}}" style="font-size:12px;" ng-click="pod.graphs.splice(pod.graphs.indexOf(graph),1);reflow();">
+				<span class="iblk pointer btn-primary pad5 margin10 marginr5 edit-comp{{editMode}}" title="Remove Graph"  style="font-size:12px;border-radius:2px;padding-top:7px" ng-click="reloadGraph(graph)">
+					<i class="glyphicon glyphicon-eye-open" style="font-weight:bold"></i>
+					<span class="pad5">Preview</span>
+				</span>
+				<span class="iblk pointer btn-danger pad5 margin10 marginl5 edit-comp{{editMode}}" title="Remove Graph"  style="font-size:12px;border-radius:2px;padding-top:7px" ng-click="pod.graphs.splice(pod.graphs.indexOf(graph),1);reflow();">
 					<i class="glyphicon glyphicon-trash" style="font-weight:bold"></i>
 					<span class="pad5">Delete</span>
-				</a>
+				</span>
+			</div>
 			</div>
 		</div>
 	</div>

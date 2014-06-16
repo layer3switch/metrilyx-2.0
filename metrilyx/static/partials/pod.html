@@ -1,8 +1,8 @@
 <div class="layout-column edit-comp{{editMode}} col-md-{{row.length|columnWidth}}" ng-repeat="column in row" ui-sortable="columnSortOpts" ng-model="column" column="true">
 	<div class="dblclick-helper edit-comp{{editMode}} text-center column-handle">Double-click to add new pod</div>
 	<!--<div class="pad20">-->
-	<div ng-repeat="pod in column" class="pod" ng-model="pod" pod="true">
-		<div class="pod-header edit-comp{{editMode}}">
+	<div ng-repeat="pod in column" class="pod{{editMode}} animated bottom-shadow" ng-model="pod" pod="true">
+		<div class="pod-header edit-comp{{editMode}} animated">
 			<div class="input-group" style="width:100%">
 				<span class="input-group-btn edit-comp{{editMode}} pod-btn-bar nobg">
 					<span ng-switch="modelType">
@@ -13,10 +13,10 @@
 							<span style="opacity:0"><i class="glyphicon glyphicon-plus"></i></span>
 						</span>
 					</span>
-					<a href="javascript:void(0)" title="Vertical graph layout" ng-click="pod.orientation='vertical';" class="btn interactive pod-header-btn edit-comp{{editMode}} vertical-graphs {{pod.orientation}}"><i class="glyphicon glyphicon-resize-vertical" style="font-weight:bold;"></i></a>
 				</span>
 				<input type="text" class="form-control edit-comp{{editMode}}" ng-model="pod.name" placeholder="Pod Name" disabled="true">
 				<span class="edit-comp{{editMode}} input-group-btn pod-btn-bar">
+					<a href="javascript:void(0)" title="Vertical graph layout" ng-click="pod.orientation='vertical';" class="btn interactive pod-header-btn edit-comp{{editMode}} vertical-graphs {{pod.orientation}}"><i class="glyphicon glyphicon-resize-vertical" style="font-weight:bold;"></i></a>
 					<a href="javascript:void(0)" title="Horizontal graph layout" class="btn interactive pod-header-btn edit-comp{{editMode}} horizontal-graphs {{pod.orientation}}" ng-click="pod.orientation='horizontal';">
 						<i class="glyphicon glyphicon-resize-horizontal" style="font-weight:bold;"></i>
 					</a>

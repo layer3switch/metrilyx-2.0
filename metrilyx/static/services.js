@@ -39,14 +39,29 @@ metrilyxServices.factory('Metrics', ['$http', 'Auth', function($http, Auth) {
         }
     };
 }]);
+metrilyxServices.factory('EventTypes', ['$resource',
+	function($resource) {
+		return $resource('/api/event_types/:eventType', {}, {
+			listEvents: {
+				method: 'GET',
+				isArray: true
+			},
+			getEvent: {
+				method: 'GET',
+				params: {eventType: '@eventType'},
+				isArray: false
+			}
+		});
+	}
+]);
 metrilyxServices.factory('Model', ['$resource', 'Auth',
 	function($resource, Auth) {
 		return $resource('/api/graphmaps/:pageId', {}, {
 			getModel: {
 				method:'GET', 
 				params:{modelId:'@pageId'}, 
-				isArray:false}
-			,
+				isArray:false
+			},
 			listModels:{
 				method:'GET', 
 				isArray:true
