@@ -11,7 +11,7 @@ from pprint import pprint
 class EventType(models.Model):
 	name = models.CharField(max_length=32)
 	_id = models.CharField(max_length=32, primary_key=True)
-	metadata = jsonfield.JSONField()
+	metadata = jsonfield.JSONField(default={},null=True,blank=True)
 
 	def save(self, *args, **kwargs):
 		self._id = self.name.lower()
