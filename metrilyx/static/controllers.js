@@ -656,10 +656,13 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 					try {
 						arr = $routeParams.thresholds.split(":");
 						if(arr.length == 3) {
+							dmm = arr[0].split("-");
+							wmm = arr[1].split("-");
+							imm = arr[2].split("-");
 							graphModel.thresholds = {
-								'danger': arr[0],
-								'warning': arr[1],
-								'info': arr[2]
+								'danger': {max:dmm[0],min:dmm[1]},
+								'warning': {max:wmm[0],min:wmm[1]},
+								'info': {max:imm[0],min:imm[1]}
 							}
 						} 
 					} catch(e) {
@@ -691,8 +694,19 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				}
 				$scope.graph = graphModel;
 				$scope.reloadGraph();
+				setTimeout(function() {
+					$("[data-graph-id='"+$scope.graph._id+"']").html(
+						"<table class='gif-loader-table'><tr><td> \
+						<img src='/imgs/loader.gif'></td></tr></table>");
+				},400);
 			} else {
 				// initial empty page
+				graphModel.thresholds.danger.max = '';
+				graphModel.thresholds.danger.min = '';
+				graphModel.thresholds.warning.max = '';
+				graphModel.thresholds.warning.min = '';
+				graphModel.thresholds.info.max = '';
+				graphModel.thresholds.info.min = '';
 				$scope.graph = graphModel;
 			}
 		});
@@ -801,7 +815,9 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			}
 			srch = {
 				'm': outarr,
-				'thresholds': $scope.graph.thresholds.danger+":"+$scope.graph.thresholds.warning+":"+$scope.graph.thresholds.info,
+				'thresholds': $scope.graph.thresholds.danger.max + "-" + $scope.graph.thresholds.danger.min +
+					":"+$scope.graph.thresholds.warning.max + "-" + $scope.graph.thresholds.warning.min +
+					":"+$scope.graph.thresholds.info.max + "-" + $scope.graph.thresholds.info.min,
 				'type': $scope.graph.graphType,
 				'size': $scope.graph.size,
 			};
@@ -853,8 +869,8 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			q.series = gobj.series;
 			$scope.requestData(q);
 			// destroy current graph //
-			try { $('[data-graph-id='+gobj._id+']').highcharts().destroy(); } catch(e) {};
-			$('[data-graph-id='+gobj._id+']').html(
+			try { $("[data-graph-id='"+gobj._id+"']").highcharts().destroy(); } catch(e) {};
+			$("[data-graph-id='"+gobj._id+"']").html(
 				"<table class='gif-loader-table'><tr><td> \
 				<img src='/imgs/loader.gif'></td></tr></table>");
 		}

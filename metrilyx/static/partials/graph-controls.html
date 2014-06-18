@@ -22,7 +22,7 @@
 			</select>
 		</span>
 	</div>
-	<div ng-if="graph.graphType!=='pie'" class="padb5 padlr10 text-right">
+	<div ng-if="graph.graphType!=='pie'&&!graph.multiPane" class="padb5 padlr10 text-right">
 		<div class="text-left" style="border-top:1px solid #777;padding-top:5px;">
 			<a href="javascript:void(0)" data-toggle="collapse" data-target="[data-graph-thresholds='{{graph._id}}']" style="color:#ccc" class="interactive">
 				<span>Thresholds</span>
@@ -32,21 +32,21 @@
 		<div data-graph-thresholds="{{graph._id}}" class="collapse">
 			<div style="margin-top:12px;">
 				<div class="threshold-label" style="color:rgba(200,74,71,1);">Danger:</div>
-				<input type="text" ng-model="graph.thresholds.danger.max" class="threshold-input dark danger">
+				<input type="text" ng-model="graph.thresholds.danger.max" class="threshold-input trans danger">
 				<span class="small" style="color:#aaa"> to </span>
-				<input type="text" ng-model="graph.thresholds.danger.min" class="threshold-input dark danger">
+				<input type="text" ng-model="graph.thresholds.danger.min" class="threshold-input trans danger">
 			</div>
 			<div>
 				<div class="threshold-label" style="color:rgba(224,158,73,1);">Warn:</div>
-				<input type="text" ng-model="graph.thresholds.warning.max" class="threshold-input dark warning">
+				<input type="text" ng-model="graph.thresholds.warning.max" class="threshold-input trans warning">
 				<span class="small" style="color:#aaa"> to </span>
-				<input type="text" ng-model="graph.thresholds.warning.min" class="threshold-input dark warning">
+				<input type="text" ng-model="graph.thresholds.warning.min" class="threshold-input trans warning">
 			</div>
 			<div>
 				<div class="threshold-label" style="color:rgba(99,177,211,1);">Info:</div>
-				<input type="text" ng-model="graph.thresholds.info.max" class="threshold-input dark info">
+				<input type="text" ng-model="graph.thresholds.info.max" class="threshold-input trans info">
 				<span class="small" style="color:#aaa"> to </span>
-				<input type="text" ng-model="graph.thresholds.info.min" class="threshold-input dark info">
+				<input type="text" ng-model="graph.thresholds.info.min" class="threshold-input trans info">
 			</div>
 			<div ng-if="modelType!=='heatmap/'" class="gcontrols-apply-btn pointer" ng-click="setPlotBands(graph)" title="Apply threshold changes">
 				<span>Apply</span>

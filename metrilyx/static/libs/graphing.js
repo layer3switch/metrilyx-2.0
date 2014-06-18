@@ -1,6 +1,11 @@
 // TODO below here needs fixing //
 var CHART_TEXT_COLOR = '#666';
 var DEFAULT_CHART_OPTS = {
+        /*PLOT_BAND_COLORS: {
+        "info":"rgba(99,177,211,0.25)",
+        "warning":"rgba(224,158,73,0.25)",
+        "info":"rgba(187,74,71,0.25)"
+    }, */
     AXIS:{
         gridLineWidth: 1,
         gridLineColor: "#ddd",
@@ -334,7 +339,7 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
     } else {
         $.extend(opts,{'series':this._sfmt.lineSeries(this._graph.multiPane)},true);
     }
-    console.log(this._graph._id, opts);
+    //console.log(this._graph._id, opts);
     return opts;
 }
 ChartOptions.prototype.areaChartDefaults = function(extraOpts) {
@@ -531,20 +536,20 @@ function getPlotBands(thresholds) {
     $.extend(out, DEFAULT_CHART_OPTS.AXIS, true);
     $.extend(out, { plotBands: [
             {
-                from: thresholds['info'],
-                to: thresholds['warning'],
+                from: thresholds.info.min,
+                to: thresholds.info.max,
                 color: "rgba(99,177,211,0.3)"
             },{
-                from: thresholds['warning'],
-                to: thresholds['danger'],
+                from: thresholds.warning.min,
+                to: thresholds.warning.max,
                 color:"rgba(224,158,73,0.3)"
             },{
-                from: thresholds['danger'],
-                to: thresholds['danger']+1000,
+                from: thresholds.danger.min,
+                to: thresholds.danger.max,
                 color: "rgba(187,74,71,0.3)"
             }
         ]
-        }, true);
+    }, true);
     return out;
 }
 function dataHasErrors(gObj) {
@@ -575,6 +580,7 @@ function setPlotBands(graph) {
         return;
     }
     hc.options.yAxis = getPlotBands(graph.thresholds);
+    console.log(hc.options.yAxis);
     $(renderTo).highcharts("StockChart",hc.options);  
 }
 function render_lineBasedNewGraph(selector, options) {
