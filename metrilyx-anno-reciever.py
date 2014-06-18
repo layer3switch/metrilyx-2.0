@@ -19,7 +19,7 @@ from metrilyx.metrilyxconfig import config
 
 from metrilyx.annotations import Annotator
 from metrilyx.annotations.messagebus import KafkaProducer, KafkaConsumer
-from metrilyx.datastores import ElasticsearchDataStore
+from metrilyx.datastores.ess import ElasticsearchDataStore
 
 
 Q = Queue()

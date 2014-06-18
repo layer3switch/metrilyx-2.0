@@ -10,7 +10,6 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status, viewsets, permissions, filters
 
@@ -22,8 +21,7 @@ from custom_permissions import IsGroupOrReadOnly, IsCreatorOrReadOnly
 from serializers import *
 from models import * 
 
-from datastores import *
-from httpclients import HttpJsonClient
+from datastores.ess import ElasticsearchDataStore
 from dataserver.dataproviders import AnnoEventDataProvider
 from annotations import Annotator
 
@@ -122,19 +120,33 @@ class SchemaViewSet(viewsets.ViewSet):
 
 class AnnotationViewSet(APIView):
 	REQUIRED_QUERY_PARAMS = ('start','types','tags')
+	REQUIRED_WRITE_PARAMS = ('eventType','message', 'tags')
 	# this api is used for synchronous calls
 	esearch = Elasticsearch()
-	dp = AnnoEventDataProvider(config['dataproviders'][1])
+	esds = ElasticsearchDataStore(config['dataproviders'][1])
+	
+	dp = AnnoEventDataProvider(**config['dataproviders'][1])
 	annotator = Annotator()
 
 	def __checkRequest(self, request):
-		for rp in self.REQUIRED_QUERY_PARAMS:
-			if rp not in request.keys():
-				return {'error':'%s key required' %(rp)}
-		if type(request['tags']) is not dict:
-			return {'error': 'Invalid tags'}
-		return request
+		if request.body == "":
+			return {'error': 'no query specified'}
+		try:
+			jsonReq = json.loads(request.body)
+		except Exception,e:
+			return {'error': 'json parse: %s' %(str(e))}
 
+		if request.method == 'GET':
+			for rp in self.REQUIRED_QUERY_PARAMS:
+				if rp not in jsonReq.keys():
+					return {'error':'%s key required' %(rp)}
+			if type(request['tags']) is not dict:
+				return {'error': 'Invalid tags'}
+		else:
+			for rp in self.REQUIRED_WRITE_PARAMS:
+				if rp not in jsonReq.keys():
+					return {'error': 'missing parameter: %s' %(rp)}
+		return jsonReq
 
 	def get(self, request, pk=None):
 		'''
@@ -144,10 +156,9 @@ class AnnotationViewSet(APIView):
 				start:
 				end: (optional)
 		'''
-		reqBody = self.__checkRequest(json.loads(request.body))
+		reqBody = self.__checkRequest(request)
 		if reqBody.has_key('error'):
 			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
-
 		# always yield's 1 when split=False
 		for (url, eventTypes, query) in self.dp.getQueries(reqBody,split=False):
 			essRslt = self.esearch.search(
@@ -157,13 +168,24 @@ class AnnotationViewSet(APIView):
 			return Response(rslt)
 	
 	def post(self, request, pk=None):
-		reqBody = self.annotator.annotation(json.loads(request.body))
+		'''
+			request object:
+				eventType:
+				tags:
+				message:
+				timestamp:
+		'''
+		reqBody = self.__checkRequest(request)
+
 		if reqBody.has_key('error'):
 			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
-		annoObj = self.annotator.annotation(reqBody)
-		annoStr = self.annotator.annotation(annoStr)
-		print reqBody
-		return Response({})
+
+		annoStr = self.annotator.annotation(reqBody)
+		## this will give an object with the _id
+		annoObj = self.annotator.annotation(annoStr)
+		self.esds.add(annoObj)
+		return Response(annoObj)
+		
 	'''
 	def put(self, request, pk=None):
 		reqBody = self.__checkRequest(json.loads(request.body))

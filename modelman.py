@@ -12,7 +12,7 @@ from metrilyx.models import *
 
 graphSchema = json.load(open("./schemas/graph.json", "rb"))
 
-def upgradeThresholds(graph):
+def updateThresholds(graph):
 	if graph['graphType'] == "pie": 
 		print graph['_id'],  "skipping pie graph"
 		return
@@ -20,6 +20,7 @@ def upgradeThresholds(graph):
 			type(graph['thresholds']['danger']) is str or \
 			type(graph['thresholds']['danger']) is unicode:
 		graph['thresholds'] = graphSchema['thresholds']
+		print graph['_id'], "thresholds added"
 	else:
 		if type(graph['thresholds']['danger']) is dict: 
 			print graph['_id'], "skipping already in upgraded"
@@ -38,19 +39,32 @@ def upgradeThresholds(graph):
 				'max': graph['thresholds']['warning']
 			}
 		}
-		print graph['_id'], "updated"
+		print graph['_id'], "thresholds updated"
 		#print model._id, graph['thresholds']
 
 def addEventAnnoDef(graph):
 	graph['annoEvents'] = graphSchema['annoEvents']
+	print graph['_id'], "added event annotation"
+
+def updateMultiPaneOptions(graph):
+	if not graph.has_key('multiPane'):
+		graph['multiPane'] = False
+	if not graph.has_key('panes'):
+		graph['panes'] = ["",""]
+	else:
+		while(len(graph['panes'])<2):
+			graph['panes'].append("")
+	for s in graph['series']:
+		s['paneIndex'] = 0
 
 def processLayout(model):
 	for row in model.layout:
 		for col in row:
 			for pod in col:
 				for graph in pod['graphs']:
-					upgradeThresholds(graph)
+					updateThresholds(graph)
 					addEventAnnoDef(graph)
+					updateMultiPaneOptions(graph)
 
 models = MapModel.objects.all()
 for m in models:

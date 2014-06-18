@@ -28,7 +28,7 @@ class TSDBGraphServerProtocol(GraphServerProtocol):
 class ESAnnoEventGraphServerProtocol(AnnoEventGraphServerProtocol):
 	dataprovider = TSDBDataProvider(config['dataproviders'][0])
 	timeout = config['dataproviders'][0]['timeout']	
-	annoEventDataProvider = AnnoEventDataProvider(config['dataproviders'][1])
+	annoEventDataProvider = AnnoEventDataProvider(**config['dataproviders'][1])
 
 def spawn_websocket_server(uri, logLevel, externalPort=None):
 	if logLevel == "DEBUG":

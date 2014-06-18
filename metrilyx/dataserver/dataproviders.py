@@ -3,21 +3,17 @@ import re
 import json
 import logging
 
+from metrilyx import BasicDataStructure
 from ..httpclients import AsyncHttpJsonRequest
 from transforms import absoluteTime
-
+from ..datastores.ess import ElasticsearchAnnotationQueryBuilder 
 from pprint import pprint
 
 logger = logging.getLogger(__name__)
 
 re_504 = re.compile("(504 gateway time.+out)", re.IGNORECASE)
 
-class BaseDataProvider(object):
-	def __init__(self, config):
-		for k,v in config.items():
-			setattr(self, k, v)
-
-class PerformanceDataProvider(BaseDataProvider):
+class PerformanceDataProvider(BasicDataStructure):
 
 	def graph_metadata(self, request, serie):
 		"""
@@ -117,8 +113,8 @@ class TSDBDataProvider(PerformanceDataProvider):
 		url = "%s%s" %(base_url, self.__get_serie_query(query_obj))
 		return str(url)
 
-class AnnoEventDataProvider(BaseDataProvider):
-	
+class AnnoEventDataProvider(ElasticsearchAnnotationQueryBuilder):
+	'''
 	def timestampQuery(self, request):
 		if request.has_key('end'):
 			return {'range':{'timestamp':{
@@ -135,6 +131,7 @@ class AnnoEventDataProvider(BaseDataProvider):
 
 	def eventTypeQuery(self, eventType):
 		return {'term': {'eventType': str(eventType).lower()}}
+	'''
 
 	def getQueries(self, request, split=True):
 		'''
