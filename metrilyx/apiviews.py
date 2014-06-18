@@ -99,8 +99,7 @@ class HeatMapViewSet(MapViewSet):
 class EventTypeViewSet(viewsets.ModelViewSet):
 	queryset = EventType.objects.all()
 	serializer_class = EventTypeSerializer
-	permission_classes = (permissions.IsAdminUser, 
-		permissions.DjangoModelPermissionsOrAnonReadOnly)
+	permission_classes = (permissions.DjangoModelPermissionsOrAnonReadOnly,)
 
 class SchemaViewSet(viewsets.ViewSet):
 
