@@ -6,7 +6,7 @@ import time
 from metrilyx.metrilyxconfig import config
 
 DEFAULT_PARSE_PATTERN = re.compile(config['annotations']['line_re'])	
-VALID_KEYS = ('_id', 'timestamp', 'type', 'message')
+VALID_KEYS = ('_id', 'timestamp', 'eventType', 'message', 'tags')
 
 class Annotator(object):
 	'''
@@ -29,7 +29,7 @@ class Annotator(object):
 			Return:
 				if string is provided a dict is returned or vica-versa
 		'''
-		if type(anno) == str:
+		if type(anno) in (str, unicode):
 			m = self.pattern.match(anno)
 			if m != None:
 				try:
@@ -48,10 +48,10 @@ class Annotator(object):
 					return {"error": str(e)}
 			else:
 				return {"error": "Invalid annotation: %s" %(line)}
-		elif type(anno) == dict:
+		elif type(anno) is dict:
 			if not anno.has_key('timestamp'):
 				anno['timestamp'] = time.time()*1000000
-			tagsStr = " ".join([ "%s=%s" %(k, anno[k]) for k in sorted(anno.keys()) if k not in VALID_KEYS])
+			tagsStr = " ".join([ "%s=%s" %(k, anno['tags'][k]) for k in sorted(anno['tags'].keys())])
 			return "%d %s %s:%s" %(anno['timestamp'], tagsStr, anno['eventType'], anno['message'])
 		else:
-			return {"error": "Invalid argument"}
+			return {"error": "Invalid type: %s" %(str(type(anno)))}
