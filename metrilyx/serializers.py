@@ -27,6 +27,17 @@ class MapModelSerializer(serializers.HyperlinkedModelSerializer):
 		model = MapModel
 		fields = ('_id', 'name', 'user', 'group', 'layout', 'tags')
 
+class MapModelListSerializer(serializers.HyperlinkedModelSerializer):
+	user = serializers.Field(source='user.username')
+	group = serializers.Field(source='group.name')
+	tags = custom_fields.JSONField(source='tags',required=False)
+
+	class Meta:
+		model = MapModel
+		fields = ('_id', 'name', 'user', 'group', 'tags')
+
+
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
 	mapmodels = serializers.PrimaryKeyRelatedField(many=True)
 

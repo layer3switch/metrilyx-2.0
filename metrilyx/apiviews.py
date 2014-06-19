@@ -21,9 +21,9 @@ from custom_permissions import IsGroupOrReadOnly, IsCreatorOrReadOnly
 from serializers import *
 from models import * 
 
-from datastores.ess import ElasticsearchDataStore
 from dataserver.dataproviders import AnnoEventDataProvider
 from annotations import Annotator
+from annotations.messagebus import KafkaProducer
 
 from metrilyxconfig import config
 
@@ -53,6 +53,11 @@ class MapViewSet(viewsets.ModelViewSet):
 		obj.user = self.request.user
 
 
+class EventTypeViewSet(viewsets.ModelViewSet):
+	queryset = EventType.objects.all()
+	serializer_class = EventTypeSerializer
+	permission_classes = (IsCreatorOrReadOnly,)
+
 class GraphMapViewSet(MapViewSet):
 	
 	queryset = MapModel.objects.filter(model_type="graph")
@@ -60,6 +65,11 @@ class GraphMapViewSet(MapViewSet):
 	def pre_save(self, obj):
 		super(GraphMapViewSet,self).pre_save(obj)
 		obj.model_type = "graph"
+
+
+	def list(self, request, pk=None):
+		serializer = MapModelListSerializer(self.queryset)
+		return Response(serializer.data)
 
 	def retrieve(self, request, pk=None):
 		export_model = request.GET.get('export', None)
@@ -96,10 +106,6 @@ class HeatMapViewSet(MapViewSet):
 				'Content-Type': 'application/json'
 				})
 
-class EventTypeViewSet(viewsets.ModelViewSet):
-	queryset = EventType.objects.all()
-	serializer_class = EventTypeSerializer
-	permission_classes = (permissions.DjangoModelPermissionsOrAnonReadOnly,)
 
 class SchemaViewSet(viewsets.ViewSet):
 
@@ -120,13 +126,15 @@ class SchemaViewSet(viewsets.ViewSet):
 class AnnotationViewSet(APIView):
 	REQUIRED_QUERY_PARAMS = ('start','types','tags')
 	REQUIRED_WRITE_PARAMS = ('eventType','message', 'tags')
+	
 	# this api is used for synchronous calls
 	esearch = Elasticsearch()
-	esds = ElasticsearchDataStore(config['dataproviders'][1])
-	
+
 	dp = AnnoEventDataProvider(**config['dataproviders'][1])
 	annotator = Annotator()
 
+	msgBusCfg = dict([(k,v) for k,v in config['annotations']['messagebus'].items()]+[('async', False)])
+	
 	def __checkRequest(self, request):
 		if request.body == "":
 			return {'error': 'no query specified'}
@@ -158,6 +166,7 @@ class AnnotationViewSet(APIView):
 		reqBody = self.__checkRequest(request)
 		if reqBody.has_key('error'):
 			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
+			
 		# always yield's 1 when split=False
 		for (url, eventTypes, query) in self.dp.getQueries(reqBody,split=False):
 			essRslt = self.esearch.search(
@@ -175,16 +184,23 @@ class AnnotationViewSet(APIView):
 				timestamp:
 		'''
 		reqBody = self.__checkRequest(request)
-
 		if reqBody.has_key('error'):
 			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
 
-		annoStr = self.annotator.annotation(reqBody)
-		## this will give an object with the _id
-		annoObj = self.annotator.annotation(annoStr)
-		self.esds.add(annoObj)
-		return Response(annoObj)
-		
+		try:
+			annoStr = self.annotator.annotation(reqBody)
+			#print annoStr, type(annoStr)
+			msgbus = KafkaProducer(self.msgBusCfg)
+			msgbus.send(annoStr)
+
+			## this will give an object with the _id
+			annoObj = self.annotator.annotation(annoStr)
+			return Response(annoObj)
+		except Exception,e:
+			## 503 service unavailable
+			return Response({'error': str(e)},
+				status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
 	'''
 	def put(self, request, pk=None):
 		reqBody = self.__checkRequest(json.loads(request.body))
@@ -229,7 +245,7 @@ class SearchViewSet(viewsets.ViewSet):
 	tsdb_suggest_url = "%(uri)s%(search_endpoint)s?max=%(suggest_limit)d" %(config['dataproviders'][0])
 
 	def list(self, request, pk=None):
-		return Response(['graphmaps', 'heatmaps', 'metrics', 'tagk', 'tagv'])
+		return Response(['graphmaps', 'heatmaps', 'metrics', 'tagk', 'tagv', 'event_types'])
 
 	def retrieve(self, request, pk=None):
 		query = request.GET.get('q', '')
@@ -241,12 +257,17 @@ class SearchViewSet(viewsets.ViewSet):
 			response = serializer_obj.data
 		elif pk == 'heatmaps':
 			models_obj = MapModel.objects.filter(name__contains=query, model_type='heat')
+			print models_obj
 			serializer_obj = MapModelSerializer(models_obj, many=True)
 			response = serializer_obj.data
 		elif pk in ('metrics','tagk','tagv'):
 			request_url = "%s&type=%s&q=%s" %(self.tsdb_suggest_url, pk, query)
 			resp = requests.get(request_url)
 			response = resp.json()
+		elif pk == 'event_types':
+			models_obj = EventType.objects.filter(name__contains=query)
+			serializer_obj = EventTypeSerializer(models_obj,many=True)
+			response = serializer_obj.data
 		else:
 			response = {"error": "Invalid search: %s" %(pk)}
 		return Response(response)
