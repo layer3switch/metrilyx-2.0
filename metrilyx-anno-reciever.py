@@ -36,6 +36,7 @@ class AnnotationReceiver(LineReceiver):
 		pass
 
 	def lineReceived(self, line):
+		global logger
 		line = line.strip()
 		if line == "": return
 		result = self.annotator.annotation(line)
@@ -69,10 +70,10 @@ class AnnoventStorageProcess(Process):
 	annotator = Annotator()
 
 	def run(self):
+		global logger
 		for kMsg in self.kcon.consumer:
 			logger.info("offset=%d message=%s" %(kMsg.offset, kMsg.message.value))
 			annoObj = self.annotator.annotation(kMsg.message.value)
-			#print annoObj
 			self.esds.add(annoObj)
 
 		self.kcon.close()
