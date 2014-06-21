@@ -100,7 +100,7 @@ _config_sanity() {
 
 if [ -f "$CELERY_DEFAULTS" ]; then
     _config_sanity "$CELERY_DEFAULTS"
-    echo "Using config script: $CELERY_DEFAULTS"
+    #echo "Using config script: $CELERY_DEFAULTS"
     . "$CELERY_DEFAULTS"
 fi
 

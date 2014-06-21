@@ -6,20 +6,21 @@
 
 [ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
 
-NAME="metrilyxd"
-
+NAME="metrilyx"
+SERVICE_START_ORDER="metrilyx-dataserver metrilyx-modelmanager metrilyx-eventceiver celeryd celerybeat"
+SERVICE_STOP_ORDER="metrilyx-dataserver metrilyx-modelmanager metrilyx-eventceiver celerybeat celeryd"
 start() {
-	for service in metrilyx-dataserver metrilyx-modelmanager celeryd celerybeat; do
+	for service in ${SERVICE_START_ORDER}; do
 		service $service start
 	done
 }
 status() {
-	for service in metrilyx-dataserver metrilyx-modelmanager celeryd celerybeat; do
+	for service in ${SERVICE_START_ORDER}; do
 		service $service status
 	done
 }
 stop() {
-	for service in metrilyx-dataserver metrilyx-modelmanager celeryd celerybeat; do
+	for service in ${SERVICE_STOP_ORDER}; do
 		service $service stop
 	done
 }
