@@ -32,12 +32,17 @@ class MetrilyxEvent(object):
 		self.serverPort = args[1]
 		self._data = kwargs
 
+	@property
+	def data(self):
+		return self._data
+
 	def __str__(self):
-		return "%d %s %s:%s" %(
+		return "%d %s %s:%s '%s'" %(
 				self._data['timestamp'], 
 				" ".join(["%s=%s" %(k,v) for k,v in self._data['tags'].items()]), 
 				self._data['eventType'], 
-				self._data['message'])
+				self._data['message'], 
+				json.dumps(self._data['data']))
 
 	def fire(self):
 		if self.protocol == 'tcp':
@@ -59,6 +64,7 @@ parser = OptionParser(description)
 parser.add_option('-m', dest="message")
 parser.add_option('-e', dest="event_type")
 parser.add_option('-t', dest="tags", help="t1=v1,t2=v2")
+parser.add_option('-d', dest="data", help="JSON data")
 parser.add_option('-s', dest="server", default=EVENT_SERVER, 
 	help="Server to send event to. default: %s" %(EVENT_SERVER))
 parser.add_option('-p', dest="port", default=EVENT_SRV_PORT, type="int", 
@@ -79,9 +85,21 @@ except Exception,e:
 	parser.print_help()
 	sys.exit(1)
 
+if opts.data:
+	try:
+		if opts.data.startswith("@"):
+			opts.data = json.load(open(opts.data[1:], "rb"))
+		else:
+			opts.data = json.loads(opts.data)
+	except Exception,e:
+		print str(e)
+		parser.print_help()
+		sys.exit(1)
+
 mEvent = MetrilyxEvent(opts.server, opts.port,
 					message=opts.message,
 					tags=opts.tags,
+					data=opts.data,
 					timestamp=EVENT_TIME,
 					eventType=opts.event_type,
 					protocol=opts.protocol)
@@ -96,6 +114,10 @@ if opts.protocol == 'tcp':
 	else:	
 		print "[Sent %d bytes] %s" %(bytesSent, mEvent)
 else:
-	print "[HTTP Response code %d] %s" %(bytesSent[0], mEvent)
+	if bytesSent[0] >= 200 and bytesSent[0] <= 304:
+		print "[HTTP Response code %d]" %(bytesSent[0])
+		pprint(bytesSent[1])
+	else:
+		print "[HTTP Response code %d] %s %s" %(bytesSent[0], str(bytesSent[1]), mEvent)
 
 sys.exit(0)
