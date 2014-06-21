@@ -28,12 +28,16 @@ class KafkaBusClient(BasicBusClient):
 		super(KafkaBusClient, self).__init__(client_type, config)
 		self.address = str(self.address)
 		self.topic = str(self.topic)
-		self.consumer_group = str(self.consumer_group)
 		self.client = KafkaClient("%s:%d" %(self.address, self.port))
-		
-		if self.client_type == 'producer':
-			self.producer = SimpleProducer(self.client, async=True)
+		if config.has_key('async'):
+			self.async = config['async']
 		else:
+			self.async = True
+
+		if self.client_type == 'producer':
+			self.producer = SimpleProducer(self.client, async=self.async)
+		else:
+			self.consumer_group = str(self.consumer_group)
 			if not config.has_key('consumer_procs'):
 				self.consumer_procs = multiprocessing.cpu_count()
 				#print "Using %d processes" %(self.consumer_procs)
@@ -50,7 +54,7 @@ class KafkaProducer(KafkaBusClient):
 		super(KafkaProducer,self).__init__('producer', config)
 
 	def send(self, message):
-		self.producer.send_messages(self.topic, message)
+		ret = self.producer.send_messages(self.topic, str(message))
 
 class KafkaConsumer(KafkaBusClient):
 	def __init__(self, config):
