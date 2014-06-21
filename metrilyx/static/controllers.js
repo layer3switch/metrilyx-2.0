@@ -142,7 +142,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.heatGraphHtml 	= connectionPool.nextConnection()+"/partials/heat-graph.html"
 		$scope.podHtml 			= connectionPool.nextConnection()+"/partials/pod.html";
 		$scope.pageHeaderHtml 	= connectionPool.nextConnection()+"/partials/page-header.html";
-		$scope.jsonHtml 		= connectionPool.nextConnection()+"/partials/json.html";
+		//$scope.jsonHtml 		= connectionPool.nextConnection()+"/partials/json.html";
 		$scope.graphControlsHtml= connectionPool.nextConnection()+"/partials/graph-controls.html";
 
 		$scope.metricListSortOpts 	= dndconfig.metricList;
@@ -152,7 +152,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.rowSortOpts 			= dndconfig.row;
 		$scope.layoutSortOpts 		= dndconfig.layout;
 
-		$scope.annoEventTypes = ANNO_EVENT_TYPES;
+		$scope.selectedAnno = {};
 
 		// set default to relative time //
 		$scope.timeType = "1h-ago";
@@ -428,22 +428,36 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				});
 			}, 500);
 		}
-		$scope.getTimeWindow = function() {
+		$scope.getTimeWindow = function(inMilli) {
 			if($scope.timeType == "absolute"){
-				if($scope.endTime) 
+				if($scope.endTime) {
+					if(inMilli) {
+						return {end: $scope.endTime*1000, start:$scope.startTime*1000};
+					}
+					return {end: $scope.endTime,start: $scope.startTime};
+				}
+				if(inMilli) {
 					return {
-						end: $scope.endTime, 
-						start: $scope.startTime
+						start: $scope.startTime*1000, 
+						end: Math.ceil((new Date()).getTime())
 					};
+				}
 				return {
 					start: $scope.startTime, 
 					end: Math.ceil((new Date()).getTime()/1000)
 				};
 			} else {
-				return {
-					start: Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime($scope.timeType)),
-					end: Math.ceil((new Date()).getTime()/1000)
-				};
+				if(inMilli) {
+					return {
+						start: (Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime($scope.timeType)))*1000,
+						end: Math.ceil((new Date()).getTime())
+					};
+				} else {
+					return {
+						start: Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime($scope.timeType)),
+						end: Math.ceil((new Date()).getTime()/1000)
+					};
+				}
 			}
 		}
 		$scope.baseQuery = function(graphObj) {
@@ -612,7 +626,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		var QUEUED_REQS = [];
 		$scope.wssock = getWebSocket();
 
-		$scope.annoEventTypes 	= ANNO_EVENT_TYPES;
 		$scope.modelType 		= "adhoc";
 		$scope.timeType 		= "1h-ago";
 		$scope.editMode 		= " edit-mode";
@@ -762,11 +775,18 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
         $scope.wssock.onopen = function() {
           console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
           console.log("Queued requests:",QUEUED_REQS.length);
-          while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());
+          setTimeout(function() {
+          	while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());	
+          }, 750);
        	}
        	$scope.wssock.onclose = function(e) {
           console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
           $scope.wssock = null;
+          /*
+          setGlobalAlerts({'error': 'Disconnected', 
+          	'message': "Disconnected (clean=" + e.wasClean + ", code=" + 
+          		e.code + ", reason='" + e.reason + "')"});
+          flashAlertsBar();*/
        	}
        	$scope.wssock.onmessage = function(e) {
        		var data = JSON.parse(e.data);

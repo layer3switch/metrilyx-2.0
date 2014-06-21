@@ -189,12 +189,12 @@ class AnnotationViewSet(APIView):
 
 		try:
 			annoStr = self.annotator.annotation(reqBody)
-			#print annoStr, type(annoStr)
+			## this will give an object with the _id
+			annoObj = self.annotator.annotation(annoStr)
+
 			msgbus = KafkaProducer(self.msgBusCfg)
 			msgbus.send(annoStr)
 
-			## this will give an object with the _id
-			annoObj = self.annotator.annotation(annoStr)
 			return Response(annoObj)
 		except Exception,e:
 			## 503 service unavailable

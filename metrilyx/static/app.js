@@ -61,14 +61,20 @@ angular.module('filters',[]).
 			return text.replace(/\./g, "-");
 		}
 	}).filter('dateTime', function() {
-		return function(epoch) {
+		return function(epoch, millisecs) {
 			try {
-				d = new Date(epoch*1000);
+				var d;
+				if(millisecs) {
+					d = new Date(epoch);
+				} else {
+					d = new Date(epoch*1000);	
+				}
 				return d.toLocaleString("en-US", {hour12:false});
 			} catch(e) {
 				return epoch;
 			}
 		}
+
 	}).filter('rateString', function() {
 		return function(rate) {
 			if(rate) return "rate:";
@@ -149,7 +155,17 @@ app.directive('eventTypes', function() {
 			ctrl.$formatters.push(function(modelValue){return "";});
 			ctrl.$parsers.unshift(function(viewValue){return ctrl.$modelValue;});
 			$(elem).autocomplete({
-				source: ANNO_EVENT_TYPES,
+				/*source: ANNO_EVENT_TYPES,*/
+				source: function(request, response) {
+	            	$.getJSON('/api/search/event_types?q='+request.term, 
+	            		function(a,b,c) {
+		            		for(var o in a) {
+		            			a[o].label = a[o].name;
+		            			a[o].value = a[o].name;
+		            		}
+		            		response(a);
+	            	});
+	        	},
 				messages: {
 	            	noResults: '',
 	            	results: function() {}

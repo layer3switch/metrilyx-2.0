@@ -37,7 +37,8 @@ class EventannoSerie(object):
 		return [ {
 			'x': s['timestamp'],
 			'text': s['message'],
-			'title': s['eventType']
+			'title': s['eventType'],
+			'data': s['data']
 		} for s in self._serie ]
 
 	

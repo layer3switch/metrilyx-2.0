@@ -42,7 +42,7 @@ var DEFAULT_CHART_OPTS = {
                 cursor: 'pointer',
                 dataLabels: {
                     enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.2f} %'
+                    format: '<b>{point.name}</b>: {point.y:.2f}<br/>{point.percentage:.2f}%'
                 }
             },
             area: {
@@ -120,10 +120,22 @@ function highchartsFormattedSerie(dataObj, dataQuery, graphType, paneIndex) {
         }
     }
 }
+function onAnnotationClick(event) {
+    scope = angular.element($('#event-anno-details')).scope();
+    scope.$apply(function(){
+        scope.selectedAnno = {
+            data: event.point.data,
+            eventType: event.point.title,
+            message: event.point.text,
+            timestamp: event.point.x,
+            color: event.point.series.color
+        };
+    });
+    $('#event-anno-details').addClass('open');
+}
 
 function MetrilyxGraph(graphObj, timeWin) {
-    this.start = timeWin.start;
-    this.end = timeWin.end;
+    this.timeWindow = timeWin;
     this.graphdata = graphObj;
     this.uigraph = $("[data-graph-id='"+this.graphdata._id+"']").highcharts();
 }
@@ -144,7 +156,7 @@ MetrilyxGraph.prototype.applyData = function() {
         dhe = dataHasErrors(this.graphdata);
         if(dhe) return;
         $("[data-graph-status='"+this.graphdata._id+"']").html("");
-        graphing_upsertSeries(this.graphdata);
+        graphing_upsertSeries(this.graphdata, this.timeWindow);
     }
 }
 function MetrilyxAnnotation(obj) {
@@ -257,7 +269,7 @@ ChartOptions.prototype.__plotBands = function() {
     if(this._graph.thresholds) {
         return getPlotBands(this._graph.thresholds);
     }
-    return DEFAULT_CHART_OPTS.AXIS;
+    return $.extend({}, DEFAULT_CHART_OPTS.AXIS);
 };
 ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
     var opts = $.extend(true, this.chartDefaults(), {
@@ -278,7 +290,7 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
                     s += '<div class="small"><span class="padr5" style="color:'+this.point.series.color+'">'+this.point.title+"</span>"+ (new Date(this.x)).toLocaleString() +'</div>';
                     s += "<div style='padding-top:7px;font-size:11px;'>" + this.point.text +"</div></div>";
                 } else {
-                    var s = '<div class="chart-tooltip"><small style="color:#ddd">'+ (new Date(this.x)).toLocaleString() +'</small>';
+                    var s = '<div class="chart-tooltip"><small style="color:#eee">'+ (new Date(this.x)).toLocaleString() +'</small>';
                     s += '<table style="font-size:11px;color:#ddd;min-width:220px;margin-top:5px;">';
                     var sortedPoints = this.points.sort(function(a, b){
                         return ((a.y > b.y) ? -1 : ((a.y < b.y) ? 1 : 0));
@@ -326,7 +338,7 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
                     top: currTop.toString()+"%",
                     offset: 0,
                     labels: {align:"right",x:-5},
-                    title: {text: this._graph.panes[i]}
+                    title: {text: this._graph.panes[i]},
                 }));
             currTop += h;
         }
@@ -411,7 +423,10 @@ SeriesFormatter.prototype.flagsSeries = function(annoName) {
         },
         y: -48,
         stackDistance: 20,
-        states : {hover : {fillColor: '#ddd'}}
+        states : {hover : {fillColor: '#ddd'}},
+        events: {
+            click: onAnnotationClick
+        }
     };
 }
 SeriesFormatter.prototype.lineSeries = function(isMultiPane) {
@@ -618,7 +633,7 @@ function upsertPieSeries(args, hcg) {
         }
     }
 }
-function upsertLineBasedSeries(args, hcg) {
+function upsertLineBasedSeries(args, hcg, timeWindow) {
     for(var j in args.series) {
         for(var d in args.series[j].data) {
             // find series in highcharts //
@@ -642,13 +657,17 @@ function upsertLineBasedSeries(args, hcg) {
                             newData = args.series[j].data[d].dps;
                         } else {
                             // name , currData, newData //
-                            newData = getNewDataAlignedSeries(hcg.series[i].options.name, 
-                                    hcg.series[i].options.data, args.series[j].data[d].dps);                   
+                            newData = getNewDataAlignedSeries2({
+                                name: hcg.series[i].options.name,
+                                currData: hcg.series[i].options.data,
+                                newData:  args.series[j].data[d].dps,
+                                timeWindow: timeWindow
+                            });
+                            //newData = getNewDataAlignedSeries(hcg.series[i].options.name, 
+                            //        hcg.series[i].options.data, args.series[j].data[d].dps);                   
                         }
                         if(newData != false){ 
                             hcg.series[i].setData(newData, false, null, false);
-                        } else {
-                            console.log(args.start, args.end);
                         }
                         break;
                     }
@@ -672,28 +691,72 @@ function upsertLineBasedSeries(args, hcg) {
  * Add or update series with new data
  *  args:   Graph data
 */
-function graphing_upsertSeries(args) {
+function graphing_upsertSeries(data, timeWindow) {
     //console.log(args);
-    var hcg = $("[data-graph-id='"+args._id+"']").highcharts();
+    var hcg = $("[data-graph-id='"+data._id+"']").highcharts();
     if(hcg == undefined) {
-        console.log("graph uninitialized: not upserting. name", args.name, "type", args.graphType,"_id", args._id);
+        console.log("graph uninitialized: not upserting. name", data.name, "type", data.graphType,"_id", data._id);
         return;
     }
-    if(args.graphType === 'pie') {
-        upsertPieSeries(args, hcg);
+    if(data.graphType === 'pie') {
+        upsertPieSeries(data, hcg);
     } else {
-        upsertLineBasedSeries(args,hcg);
+        upsertLineBasedSeries(data,hcg,timeWindow);
     }
     hcg.redraw();
 }
-function getNewDataAlignedSeries(dataName, currData, newData) {
-    if(newData.length <= 0) return false;
+function getNewDataAlignedSeries2(args) {
+    if(args.newData.length <= 0) return false;
+
+    newStartTime = args.newData[0][0];
+    newEndTime = args.newData[args.newData.length-1][0];
+
+    currStartTime = args.currData[0][0];
+    currEndTime = args.currData[args.currData.length-1][0];
+
+    // no new data //
+    if(newEndTime < currEndTime) return false;
+    // check time window //
+    if((newStartTime > args.timeWindow.start) && (newStartTime < args.timeWindow.end)) {
+        if((newStartTime<currStartTime) && (newEndTime>currStartTime)) {
+            console.log(args.name, "TBI");
+            console.log("curr data:",new Date(currStartTime),new Date(currEndTime), "dps", args.currData.length);
+            console.log("new  data:", new Date(newStartTime),new Date(newEndTime), "dps", args.newData.length);
+            console.log("window",new Date(args.timeWindow.start), new Date(args.timeWindow.end));
+            return false;
+        } else if((newStartTime>=currStartTime) &&(newEndTime>currEndTime)) {
+            // 
+            while(args.currData[args.currData.length-1][0] >= newStartTime) {
+                c = args.currData.pop();
+            }
+            while(args.currData.length > 0 && args.currData[0][0] < args.timeWindow.start) {
+                c = args.currData.shift();
+            }
+            return args.currData.concat(args.newData);
+        } else {
+            console.log(args.name, "unhandled");
+            console.log("window",new Date(args.timeWindow.start), new Date(args.timeWindow.end));
+            console.log("curr data:",new Date(currStartTime),new Date(currEndTime), "dps", args.currData.length);
+            console.log("new  data:", new Date(newStartTime),new Date(newEndTime), "dps", args.newData.length);
+            return false;
+        }
+    } else {
+        console.log(args.name, "data out of range",new Date(args.timeWindow.start), new Date(args.timeWindow.end));
+        return false;
+    }
+}
+function getNewDataAlignedSeries(args) {
+//function getNewDataAlignedSeries(dataName, currData, newData) {
+    if(args.newData.length <= 0) return false;
     //if(!currData) return newData;
-    newStartTime = newData[0][0];
-    newEndTime = newData[newData.length-1][0];
-    
-    currStartTime = currData[0][0];
-    currEndTime = currData[currData.length-1][0];
+    newStartTime = args.newData[0][0];
+    newEndTime = args.newData[args.newData.length-1][0];
+    //newStartTime = args.timeWindow['start'];
+    //newEndTime = args.timeWindow.end;
+
+
+    currStartTime = args.currData[0][0];
+    currEndTime = args.currData[args.currData.length-1][0];
 
     if(newEndTime < currEndTime) return false;
     if((newStartTime > currStartTime) && (newStartTime < currEndTime)) {
@@ -701,19 +764,20 @@ function getNewDataAlignedSeries(dataName, currData, newData) {
         //console.log("Time added:", timeAdded)
         var shiftedStartTime = currStartTime + timeAdded;
         // remove overlapping old data //
-        while(currData[currData.length-1][0] >= newStartTime) {
-            c = currData.pop();
+        while(args.currData[args.currData.length-1][0] >= newStartTime) {
+            c = args.currData.pop();
         }
         // shift data from front per window //
         // removes same amount of old data as is new data added //
-        while(currData.length > 0 && currData[0][0] < shiftedStartTime) {
-            c = currData.shift();
+        while(args.currData.length > 0 && args.currData[0][0] < shiftedStartTime) {
+            c = args.currData.shift();
         }
-        return currData.concat(newData);
+        return args.currData.concat(args.newData);
     } else {
-        console.log(dataName, "out of range");
-        console.log("curr data:",new Date(currStartTime),new Date(currEndTime));
-        console.log("new  data:", new Date(newStartTime),new Date(newEndTime), "dps", newData.length);
+        console.log(args.name, "out of range");
+        console.log("curr data:",new Date(currStartTime),new Date(currEndTime), "dps", args.currData.length);
+        console.log("new  data:", new Date(newStartTime),new Date(newEndTime), "dps", args.newData.length);
+        console.log("window",new Date(args.timeWindow.start), new Date(args.timeWindow.end));
         return false;
     }
 }

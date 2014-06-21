@@ -221,8 +221,7 @@ angular.module('graphing', [])
 						anno = new MetrilyxAnnotation(data);
 						anno.applyData();
 					}
-					tWin = scope.getTimeWindow();
-					var mg = new MetrilyxGraph(data, tWin.start, tWin.end);
+					var mg = new MetrilyxGraph(data, scope.getTimeWindow(true));
 					mg.applyData();
 					
 					var sTags = (new SeriesFormatter(data.series)).seriesTags();

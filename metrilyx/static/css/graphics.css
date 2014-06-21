@@ -332,3 +332,9 @@ input.borderb-lite {
 .round-right3 {
     border-radius: 0 3px 3px 0;
 }
+.rounded3 {
+    border-radius: 3px;
+}
+.rounded2 {
+    border-radius: 2px;
+}

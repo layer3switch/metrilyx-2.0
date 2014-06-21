@@ -126,7 +126,7 @@ class AnnoEventGraphServerProtocol(GraphServerProtocol):
 				return
 			eas = EventannoSerie([ h['_source'] for h in dct['hits']['hits'] ])
 			if len(eas.data) < 1:
-				logger.info("%s %s" %(annoType, graph['_id']))
+				logger.info("Event annotation: type=%s no data (%s)" %(annoType,graph['_id']))
 				return
 			
 			out = {

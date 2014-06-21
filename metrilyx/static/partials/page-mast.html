@@ -11,16 +11,16 @@
 				</a>
 			</span>
 		</div>
-		<div class="col-md-6">
-			<div ng-if="modelType=='' && editMode!==' edit-mode'">
-				<div class="input-group" title="Tags to be applied to all graphs. These tags do not get saved with the model.">
+		<div class="col-md-6 text-right">
+			<span ng-if="modelType=='' && editMode!==' edit-mode'">
+				<span class="input-group" title="Tags to be applied to all graphs. These tags do not get saved with the model.">
 					<span class="input-group-addon" style="background:none;color:#ccc;border-color:#777!important">Global Tags</span>
 					<input type="text" ng-model="globalTags" key-value-pairs class="form-control dark" style="border-color: #707070 !important;">
 					<div class="input-group-btn">
     					<button type="button" class="btn btn-default interactive" ng-click="setGlobalTags(globalTags)" style="background:none;padding-top:9px;padding-bottom:9px;border-color:#777!important"><i class="glyphicon glyphicon-ok"></i></button>
   					</div>
-				</div>
-			</div>
+				</span>
+			</span>
 		</div>
 	</div>
 </div>
