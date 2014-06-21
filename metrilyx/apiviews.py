@@ -93,6 +93,10 @@ class HeatMapViewSet(MapViewSet):
 		super(HeatMapViewSet,self).pre_save(obj)
 		obj.model_type = "heat"
 
+	def list(self, request, pk=None):
+		serializer = MapModelListSerializer(self.queryset)
+		return Response(serializer.data)
+
 	def retrieve(self, request, pk=None):
 		export_model = request.GET.get('export', None)
 		if export_model == None:
