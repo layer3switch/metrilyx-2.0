@@ -25,7 +25,7 @@ from metrilyx.datastores.ess import ElasticsearchDataStore
 Q = Queue()
 LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s]: %(message)s"
 
-class AnnotationReceiver(LineReceiver):
+class EventReceiver(LineReceiver):
 	delimiter = "\n"
 	annotator = Annotator()
 	
@@ -46,7 +46,7 @@ class AnnotationReceiver(LineReceiver):
 		else:
 			Q.put(line)
 
-class AnnotationProcesser(Process):
+class EventMessageBusProcess(Process):
 
 	bus = KafkaProducer(config['annotations']['messagebus'])
 	annotator = Annotator()
@@ -64,7 +64,7 @@ class AnnotationProcesser(Process):
 			else:
 				time.sleep(1)
 
-class AnnoventStorageProcess(Process):
+class EventStorageProcess(Process):
 	esds = ElasticsearchDataStore(config['dataproviders'][1])
 	kcon = KafkaConsumer(config['annotations']['messagebus'])
 	annotator = Annotator()
@@ -78,8 +78,8 @@ class AnnoventStorageProcess(Process):
 
 		self.kcon.close()
 
-class AnnotationFactory(ServerFactory):
-	protocol = AnnotationReceiver
+class EventReceiverFactory(ServerFactory):
+	protocol = EventReceiver
 
 if __name__ == "__main__":
 	parser = OptionParser()
@@ -97,14 +97,14 @@ if __name__ == "__main__":
 		sys.exit(2)
 
 
-	annoProc = AnnotationProcesser(name='mainAnno')
+	annoProc = EventMessageBusProcess(name='EventMessageBus')
 	annoProc.start()
 
-	annoStorProc = AnnoventStorageProcess(name='storageAnno')
+	annoStorProc = EventStorageProcess(name='EventStorage')
 	annoStorProc.start()
 
 	log.startLogging(sys.stdout)
-	reactor.listenTCP(4545, AnnotationFactory())
+	reactor.listenTCP(4545, EventReceiverFactory())
 	reactor.run()
 
 	annoStorProc.join()

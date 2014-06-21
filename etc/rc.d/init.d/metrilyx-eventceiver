@@ -1,0 +1,72 @@
+#!/bin/sh
+#
+# chkconfig: 234 90 10
+# description: Metrilyx annotion receiver.
+#
+
+[ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
+
+NAME="metrilyx-eventceiver"
+APP_HOME="/opt/metrilyx"
+BIN=${APP_HOME}/${NAME}.py
+LOGFILE=/var/log/${NAME}.log
+PGREP="/usr/bin/pgrep -f"
+
+DEFAULT_OPTS="-lINFO"
+
+RETVAL=0
+
+start() {
+	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+	if [ "$PIDS" = "" ]; then
+		echo -n "${NAME} starting... "
+		${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
+		sleep 1;
+		PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+		if [ "$PIDS" = "" ]; then
+			echo "[failed]";
+			RETVAL=2;
+		else
+			echo "[ok]";
+		fi
+	else
+		echo -n "${NAME} already running... ${PIDS}";
+		RETVAL=1
+	fi
+}
+status() {
+	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+	if [ "$PIDS" = "" ]; then
+		echo "${NAME} not running";
+	else
+		echo "${NAME} running... ${PIDS}"
+	fi
+}
+stop() {
+	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | sort -r`;
+	for pid in $PIDS; do
+		kill $pid;
+	done
+	${PGREP} "${BIN} ${DEFAULT_OPTS}" || echo "${NAME} stopped";
+}
+
+case "$1" in
+	start)
+		start;
+		;;
+	stop)
+		stop;
+		;;
+	status)
+		status;
+		;;
+	restart)
+		$0 stop
+		sleep 3
+		$0 start
+		;;
+	*)
+		echo "$0 [start|stop|restart|status]"
+		exit 1;
+esac
+exit 0
