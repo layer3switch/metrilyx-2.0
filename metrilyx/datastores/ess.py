@@ -3,7 +3,10 @@ from elasticsearch import Elasticsearch
 from metrilyx import BasicDataStructure
 from ..dataserver.transforms import absoluteTime
 	
+DEFAULT_EVENT_RESULT_SIZE = 10000000
+
 class ElasticsearchAnnotationQueryBuilder(object):
+
 	def __init__(self, **config):
 		for k,v in config.items():
 			setattr(self, k, v)
@@ -24,6 +27,9 @@ class ElasticsearchAnnotationQueryBuilder(object):
 
 	def eventTypeQuery(self, eventType):
 		return {'term': {'eventType': str(eventType).lower()}}
+
+	def resultSize(self):
+		return {"from": 0, "size": DEFAULT_EVENT_RESULT_SIZE}
 
 	def getQuery(self, request):
 		# 'and' queries passed to 'must' 

@@ -65,7 +65,7 @@ class EventMessageBusProcess(Process):
 				time.sleep(1)
 
 class EventStorageProcess(Process):
-	esds = ElasticsearchDataStore(config['dataproviders'][1])
+	esds = ElasticsearchDataStore(config['annotations']['dataprovider'])
 	kcon = KafkaConsumer(config['annotations']['messagebus'])
 	annotator = Annotator()
 

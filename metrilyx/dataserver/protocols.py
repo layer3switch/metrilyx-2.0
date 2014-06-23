@@ -4,7 +4,7 @@ import json
 from pprint import pprint 
 
 from twisted.internet import reactor
-from twisted.web.client import getPage, HTTPClientFactory, _makeGetterFactory
+from twisted.web.client import getPage
 
 from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.websocket.compress import PerMessageDeflateOffer, \
@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 """
 def advancedGetPage(url, contextFactory=None, *args, **kwargs):
+	from twisted.web.client import HTTPClientFactory, _makeGetterFactory
 	return _makeGetterFactory(
 		url,
 		HTTPClientFactory,
@@ -61,45 +62,50 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 			logger.warning("Binary data not supported!")
 			return {'error': 'Binary data not support!'}
 
-class GraphServerProtocol(BaseGraphServerProtocol):
-	## set dataprovider in subclass
-	dataprovider = None
-	timeout = 0
-
-	def ds_response_callback(self, response, url, graph_meta=None):
-		graph_meta['series'][0]['data'] = self.dataprovider.response_callback(
-															json.loads(response))
-		
-		## apply metrilyx transforms
-		mserie = MetrilyxSerie(graph_meta['series'][0])
-		graph_meta['series'][0]['data'] = mserie.data
-		self.sendMessage(json.dumps(graph_meta))
-
-	def ds_response_errback(self, error, url, graph_meta=None):
-		response = self.dataprovider.response_errback(error, graph_meta)
-		self.sendMessage(json.dumps(response))
-
-
-	def submitPerfQueries(self, req_obj):
-		for (url, meta) in self.dataprovider.get_queries(req_obj):
-			d = getPage(url, timeout=self.timeout)
-			d.addCallback(self.ds_response_callback, url, meta)
-			d.addErrback(self.ds_response_errback, url, meta)
-
-	def submit_parallel_queries(self, req_obj):
-		'''
-		This gets called when a message is recieved
-		'''
-		self.submitPerfQueries(req_obj)
-
 	def onMessage(self, payload, isBinary):
 		request_obj = self.checkMessage(payload, isBinary)
 		if not request_obj.get("error"):
 			## all checks passed - proceed
 			logger.info("Request %(_id)s start=%(start)s" %(request_obj))
-			self.submit_parallel_queries(request_obj)
+			self.submitQueries(request_obj)
 		else:
 			logger.error("Invalid request object: %s" %(str(request_obj)))
+
+	def submitQueries(self, req_obj):
+		'''
+		Override in subclass (required)
+		'''
+		pass
+
+
+class GraphServerProtocol(BaseGraphServerProtocol):
+	## set dataprovider in subclass
+	dataprovider = None
+	timeout = 0
+
+	def gQueryResponseCallback(self, response, url, graph_meta=None):
+		graph_meta['series'][0]['data'] = self.dataprovider.response_callback(
+															json.loads(response))		
+		## apply metrilyx transforms
+		mserie = MetrilyxSerie(graph_meta['series'][0])
+		graph_meta['series'][0]['data'] = mserie.data
+		self.sendMessage(json.dumps(graph_meta))
+
+	def gQueryResponseErrback(self, error, url, graph_meta=None):
+		response = self.dataprovider.response_errback(error, graph_meta)
+		self.sendMessage(json.dumps(response))
+
+
+	def submitPerfQueries(self, req_obj):
+		for (url, meta) in self.dataprovider.getQueries(req_obj):
+			d = getPage(url, timeout=self.timeout)
+			d.addCallback(self.gQueryResponseCallback, url, meta)
+			d.addErrback(self.gQueryResponseErrback, url, meta)
+
+	def submitQueries(self, req_obj):
+		self.submitPerfQueries(req_obj)
+
+	
 
 	"""
 	def onClose(self, wasClean, code, reason):
@@ -108,40 +114,34 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 			del self.active_queries[k]
 	"""
 
-class AnnoEventGraphServerProtocol(GraphServerProtocol):
+class EventGraphServerProtocol(GraphServerProtocol):
 	annoEventDataProvider = None
 
-	def submit_parallel_queries(self, req_obj):
-		'''
-		This gets called when a message is recieved
-		'''
+	def submitQueries(self, req_obj):
+		# submit performance metric queries
 		self.submitPerfQueries(req_obj)
-		self.__fetchAnnoEvents(req_obj)
+		# submit annotation queries
+		self.submitEventQueries(req_obj)
 
-	def ae_response_callback(self, data, annoType, query, graph):
+	def eventQueryResponseCallback(self, data, eventType, graph, query):
 		try:
 			dct = json.loads(data)
 			if dct.has_key('error'):
 				logger.error(str(dct))
 				return
-			eas = EventannoSerie([ h['_source'] for h in dct['hits']['hits'] ])
-			if len(eas.data) < 1:
-				logger.info("Event annotation: type=%s no data (%s)" %(annoType,graph['_id']))
+			eas = EventannoSerie([ h['_source'] for h in dct['hits']['hits'] ],
+								graph, eventType)
+			if len(eas.data['annoEvents']['data']) < 1:
+				logger.info("Event annotation: type=%s no data (%s)" %(eventType, graph['_id']))
 				return
-			
-			out = {
-				'_id': graph['_id'],
-				'annoEvents': graph['annoEvents'],
-				'graphType': graph['graphType']
-				}
-			out['annoEvents']['data'] = eas.data
-			out['annoEvents']['eventType'] = annoType
-			self.sendMessage(json.dumps(out))
-			logger.info("Event annotation: sha1=%s type=%s count=%d" %(graph['_id'], annoType, len(eas.data)))
-		except Exception,e:
-			logger.error(str(e))
 
-	def __fetchAnnoEvents(self, graphMeta):
+			self.sendMessage(json.dumps(eas.data))
+			logger.info("Event annotation: sha1=%s type=%s count=%d" %(graph['_id'], 
+															eventType, len(eas.data['annoEvents']['data'])))
+		except Exception,e:
+			logger.error("%s %s" %(str(e), str(data)))
+
+	def submitEventQueries(self, graphMeta):
 		if len(graphMeta['annoEvents']['types']) < 1 or \
 					len(graphMeta['annoEvents']['tags'].keys()) < 1:
 			return
@@ -156,4 +156,4 @@ class AnnoEventGraphServerProtocol(GraphServerProtocol):
 			#print graphMeta['_id'], eventType
 			#print eventType, query
 			a = AsyncHttpJsonRequest(uri=url, method='GET', body=query)
-			a.addResponseCallback(self.ae_response_callback, eventType, query, graphMeta)
+			a.addResponseCallback(self.eventQueryResponseCallback, eventType, graphMeta, query)

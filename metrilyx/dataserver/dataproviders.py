@@ -15,7 +15,7 @@ re_504 = re.compile("(504 gateway time.+out)", re.IGNORECASE)
 
 class PerformanceDataProvider(BasicDataStructure):
 
-	def graph_metadata(self, request, serie):
+	def graphMetadata(self, request, serie):
 		"""
 		Return: Graph metadata for a given request
 		"""
@@ -26,24 +26,25 @@ class PerformanceDataProvider(BasicDataStructure):
 	def get_query_url(self, request, query_obj):
 		"""
 		Override in subclass (required).
-		This must call self.time_window() to get time range.
+		This must call self.timeWindow() to get time range.
 		"""
 		pass
 
-	def get_queries(self, request):
+	def getQueries(self, request):
 		"""
 		yield url, metadata
 		"""
-		request = self.__apply_globaltags(request)
+		request = self.__applyGlobalTags(request)
 		for s in request['series']:
 			url = self.get_query_url(request, s['query'])
-			meta_obj = self.graph_metadata(request, s)
+			meta_obj = self.graphMetadata(request, s)
 			yield (url, meta_obj)
 
 	def response_callback(self, response):
 		"""
 		Override in subclass if data needs to be transformed to 
 		metrilyx understandable format (optional).
+		By default it understands data in the format tsdb returns it.
 		"""
 		return response
 
@@ -65,7 +66,7 @@ class PerformanceDataProvider(BasicDataStructure):
 			str(graph_meta['series'][0]['query']), err_obj['message']))
 		return graph_meta
 
-	def time_window(self, request):
+	def timeWindow(self, request):
 		time_win = {}
 		if request.get('end'):
 			if request['graphType'] == 'pie':
@@ -85,7 +86,7 @@ class PerformanceDataProvider(BasicDataStructure):
 				time_win = { 'start': request['start'] }
 		return time_win
 
-	def __apply_globaltags(self, request):
+	def __applyGlobalTags(self, request):
 		for serie in request['series']:
 			for k,v in request['tags'].items():
 				serie['query']['tags'][k] = v
@@ -105,34 +106,15 @@ class TSDBDataProvider(PerformanceDataProvider):
 
 	def get_query_url(self, request, query_obj):
 		base_url = "%s%s?" %(self.uri, self.query_endpoint)
-		# all custom dataproviders need to call time_window.
+		# all custom dataproviders need to call timeWindow().
 		# this should not be manually set for performance reasons
-		time_range = self.time_window(request)
+		time_range = self.timeWindow(request)
 		base_url += "&".join(["%s=%s" %(k,v) for k,v in time_range.items()])
 
 		url = "%s%s" %(base_url, self.__get_serie_query(query_obj))
 		return str(url)
 
 class AnnoEventDataProvider(ElasticsearchAnnotationQueryBuilder):
-	'''
-	def timestampQuery(self, request):
-		if request.has_key('end'):
-			return {'range':{'timestamp':{
-				'gte': absoluteTime(request['start']), 
-				'lte': absoluteTime(request['end'])
-				}}}
-		else:
-			return {'range':{'timestamp':{
-				'gte': absoluteTime(request['start'])
-				}}}
-
-	def tagsQuery(self, request):
-		return [ {'term':{k:v}} for k,v in request['tags'].items() ]
-
-	def eventTypeQuery(self, eventType):
-		return {'term': {'eventType': str(eventType).lower()}}
-	'''
-
 	def getQueries(self, request, split=True):
 		'''
 		Args:
@@ -141,14 +123,14 @@ class AnnoEventDataProvider(ElasticsearchAnnotationQueryBuilder):
 		url = str("%s/%s/%s" %(self.uri, self.index, self.search_endpoint))
 		# 'and' queries passed to 'must' 
 		andQueries = [ self.timestampQuery(request) ] + self.tagsQuery(request)
-
 		if split:
 			for eventType in request['types']:
 				q = {"query":{"filtered":{"filter":{"bool":{		
 						"must": andQueries + [ self.eventTypeQuery(eventType) ]
 					}}}},
-					"sort": "timestamp"
+					"sort": "timestamp",
 				}
+				q.update(self.resultSize())
 				yield (url, eventType, q)
 		else:
 			q = {"query":{"filtered":{"filter":{"bool":{		
@@ -157,4 +139,5 @@ class AnnoEventDataProvider(ElasticsearchAnnotationQueryBuilder):
 					}}}},
 					"sort": "timestamp"
 				}
+			q.update(self.resultSize())
 			yield (url, request['types'], q)

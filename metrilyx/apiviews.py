@@ -68,7 +68,7 @@ class GraphMapViewSet(MapViewSet):
 
 
 	def list(self, request, pk=None):
-		serializer = MapModelListSerializer(self.queryset)
+		serializer = MapModelListSerializer(self.queryset,many=True)
 		return Response(serializer.data)
 
 	def retrieve(self, request, pk=None):
@@ -94,7 +94,7 @@ class HeatMapViewSet(MapViewSet):
 		obj.model_type = "heat"
 
 	def list(self, request, pk=None):
-		serializer = MapModelListSerializer(self.queryset)
+		serializer = MapModelListSerializer(self.queryset, many=True)
 		return Response(serializer.data)
 
 	def retrieve(self, request, pk=None):
@@ -134,7 +134,7 @@ class AnnotationViewSet(APIView):
 	# this api is used for synchronous calls
 	esearch = Elasticsearch()
 
-	dp = AnnoEventDataProvider(**config['dataproviders'][1])
+	dp = AnnoEventDataProvider(**config['annotations']['dataprovider'])
 	annotator = Annotator()
 
 	msgBusCfg = dict([(k,v) for k,v in config['annotations']['messagebus'].items()]+[('async', False)])
@@ -174,7 +174,7 @@ class AnnotationViewSet(APIView):
 		# always yield's 1 when split=False
 		for (url, eventTypes, query) in self.dp.getQueries(reqBody,split=False):
 			essRslt = self.esearch.search(
-				index=config['dataproviders'][1]['index'], body=query)
+				index=config['annotations']['dataprovider']['index'], body=query)
 			## TODO: potentially need to add error checking 
 			rslt = [r['_source'] for r in essRslt['hits']['hits']]
 			return Response(rslt)

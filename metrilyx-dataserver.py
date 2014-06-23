@@ -15,7 +15,7 @@ from autobahn.twisted.websocket import WebSocketServerFactory, listenWS
 
 from metrilyx.metrilyxconfig import config
 from metrilyx.dataserver.protocols import GraphServerProtocol, \
-					AnnoEventGraphServerProtocol, acceptedCompression
+					EventGraphServerProtocol, acceptedCompression
 from metrilyx.dataserver.dataproviders import TSDBDataProvider, AnnoEventDataProvider
 
 
@@ -25,10 +25,10 @@ class TSDBGraphServerProtocol(GraphServerProtocol):
 	dataprovider = TSDBDataProvider(config['dataproviders'][0])
 	timeout = config['dataproviders'][0]['timeout']
 
-class ESAnnoEventGraphServerProtocol(AnnoEventGraphServerProtocol):
+class ESAnnoEventGraphServerProtocol(EventGraphServerProtocol):
 	dataprovider = TSDBDataProvider(config['dataproviders'][0])
 	timeout = config['dataproviders'][0]['timeout']	
-	annoEventDataProvider = AnnoEventDataProvider(**config['dataproviders'][1])
+	annoEventDataProvider = AnnoEventDataProvider(**config['annotations']['dataprovider'])
 
 def spawn_websocket_server(uri, logLevel, externalPort=None):
 	if logLevel == "DEBUG":
@@ -42,8 +42,11 @@ def spawn_websocket_server(uri, logLevel, externalPort=None):
 		factory = WebSocketServerFactory(uri, debug=isDebug, 
 										externalPort=externalPort)
 
-	#factory.protocol = TSDBGraphServerProtocol
-	factory.protocol = ESAnnoEventGraphServerProtocol
+	if config['annotations']['enabled']:
+		factory.protocol = ESAnnoEventGraphServerProtocol
+	else:
+		factory.protocol = TSDBGraphServerProtocol
+	
 	factory.setProtocolOptions(
 			perMessageCompressionAccept=acceptedCompression)
 	

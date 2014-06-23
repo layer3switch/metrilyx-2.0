@@ -151,7 +151,8 @@ class OpenTSDBClient(object):
         else:
             #print q
             return OpenTSDBResponse(hjc.GET("/api/query?"+q))
-        
+   
+## ASYNC ##     
 class JsonBodyProducer(object):
     implements(IBodyProducer)
 
@@ -172,13 +173,13 @@ class JsonBodyProducer(object):
 class AsyncHttpResponseProtocol(Protocol):
     def __init__(self, finished_deferred):
         self.finished = finished_deferred
-        self.remaining = 1024 * 10
+        self.remaining = 1024 * 50
         self.data = ""
 
     def dataReceived(self, bytes):
-        if self.remaining:
-            self.data += bytes
-            self.remaining -= len(bytes[:self.remaining])
+        #if self.remaining:
+        self.data += bytes
+        #    self.remaining -= len(bytes[:self.remaining])
 
     def connectionLost(self, reason):
         #print 'Finished receiving body:', reason.getErrorMessage()
@@ -223,6 +224,10 @@ class AsyncHttpJsonRequest(object):
 
     def addResponseCallback(self, callback, *cbargs):
         self.__deferredResponse.addCallback(callback, *cbargs)
+
+    ## TODO: this function needs validation.
+    def addResponseErrback(self, callback, *cbargs):
+        self.__deferredResponse.addErrback(callback, *cbargs)
 
 
 
