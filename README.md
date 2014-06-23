@@ -4,8 +4,8 @@ Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database us
 
 #### Features:
 - Event annotations.
-- Additional graph types: spline, area, stacked
-- UI fixes.
+- More graph types: spline, area, stacked, pie, line
+- UI changes and fixes.
 
 ##### v2.2.0
 - Major performance improvements.
@@ -32,10 +32,30 @@ Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database us
 ![Alt text](metrilyx/static/imgs/readme/screenshot_3.png)
  
 ### Requirements
-Metrilyx will run on any system that supports the packages mentioned below.  It has primarily been tested on RedHat based flavors of Linux.
+Metrilyx will run on any system that supports the packages mentioned below.  It has primarily been tested on RedHat based flavors of Linux. Aside from the packages below, you will also need a running instances of the following:
+
+*	**kafka**
+	
+	This is used for the devlivery of event annotations.  This component is responsible for receiving events.
+	
+*	**elasticsearch**
+
+	This is used to store all event annotations.  This is where the data is queried from.
+
+*	**mongodb**
+
+	This component is used by heatmaps.  
+	
+*	**postgresql/mysql** (optional)
+
+	This component is only needed if you plan to store your models in a database other than the default sqlite3.  Based on the number of models and usage a proper database may be needed.
+
+
 
 #### OS Packages:
 ##### RHEL:
+Before running the command below, make sure you've added the **nginx repo** to yum.
+
 	yum -y install libuuid uuid nginx python-setuptools python-devel gcc mongodb
 	
 ##### Debian:
@@ -54,7 +74,15 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 	jsonfield
 	uwsgi
 	pymongo
+	six
 	autobahn
+
+Installing autobahn throws an error if six hasn't bin install beforehand or is not the correct version.  To correct this, uninstall six and autobahn and re-install both as follows:
+
+	pip uninstall autobahn -y
+	pip uninstall six -y
+	pip install six
+	pip install autobahn
 
 ### Installation
 The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below to install the application after the above mentioned requirements have been satisfied. The default install destination is **/opt/metrilyx**.	
@@ -71,13 +99,10 @@ Assuming all required OS packages are installed, the script will install the nee
 After you have completed editing the configuration file, start the modelmanager and dataserver processes, then restart nginx.  Also start celeryd and celerybeat which consume and run periodic jobs repsectively.
 	
 	/etc/init.d/metrilyx-dataserver start
-	
 	/etc/init.d/metrilyx-modelmanager start
-
+	/etc/init.d/metrilyx-eventceiver start
 	/etc/init.d/nginx restart
-
 	/etc/init.d/celeryd start
-
 	/etc/init.d/celerybeat start
 
 The default system nginx configuration may conflict with the metrilyx one.  In this case you'll need to disable the default one or edit the configuration file to accomodate the metrilyx nginx configuration.
@@ -113,6 +138,15 @@ A sample configuration file has been provided.  The configuration file is in JSO
 			"tasks": [
 				"metrilyx.heatmap_tasks"
 			]
+		},
+		"annotations": {
+			"line_re": "([0-9]+) (.+) ([a-zA-Z0-9_]+):(.+) '({.*})'$",
+			"messagebus": {
+				"topic": "anno_events",
+				"address": "localhost",
+				"port": 9092,
+				"consumer_group": "anno_reader"
+			}
 		},
 		"debug": false
 	}
