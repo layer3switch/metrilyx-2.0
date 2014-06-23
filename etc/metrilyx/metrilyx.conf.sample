@@ -6,11 +6,6 @@
 		"search_endpoint": "/api/suggest",
 		"suggest_limit": 50,
 		"timeout": 180
-	},{
-		"name": "Elasticsearch",
-		"uri": "http://localhost:9200",
-		"search_endpoint": "_search",
-		"index": "anno_events"
 	}],
 	"heatmaps": {
 		"analysis_interval": "1m-ago",
@@ -39,12 +34,19 @@
 		]
 	},
 	"annotations": {
+		"enabled": false,
 		"line_re": "([0-9]+) (.+) ([a-zA-Z0-9_]+):(.+)",
 		"messagebus": {
 			"topic": "anno_events",
 			"address": "localhost",
 			"port": 9092,
 			"consumer_group": "anno_reader"
+		},
+		"dataprovider":{
+			"name": "Elasticsearch",
+			"uri": "http://localhost:9200",
+			"search_endpoint": "_search",
+			"index": "anno_events"
 		}
 	},
 	"debug": false
