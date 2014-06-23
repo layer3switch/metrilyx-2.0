@@ -204,18 +204,34 @@ MetrilyxAnnotation.prototype.queueDataForRendering = function() {
         } else {
             //console.log('writing queued anno data');
             wsf = new SeriesFormatter(ma._data.annoEvents.data);
-            wchrt.addSeries(wsf.flagsSeries(ma._data.annoEvents.eventType));
+            //wchrt.addSeries(wsf.flagsSeries(ma._data.annoEvents.eventType));
+            var idx = -1;
+            for(var i in wchrt.series) {
+                if(wchrt.series[i].type === 'flags') {
+                    if(wchrt.series[i].name === this._data.annoEvents.eventType) {
+                        idx = i;
+                        break;
+                    }
+                }
+            }
+            if(idx < 0) {
+                var sf = new SeriesFormatter(this._data.annoEvents.data);
+                wchrt.addSeries(sf.flagsSeries(this._data.annoEvents.eventType));
+            } else {
+                this.appendData(chrt, idx);
+            }
         }
     }, 3000);
 }
 MetrilyxAnnotation.prototype.applyData = function() {
-    var chrt = $("[data-graph-id='"+this._data._id+"']").highcharts();
-    if(chrt === undefined) {
+    //var chrt = $("[data-graph-id='"+this._data._id+"']").highcharts();
+    //if(chrt === undefined) {
         /*
             Graphs must be present before adding annotations or they disappear.
             Queue the data until graph has been rendered with performance data.
         */
         this.queueDataForRendering();
+    /*
     } else {   
         var idx = -1;
         for(var i in chrt.series) {
@@ -232,7 +248,7 @@ MetrilyxAnnotation.prototype.applyData = function() {
         } else {
             this.appendData(chrt, idx);
         }
-    }
+    }*/
 }
 
 /*
