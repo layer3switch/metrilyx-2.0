@@ -624,7 +624,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model',
 	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model) {
 		var QUEUED_REQS = [];
-		$scope.wssock = getWebSocket();
 
 		$scope.modelType 		= "adhoc";
 		$scope.timeType 		= "1h-ago";
@@ -729,6 +728,40 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		} else {
 			$scope.metricListSortOpts.disabled = false;
 		}
+		function onOpenWssock() {
+			console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
+          	console.log("Queued requests:",QUEUED_REQS.length);
+          	setTimeout(function() {
+          		while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());	
+          	}, 750);	
+		}
+		function onCloseWssock(e) {
+			console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
+			$scope.wssock = null;
+			/*
+			setGlobalAlerts({'error': 'Disconnected', 'message': "Disconnected (clean=" + e.wasClean + ", code=" + 
+					e.code + ", reason='" + e.reason + "')"});
+			flashAlertsBar();*/	
+		}
+		function onMessageWssock(e) {
+			var data = JSON.parse(e.data);
+       		if(data.error) {
+       			console.warn(data);
+       			setGlobalAlerts(data);
+       			flashAlertsBar();
+       			return;
+       		}
+       		var ce = new CustomEvent(data._id, {'detail': data });
+       		$scope.wssock.dispatchEvent(ce);
+		}
+		function setupWebSocket() {
+			$scope.wssock = getWebSocket();
+        	$scope.wssock.onopen = onOpenWssock;
+       		$scope.wssock.onclose = onCloseWssock;
+       		$scope.wssock.onmessage = onMessageWssock;
+		}
+        setupWebSocket();
+        
 		$scope.onEditPanelLoad = function() {
 			document.getElementById('edit-panel').addEventListener('refresh-metric-list',
 				function() {
@@ -772,42 +805,20 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			return q;
 		}
 
-        $scope.wssock.onopen = function() {
-          console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
-          console.log("Queued requests:",QUEUED_REQS.length);
-          setTimeout(function() {
-          	while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());	
-          }, 750);
-       	}
-       	$scope.wssock.onclose = function(e) {
-          console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
-          $scope.wssock = null;
-          /*
-          setGlobalAlerts({'error': 'Disconnected', 
-          	'message': "Disconnected (clean=" + e.wasClean + ", code=" + 
-          		e.code + ", reason='" + e.reason + "')"});
-          flashAlertsBar();*/
-       	}
-       	$scope.wssock.onmessage = function(e) {
-       		var data = JSON.parse(e.data);
-       		if(data.error) {
-       			console.warn(data);
-       			setGlobalAlerts(data);
-       			flashAlertsBar();
-       			return;
-       		}
-       		var ce = new CustomEvent(data._id, {'detail': data });
-       		$scope.wssock.dispatchEvent(ce);
-       	}
         $scope.requestData = function(query) {
+        	jsonQuery = JSON.stringify(query);
         	try {
-				$scope.wssock.send(JSON.stringify(query));	
+				$scope.wssock.send(jsonQuery);	
         	} catch(e) {
         		// in CONNECTING state. //
         		if(e.code === 11) {
-        			QUEUED_REQS.push(JSON.stringify(query));
+        			QUEUED_REQS.push(jsonQuery);
         		} else {
-        			console.error(e)
+        			//console.warn(e);
+        			console.log("Queueing request...");
+        			QUEUED_REQS.push(jsonQuery);
+        			console.log('Reconnecting...')
+        			setupWebSocket();
         		}
         	}
         }

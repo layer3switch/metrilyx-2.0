@@ -118,7 +118,7 @@ angular.module('filters',[]).
 			Returns number of queries loaded in highcharts.  In other words,
 			which queries have returned data.
 		*/
-		return function(graph) {
+		return function(graph, inPercent) {
 			hcg = $("[data-graph-id='"+graph._id+"']").highcharts();
 			if(hcg === undefined) return 0;
 			var cnt = 0;
@@ -143,6 +143,7 @@ angular.module('filters',[]).
 					}
 				}
 			}
+			if(inPercent) return (cnt/graph.series.length)*100;
 			return cnt;
 		}
 	});

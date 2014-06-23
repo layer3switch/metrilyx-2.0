@@ -1,13 +1,18 @@
 <div class="graph-container">
 	<div class="graph-face front{{editMode}}">
-		<div class="input-group input-group-sm text-center" style="width:100%">
+		<div class="animated loaded{{graph|loadedSeries:false}}{{graph.series.length}}">
+			<div class="progress" style="margin-top:0px!important;margin-bottom:0px!important;height:4px;text-align:bottom;">
+					<div class="progress-bar" role="progressbar" aria-valuenow="graph|loadedSeries: true" aria-valuemin="0" aria-valuemax="100" style="width: {{graph|loadedSeries: true}}%;background-color: #428bca"></div>
+			</div>
+		</div>
+		<div class="input-group input-group-sm text-center padtb5" style="width:100%">
 			<a href="javascript:void(0)" class="input-group-addon nobg interactive" onclick="$(this).next().show()">
 				<i class="glyphicon glyphicon-cog" style="font-size:14px;"></i>
 			</a>
 			<div ng-include="graphControlsHtml" style="display:none"></div>
 			<span class="form-control" style="border:none;-webkit-box-shadow:none"><strong>{{graph.name}}</strong></span>
 			<span class="input-group-addon nobg interactive" ng-click="reloadGraph(graph);" title="Refresh">
-				<i class="glyphicon glyphicon-refresh" style="font-size:12px;color:#666;font-weight:bold"></i>
+				<i class="glyphicon glyphicon-refresh interactive" style="font-size:12px;color:#666;font-weight:bold"></i>
 			</span>
 		</div>
 		<div class="graph {{graph.size}} text-center animated"  style="width:100%" data-graph-id="{{graph._id}}" ui-sortable ng-model="graph.series">
@@ -16,20 +21,20 @@
 			</td></tr></table>
 		</div>
 		<!-- graph footer -->
-		<div class="small padtb5 row" style="margin:0;background-color:none">
+		<div class="row" style="margin:0;padding-bottom:5px;">
 			<div class="col-md-3">
-				<span class="btn-group metrics-loaded-list dropup" style="position:relative;top:3px;">
+				<span class="btn-group metrics-loaded-list dropup">
 					<span class="metric-loaded-btn interactive" data-toggle="dropdown" title="Metrics successfully loaded">{{graph|loadedSeries}} / {{graph.series.length}}</span>
-					<ul class="dropdown-menu noshadow metric-status">
+					<ul class="dropdown-menu bottom-shadow metric-status">
 						<li ng-repeat="serie in graph.series" ng-attr-class="padlr10 padtb5 {{isSerieLoaded(graph, serie) || 'metric-not-loaded' }}">{{serie.query|metricQuery}}</li>
 			        </ul>
 		        </span>
-	        </div>
-	        <div class="col-md-9">
-	        	<span data-graph-status="{{graph._id}}"></span>
-	        </div>
+			</div>
+			<div class="col-md-9">
+				<span data-graph-status="{{graph._id}}"></span>
+			</div>
 		</div>
-		<!-- graph controls -->
+		<!-- graph controls overlayed on top of graph -->
 		<div class="graph-face back{{editMode}} animated">
 			<div class="padtb10 padl5 padr4" style="background:rgb(95,95,95);border-bottom:1px solid #505050;border-radius:2px 2px 0 0">
 				<div class="input-group input-group-sm" style="width:100%">

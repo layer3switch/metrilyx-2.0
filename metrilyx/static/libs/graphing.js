@@ -164,21 +164,23 @@ function MetrilyxAnnotation(obj) {
 }
 MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
     var ndata = [];
+    //console.log('curr', new Date(chrt.series[serieIdx].data[0].x), new Date(this._data.annoEvents.data[this._data.annoEvents.data.length-1].x));
+    //console.log('new', new Date(this._data.annoEvents.data[0].x), new Date(this._data.annoEvents.data[this._data.annoEvents.data.length-1].x))
     for(var i in chrt.series[serieIdx].data) {
         if(chrt.series[serieIdx].data[i].x < this._data.annoEvents.data[0].x) {
             ndata.push({
                 x: chrt.series[serieIdx].data[i].x,
                 title: chrt.series[serieIdx].data[i].title,
-                text: chrt.series[serieIdx].data[i].text
+                text: chrt.series[serieIdx].data[i].text,
+                data: chrt.series[serieIdx].data[i].data
             });
-        }
-        break;
+        } else {break;}
     }
     for(var i in this._data.annoEvents.data) {
         ndata.push(this._data.annoEvents.data[i]);
     }
     chrt.series[serieIdx].setData(ndata);
-}
+}/*
 MetrilyxAnnotation.prototype.newChart = function() {
     var copts = new ChartOptions(this._data,true);
     Highcharts.setOptions({ global: { useUTC:false } });
@@ -190,17 +192,34 @@ MetrilyxAnnotation.prototype.newChart = function() {
     } (Highcharts.seriesTypes.line.prototype.drawPoints));
     $("[data-graph-id='"+this._data._id+"']").highcharts("StockChart", 
                                             copts.chartDefaultsForType());
+}*/
+MetrilyxAnnotation.prototype.queueDataForRendering = function() {
+    /* queue annotations until graph has been rendering with metric data */
+    var ma = this;
+    var tout = setTimeout(function(){
+        wchrt = $("[data-graph-id='"+ma._data._id+"']").highcharts();
+        if(wchrt === undefined) {
+            clearTimeout(tout);
+            this.queueDataForRendering();
+        } else {
+            //console.log('writing queued anno data');
+            wsf = new SeriesFormatter(ma._data.annoEvents.data);
+            wchrt.addSeries(wsf.flagsSeries(ma._data.annoEvents.eventType));
+        }
+    }, 3000);
 }
 MetrilyxAnnotation.prototype.applyData = function() {
     var chrt = $("[data-graph-id='"+this._data._id+"']").highcharts();
     if(chrt === undefined) {
-        this.newChart();
+        /*
+            Graphs must be present before adding annotations or they disappear.
+            Queue the data until graph has been rendered with performance data.
+        */
+        this.queueDataForRendering();
     } else {   
         var idx = -1;
-        var flagIdx = [];
         for(var i in chrt.series) {
             if(chrt.series[i].type === 'flags') {
-                flagIdx.push(i);
                 if(chrt.series[i].name === this._data.annoEvents.eventType) {
                     idx = i;
                     break;
@@ -334,7 +353,7 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
         for(var i=0; i< this._graph.panes.length; i++) {
             opts.yAxis.push(
                 $.extend(true, this.__plotBands(), {
-                    height: (hstr-3).toString()+"%", 
+                    height: (h-3).toString()+"%", 
                     top: currTop.toString()+"%",
                     offset: 0,
                     labels: {align:"right",x:-5},
@@ -347,7 +366,7 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
     }
 
     if(this.flagSeries) {
-        $.extend(opts,{'series':this._sfmt.flagsSeries()},true);
+        $.extend(opts,{'series':this._sfmt.flagsSeries(this._graph.annoEvents.eventType)},true);
     } else {
         $.extend(opts,{'series':this._sfmt.lineSeries(this._graph.multiPane)},true);
     }
@@ -411,9 +430,9 @@ SeriesFormatter.prototype.seriesTags = function() {
     }
     return tags;
 }
-SeriesFormatter.prototype.flagsSeries = function(annoName) {
+SeriesFormatter.prototype.flagsSeries = function(eventType) {
     return {
-        name: annoName,
+        name: eventType,
         type:'flags',
         data: this.metSeries,
         shape: 'squarepin',
@@ -715,9 +734,9 @@ function getNewDataAlignedSeries2(args) {
     currEndTime = args.currData[args.currData.length-1][0];
 
     // no new data //
-    if(newEndTime < currEndTime) return false;
+    if(newEndTime <= currEndTime) return false;
     // check time window //
-    if((newStartTime > args.timeWindow.start) && (newStartTime < args.timeWindow.end)) {
+    if((newStartTime >= args.timeWindow.start) && (newStartTime < args.timeWindow.end)) {
         if((newStartTime<currStartTime) && (newEndTime>currStartTime)) {
             console.log(args.name, "TBI");
             console.log("curr data:",new Date(currStartTime),new Date(currEndTime), "dps", args.currData.length);
@@ -725,7 +744,6 @@ function getNewDataAlignedSeries2(args) {
             console.log("window",new Date(args.timeWindow.start), new Date(args.timeWindow.end));
             return false;
         } else if((newStartTime>=currStartTime) &&(newEndTime>currEndTime)) {
-            // 
             while(args.currData[args.currData.length-1][0] >= newStartTime) {
                 c = args.currData.pop();
             }
