@@ -200,7 +200,7 @@ MetrilyxAnnotation.prototype.queueDataForRendering = function() {
         wchrt = $("[data-graph-id='"+ma._data._id+"']").highcharts();
         if(wchrt === undefined) {
             clearTimeout(tout);
-            this.queueDataForRendering();
+            ma.queueDataForRendering();
         } else {
             //console.log('writing queued anno data');
             wsf = new SeriesFormatter(ma._data.annoEvents.data);
@@ -208,15 +208,15 @@ MetrilyxAnnotation.prototype.queueDataForRendering = function() {
             var idx = -1;
             for(var i in wchrt.series) {
                 if(wchrt.series[i].type === 'flags') {
-                    if(wchrt.series[i].name === this._data.annoEvents.eventType) {
+                    if(wchrt.series[i].name === ma._data.annoEvents.eventType) {
                         idx = i;
                         break;
                     }
                 }
             }
             if(idx < 0) {
-                var sf = new SeriesFormatter(this._data.annoEvents.data);
-                wchrt.addSeries(sf.flagsSeries(this._data.annoEvents.eventType));
+                var sf = new SeriesFormatter(ma._data.annoEvents.data);
+                wchrt.addSeries(sf.flagsSeries(ma._data.annoEvents.eventType));
             } else {
                 this.appendData(chrt, idx);
             }
