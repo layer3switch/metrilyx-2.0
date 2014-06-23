@@ -3,6 +3,7 @@
 INSTALL_ROOT="/opt";
 INSTALL_TIME=$(date '+%d%b%Y_%H%M%S');
 APP_HOME="${INSTALL_ROOT}/metrilyx";
+KAFKA_VERSION="kafka-0.8.1.1"
 
 if [[ -f "/etc/redhat-release" ]]; then
 	HTTPD="nginx"
@@ -52,10 +53,50 @@ configure_uwsgi() {
 install_pydeps() {
 	echo "-- Installing python dependencies..."
 	which pip || easy_install pip;
+	pip uninstall autobahn -y;
+	pip uninstall six -y;
+	pip install six;
 	for pypkg in $(cat PYPACKAGES); do
 		pip list | grep ${pypkg} || pip install ${pypkg};
 	done;
 }
+install_ess() {
+	if [ "$(rpm -qa | grep elasticsearch)" == "" ]; then
+		echo -n "- Installing elasticsearch... "
+		yum -y install "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.2.1.noarch.rpm" > /dev/null 2>&1
+		if [ "$?" == "0"]; then 
+			echo "[success]"
+			/etc/init.d/elasticsearch start;
+			chkconfig elasticsearch on;
+		else
+			echo "[failed]"
+		fi
+	fi 
+}
+install_kafka() {
+	echo "Installing java..."
+	yum -y install java-1.7.0-openjdk java-1.7.0-openjdk-devel > /dev/null;
+	
+	if [ ! -e "/opt/kafka" ]; then 
+		if [ ! -d "/opt/${KAFKA_VERSION}-src" ]; then 
+			if [ ! -f "${KAFKA_VERSION}-src.tgz" ]; then
+				wget --no-check "http://apache.mirrors.pair.com/kafka/0.8.1.1/${KAFKA_VERSION}-src.tgz";
+			fi
+			tar -zxvf ${KAFKA_VERSION}-src.tgz;
+			##compile
+			cd ${KAFKA_VERSION}-src && ./gradlew jar;
+			cd ..;
+			cp -a ${KAFKA_VERSION}-src /opt/
+		fi
+		ln -s /opt/${KAFKA_VERSION}-src /opt/kafka
+		echo "-- Kafka install complete --"
+	else
+		echo "**"
+		echo "** /opt/kafka already present.  Please confirm this is a working kafka installation."
+		echo "**"
+	fi
+}
+
 backup_curr_install() {
 	clean;
 	if [ -d "${APP_HOME}" ]; then
