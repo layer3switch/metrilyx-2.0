@@ -67,6 +67,7 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 		if not request_obj.get("error"):
 			## all checks passed - proceed
 			logger.info("Request %(_id)s start=%(start)s" %(request_obj))
+			## this is overriden in subclass
 			self.submitQueries(request_obj)
 		else:
 			logger.error("Invalid request object: %s" %(str(request_obj)))
