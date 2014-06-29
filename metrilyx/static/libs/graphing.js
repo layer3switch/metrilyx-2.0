@@ -180,19 +180,7 @@ MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
         ndata.push(this._data.annoEvents.data[i]);
     }
     chrt.series[serieIdx].setData(ndata);
-}/*
-MetrilyxAnnotation.prototype.newChart = function() {
-    var copts = new ChartOptions(this._data,true);
-    Highcharts.setOptions({ global: { useUTC:false } });
-    Highcharts.seriesTypes.line.prototype.drawPoints = (function 
-    (func) {
-        return function () {
-            return false;
-        };
-    } (Highcharts.seriesTypes.line.prototype.drawPoints));
-    $("[data-graph-id='"+this._data._id+"']").highcharts("StockChart", 
-                                            copts.chartDefaultsForType());
-}*/
+}
 MetrilyxAnnotation.prototype.queueDataForRendering = function() {
     /* queue annotations until graph has been rendering with metric data */
     var ma = this;
@@ -202,9 +190,7 @@ MetrilyxAnnotation.prototype.queueDataForRendering = function() {
             clearTimeout(tout);
             ma.queueDataForRendering();
         } else {
-            //console.log('writing queued anno data');
             wsf = new SeriesFormatter(ma._data.annoEvents.data);
-            //wchrt.addSeries(wsf.flagsSeries(ma._data.annoEvents.eventType));
             var idx = -1;
             for(var i in wchrt.series) {
                 if(wchrt.series[i].type === 'flags') {
@@ -224,31 +210,11 @@ MetrilyxAnnotation.prototype.queueDataForRendering = function() {
     }, 3000);
 }
 MetrilyxAnnotation.prototype.applyData = function() {
-    //var chrt = $("[data-graph-id='"+this._data._id+"']").highcharts();
-    //if(chrt === undefined) {
-        /*
-            Graphs must be present before adding annotations or they disappear.
-            Queue the data until graph has been rendered with performance data.
-        */
-        this.queueDataForRendering();
     /*
-    } else {   
-        var idx = -1;
-        for(var i in chrt.series) {
-            if(chrt.series[i].type === 'flags') {
-                if(chrt.series[i].name === this._data.annoEvents.eventType) {
-                    idx = i;
-                    break;
-                }
-            }
-        }
-        if(idx < 0) {
-            var sf = new SeriesFormatter(this._data.annoEvents.data);
-            chrt.addSeries(sf.flagsSeries(this._data.annoEvents.eventType));
-        } else {
-            this.appendData(chrt, idx);
-        }
-    }*/
+        Graph must be initialized before adding annotations or they disappear.
+        Queue the data until graph has been initialized with performance data.
+    */
+    this.queueDataForRendering();
 }
 
 /*
@@ -675,6 +641,7 @@ function upsertLineBasedSeries(args, hcg, timeWindow) {
             var found = false;
             try {
                 for(var i in hcg.series) {
+                    // may need to add globalTags as part of check //
                     // series found //
                     if(equalObjects(args.series[j].query, hcg.series[i].options.query) && 
                             equalObjects(args.series[j].data[d].tags, hcg.series[i].options.tags)) {

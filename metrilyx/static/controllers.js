@@ -254,6 +254,9 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
         		if(e.code === 11) QUEUED_REQS.push(JSON.stringify(query));
         	}
         }
+        $scope.getLoadedSeriesForGraph = function(graph,inPercent) {
+        	return getLoadedSeries(graph, inPercent);
+        }
         $scope.isSerieLoaded = function(graph, serie) {
         	hcg = $("[data-graph-id='"+graph._id+"']").highcharts();
         	if(hcg === undefined) return false;
@@ -426,7 +429,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 						hc.reflow();
 					}
 				});
-			}, 500);
+			}, 600);
 		}
 		$scope.getTimeWindow = function(inMilli) {
 			if($scope.timeType == "absolute"){
@@ -974,7 +977,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 					hc = $(this).highcharts();
 					if(hc != undefined) hc.reflow();
 				});
-			}, 350);
+			}, 500);
 		}
 		$scope.setStartTime = function(sTime) {
 			if($scope.endTime) {

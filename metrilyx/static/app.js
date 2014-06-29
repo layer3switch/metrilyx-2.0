@@ -119,32 +119,7 @@ angular.module('filters',[]).
 			which queries have returned data.
 		*/
 		return function(graph, inPercent) {
-			hcg = $("[data-graph-id='"+graph._id+"']").highcharts();
-			if(hcg === undefined) return 0;
-			var cnt = 0;
-			if(graph.graphType === 'pie') {
-				for(var i in graph.series) {
-					for(var j in hcg.series) {
-						for(var d in hcg.series[j].data) {
-							if(equalObjects(hcg.series[j].data[d].query,graph.series[i].query)) {
-								cnt++;
-								break;
-							}
-						}
-					}
-				}
-			} else {
-				for(var i in graph.series) {
-					for(var j in hcg.series) {
-						if(equalObjects(hcg.series[j].options.query,graph.series[i].query)) {
-							cnt++;
-							break;
-						}
-					}
-				}
-			}
-			if(inPercent) return (cnt/graph.series.length)*100;
-			return cnt;
+			return getLoadedSeries(graph, inPercent);
 		}
 	});
 app.directive('eventTypes', function() {
@@ -328,7 +303,22 @@ app.directive('pageId', function() {
 			});
 		}
 	};
-});
+});/*
+app.directive('graphStatus', function() {
+	return {
+		restrict: 'A',
+		require: '?ngModel',
+		link: function(scope, elem, attrs, ctrl) {
+			if(!ctrl) return;
+			scope.$watch(function() {
+				return ctrl.$modelValue;
+			}, function(newVal, oldVal) {
+				//if(!newVal.series) return;
+				console.log(newVal.series.length);
+			}, true);
+		}
+	};
+});*/
 /*
  * Parse tags object to 'tag1=val1,tag2=val2;'
  * Error checking and validity setting.
@@ -445,6 +435,38 @@ function getWebSocket() {
        console.error("Browser does not support WebSockets!");
        return null;
     }
+}
+function getLoadedSeries(graph, inPercent) {
+	hcg = $("[data-graph-id='"+graph._id+"']").highcharts();
+	if(hcg === undefined) return 0;
+	var cnt = 0;
+	if(graph.graphType === 'pie') {
+		for(var i in graph.series) {
+			for(var j in hcg.series) {
+				for(var d in hcg.series[j].data) {
+					if(equalObjects(hcg.series[j].data[d].query,graph.series[i].query)) {
+						cnt++;
+						break;
+					}
+				}
+			}
+		}
+	} else {
+		for(var i in graph.series) {
+			for(var j in hcg.series) {
+				//console.log(hcg.series[j].options.query,graph.series[i].query);
+				//q = $.extend({}, graph.series[i].query);
+				// $.extend(true, q.tags, globalTags);
+				if(equalObjects(hcg.series[j].options.query,graph.series[i].query)) {
+					cnt++;
+					break;
+				}
+			}
+		}
+	}
+	//console.log(cnt);
+	if(inPercent) return (cnt/graph.series.length)*100;
+	return cnt;
 }
 /*
  * args: { key1: val1, key2: val2 }
