@@ -116,7 +116,7 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 	"""
 
 class EventGraphServerProtocol(GraphServerProtocol):
-	annoEventDataProvider = None
+	eventDataprovider = None
 
 	def submitQueries(self, req_obj):
 		# submit performance metric queries
@@ -143,17 +143,17 @@ class EventGraphServerProtocol(GraphServerProtocol):
 			logger.error("%s %s" %(str(e), str(data)))
 
 	def submitEventQueries(self, graphMeta):
-		if len(graphMeta['annoEvents']['types']) < 1 or \
+		if len(graphMeta['annoEvents']['eventTypes']) < 1 or \
 					len(graphMeta['annoEvents']['tags'].keys()) < 1:
 			return
 		request = {
 			'start': graphMeta['start']*1000000,
 			'tags': graphMeta['annoEvents']['tags'],
-			'types': graphMeta['annoEvents']['types']
+			'eventTypes': graphMeta['annoEvents']['eventTypes']
 		}
 		if graphMeta.has_key('end'):
 			request['end'] = graphMeta['end']*1000000
-		for (url, eventType, query) in self.annoEventDataProvider.getQueries(request):
+		for (url, eventType, query) in self.eventDataprovider.queryBuilder.getQuery(request):
 			#print graphMeta['_id'], eventType
 			#print eventType, query
 			a = AsyncHttpJsonRequest(uri=url, method='GET', body=query)

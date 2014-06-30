@@ -16,8 +16,8 @@ from autobahn.twisted.websocket import WebSocketServerFactory, listenWS
 from metrilyx.metrilyxconfig import config
 from metrilyx.dataserver.protocols import GraphServerProtocol, \
 					EventGraphServerProtocol, acceptedCompression
-from metrilyx.dataserver.dataproviders import TSDBDataProvider, AnnoEventDataProvider
-
+from metrilyx.dataserver.dataproviders import TSDBDataProvider
+from metrilyx.datastores.ess import ElasticsearchDatastore
 
 LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s]: %(message)s"
 
@@ -25,10 +25,10 @@ class TSDBGraphServerProtocol(GraphServerProtocol):
 	dataprovider = TSDBDataProvider(config['dataproviders'][0])
 	timeout = config['dataproviders'][0]['timeout']
 
-class ESAnnoEventGraphServerProtocol(EventGraphServerProtocol):
+class ESEventGraphServerProtocol(EventGraphServerProtocol):
 	dataprovider = TSDBDataProvider(config['dataproviders'][0])
 	timeout = config['dataproviders'][0]['timeout']	
-	annoEventDataProvider = AnnoEventDataProvider(**config['annotations']['dataprovider'])
+	eventDataprovider = ElasticsearchDatastore(config['annotations']['dataprovider'])
 
 def spawn_websocket_server(uri, logLevel, externalPort=None):
 	if logLevel == "DEBUG":
@@ -43,7 +43,7 @@ def spawn_websocket_server(uri, logLevel, externalPort=None):
 										externalPort=externalPort)
 
 	if config['annotations']['enabled']:
-		factory.protocol = ESAnnoEventGraphServerProtocol
+		factory.protocol = ESEventGraphServerProtocol
 	else:
 		factory.protocol = TSDBGraphServerProtocol
 	

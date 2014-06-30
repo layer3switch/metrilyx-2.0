@@ -30,7 +30,7 @@ urlpatterns = patterns('',
 	url(r'', include(router.urls)),
 	#url(r'^(api/)?graph(/(?P<graph_query>.*)|/*)$', apiviews.GraphView.as_view()),
 	url(r'^(api/)?heat(/(?P<heat_id>.*)|/*)$', apiviews.HeatView.as_view()),
-	url(r'^(api/)?annotations', apiviews.AnnotationViewSet.as_view()),
+	url(r'^(api/)?annotations', apiviews.EventsViewSet.as_view()),
 	url(r'^(api/)?api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 	url(r'^(api/)?admin/?', include(admin.site.urls)),
 )

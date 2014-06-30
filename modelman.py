@@ -43,8 +43,14 @@ def updateThresholds(graph):
 		#print model._id, graph['thresholds']
 
 def addEventAnnoDef(graph):
-	graph['annoEvents'] = graphSchema['annoEvents']
-	print graph['_id'], "added event annotation"
+	if not graph.has_key('annoEvents'):
+		graph['annoEvents'] = graphSchema['annoEvents']
+		print graph['_id'], "added event annotation"
+	else:
+		if graph['annoEvents'].has_key('types'):
+			graph['annoEvents']['eventTypes'] = graph['annoEvents']['types']
+			del graph['annoEvents']['types']
+			print graph['_id'], "updated event annotation"
 
 def updateMultiPaneOptions(graph):
 	if not graph.has_key('multiPane'):

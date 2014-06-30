@@ -21,9 +21,10 @@ from custom_permissions import IsGroupOrReadOnly, IsCreatorOrReadOnly
 from serializers import *
 from models import * 
 
-from dataserver.dataproviders import AnnoEventDataProvider
+#from dataserver.dataproviders import AnnoEventDataProvider
+from datastores.ess import ElasticsearchDatastore
 from annotations import Annotator
-from annotations.messagebus import KafkaProducer
+#from annotations.messagebus import KafkaProducer
 
 from metrilyxconfig import config
 
@@ -127,18 +128,13 @@ class SchemaViewSet(viewsets.ViewSet):
 			return Response({"error": str(e)})
 
 
-class AnnotationViewSet(APIView):
-	REQUIRED_QUERY_PARAMS = ('start','types','tags')
+class EventsViewSet(APIView):
+	REQUIRED_QUERY_PARAMS = ('start','eventTypes','tags')
 	REQUIRED_WRITE_PARAMS = ('eventType','message', 'tags')
-	
-	# this api is used for synchronous calls
-	esearch = Elasticsearch()
 
-	dp = AnnoEventDataProvider(**config['annotations']['dataprovider'])
+	eds = ElasticsearchDatastore(config['annotations']['dataprovider'])
 	annotator = Annotator()
 
-	msgBusCfg = dict([(k,v) for k,v in config['annotations']['messagebus'].items()]+[('async', False)])
-	
 	def __checkRequest(self, request):
 		if request.body == "":
 			return {'error': 'no query specified'}
@@ -151,7 +147,7 @@ class AnnotationViewSet(APIView):
 			for rp in self.REQUIRED_QUERY_PARAMS:
 				if rp not in jsonReq.keys():
 					return {'error':'%s key required' %(rp)}
-			if type(request['tags']) is not dict:
+			if type(jsonReq['tags']) is not dict:
 				return {'error': 'Invalid tags'}
 		else:
 			for rp in self.REQUIRED_WRITE_PARAMS:
@@ -172,9 +168,8 @@ class AnnotationViewSet(APIView):
 			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
 			
 		# always yield's 1 when split=False
-		for (url, eventTypes, query) in self.dp.getQueries(reqBody,split=False):
-			essRslt = self.esearch.search(
-				index=config['annotations']['dataprovider']['index'], body=query)
+		for (url, eventTypes, query) in self.eds.queryBuilder.getQuery(reqBody,split=False):
+			essRslt = self.eds.search(query)
 			## TODO: potentially need to add error checking 
 			rslt = [r['_source'] for r in essRslt['hits']['hits']]
 			return Response(rslt)
@@ -196,9 +191,7 @@ class AnnotationViewSet(APIView):
 			## this will give an object with the _id
 			annoObj = self.annotator.annotation(annoStr)
 
-			msgbus = KafkaProducer(self.msgBusCfg)
-			msgbus.send(annoStr)
-
+			self.eds.add(annoObj)
 			return Response(annoObj)
 		except Exception,e:
 			## 503 service unavailable

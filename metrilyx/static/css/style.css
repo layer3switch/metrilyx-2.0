@@ -339,7 +339,7 @@ input[ng-model='metricQuery'] {
 	text-wrap: none;*/
 	word-wrap:break-word;
 }
-[ng-repeat='evtType in graph.annoEvents.types'].removable-tag {
+[ng-repeat='evtType in graph.annoEvents.eventTypes'].removable-tag {
 	border:1px solid #888;
 	border-radius:3px;
 	float:left;

@@ -113,31 +113,3 @@ class TSDBDataProvider(PerformanceDataProvider):
 
 		url = "%s%s" %(base_url, self.__get_serie_query(query_obj))
 		return str(url)
-
-class AnnoEventDataProvider(ElasticsearchAnnotationQueryBuilder):
-	def getQueries(self, request, split=True):
-		'''
-		Args:
-			split: splits query by type (i.e. 1 for each type)
-		'''
-		url = str("%s/%s/%s" %(self.uri, self.index, self.search_endpoint))
-		# 'and' queries passed to 'must' 
-		andQueries = [ self.timestampQuery(request) ] + self.tagsQuery(request)
-		if split:
-			for eventType in request['types']:
-				q = {"query":{"filtered":{"filter":{"bool":{		
-						"must": andQueries + [ self.eventTypeQuery(eventType) ]
-					}}}},
-					"sort": "timestamp",
-				}
-				q.update(self.resultSize())
-				yield (url, eventType, q)
-		else:
-			q = {"query":{"filtered":{"filter":{"bool":{		
-						"must": andQueries,
-						"should": [self.eventTypeQuery(et) for et in request['types']]
-					}}}},
-					"sort": "timestamp"
-				}
-			q.update(self.resultSize())
-			yield (url, request['types'], q)

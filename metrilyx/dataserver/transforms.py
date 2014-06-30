@@ -3,11 +3,12 @@ import logging
 
 log = logging.getLogger(__name__)
 
-def absoluteTime(relTime):
+def absoluteTime(relTime, convertTo='micro'):
 	'''
 		Args:
 			relTime: relative time or absolute time in seconds
-		Returns relative/absoluteTime time in microseconds
+		Returns:
+			Time in nano/micro/milli seconds
 	'''
 	if type(relTime) != str or "-ago" not in relTime:
 		return relTime
@@ -18,13 +19,22 @@ def absoluteTime(relTime):
 	if unit == 's':
 		retVal = time.time() - val
 	elif unit == 'm':
-		retVal = time.time() - (val*60000000)
+		retVal = time.time() - (val*60)
 	elif unit == 'h':
-		retVal = time.time() - (val*3600000000)
+		retVal = time.time() - (val*3600)
 	elif unit == 'd':
-		retVal = time.time() - (val*86400000000)
+		retVal = time.time() - (val*86400)
 	elif unit == 'w':
-		retVal = time.time() - (val*604800000000)
+		retVal = time.time() - (val*604800)
+	
+	if convertTo == 'nano':
+		retVal *= 1000000000
+	elif convertTo == 'micro':
+		retVal *= 1000000
+	elif convertTo == 'milli':
+		retVal *= 1000
+	else:
+		pass
 	return retVal
 
 class EventannoSerie(object):

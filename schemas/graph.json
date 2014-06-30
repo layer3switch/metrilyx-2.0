@@ -8,7 +8,7 @@
 		"info"		: {"max": 99999999999999, "min": 99999999999999}
 	},
 	"annoEvents": {
-		"types": [],
+		"eventTypes": [],
 		"tags": {}
 	},
 	"multiPane": false,

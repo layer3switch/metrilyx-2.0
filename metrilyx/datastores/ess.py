@@ -3,6 +3,8 @@ from elasticsearch import Elasticsearch
 from metrilyx import BasicDataStructure
 from ..dataserver.transforms import absoluteTime
 	
+from pprint import pprint
+
 DEFAULT_EVENT_RESULT_SIZE = 10000000
 
 class ElasticsearchAnnotationQueryBuilder(object):
@@ -31,21 +33,51 @@ class ElasticsearchAnnotationQueryBuilder(object):
 	def resultSize(self):
 		return {"from": 0, "size": DEFAULT_EVENT_RESULT_SIZE}
 
-	def getQuery(self, request):
+	def getQuery(self, request, split=True):
+		'''
+		Args:
+			split: splits query by type (i.e. 1 for each type)
+		'''
+		if self.use_ssl:
+			url = str("https://%s:%d/%s/%s" %(self.host, self.port, 
+									self.index, self.search_endpoint))
+		else:
+			url = str("http://%s:%d/%s/%s" %(self.host, self.port,
+									self.index, self.search_endpoint))
+		
 		# 'and' queries passed to 'must' 
 		andQueries = [ self.timestampQuery(request) ] + self.tagsQuery(request)
-		return {"query":{"filtered":{"filter":{"bool":{		
-					"must": andQueries,
-					"should": [self.eventTypeQuery(et) for et in request['types']]
-				}}}},
-				"sort": "timestamp"
-			}
+		if split:
+			for eventType in request['eventTypes']:
+				q = {"query":{"filtered":{"filter":{"bool":{		
+						"must": andQueries + [ self.eventTypeQuery(eventType) ]
+					}}}},
+					"sort": "timestamp",
+				}
+				q.update(self.resultSize())
+				yield (url, eventType, q)
+		else:
+			q = {"query":{"filtered":{"filter":{"bool":{		
+						"must": andQueries,
+						"should": [self.eventTypeQuery(et) for et in request['eventTypes']]
+					}}}},
+					"sort": "timestamp"
+				}
+			q.update(self.resultSize())
+			yield (url, request['eventTypes'], q)
 
-class ElasticsearchDataStore(BasicDataStructure):
+
+
+class ElasticsearchDatastore(BasicDataStructure):
 	def __init__(self, config):
-		super(ElasticsearchDataStore, self).__init__(config)
-		self.ds = Elasticsearch()
-		self.queryBuilder = ElasticsearchAnnotationQueryBuilder()
+		super(ElasticsearchDatastore, self).__init__(config)
+		self.ds = Elasticsearch([{
+			'host': self.host,
+			'port': self.port,
+			'use_ssl': self.use_ssl
+			}])
+
+		self.queryBuilder = ElasticsearchAnnotationQueryBuilder(**config)
 
 	def add(self, item):
 		return self.ds.index(index=self.index, 
@@ -53,5 +85,5 @@ class ElasticsearchDataStore(BasicDataStructure):
 				id=item['_id'], 
 				body=item)
 
-	def search(self, query):
-		return self.queryBuilder(query)
+	def search(self, q):
+		return self.ds.search(index=self.index, body=q)

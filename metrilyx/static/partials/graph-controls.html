@@ -85,8 +85,8 @@
 			    <div class="padt10" style="border-top:1px solid #777">
 					<div class="small padb10">Types :</div>
 					<div class="padl7">
-						<div ng-repeat="evtType in graph.annoEvents.types" class="small removable-tag">
-							<a href="javascript:void(0)" style="color:#ccc" class="interactive" ng-click="graph.annoEvents.types.splice($index,1)">
+						<div ng-repeat="evtType in graph.annoEvents.eventTypes" class="small removable-tag">
+							<a href="javascript:void(0)" style="color:#ccc" class="interactive" ng-click="graph.annoEvents.eventTypes.splice($index,1)">
 								<i class="glyphicon glyphicon-remove"></i>
 							</a>
 							<span>{{evtType}}</span>
@@ -94,7 +94,7 @@
 					</div>
 					<div style="clear:both;"></div>
 					<div class="input-group input-group-sm padt5 padl10">
-				    	<input type="text" class="form-control dark" style="border-color:#888 !important" ng-model="graph.annoEvents.types" event-types>
+				    	<input type="text" class="form-control dark" style="border-color:#888 !important" ng-model="graph.annoEvents.eventTypes" event-types>
 				    	<span class="input-group-addon nobg" style="color:#ccc;border-color:#888;">
 				    		<i class="glyphicon glyphicon-search"></i>
 				    	</span>

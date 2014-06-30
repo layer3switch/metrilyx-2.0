@@ -173,7 +173,7 @@ class JsonBodyProducer(object):
 class AsyncHttpResponseProtocol(Protocol):
     def __init__(self, finished_deferred):
         self.finished = finished_deferred
-        self.remaining = 1024 * 50
+        #self.remaining = 1024 * 50
         self.data = ""
 
     def dataReceived(self, bytes):
