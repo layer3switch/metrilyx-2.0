@@ -15,44 +15,58 @@ from autobahn.twisted.websocket import WebSocketServerFactory, listenWS
 
 from metrilyx.metrilyxconfig import config
 from metrilyx.dataserver.protocols import GraphServerProtocol, \
-					EventGraphServerProtocol, acceptedCompression
-from metrilyx.dataserver.dataproviders import TSDBDataProvider
-from metrilyx.datastores.ess import ElasticsearchDatastore
+										EventGraphServerProtocol, \
+										acceptedCompression
 
 LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s]: %(message)s"
 
-class TSDBGraphServerProtocol(GraphServerProtocol):
-	dataprovider = TSDBDataProvider(config['dataproviders'][0])
-	timeout = config['dataproviders'][0]['timeout']
-
-class ESEventGraphServerProtocol(EventGraphServerProtocol):
-	dataprovider = TSDBDataProvider(config['dataproviders'][0])
-	timeout = config['dataproviders'][0]['timeout']	
-	eventDataprovider = ElasticsearchDatastore(config['annotations']['dataprovider'])
-
-def spawn_websocket_server(uri, logLevel, externalPort=None):
+def spawnWebsocketServer(uri, logLevel, protocol, externalPort=None):
 	if logLevel == "DEBUG":
 		isDebug = True
 	else:
 		isDebug = False
 
-	if externalPort == None:
-		factory = WebSocketServerFactory(uri, debug=isDebug)
-	else:
-		factory = WebSocketServerFactory(uri, debug=isDebug, 
-										externalPort=externalPort)
-
-	if config['annotations']['enabled']:
-		factory.protocol = ESEventGraphServerProtocol
-	else:
-		factory.protocol = TSDBGraphServerProtocol
-	
-	factory.setProtocolOptions(
-			perMessageCompressionAccept=acceptedCompression)
+	factory = WebSocketServerFactory(uri, debug=isDebug, externalPort=externalPort)
+	factory.protocol = protocol
+	factory.setProtocolOptions(perMessageCompressionAccept=acceptedCompression)
 	
 	listenWS(factory)
 	reactor.run()
 
+def spawnServers(protocol):
+	global logger, opts
+	procs = []
+	for i in range(opts.serverCount):
+		uri = "%s:%d" %(opts.uri, opts.startPort+i)
+		proc = multiprocessing.Process(
+						target=spawnWebsocketServer, 
+						args=(uri, opts.logLevel, protocol, opts.externalPort))
+		proc.start()
+		logger.info("Started server - %s" %(uri))
+		procs.append(proc)
+	return procs
+
+def getPerfDataProvider():
+	mc = config['dataprovider']['loader_class'].split(".")
+	mod = __import__('metrilyx.dataserver.dataproviders.perf.%s'%(
+									".".join(mc[:-1])), fromlist=['*']) 
+	return eval("mod.%s(config['dataprovider'])" %(mc[-1]))
+
+def getEventDataProvider():
+	mc = config['annotations']['dataprovider']['loader_class'].split(".")
+	mod = __import__('metrilyx.dataserver.dataproviders.events.%s' %(
+									".".join(mc[:-1])), fromlist=['*'])
+	return eval("mod.%s(config['annotations']['dataprovider'])" %(mc[-1]))
+
+def getLogger(level):
+	try:
+		logging.basicConfig(level=eval("logging.%s" %(opts.logLevel)),
+			format=LOG_FORMAT)
+		return logging.getLogger(__name__)
+	except Exception,e:
+		print "[ERROR] %s" %(str(e))
+		parser.print_help()
+		sys.exit(2)
 
 if __name__ == '__main__':
 
@@ -70,43 +84,50 @@ if __name__ == '__main__':
 
 	(opts, args) = parser.parse_args()
 
-	if not opts.uri:
-		print " --uri required!"
-		parser.print_help()
-		sys.exit(1)
-
 	if opts.logLevel == "DEBUG":
 		# twisted logger (may not be needed)
 		log.startLogging(sys.stdout)
 		observer = log.PythonLoggingObserver()
 		observer.start()
-
-	try:
-		logging.basicConfig(level=eval("logging.%s" %(opts.logLevel)),
-			format=LOG_FORMAT)
-		logger = logging.getLogger(__name__)
-	except Exception,e:
-		print "[ERROR] %s" %(str(e))
-		parser.print_help()
-		sys.exit(2)
+	logger = getLogger(opts.logLevel)
 	
+	if not opts.uri:
+		print " --uri required!"
+		parser.print_help()
+		sys.exit(1)
+
 	if opts.serverCount == 0:
 		logger.info("Using auto-spawn count.")
 		opts.serverCount = multiprocessing.cpu_count()
-	logger.info("Spawning %d server/s..." %(opts.serverCount))
 	
-	procs = []
-	for i in range(opts.serverCount):
-		uri = "%s:%d" %(opts.uri, opts.startPort+i)
-		proc = multiprocessing.Process(
-								target=spawn_websocket_server, 
-								args=(uri, opts.logLevel, opts.externalPort))
-		proc.start()
-		logger.info("Started server - %s" %(uri))
-		procs.append(proc)
+	try:
+		perfDP = getPerfDataProvider()
+		logger.info('Performance dataprovider [loaded]')
+		if config['annotations']['enabled']:
+			eventDP = getEventDataProvider()
+			logger.info('Event dataprovider [loaded]')
+
+			class EventGraphProtocol(EventGraphServerProtocol):
+				dataprovider = perfDP
+				eventDataprovider = eventDP
+
+			proto = EventGraphProtocol
+		else:
+			class GraphProtocol(GraphServerProtocol):
+				dataprovider = perfDP
+
+			proto = GraphProtocol
+	except Exception,e:
+		logger.error("Could not set dataprovider and/or protocol: " %(str(e)))
+		sys.exit(2)
+
+	logger.info("Protocol: %s" %(str(proto)))
+
+	logger.info("Spawning %d server/s..." %(opts.serverCount))
+	server_procs = spawnServers(proto)
 
 	try:
-		for p in procs:
+		for p in server_procs:
 			p.join()
 	except KeyboardInterrupt:
 		logger.info("Stopping...")

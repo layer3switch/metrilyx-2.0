@@ -61,7 +61,8 @@ def updateMultiPaneOptions(graph):
 		while(len(graph['panes'])<2):
 			graph['panes'].append("")
 	for s in graph['series']:
-		s['paneIndex'] = 0
+		if not s.has_key(paneIndex):
+			s['paneIndex'] = 0
 
 def processLayout(model):
 	for row in model.layout:

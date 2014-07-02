@@ -16,7 +16,7 @@ from pprint import pprint
 
 EVENT_HTTP_ENDPOINT = "/api/annotations"
 EVENT_SERVER = "localhost"
-EVENT_SRV_PORT = 4545
+EVENT_SRV_PORT = 80
 EVENT_TIME = time.time()*1000000
 
 class MetrilyxEvent(object):
@@ -66,10 +66,10 @@ parser.add_option('-e', dest="event_type")
 parser.add_option('-t', dest="tags", help="t1=v1,t2=v2")
 parser.add_option('-d', dest="data", help="JSON data")
 parser.add_option('-s', dest="server", default=EVENT_SERVER, 
-	help="Server to send event to. default: %s" %(EVENT_SERVER))
+	help="Server to send event to (default: %s)" %(EVENT_SERVER))
 parser.add_option('-p', dest="port", default=EVENT_SRV_PORT, type="int", 
-	help="Server port. default: %d" %(EVENT_SRV_PORT))
-parser.add_option('--proto',dest="protocol", default="tcp", help="tcp or http")
+	help="Server port (default: %d)" %(EVENT_SRV_PORT))
+parser.add_option('--proto',dest="protocol", default="http", help="tcp or http (default: http)")
 
 (opts,args) = parser.parse_args()
 
