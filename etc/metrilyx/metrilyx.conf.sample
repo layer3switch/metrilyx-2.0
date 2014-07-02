@@ -1,12 +1,13 @@
 {
-	"dataproviders": [{
+	"dataproviders": {
 		"name": "OpenTSDB",
 		"uri": "http://<OpenTSDB host>",
 		"query_endpoint": "/api/query",
 		"search_endpoint": "/api/suggest",
 		"suggest_limit": 50,
-		"timeout": 180
-	}],
+		"timeout": 180,
+		"loader_class": "opentsdb.OpenTSDBDataProvider"
+	},
 	"heatmaps": {
 		"analysis_interval": "1m-ago",
 		"transport": "mongodb",
@@ -17,17 +18,19 @@
 	    	"taskmeta_collection": "taskmeta_collection"
 		}
 	},
-	"databases":[{
-		"ENGINE": "django.db.backends.sqlite3",
-        "NAME": "/opt/metrilyx/metrilyx.sqlite3"
-	},{
-		"ENGINE": "django.db.backends.postgresql_psycopg2",
-		"NAME": "metrilyx",
-		"HOST": "127.0.0.1",
-		"PORT": "5432",
-		"USER": "metuser",
-		"PASSWORD": "metpass"
-	}],
+	"databases":[
+		{
+			"ENGINE": "django.db.backends.sqlite3",
+        	"NAME": "/opt/metrilyx/metrilyx.sqlite3"
+		},{
+			"ENGINE": "django.db.backends.postgresql_psycopg2",
+			"NAME": "metrilyx",
+			"HOST": "127.0.0.1",
+			"PORT": "5432",
+			"USER": "metuser",
+			"PASSWORD": "metpass"
+		}
+	],
 	"celery": {
 		"tasks": [
 			"metrilyx.heatmap_tasks"
@@ -35,18 +38,16 @@
 	},
 	"annotations": {
 		"enabled": false,
-		"line_re": "([0-9]+) (.+) ([a-zA-Z0-9_]+):(.+)",
-		"messagebus": {
-			"topic": "anno_events",
-			"address": "localhost",
-			"port": 9092,
-			"consumer_group": "anno_reader"
-		},
+		"line_re": "([0-9]+) (.+) ([a-zA-Z0-9_]+):(.+) '({.*})'",
 		"dataprovider":{
 			"name": "Elasticsearch",
-			"uri": "http://localhost:9200",
+			"host": "localhost",
+			"port": 9200,
+			"use_ssl": false,
 			"search_endpoint": "_search",
-			"index": "anno_events"
+			"index": "anno_events",
+			"result_size": 10000000,
+			"loader_class": "ess.ElasticsearchEventDataProvider"
 		}
 	},
 	"debug": false
