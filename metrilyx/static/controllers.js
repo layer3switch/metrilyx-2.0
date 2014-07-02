@@ -435,9 +435,14 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			if($scope.timeType == "absolute"){
 				if($scope.endTime) {
 					if(inMilli) {
-						return {end: $scope.endTime*1000, start:$scope.startTime*1000};
+						return {
+							end: $scope.endTime*1000, 
+							start: $scope.startTime*1000};
 					}
-					return {end: $scope.endTime,start: $scope.startTime};
+					return {
+						end: $scope.endTime, 
+						start: $scope.startTime
+					};
 				}
 				if(inMilli) {
 					return {
@@ -782,8 +787,8 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			if($scope.timeType == "absolute"){
 				if($scope.endTime) 
 					return {
-						end: $scope.endTime, 
-						start: $scope.startTime
+						start: $scope.startTime,
+						end: $scope.endTime
 					};
 				return {
 					start: $scope.startTime, 

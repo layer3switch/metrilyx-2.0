@@ -185,7 +185,7 @@ class AsyncHttpResponseProtocol(Protocol):
         #print 'Finished receiving body:', reason.getErrorMessage()
         self.finished.callback(self.data)
 
-class AsyncHttpJsonRequest(object):
+class AsyncHttpJsonClient(object):
     '''
         Supports json request payload on both HTTP GET and POST
     '''

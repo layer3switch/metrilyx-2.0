@@ -11,7 +11,7 @@ admin.autodiscover()
 
 from rest_framework import routers
 from metrilyxconfig import config
-from metrilyx import apiviews
+from metrilyx.rest import apiviews
 
 router = routers.SimpleRouter(trailing_slash=False)
 router.register(r'(api/)?event_types', apiviews.EventTypeViewSet)

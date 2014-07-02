@@ -1,6 +1,6 @@
 
 from elasticsearch import Elasticsearch
-from metrilyx import BasicDataStructure
+from metrilyx import BaseClassWithConfig
 from ..dataserver.transforms import absoluteTime
 	
 from pprint import pprint
@@ -68,7 +68,7 @@ class ElasticsearchAnnotationQueryBuilder(object):
 
 
 
-class ElasticsearchDatastore(BasicDataStructure):
+class ElasticsearchDatastore(BaseClassWithConfig):
 	def __init__(self, config):
 		super(ElasticsearchDatastore, self).__init__(config)
 		self.ds = Elasticsearch([{

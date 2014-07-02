@@ -1226,12 +1226,15 @@ input.threshold-input {
 	border-radius: 0 2px 2px 2px;
 	color: #ccc !important;
 	border-top: none;
-	font-size: 13px;
+	font-size: 12px;
 	padding-top: 0px;
 	padding-bottom: 0px;
+	border-bottom:none;
 }
 .dropdown-menu.result-tags li a {
 	padding-left: 10px !important;
+	padding-top: 4px !important;
+	padding-bottom: 4px !important;
 }
 .dropdown-menu.result-tags li a:hover {
 	background: none;
@@ -1242,6 +1245,14 @@ input.threshold-input {
 	border-radius: 2px 2px 0 0;
 	background-color: rgba(44,44,44,0.8);
 	color: #ccc !important;
+}
+li[ng-repeat="tagvalue in tagvalues|orderBy:'toString()'"] > a {
+	color:#ccc !important;
+	border-top: 1px solid #636363;
+	border-bottom:1px solid #444;
+}
+li[ng-repeat="tagvalue in tagvalues|orderBy:'toString()'"]:last-child > a {
+	border-bottom: none !important
 }
 .btn-group.open > .dropdown-toggle {
 	-webkit-box-shadow: none !important;

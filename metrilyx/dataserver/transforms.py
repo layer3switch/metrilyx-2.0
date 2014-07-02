@@ -33,11 +33,10 @@ def absoluteTime(relTime, convertTo='micro'):
 		retVal *= 1000000
 	elif convertTo == 'milli':
 		retVal *= 1000
-	else:
-		pass
+
 	return retVal
 
-class EventannoSerie(object):
+class EventSerie(object):
 	'''
 	Args:
 		serie: event serie 

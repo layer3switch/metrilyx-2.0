@@ -10,8 +10,9 @@ from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.websocket.compress import PerMessageDeflateOffer, \
 										PerMessageDeflateOfferAccept
 
-from ..httpclients import AsyncHttpJsonRequest
-from transforms import MetrilyxSerie, EventannoSerie
+from ..httpclients import AsyncHttpJsonClient
+from transforms import MetrilyxSerie, EventSerie
+from ..dataserver import GraphRequest, GraphEventRequest
 
 logger = logging.getLogger(__name__)
 
@@ -35,24 +36,22 @@ def acceptedCompression(offers):
 			return PerMessageDeflateOfferAccept(offer)
 
 class BaseGraphServerProtocol(WebSocketServerProtocol):
-	REQUIRED_REQUEST_KEYS = ('_id', 'start', 'graphType', 'series',)
-
+	'''
+		Basic protocol that handles incoming requests. 
+		This does nothing more than check the request and submit for processing.  
+		If needed, 'GraphServerProtocol' should be subclassed instead.
+	'''
 	def onConnect(self, request):
 		logger.info("WebSocket connection request by %s" %(str(request.peer)))
 
 	def onOpen(self):
-		logger.info("WebSocket connection opened. extensions: %s" %(self.websocket_extensions_in_use))
+		logger.info("WebSocket connection opened. extensions: %s" %(
+										self.websocket_extensions_in_use))
 
 	def checkMessage(self, payload, isBinary):
 		if not isBinary:
 			try:
-				obj = json.loads(payload)
-				for k in self.REQUIRED_REQUEST_KEYS:
-					if not obj.has_key(k):
-						self.sendMessage(json.dumps({"error": "Invalid key: '%s'" %(k)}))
-						logger.warning("Invalid key '%s'" %(k))
-						return {"error": "Invalid key: '%s'" %(k)}
-				return obj
+				return json.loads(payload)
 			except Exception, e:
 				self.sendMessage(json.dumps({'error': str(e)}))
 				logger.error(str(e))
@@ -63,22 +62,53 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 			return {'error': 'Binary data not support!'}
 
 	def onMessage(self, payload, isBinary):
+		'''
+			Check the payload validity
+			Split the request into 1 request per metric.
+			Call dataprovider to get query.
+			Submit query.
+		'''
 		request_obj = self.checkMessage(payload, isBinary)
 		if not request_obj.get("error"):
 			## all checks passed - proceed
 			logger.info("Request %(_id)s start=%(start)s" %(request_obj))
-			## this is overriden in subclass
-			self.submitQueries(request_obj)
+			graphReq = GraphRequest(request_obj)
+			self.processRequest(graphReq)
 		else:
 			logger.error("Invalid request object: %s" %(str(request_obj)))
 
-	def submitQueries(self, req_obj):
+	def processRequest(self, graphRequest):
 		'''
-		Override in subclass (required)
+			This is a stub that is overwritten in 'GraphServerProtocol'
 		'''
 		pass
 
 
+class GraphServerProtocol(BaseGraphServerProtocol):
+
+	def graphResponseErrback(self, error, graphMeta):
+		# call dataprovider errback (diff for diff backends)
+		errResponse = self.dataprovider.responseErrback(error, graphMeta)
+		self.sendMessage(json.dumps(errResponse))
+
+	def graphResponseCallback(self, response, url, graphMeta):
+		graphMeta['series'][0]['data'] = self.dataprovider.responseCallback(
+											json.loads(response), url, graphMeta)
+		mserie = MetrilyxSerie(graphMeta['series'][0])
+		graphMeta['series'][0]['data'] = mserie.data
+		self.sendMessage(json.dumps(graphMeta))
+
+	def processRequest(self, graphRequest):
+		self.submitPerfQueries(graphRequest)
+
+	def submitPerfQueries(self, graphRequest):
+		for serieReq in graphRequest.split():
+			(url, method, query) = self.dataprovider.getQuery(serieReq)
+		 	a = AsyncHttpJsonClient(uri=url, method=method, body=query)
+			a.addResponseCallback(self.graphResponseCallback, url, serieReq)
+			a.addResponseErrback(self.graphResponseErrback, serieReq)
+
+'''
 class GraphServerProtocol(BaseGraphServerProtocol):
 	## set dataprovider in subclass
 	dataprovider = None
@@ -106,55 +136,61 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 	def submitQueries(self, req_obj):
 		self.submitPerfQueries(req_obj)
 
-	
-
 	"""
 	def onClose(self, wasClean, code, reason):
 		for k in self.active_queries.keys():
 			self.active_queries[k].cancel()
 			del self.active_queries[k]
 	"""
+'''
 
 class EventGraphServerProtocol(GraphServerProtocol):
 	eventDataprovider = None
 
-	def submitQueries(self, req_obj):
-		# submit performance metric queries
-		self.submitPerfQueries(req_obj)
-		# submit annotation queries
-		self.submitEventQueries(req_obj)
+	def processRequest(self, graphRequest):
+		# submit graph data queries
+		self.submitPerfQueries(graphRequest)
+		# submit event queries
+		self.submitEventQueries(graphRequest.request)
 
-	def eventQueryResponseCallback(self, data, eventType, graph, query):
+	def eventResponseCallback(self, data, eventType, graph):
 		try:
 			dct = json.loads(data)
 			if dct.has_key('error'):
 				logger.error(str(dct))
 				return
-			eas = EventannoSerie([ h['_source'] for h in dct['hits']['hits'] ],
-								graph, eventType)
+
+			eas = EventSerie(self.eventDataprovider.responseCallback(dct),
+														graph, eventType)
 			if len(eas.data['annoEvents']['data']) < 1:
-				logger.info("Event annotation: type=%s no data (%s)" %(eventType, graph['_id']))
+				logger.info("Event annotation: type=%s no data (%s)" %(
+													eventType, graph['_id']))
 				return
 
 			self.sendMessage(json.dumps(eas.data))
 			logger.info("Event annotation: sha1=%s type=%s count=%d" %(graph['_id'], 
-															eventType, len(eas.data['annoEvents']['data'])))
+										eventType, len(eas.data['annoEvents']['data'])))
 		except Exception,e:
 			logger.error("%s %s" %(str(e), str(data)))
 
-	def submitEventQueries(self, graphMeta):
-		if len(graphMeta['annoEvents']['eventTypes']) < 1 or \
-					len(graphMeta['annoEvents']['tags'].keys()) < 1:
+	def submitEventQueries(self, request):
+		## TODO: this will raise an exception 
+		if len(request['annoEvents']['tags'].keys()) < 1 or \
+					len(request['annoEvents']['eventTypes']) < 1: 
 			return
-		request = {
-			'start': graphMeta['start']*1000000,
-			'tags': graphMeta['annoEvents']['tags'],
-			'eventTypes': graphMeta['annoEvents']['eventTypes']
-		}
-		if graphMeta.has_key('end'):
-			request['end'] = graphMeta['end']*1000000
+
+		graphEvtReq = GraphEventRequest(request)
+		
+		for graphEvent in graphEvtReq.split():
+			(url, method, query) = self.eventDataprovider.getQuery(graphEvent)
+			a = AsyncHttpJsonClient(uri=url, method=method, body=query)
+			a.addResponseCallback(self.eventResponseCallback, 
+					graphEvent['eventTypes'][0], request)
+
+		'''
 		for (url, eventType, query) in self.eventDataprovider.queryBuilder.getQuery(request):
 			#print graphMeta['_id'], eventType
 			#print eventType, query
 			a = AsyncHttpJsonRequest(uri=url, method='GET', body=query)
 			a.addResponseCallback(self.eventQueryResponseCallback, eventType, graphMeta, query)
+		'''

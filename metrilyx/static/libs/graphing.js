@@ -326,7 +326,7 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
     //console.log(this._graph);
 
     if(this._graph.multiPane) {
-        console.log('parallel view');
+        //console.log('parallel view');
         //console.log(this._graph);
         h = 100/this._graph.panes.length;
         hstr = h.toString();
