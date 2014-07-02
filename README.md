@@ -114,12 +114,14 @@ The default installation directory is /opt/metrilyx.
 A sample configuration file has been provided.  The configuration file is in JSON format.  
 	
 	{
-		"dataproviders": [{
+		"dataproviders": {
+			"name": "OpenTSDB"
 			"uri":"http://tsdb.example.com",
 			"query_endpoint": "/api/query",
 			"search_endpoint": "api/suggest",
-			"suggest_limit": 100
-		}],
+			"suggest_limit": 50,
+			"loader_class": "opentsdb.OpenTSDBDataProvider"
+		},
 		"databases":[{
 			"ENGINE": "django.db.backends.sqlite3",
             "NAME": "metrilyx.sqlite3"
@@ -140,12 +142,12 @@ A sample configuration file has been provided.  The configuration file is in JSO
 			]
 		},
 		"annotations": {
+			"enabled": false,
 			"line_re": "([0-9]+) (.+) ([a-zA-Z0-9_]+):(.+) '({.*})'$",
-			"messagebus": {
-				"topic": "anno_events",
-				"address": "localhost",
-				"port": 9092,
-				"consumer_group": "anno_reader"
+			"dataprovider": {
+				"host": "",
+				"port": 9200,
+				"loader_class": "ess.ElasticsearchEventDataProvider"
 			}
 		},
 		"debug": false
