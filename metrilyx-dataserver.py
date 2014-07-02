@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
 			proto = GraphProtocol
 	except Exception,e:
-		logger.error("Could not set dataprovider and/or protocol: " %(str(e)))
+		logger.error("Could not set dataprovider and/or protocol: %s" %(str(e)))
 		sys.exit(2)
 
 	logger.info("Protocol: %s" %(str(proto)))
