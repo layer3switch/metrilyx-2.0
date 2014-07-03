@@ -16,15 +16,24 @@ def updateThresholds(graph):
 	if graph['graphType'] == "pie": 
 		print graph['_id'],  "skipping pie graph"
 		return
-	if not graph.has_key('thresholds') or \
-			type(graph['thresholds']['danger']) is str or \
-			type(graph['thresholds']['danger']) is unicode:
+	if not graph.has_key('thresholds'):
 		graph['thresholds'] = graphSchema['thresholds']
 		print graph['_id'], "thresholds added"
+
 	else:
 		if type(graph['thresholds']['danger']) is dict: 
 			print graph['_id'], "skipping already in upgraded"
 			return
+		if type(graph['thresholds']['danger']) is str or \
+				type(graph['thresholds']['danger']) is unicode:
+			graph['thresholds']['danger'] = float(graph['thresholds']['danger'])
+		if type(graph['thresholds']['warning']) is str or \
+				type(graph['thresholds']['warning']) is unicode:
+			graph['thresholds']['warning'] = float(graph['thresholds']['warning'])
+		if type(graph['thresholds']['info']) is str or \
+				type(graph['thresholds']['info']) is unicode:
+			graph['thresholds']['info'] = float(graph['thresholds']['info'])
+
 		graph['thresholds'] = {
 			'danger': {
 				'min': graph['thresholds']['danger'],
@@ -64,7 +73,7 @@ def updateMultiPaneOptions(graph):
 		if not s.has_key('paneIndex'):
 			s['paneIndex'] = 0
 
-def processLayout(model):
+def processGraphLayout(model):
 	for row in model.layout:
 		for col in row:
 			for pod in col:
@@ -73,8 +82,18 @@ def processLayout(model):
 					addEventAnnoDef(graph)
 					updateMultiPaneOptions(graph)
 
+def processHeatLayout(model):
+	for row in model.layout:
+		for col in row:
+			for pod in col:
+				for graph in pod['graphs']:
+					updateThresholds(graph)
+
 models = MapModel.objects.all()
 for m in models:
-	if m.model_type != "graph": continue
-	processLayout(m)
-	m.save()
+	if m.model_type == "graph":
+		processGraphLayout(m)
+		m.save()
+	elif m.model_type == "heat":
+		processHeatLayout(m)
+		m.save()
