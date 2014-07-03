@@ -226,6 +226,7 @@ input.form-control.md {
     padding-left: 10px;*/
 }
 #edit-panel.edit-mode {
+	min-width: 0;
 	width: 23.5%;
 	opacity: 1;
 }

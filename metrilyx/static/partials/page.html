@@ -5,16 +5,19 @@
 		<div class="col-md-12" style="padding:0">
 			<ng-include src="pageHeaderHtml" onload="onPageHeaderLoad()"></ng-include>
 			<div class="row layout edit-comp{{editMode}}" ui-sortable="layoutSortOpts" ng-model="model.layout" layout="true">
-				<div class="dblclick-helper layout-helper edit-comp{{editMode}} text-center">Double-click to add a pod to a <b>new row</b></div>		
+				<div class="dblclick-helper layout-helper edit-comp{{editMode}} text-center">Double-click to add a <b>pod</b> to a <b>new row</b></div>		
 				<div ng-repeat="row in model.layout" class="row layout-row edit-comp{{editMode}}" ng-include="podHtml" ui-sortable="rowSortOpts" ng-model="row" row="true">
 				</div>
-				<div class="dblclick-helper edit-comp{{editMode}} text-center">Double-click to add a pod to a <b>new row</b></div>
+				<div class="dblclick-helper layout-helper edit-comp{{editMode}} text-center">Double-click to add a <b>pod</b> to a <b>new row</b></div>
 			</div>
 			<div class="text-center small padb20">
 				<a href="#/tutorials" class="pad5 interactive" style="font-weight:bold;color:#555">tutorials</a>
 			</div>
 		</div><!-- END .col-md-9 -->
 	</div><!-- END .row -->
+
+	<!-- static positioned display components (dialog boxes) -->
+	<!-- these must be on the stage to avoid overflow-x -->	
 	<div class="modal fade" id="confirm-delete">
 		<div class="modal-dialog">
 		    <div class="modal-content">
@@ -29,9 +32,10 @@
 			    	<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
 			    	<button type="button" class="btn btn-danger" ng-click="removeModel();">Delete</button>
 			    </div>
-		    </div><!-- /.modal-content -->
-		</div><!-- /.modal-dialog -->
-	</div><!-- /.modal -->
+		    </div>
+		</div>
+	</div>
+
 	<div class="modal fade" id="add-page-tag">
 		<div class="modal-dialog">
 			<div class="modal-content">
