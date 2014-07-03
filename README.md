@@ -6,6 +6,7 @@ Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database us
 - Event annotations.
 - More graph types: spline, area, stacked, pie, line
 - UI changes and fixes.
+- Performance improvements on listing api
 
 ##### v2.2.0
 - Major performance improvements.
@@ -32,34 +33,29 @@ Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database us
 ![Alt text](metrilyx/static/imgs/readme/screenshot_3.png)
  
 ### Requirements
-Metrilyx will run on any system that supports the packages mentioned below.  It has primarily been tested on RedHat based flavors of Linux. Aside from the packages below, you will also need a running instances of the following:
-
-*	**kafka**
-	
-	This is used for the devlivery of event annotations.  This component is responsible for receiving events.
+Metrilyx will run on any system that supports the packages mentioned below.  It has primarily been tested on RedHat based flavors of Linux. Aside from the packages below, you will also need running instances of the following:
 	
 *	**elasticsearch**
 
-	This is used to store all event annotations.  This is where the data is queried from.
+	This is used to store all event annotations.  This is where the data is queried from as well.
 
 *	**mongodb**
 
 	This component is used by heatmaps.  
 	
-*	**postgresql/mysql** (optional)
+*	**postgresql** (optional)
 
-	This component is only needed if you plan to store your models in a database other than the default sqlite3.  Based on the number of models and usage a proper database may be needed.
-
+	This component is only needed if you plan to store your models in a database other than the default sqlite3.  Based on the number of models and usage a proper database may be needed.  Metrilyx has been tested using postgresql and is currently in use at TicketMaster.  MySQL has not been tried due to the lack of JSON support.
 
 
 #### OS Packages:
 ##### RHEL:
-Before running the command below, make sure you've added the **nginx repo** to yum.
+Before running the command below, make sure you've added the **nginx repo** to yum. 
 
-	yum -y install libuuid uuid nginx python-setuptools python-devel gcc mongodb
+	yum -y install libuuid uuid nginx python-setuptools python-devel gcc
 	
 ##### Debian:
-	apt-get install libuuid1 uuid-runtime nginx python-setuptools python-dev libpython-dev make mongodb
+	apt-get install libuuid1 uuid-runtime nginx python-setuptools python-dev libpython-dev make
 
 #### Python Packages:
 	uuid
@@ -77,7 +73,7 @@ Before running the command below, make sure you've added the **nginx repo** to y
 	six
 	autobahn
 
-Installing autobahn throws an error if six hasn't bin install beforehand or is not the correct version.  To correct this, uninstall six and autobahn and re-install both as follows:
+Installing autobahn throws an error if **six** hasn't been install beforehand or is not the correct version.  To correct this, uninstall six and autobahn and re-install both as follows:
 
 	pip uninstall autobahn -y
 	pip uninstall six -y
@@ -105,27 +101,23 @@ After you have completed editing the configuration file, start the modelmanager 
 	/etc/init.d/celeryd start
 	/etc/init.d/celerybeat start
 
-The default system nginx configuration may conflict with the metrilyx one.  In this case you'll need to disable the default one or edit the configuration file to accomodate the metrilyx nginx configuration.
+The default nginx configuration file may conflict with the metrilyx one.  In this case you'll need to disable the default one or edit the configuration file to accomodate for metrilyx's nginx configuration.
 
 ### Configuration
-The default installation directory is /opt/metrilyx.
+The configuration file is located at: **/opt/metrilyx/etc/metrilyx/metrilyx.conf**
 
 #### /opt/metrilyx/etc/metrilyx/metrilyx.conf
 A sample configuration file has been provided.  The configuration file is in JSON format.  
 	
 	{
 		"dataproviders": {
-			"name": "OpenTSDB"
-			"uri":"http://tsdb.example.com",
+			"name": "OpenTSDB",
+			"uri": "http://<OpenTSDB host>",
 			"query_endpoint": "/api/query",
-			"search_endpoint": "api/suggest",
+			"search_endpoint": "/api/suggest",
 			"suggest_limit": 50,
 			"loader_class": "opentsdb.OpenTSDBDataProvider"
 		},
-		"databases":[{
-			"ENGINE": "django.db.backends.sqlite3",
-            "NAME": "metrilyx.sqlite3"
-		}],
 		"heatmaps": {
 			"analysis_interval": "1m-ago",
 			"transport": "mongodb",
@@ -136,6 +128,19 @@ A sample configuration file has been provided.  The configuration file is in JSO
 		    	"taskmeta_collection": "taskmeta_collection"
 			}
 		},
+		"databases":[
+			{
+				"ENGINE": "django.db.backends.sqlite3",
+	        	"NAME": "/opt/metrilyx/metrilyx.sqlite3"
+			},{
+				"ENGINE": "django.db.backends.postgresql_psycopg2",
+				"NAME": "metrilyx",
+				"HOST": "127.0.0.1",
+				"PORT": "5432",
+				"USER": "metuser",
+				"PASSWORD": "metpass"
+			}
+		],
 		"celery": {
 			"tasks": [
 				"metrilyx.heatmap_tasks"
@@ -143,10 +148,15 @@ A sample configuration file has been provided.  The configuration file is in JSO
 		},
 		"annotations": {
 			"enabled": false,
-			"line_re": "([0-9]+) (.+) ([a-zA-Z0-9_]+):(.+) '({.*})'$",
-			"dataprovider": {
-				"host": "",
+			"line_re": "([0-9]+) (.+) ([a-zA-Z0-9_]+):(.+) '({.*})'",
+			"dataprovider":{
+				"name": "Elasticsearch",
+				"host": "localhost",
 				"port": 9200,
+				"use_ssl": false,
+				"search_endpoint": "_search",
+				"index": "anno_events",
+				"result_size": 10000000,
 				"loader_class": "ess.ElasticsearchEventDataProvider"
 			}
 		},
@@ -163,22 +173,22 @@ OpenTSDB http port (default: 4242)
 OpenTSDB suggest max result limit. 
 
 ##### heatmaps
-This configuration option is only need if you plan to use heatmaps. If you choose to enable this feature the only needed change is the mongodb information relative to your setup i.e. host, port, and database
+This configuration option is only need if you plan to use heatmaps. If you choose to enable this feature the only needed change is the mongodb information relative to your setup i.e. **host**, **port**, and database
 
 ##### databases
-The are 2 configurations provided - sqlite and postgres.  The first one in the list will be the one used.  The default uses sqlite.  Postgresql can also be used.  To use postgres move that configuration option to the top of the list.  Using postgres requires the **psycopg2** python package.
+The are 2 configurations provided - sqlite and postgres.  The first one in the list will be the one used.  The default uses sqlite.  Postgresql can also be used.  To use postgres move that configuration option to the top of the list.  Using postgres requires the **psycopg2** python package.  All options are self explanatory.
 
 
 #### /opt/metrilyx/metrilyx/static/config.js
 This is the client side configuration file. A sample for this configuration has also been provided.
 
-##### AUTHCONFIG
+##### AUTHCONFIG (optional)
 This does not need to be changed.  This is a placeholder for a future feature to allow user authentication.
 
-##### SERVER_NAME
-Client accessible FQDN of the server.  This is the address used by the client to make the websocket connection.  This must be the hostname of the machine it's running on or else client connections will fail.  This is the only required option in this configuration file.
+##### SERVER_NAME (required)
+Client accessible FQDN of the server.  This is the address used by the client to make the websocket connection.  This usually is the hostname of the machine it's running on.  Not having this configured correctly will cause client connections will fail.  This is the only required option in this configuration file.
 
-##### WS_URI
+##### WS_URI (optional)
 The websocket URI used by the client.  This is made up of the **SERVER_NAME** and connection options.  This does not need to be edited.
 
 
