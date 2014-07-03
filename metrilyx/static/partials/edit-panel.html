@@ -35,7 +35,7 @@
 			</span>
 		</div>
 	</div>
-	<div style="margin-top:112px;border-bottom:1px solid #454545">
+	<div class="metric-search-result {{modelType}}">
 		<div ui-sortable="metricListSortOpts" ng-model="metricQueryResult" drag-copy>
 			<div class="metric interactive page-list-item" ng-repeat="metric in metricQueryResult" ng-model="metric" title="{{metric.query.metric}}" style="color:#ccc">
 				<span>{{metric.query.metric}}</span>
