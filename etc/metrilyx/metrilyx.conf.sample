@@ -5,7 +5,6 @@
 		"query_endpoint": "/api/query",
 		"search_endpoint": "/api/suggest",
 		"suggest_limit": 50,
-		"timeout": 180,
 		"loader_class": "opentsdb.OpenTSDBDataProvider"
 	},
 	"heatmaps": {
