@@ -22,6 +22,7 @@ from serializers import *
 from ..models import * 
 
 from ..datastores.ess import ElasticsearchDatastore
+from ..datastores.mongodb import MetricCacheDatastore
 from ..annotations import Annotator
 
 from ..metrilyxconfig import config
@@ -237,14 +238,17 @@ class TagViewSet(viewsets.ViewSet):
 		return Response(serializer.data)
 
 class SearchViewSet(viewsets.ViewSet): 
-	tsdb_suggest_url = "%(uri)s%(search_endpoint)s?max=%(suggest_limit)d" %(
-														config['dataprovider'])
+	#tsdb_suggest_url = "%(uri)s%(search_endpoint)s?max=%(suggest_limit)d" %(
+	#													config['dataprovider'])
+	metricMetaCache = MetricCacheDatastore(**config['cache']['datastore']['mongodb'])
 
 	def list(self, request, pk=None):
 		return Response(['graphmaps', 'heatmaps', 'metrics', 'tagk', 'tagv', 'event_types'])
 
 	def retrieve(self, request, pk=None):
 		query = request.GET.get('q', '')
+		limit = request.GET.get('limit', config['cache']['result_size'])
+
 		if query == '':
 			response = []
 		elif pk == 'graphmaps':
@@ -253,13 +257,16 @@ class SearchViewSet(viewsets.ViewSet):
 			response = serializer_obj.data
 		elif pk == 'heatmaps':
 			models_obj = MapModel.objects.filter(name__contains=query, model_type='heat')
-			print models_obj
+			#print models_obj
 			serializer_obj = MapModelSerializer(models_obj, many=True)
 			response = serializer_obj.data
-		elif pk in ('metrics','tagk','tagv'):
-			request_url = "%s&type=%s&q=%s" %(self.tsdb_suggest_url, pk, query)
-			resp = requests.get(request_url)
-			response = resp.json()
+		elif pk == 'metrics':
+			response = self.metricMetaCache.search({'type': 'metric', 'query': query}, limit=limit)
+		elif pk in ('tagk','tagv'):
+			#request_url = "%s&type=%s&q=%s" %(self.tsdb_suggest_url, pk, query)
+			#resp = requests.get(request_url)
+			#response = resp.json()
+			response = self.metricMetaCache.search({'type': pk, 'query': query}, limit=limit)
 		elif pk == 'event_types':
 			models_obj = EventType.objects.filter(name__contains=query)
 			serializer_obj = EventTypeSerializer(models_obj,many=True)

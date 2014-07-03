@@ -4,7 +4,7 @@ from celery.schedules import crontab
 from pprint import pprint
 
 from metrilyxconfig import config
-import heatmap_tasks
+import celerytasks
 
 CELERY_IMPORTS = config['celery']['tasks']
 BROKER_URL = config['heatmaps']['transport']+"://%(host)s:%(port)s/%(database)s" %(config['heatmaps']['broker']) 
@@ -14,10 +14,14 @@ CELERY_ACCEPT_CONTENT = ['pickle', 'json']
 
 ## periodic tasks
 CELERYBEAT_SCHEDULE = {
-    'every-minute': {
-        'task': 'metrilyx.heatmap_tasks.run_heat_queries',
+    'heat-queries': {
+        'task': 'metrilyx.celerytasks.run_heat_queries',
         'schedule': crontab(minute='*/1'),
         #'args': (1,2),
         #'options': { 'task_id': '' }
     },
+    'metric-cacher': {
+    	'task': 'metrilyx.celerytasks.cache_metrics',
+    	'schedule': crontab(minute=str("*/%d" %(config['cache']['interval'])))
+    }
 }

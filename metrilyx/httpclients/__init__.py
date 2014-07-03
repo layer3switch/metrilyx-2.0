@@ -15,6 +15,8 @@ from twisted.web.iweb import IBodyProducer
 from twisted.internet.defer import Deferred, succeed
 from twisted.internet.protocol import Protocol
 
+from metrilyx.metrilyxconfig import config
+
 from pprint import pprint
 
 class HttpJsonClient(object):
@@ -112,9 +114,14 @@ class OpenTSDBResponse(object):
             return self._data
 
 class OpenTSDBClient(object):
-    def __init__(self, host, port=80):
-        self.host = host
-        self.port = port
+    def __init__(self, **kwargs):
+        for k,v in kwargs.items():
+            if k == 'uri':
+                setattr(self, 'host', v.split("/")[-1])
+            else:
+                setattr(self, k,v)
+        if not kwargs.has_key('port'):
+            self.port = 80
 
     def __get_tags_string(self, tags):
         tagstr = "{"
@@ -133,9 +140,11 @@ class OpenTSDBClient(object):
             q_str += self.__get_tags_string(q['tags'])
             cq_str += "&" + q_str
         if query.has_key('end'):
-            return "/api/query?start=%s&end=%s%s" %(query['start'], query['end'], cq_str)
+            return "%s?start=%s&end=%s%s" %(self.query_endpoint,
+                                query['start'], query['end'], cq_str)
         else:
-            return "/api/query?start=%s%s" %(query['start'], cq_str)
+            return "%s?start=%s%s" %(self.query_endpoint,
+                                        query['start'], cq_str)
     
     def query(self, q):
         """
@@ -149,8 +158,7 @@ class OpenTSDBClient(object):
             q_str = self.__build_metric_query(q)
             return OpenTSDBResponse(hjc.GET(q_str))
         else:
-            #print q
-            return OpenTSDBResponse(hjc.GET("/api/query?"+q))
+            return OpenTSDBResponse(hjc.GET(self.query_endpoint+"?"+q))
    
 ## ASYNC ##     
 class JsonBodyProducer(object):

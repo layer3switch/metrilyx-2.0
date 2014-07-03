@@ -375,7 +375,10 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			var qstr;
 			if(args && args !== "") qstr = args;
 			if(this.metricQuery && this.metricQuery !== "") qstr = this.metricQuery;
-			if(qstr == "" || qstr == undefined) return;
+			if(qstr == "" || qstr == undefined) {
+				$scope.metricQueryResult = [];
+				return;
+			}
 			Metrics.suggest(qstr, function(result) {
 				$scope.metricQuery = qstr;
 				Schema.get({modelType:'metric'}, function(graphModel) {

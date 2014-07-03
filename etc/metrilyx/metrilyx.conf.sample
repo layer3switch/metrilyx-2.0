@@ -4,7 +4,6 @@
 		"uri": "http://<OpenTSDB host>",
 		"query_endpoint": "/api/query",
 		"search_endpoint": "/api/suggest",
-		"suggest_limit": 50,
 		"loader_class": "opentsdb.OpenTSDBDataProvider"
 	},
 	"heatmaps": {
@@ -16,6 +15,18 @@
 	    	"database": "jobs", 
 	    	"taskmeta_collection": "taskmeta_collection"
 		}
+	},
+	"cache": {
+		"interval": 5,
+		"datastore": {
+			"mongodb": {
+				"host": "127.0.0.1",
+		    	"port": 27017,
+		    	"database": "metrilyx_cache", 
+		    	"collection": "tsmeta_cache"
+	    	}
+    	},
+    	"result_size": 50
 	},
 	"databases":[
 		{
@@ -32,7 +43,7 @@
 	],
 	"celery": {
 		"tasks": [
-			"metrilyx.heatmap_tasks"
+			"metrilyx.celerytasks"
 		]
 	},
 	"annotations": {

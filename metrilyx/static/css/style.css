@@ -17,11 +17,6 @@ input {
 	border: 1px solid #ccc !important;
 	background-color: #eee !important;
 	border-radius: 3px;
-	/*
-	padding:2px !important;
-    padding-left: 5px !important;
-    padding-right: 5px !important;
-    */
     padding:2px;
     padding-left: 5px;
     padding-right: 5px;
@@ -101,7 +96,6 @@ select[ng-model="timeType"] {
 	font-size: 13px !important;
 }
 .page-mast {
-	/*background: rgba(55,55,55,0.8);*/
 	background: rgba(44,44,44,0.8);
 	border-bottom: 1px solid rgba(77,77,77,0.8);
 	padding: 9px;
@@ -111,18 +105,13 @@ select[ng-model="timeType"] {
 	display: inline-block;
 	padding-left: 7px;
 	padding-right: 9px;
-	/*
-	background: -webkit-linear-gradient(rgba(77,77,77,0.6),rgba(66,66,66,0.9));
-	background:    -moz-linear-gradient(rgba(77,77,77,0.6),rgba(66,66,66,0.9));
-	background:     -ms-linear-gradient(rgba(77,77,77,0.6),rgba(66,66,66,0.9));
-	background:      -o-linear-gradient(rgba(77,77,77,0.6),rgba(66,66,66,0.9));
-	background:         linear-gradient(rgba(77,77,77,0.6),rgba(66,66,66,0.9));
-	border-right: 1px solid rgba(66,66,66,0.5);
-	*/
 	font-size: 22px;
 	color: #ddd;
 }
-
+.btn-default.gtag-btn {
+	color:#888!important
+}
+.btn-default.gtag-btn.interactive:hover,
 .interactive:hover {
 	color: #428bca !important;
 	cursor: pointer;
@@ -130,7 +119,6 @@ select[ng-model="timeType"] {
 .list-active {
 	color: #428bca !important;
 	font-weight: bold !important;
-	/*background-color: #343434 !important;*/
 	-moz-box-shadow: none !important;
     -webkit-box-shadow: none !important;
     box-shadow: none !important;
