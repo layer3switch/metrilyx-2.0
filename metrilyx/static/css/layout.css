@@ -281,6 +281,10 @@ input.pad0 {
 	padding-left: 10px;
 	padding-right: 10px;
 }
+.padlr15 {
+	padding-left: 15px;
+	padding-right: 15px;
+}
 .padlr20 {
 	padding-left: 20px;
 	padding-right: 20px;

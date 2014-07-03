@@ -263,9 +263,6 @@ class SearchViewSet(viewsets.ViewSet):
 		elif pk == 'metrics':
 			response = self.metricMetaCache.search({'type': 'metric', 'query': query}, limit=limit)
 		elif pk in ('tagk','tagv'):
-			#request_url = "%s&type=%s&q=%s" %(self.tsdb_suggest_url, pk, query)
-			#resp = requests.get(request_url)
-			#response = resp.json()
 			response = self.metricMetaCache.search({'type': pk, 'query': query}, limit=limit)
 		elif pk == 'event_types':
 			models_obj = EventType.objects.filter(name__contains=query)
