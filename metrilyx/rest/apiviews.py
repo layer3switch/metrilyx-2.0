@@ -23,9 +23,9 @@ from ..models import *
 
 from ..datastores.ess import ElasticsearchDatastore
 from ..annotations import Annotator
-#from ..annotations.messagebus import KafkaProducer
 
 from ..metrilyxconfig import config
+from metrilyx import metrilyxconfig
 
 from pprint import pprint
 
@@ -125,7 +125,6 @@ class SchemaViewSet(viewsets.ViewSet):
 			return Response(schema)
 		except Exception,e:
 			return Response({"error": str(e)})
-
 
 class EventsViewSet(APIView):
 	REQUIRED_QUERY_PARAMS = ('start','eventTypes','tags')
