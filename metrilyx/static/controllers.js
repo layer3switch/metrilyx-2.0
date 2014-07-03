@@ -605,15 +605,13 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$location.path('/graph').search({});
 			$route.reload();
 		}
+		$scope.previewGraph = function(graph) {
+			$scope.reloadGraph(graph);
+			$("[data-query-set='"+graph._id+"']").collapse('hide');
+		}
 		$scope.reloadGraph = function(gobj) {
 			$('.adhoc-metric-editor').hide();
 			if(gobj.series.length < 1) return;
-
-			//for(var s in gobj.series) {
-			//	gobj.series[s].loading = "loading";
-			//}
-			//$scope.setURL(gobj);
-
 			q = $scope.baseQuery(gobj)
 			q.series = gobj.series;
 			$scope.requestData(q);
