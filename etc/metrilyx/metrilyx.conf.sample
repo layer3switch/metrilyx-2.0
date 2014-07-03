@@ -1,5 +1,5 @@
 {
-	"dataproviders": {
+	"dataprovider": {
 		"name": "OpenTSDB",
 		"uri": "http://<OpenTSDB host>",
 		"query_endpoint": "/api/query",
