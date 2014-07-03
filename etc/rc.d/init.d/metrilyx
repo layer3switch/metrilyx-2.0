@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # chkconfig: 234 90 10
-# description: Metrilyx script to manage all metrilyx processes.
+# description: Metrilyx script to manage all metrilyx processes (dataserver, modelmanager, celeryd, celerybeat)
 #
 
 [ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
@@ -9,6 +9,7 @@
 NAME="metrilyx"
 SERVICE_START_ORDER="metrilyx-dataserver metrilyx-modelmanager celeryd celerybeat"
 SERVICE_STOP_ORDER="metrilyx-dataserver metrilyx-modelmanager celerybeat celeryd"
+
 start() {
 	for service in ${SERVICE_START_ORDER}; do
 		service $service start
