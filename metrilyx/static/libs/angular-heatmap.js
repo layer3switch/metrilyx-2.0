@@ -25,6 +25,8 @@ angular.module('heatmaps', [])
 					if(newValue.series.length > 1) {
 						/* can only have 1 query per pod */
 						newValue.series = [ newValue.series[0] ];
+						setGlobalAlerts({'error': true, 'message': 'Only one heatmap query allowed per pod'});
+						flashAlertsBar();
 						return;
 					}
 					Heat.getData(newValue.series[0].query,
