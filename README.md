@@ -56,9 +56,9 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 
 	This component is used by heatmaps as well as for the metric metadata caching.  It powers metric, tagkey and tagvalue searchs.  Installer packages are available on their site.
 	
-*	**postgresql** (optional)
+*	**postgresql >= 9.3** (optional)
 
-	This component is only needed if you plan to store your models in a database other than the default sqlite3.  Based on the number of models and usage a proper database may be needed.  Metrilyx has been tested using postgresql and is currently in use at TicketMaster.  MySQL has not been tried due to the lack of JSON support.  Installer packages are available on their site.
+	This component is only needed if you plan to store your models in a database other than the default sqlite3.  Based on the number of models and usage a proper database may be needed.  Metrilyx has been tested using postgresql and is currently in use at TicketMaster.  In order to install postgres on a RHEL based system, the OS version must be >= 6.5.  MySQL has not been tried due to the lack of JSON support.  Installer packages for postgres are available on their site.
 
 
 #### OS Packages:
