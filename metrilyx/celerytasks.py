@@ -67,8 +67,7 @@ def cache_metrics():
 		'tagv': 0,
 		'tagk': 0
 	}
-	DSTORE = MetricCacheDatastore(host='127.0.0.1',port=27017,
-		database='metrilyx_cache', collection='tsmeta_cache')
+	DSTORE = MetricCacheDatastore(**config['cache']['datastore'])
 
 	def updateCounter(queryType):
 		global COUNTERS, DSTORE
