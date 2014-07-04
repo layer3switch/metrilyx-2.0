@@ -2,10 +2,7 @@
 import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'metrilyx.settings')
 
-import json
-
-from twisted.internet import reactor
-from twisted.web.client import getPage
+import requests
 
 from celery.decorators import task
 from celery.schedules import crontab
@@ -60,61 +57,47 @@ def run_heat_queries(top=10):
 
 
 @task
+def cacheTSMetaByTypeForAlpha(qtype, alphabet):
+	r = requests.get(str("%s%s?type=%s&q=%s&%s" %(config['dataprovider']['uri'], 
+										config['dataprovider']['search_endpoint'], 
+										qtype, alphabet.lower(), CACHE_QUERY_PARAMS)))
+	metricList = r.json()
+	if qtype == 'metrics':
+		newList = [{'_id': "metric:%s" %(m), 
+				'name': m,
+				'type': 'metric'
+				} for m in metricList ]
+	else:
+		newList = [{'_id': "%s:%s" %(qtype, m), 
+				'name': m,
+				'type': qtype
+				} for m in metricList ]
+	
+	if len(newList) < 1:
+		return {
+			'status': 'No metrics',
+			'query': alphabet,
+			'type': qtype
+			}
+	mcd = MetricCacheDatastore(**config['cache']['datastore']['mongodb'])
+	mcd.bulkCache(newList)
+	mcd.close()
+	return {
+		'status': "refreshed %d" %(len(newList)), 
+		'query': alphabet,
+		'type': qtype
+		}
+
+@task
 def cache_metrics():
-	global COUNTERS, DSTORE
-	COUNTERS = {
-		'metrics': 0,
-		'tagv': 0,
-		'tagk': 0
-	}
-	DSTORE = MetricCacheDatastore(**config['cache']['datastore']['mongodb'])
-
-	def updateCounter(queryType):
-		global COUNTERS, DSTORE
-		COUNTERS[queryType] += 1	
-		#print " * metrics: %(metrics)d  tagkeys: %(tagk)d  tagvals: %(tagv)d  / 52" %(COUNTERS)
-		if COUNTERS['metrics'] == 52 and COUNTERS['tagk'] == 52 and COUNTERS['tagv'] == 52:
-			DSTORE.close()
-			reactor.stop()
-
-	def cacheErrback(error, query, qType):
-		print "-- ERROR", error
-		updateCounter(qType)
-
-	def callback(result, query, qType):
-		global DSTORE
-		if qType == 'metrics':
-			queryType = 'metric'
-		else:
-			queryType = qType
-
-		try:
-			metricList = json.loads(result)
-		except Exception,e:
-			updateCounter(qType)
-			return
-
-		newList = [{'_id': "%s:%s" %(queryType, m), 
-					'name': m,
-					'type': queryType} for m in metricList ]
-		if len(newList) < 1:
-			updateCounter(qType)
-			return
-		rslt = DSTORE.bulkCache(newList)
-		updateCounter(qType)
-
-	for qType in CACHE_QUERY_TYPES:
+	'''
+	Submit 1 query per alphabet per type.
+	Total queries 26 * 2 * 3 (alphabets *  upper/lower case * types)
+	'''
+	queryUrl = str("%(uri)s%(search_endpoint)s") %(config['dataprovider'])
+	for qtype in CACHE_QUERY_TYPES:
 		for a in CACHE_ALPHABETS:
-			## uppercase
-			d = getPage(str("%s%s?type=%s&q=%s&%s" %(config['dataprovider']['uri'], 
-					config['dataprovider']['search_endpoint'], qType, a, CACHE_QUERY_PARAMS)))
-			d.addCallback(callback, a, qType)
-			d.addErrback(cacheErrback, a, qType)
-			## lowercase
-			d = getPage(str("%s%s?type=%s&q=%s&%s" %(config['dataprovider']['uri'], 
-					config['dataprovider']['search_endpoint'], qType, a.lower(), CACHE_QUERY_PARAMS)))
-			d.addCallback(callback, a.lower(), qType)
-			d.addErrback(cacheErrback, a.lower(), qType)
+			cacheTSMetaByTypeForAlpha.apply_async((qtype, a))
+	return {'status': 'submitted %d' %((len(CACHE_ALPHABETS)*2)*len(CACHE_QUERY_TYPES))}
 
-	reactor.run()
-	return {'status': 'Caching complete'}
+
