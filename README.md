@@ -3,10 +3,19 @@ Metrilyx v2.3.0
 Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database used to store large amounts of data.  It allows for analyzing, cross cutting and viewing of time series data in a simple manner.
 
 #### Features:
+- Easy to use UI for dashboard creation.
+- Multiple graph types: spline, area, stacked, pie, line.
+- Data provided via websockets for low protocol overhead.
 - Event annotations.
-- More graph types: spline, area, stacked, pie, line
+- Regex support for metric, tag key and tag value searches.
+- Supports distributed and HA setup
+
+##### v2.3.0
+- Event annotations.
+- Regex support for metric, tag key and tag value searches.
+- Additional graph types: spline, area, stacked, pie, line.
 - UI changes and fixes.
-- Performance improvements on listing api
+- Performance improvements on certain api calls.
 
 ##### v2.2.0
 - Major performance improvements.
@@ -35,26 +44,32 @@ Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database us
 ### Requirements
 Metrilyx will run on any system that supports the packages mentioned below.  It has primarily been tested on RedHat based flavors of Linux. Aside from the packages below, you will also need running instances of the following:
 	
+*	**nginx**
+
+	This is used as the proxy layer to the model manager as well as the websocket data server. Installer packages are available on their site.
+
 *	**elasticsearch**
 
-	This is used to store all event annotations.  This is where the data is queried from as well.
+	This is used to store all event annotations.  This is where the data is queried from as well.  Installer packages are available on their site.
 
 *	**mongodb**
 
-	This component is used by heatmaps.  
+	This component is used by heatmaps as well as for the metric metadata caching.  It powers metric, tagkey and tagvalue searchs.  Installer packages are available on their site.
 	
 *	**postgresql** (optional)
 
-	This component is only needed if you plan to store your models in a database other than the default sqlite3.  Based on the number of models and usage a proper database may be needed.  Metrilyx has been tested using postgresql and is currently in use at TicketMaster.  MySQL has not been tried due to the lack of JSON support.
+	This component is only needed if you plan to store your models in a database other than the default sqlite3.  Based on the number of models and usage a proper database may be needed.  Metrilyx has been tested using postgresql and is currently in use at TicketMaster.  MySQL has not been tried due to the lack of JSON support.  Installer packages are available on their site.
 
 
 #### OS Packages:
-##### RHEL:
-Before running the command below, make sure you've added the **nginx repo** to yum. 
+Once the above requirements have been fulfilled, you can run the command below to install the remaining OS packages.
 
-	yum -y install libuuid uuid nginx python-setuptools python-devel gcc
+##### RHEL:
+
+	yum -y install libuuid uuid python-setuptools python-devel gcc
 	
 ##### Debian:
+
 	apt-get install libuuid1 uuid-runtime nginx python-setuptools python-dev libpython-dev make
 
 #### Python Packages:
@@ -96,12 +111,24 @@ After you have completed editing the configuration file, start the modelmanager 
 	
 	/etc/init.d/metrilyx-dataserver start
 	/etc/init.d/metrilyx-modelmanager start
-	/etc/init.d/metrilyx-eventceiver start
-	/etc/init.d/nginx restart
 	/etc/init.d/celeryd start
 	/etc/init.d/celerybeat start
+	/etc/init.d/nginx restart
 
 The default nginx configuration file may conflict with the metrilyx one.  In this case you'll need to disable the default one or edit the configuration file to accomodate for metrilyx's nginx configuration.
+
+#### Postgresql
+If you would like to use postgres for the backend database instead of the default sqlite, you can do so my moving the provided postgres database configuration above the sqlite one.  Fill in the remainder options based on your postgresql instance.
+
+###### ***Before performing the next step please export all of your existing models.***
+
+You will also need to create the appropriate schemas in postgres and re-initialize django.  
+
+To initialize django for postgres, issue the command below.  If you get prompted to create a superuser, use the following credentials **admin/metrilyx**.  Setting them to anything else will cause the application to fail.  This is due to the fact that authentication has not been fully integrated in metrilyx.
+
+	cd /opt/metrilyx && ./install.sh init_django
+
+If you have existing models in sqlite follow the instructions below to export and import them.
 
 ### Configuration
 The configuration file is located at: **/opt/metrilyx/etc/metrilyx/metrilyx.conf**
@@ -110,12 +137,11 @@ The configuration file is located at: **/opt/metrilyx/etc/metrilyx/metrilyx.conf
 A sample configuration file has been provided.  The configuration file is in JSON format.  
 	
 	{
-		"dataproviders": {
+		"dataprovider": {
 			"name": "OpenTSDB",
 			"uri": "http://<OpenTSDB host>",
 			"query_endpoint": "/api/query",
 			"search_endpoint": "/api/suggest",
-			"suggest_limit": 50,
 			"loader_class": "opentsdb.OpenTSDBDataProvider"
 		},
 		"heatmaps": {
@@ -127,6 +153,18 @@ A sample configuration file has been provided.  The configuration file is in JSO
 		    	"database": "jobs", 
 		    	"taskmeta_collection": "taskmeta_collection"
 			}
+		},
+		"cache": {
+			"interval": 5,
+			"datastore": {
+				"mongodb": {
+					"host": "127.0.0.1",
+			    	"port": 27017,
+			    	"database": "metrilyx_cache", 
+			    	"collection": "tsmeta_cache"
+		    	}
+	    	},
+	    	"result_size": 50
 		},
 		"databases":[
 			{
@@ -143,7 +181,7 @@ A sample configuration file has been provided.  The configuration file is in JSO
 		],
 		"celery": {
 			"tasks": [
-				"metrilyx.heatmap_tasks"
+				"metrilyx.celerytasks"
 			]
 		},
 		"annotations": {
@@ -176,8 +214,16 @@ OpenTSDB suggest max result limit.
 This configuration option is only need if you plan to use heatmaps. If you choose to enable this feature the only needed change is the mongodb information relative to your setup i.e. **host**, **port**, and database
 
 ##### databases
-The are 2 configurations provided - sqlite and postgres.  The first one in the list will be the one used.  The default uses sqlite.  Postgresql can also be used.  To use postgres move that configuration option to the top of the list.  Using postgres requires the **psycopg2** python package.  All options are self explanatory.
+The are 2 database configurations provided - sqlite and postgres.  The first one in the list will be the one used.  The default uses sqlite.  Postgresql can also be used.  To use postgres move that configuration option to the top of the list.  Using postgres requires the **psycopg2** python package.  All options are self explanatory.
 
+##### cache
+This is where the metric metadata cache settings can be changed.  The only configuration need is the correct mongodb settings.
+
+###### interval
+The interval at which to refresh the cache.  This is in minutes.
+
+###### result_size
+Maximum number of results to return.  Setting this value too high may cause performance issues.
 
 #### /opt/metrilyx/metrilyx/static/config.js
 This is the client side configuration file. A sample for this configuration has also been provided.
