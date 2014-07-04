@@ -67,7 +67,7 @@ def cache_metrics():
 		'tagv': 0,
 		'tagk': 0
 	}
-	DSTORE = MetricCacheDatastore(**config['cache']['datastore'])
+	DSTORE = MetricCacheDatastore(**config['cache']['datastore']['mongodb'])
 
 	def updateCounter(queryType):
 		global COUNTERS, DSTORE
