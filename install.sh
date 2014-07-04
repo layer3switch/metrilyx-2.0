@@ -49,7 +49,7 @@ configure_uwsgi() {
 		sed -i -e "s/^gid.*=.*/uid = www\-data/g" ${APP_HOME}/etc/metrilyx/uwsgi.conf;
 	fi
 }
-install_pydeps() {
+pydeps() {
 	echo "-- Installing python dependencies..."
 	which pip || easy_install pip;
 	pip uninstall autobahn -y;
@@ -128,7 +128,7 @@ if [ "$(whoami)" != "root" ]; then
 fi
 
 if [ "$1" == "app" ]; then
-	install_pydeps;
+	pydeps;
 	backup_curr_install;
 	install_app;
 	init_configs;
