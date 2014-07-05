@@ -18,6 +18,7 @@
 	},
 	"cache": {
 		"interval": 5,
+		"retention_period": 12,
 		"datastore": {
 			"mongodb": {
 				"host": "127.0.0.1",
