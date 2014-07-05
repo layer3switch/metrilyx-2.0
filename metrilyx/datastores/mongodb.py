@@ -1,4 +1,6 @@
 
+import time
+
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 from pprint import pprint
@@ -16,26 +18,47 @@ class MetricCacheDatastore(BaseMongoDatastore):
 
 	def __init__(self, **kwargs):
 		super(MetricCacheDatastore,self).__init__(**kwargs)
-		#self.__collection_name = kwargs['collection']
 		self.collection = self.db[kwargs['collection']]
+		# in seconds
+		if not kwargs.has_key('retention_period'):
+			self.retention_period = 300
+		else:
+			self.retention_period = kwargs['retention_period']
 
-	def cache(self, metaName, metaType):
-		if metaType not in self.METATYPES:
-			raise NameError('Invalid type: %s' %(metaType))
-		return self.collection.update({'_id': "%s:%s" %(metaType, metaName)},
-										{'name': metaName,'type': metaType}, 
-										upsert=True)
+	def cache(self, cache_dict):
+		if cache_dict['type'] not in self.METATYPES:
+			raise NameError('Invalid type: %(type)s' %(cache_dict))
+		#cache_dict['lastupdated'] = time.time()
+		return self.collection.update({'_id': "%(type)s:%(name)s" %(cache_dict)},
+													cache_dict, upsert=True)
 
 	def bulkCache(self, metalist):
+		'''
+		rslts = []
+		for m in metalist:
+			try:
+				rslts.append(self.cache(m))
+			except Exception,e:
+				print "ERROR", e
+				rslts.append(dict([(k,v) for k,v in m.items()]+[('error',str(e))]))
+		
+		return { "status": "updated", "results": rslts }
+		'''
 		for m in metalist:
 			if m['type'] not in self.METATYPES:
-				raise NameError('Invalid type: %(type)s %(name)s' %(m))
+				raise NameError('Invalid type: %(type)s' %(cache_dict))
+			m['lastupdated'] = time.time()
 		try:
 			return self.collection.insert(metalist, continue_on_error=True)
 		except DuplicateKeyError,e:
-			return {'warning': e}
+			return {'status': 'already exists'}
 		except Exception,e:
 			return {'error': e}
+
+	def expireCache(self):
+		return self.collection.remove({
+				'lastupdated': {'$lt': time.time()-self.retention_period }
+				})
 
 	def search(self, query, limit=-1):
 		if limit == -1:

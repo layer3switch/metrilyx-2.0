@@ -60,7 +60,7 @@ def run_heat_queries(top=10):
 def cacheTSMetaByTypeForAlpha(qtype, alphabet):
 	r = requests.get(str("%s%s?type=%s&q=%s&%s" %(config['dataprovider']['uri'], 
 										config['dataprovider']['search_endpoint'], 
-										qtype, alphabet.lower(), CACHE_QUERY_PARAMS)))
+										qtype, alphabet, CACHE_QUERY_PARAMS)))
 	metricList = r.json()
 	if qtype == 'metrics':
 		newList = [{'_id': "metric:%s" %(m), 
@@ -79,13 +79,15 @@ def cacheTSMetaByTypeForAlpha(qtype, alphabet):
 			'query': alphabet,
 			'type': qtype
 			}
-	mcd = MetricCacheDatastore(**config['cache']['datastore']['mongodb'])
-	mcd.bulkCache(newList)
+	mcd = MetricCacheDatastore(**dict([(k,v) for k,v in config['cache']['datastore']['mongodb'].items()] +
+									[('retention_period',config['cache']['retention_period']*60)]))
+	resp = mcd.bulkCache(newList)
 	mcd.close()
 	return {
 		'status': "refreshed %d" %(len(newList)), 
 		'query': alphabet,
-		'type': qtype
+		'type': qtype,
+		'response': resp
 		}
 
 @task
@@ -98,6 +100,11 @@ def cache_metrics():
 	for qtype in CACHE_QUERY_TYPES:
 		for a in CACHE_ALPHABETS:
 			cacheTSMetaByTypeForAlpha.apply_async((qtype, a))
+			cacheTSMetaByTypeForAlpha.apply_async((qtype, a.lower()))
 	return {'status': 'submitted %d' %((len(CACHE_ALPHABETS)*2)*len(CACHE_QUERY_TYPES))}
 
-
+@task
+def expire_metrics_cache():
+	mcd = MetricCacheDatastore(**dict([(k,v) for k,v in config['cache']['datastore']['mongodb'].items()] +
+									[('retention_period',config['cache']['retention_period']*60)]))
+	return mcd.expireCache()
