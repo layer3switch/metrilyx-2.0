@@ -190,11 +190,41 @@ angular.module('graphing', [])
 				var currTimer;
 				var evtListenerAdded = false;
 
+				function setSerieStatus(newData, status) {
+					/* status order: querying, updating, loading, loaded */
+					for(var ns in newData.series) {
+						for(var ms in ngModel.$modelValue.series) {
+							//console.log(ngModel.$modelValue.series[ms].query, newData.series[ns].query);
+							qgt = $.extend(true, {}, ngModel.$modelValue.series[ms].query); 
+							$.extend(qgt.tags, scope.globalTags, true);
+							if(equalObjects(qgt, newData.series[ns].query)) {
+								ngModel.$modelValue.series[ms].status = status;
+								break;
+							}
+						}
+					}
+				}
+				// only get series data that is not in 'querying' state //
+				function getSeriesInNonQueryState(series) {
+					out = [];
+					for(var ns in series) {
+						for(var ms in ngModel.$modelValue.series) {
+							qgt = $.extend(true, {}, ngModel.$modelValue.series[ms].query); 
+							$.extend(qgt.tags, scope.globalTags, true);
+							if(equalObjects(qgt, series[ns].query) && ngModel.$modelValue.series[ms].status !== 'querying') {
+								out.push(series[ns]);
+								break;
+							}
+						}
+					}
+					return out;
+				}
 				function getUpdateQuery() {
 					return { 
 						start: Math.floor(((new Date()).getTime() - 900000)/1000),
 						size: ngModel.$modelValue.size,
 						_id: ngModel.$modelValue._id,
+						name: ngModel.$modelValue.name,
 						series: ngModel.$modelValue.series,
 						graphType: ngModel.$modelValue.graphType,
 						tags: scope.globalTags,
@@ -207,15 +237,18 @@ angular.module('graphing', [])
 						// 12m-ago seems to be the magic no. otherwise data does not line up //
 						q = getUpdateQuery();
 						scope.requestData(q);
+						// TODO SET STATUS //
+						setSerieStatus(q, 'updating');
 					}
 					if(currTimer) clearTimeout(currTimer);
 					currTimer = setTimeout(function() { 
 						getUpdates();
 					}, 50000);
 				}
-
 				function processRecievedData(event) {
 					var data = event.detail;
+					// TODO SET STATUS //
+					setSerieStatus(data, 'loading');
 					if(data.annoEvents.data) {
 						//console.log(data._id, data.annoEvents.evenType);
 						anno = new MetrilyxAnnotation(data);
@@ -226,6 +259,7 @@ angular.module('graphing', [])
 					
 					var sTags = (new SeriesFormatter(data.series)).seriesTags();
 					scope.$apply(function() { scope.updateTagsOnPage(sTags) });
+					setSerieStatus(data, 'loaded');
 				}
 
 				if(scope.editMode == " edit-mode") {
@@ -249,17 +283,22 @@ angular.module('graphing', [])
 					if(!graph.series) return;
 					if(graph.series.length <= 0 && oldValue.series && oldValue.series.length <= 0) return;
 					if(!equalObjects(graph.thresholds, oldValue.thresholds)) return;
-					
+
 					// initial populate //
 					hc = $("[data-graph-id='"+graph._id+"']").highcharts();
 					if(hc == undefined) {
+						//console.log('new', graph._id);
 						$("[data-graph-id='"+graph._id+"']").html(
 							"<table class='gif-loader-table'><tr><td> \
 							<img src='/imgs/loader.gif'></td></tr></table>");
 
-						var q = scope.baseQuery(graph);
-						q.series = graph.series;
-						scope.requestData(q);
+						gseries = getSeriesInNonQueryState(graph.series);
+						if(gseries.length > 0) {
+							var q = scope.baseQuery(graph);
+							q.series = gseries;
+							setSerieStatus(q, 'querying');
+							scope.requestData(q);
+						}
 						if(scope.modelType == 'adhoc') scope.setURL(graph);
 						return;
 					}
@@ -267,9 +306,9 @@ angular.module('graphing', [])
 					if(graph.graphType != oldValue.graphType) {
 						//console.log("graph type changed. re-rendering");
 						scope.reloadGraph(graph);
+						setSerieStatus(graph, 'querying');
 						return;
 					};
-					
 					// check length //
 					if(graph.series.length == oldValue.series.length) {
 						return;
@@ -278,6 +317,7 @@ angular.module('graphing', [])
 						var q = scope.baseQuery(graph);	
 						q.series = [ graph.series[graph.series.length-1] ];
 						scope.requestData(q);
+						setSerieStatus(q,'querying');
 						if(scope.modelType == 'adhoc') scope.setURL(graph);
 					} else {
 						//console.log("removing series");

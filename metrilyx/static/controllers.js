@@ -49,6 +49,9 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 					});
 				}
 				$('#tag-back-btn').show();
+				$('#selected-tag').show();
+				$('#selected-tag').parent().addClass('padb10');
+				$('.model-list-container').addClass('tag-selected');
 				$scope.selectedTag = obj.name;
 			} else {
 				//console.log(obj);
@@ -80,6 +83,9 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 					break;
 			};
 			$('#tag-back-btn').hide();
+			$('#selected-tag').hide();
+			$('.model-list-container').removeClass('tag-selected');
+			$('#selected-tag').parent().removeClass('padb10');
 		}
 		$scope.importModel = function(fileList) {
 			var freader = new FileReader();
@@ -133,6 +139,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		// make sure modal window is not lingering around //
 		$('#confirm-delete').modal('hide');
 		$('.modal-backdrop').remove();
+		$('#side-panel').addClass('offstage');
 
 		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
 		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit-panel.html";
@@ -248,34 +255,11 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
        	}
         $scope.requestData = function(query) {
         	try {
-				$scope.wssock.send(JSON.stringify(query));	
+				$scope.wssock.send(JSON.stringify(query));
         	} catch(e) {
         		// in CONNECTING state. //
         		if(e.code === 11) QUEUED_REQS.push(JSON.stringify(query));
         	}
-        }
-        $scope.getLoadedSeriesForGraph = function(graph,inPercent) {
-        	return getLoadedSeries(graph, inPercent);
-        }
-        $scope.isSerieLoaded = function(graph, serie) {
-        	hcg = $("[data-graph-id='"+graph._id+"']").highcharts();
-        	if(hcg === undefined) return false;
-        	if(graph.graphType === 'pie') {
-				for(var j in hcg.series) {
-					for(var d in hcg.series[j].data) {
-						if(equalObjects(hcg.series[j].data[d].query,serie.query)) {
-							return true;
-						}
-					}
-				}
-			} else {
-				for(var j in hcg.series) {
-					if(equalObjects(hcg.series[j].options.query,serie.query)) {
-						return true;
-					}
-				}
-			}
-			return false;
         }
 		$scope.onPageHeaderLoad = function() {
 			// setTimeout is to account for processing time //
@@ -474,13 +458,13 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.baseQuery = function(graphObj) {
 			var q = {
 				_id: graphObj._id,
+				name: graphObj.name,
 				graphType: graphObj.graphType,
 				tags: $scope.globalTags,
 				thresholds: graphObj.thresholds,
 				annoEvents: graphObj.annoEvents,
 				multiPane: graphObj.multiPane,
 				panes: graphObj.panes,
-				totalSeries: graphObj.series.length
 			};
 			//console.log('series', graphObj.series.length);
 			return $.extend(true, q, $scope.getTimeWindow());
@@ -618,6 +602,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			q = $scope.baseQuery(gobj)
 			q.series = gobj.series;
 			$scope.requestData(q);
+
 			// destroy current graph //
 			try{$('[data-graph-id='+gobj._id+']').highcharts().destroy();}catch(e){}
 			$('[data-graph-id='+gobj._id+']').html(
@@ -781,18 +766,15 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.removeTag = function(tags, tagkey) {
 			delete tags[tagkey];
 		}
-		$scope.setStatus = function(serieIdx, status) {
-			$scope.graph.series[serieIdx].loading = status;
-		}
 		$scope.getTimeWindow = function() {
 			if($scope.timeType == "absolute"){
 				if($scope.endTime) 
 					return {
-						start: $scope.startTime,
-						end: $scope.endTime
+						start: parseFloat($scope.startTime),
+						end: parseFloat($scope.endTime)
 					};
 				return {
-					start: $scope.startTime, 
+					start: parseFloat($scope.startTime), 
 					end: Math.ceil((new Date()).getTime()/1000)
 				};
 			} else {
@@ -805,6 +787,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.baseQuery = function(graphObj) {
 			var q = {
 				_id: graphObj._id,
+				name: graphObj.name,
 				graphType: graphObj.graphType,
 				tags: {},
 				thresholds: graphObj.thresholds,
@@ -960,7 +943,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 					for(var i in result) {
 						obj = JSON.parse(JSON.stringify(graphModel));
 						obj.alias = result[i];
-						obj.loading = "loading";
 						obj.query.metric = result[i];
 						arr.push(obj);
 					}

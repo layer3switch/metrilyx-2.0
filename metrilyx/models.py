@@ -56,7 +56,7 @@ class MapModel(models.Model):
 								graph['_id'] = metrilyx.new_uuid()
 							if graph.get('series'):
 								for s in graph['series']:
-									if s.get('loading'): del s['loading']
+									if s.get('status'): del s['status']
 									if s.get('data'): del s['data']
 
 	def __get_heat_query(self, serie_query, name=""):

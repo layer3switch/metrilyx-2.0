@@ -177,6 +177,9 @@ input.pad0 {
 .padr8 {
 	padding-right: 8px;
 }
+.padr15 {
+	padding-right: 15px;
+}
 .padl2 {
 	padding-left: 2px;
 }

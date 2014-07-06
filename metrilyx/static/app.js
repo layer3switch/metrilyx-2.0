@@ -119,7 +119,13 @@ angular.module('filters',[]).
 			which queries have returned data.
 		*/
 		return function(graph, inPercent) {
-			return getLoadedSeries(graph, inPercent);
+			//var n = 0;
+			var l = 0;
+			for(var i in graph.series) {
+				if(graph.series[i].status !== 'querying') l++;
+			}
+			if(inPercent) return (l/graph.series.length)*100;
+			return l;
 		}
 	});
 app.directive('eventTypes', function() {

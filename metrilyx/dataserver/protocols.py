@@ -1,6 +1,7 @@
 
 import logging
 import json
+from datetime import datetime
 from pprint import pprint 
 
 from twisted.internet import reactor
@@ -71,7 +72,8 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 		request_obj = self.checkMessage(payload, isBinary)
 		if not request_obj.get("error"):
 			## all checks passed - proceed
-			logger.info("Request %(_id)s start=%(start)s" %(request_obj))
+			logger.info("Request %s %s start: %s" %(request_obj['_id'], request_obj['name'],
+										datetime.fromtimestamp(float(request_obj['start']))))
 			graphReq = GraphRequest(request_obj)
 			self.processRequest(graphReq)
 		else:
@@ -97,6 +99,8 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		mserie = MetrilyxSerie(graphMeta['series'][0])
 		graphMeta['series'][0]['data'] = mserie.data
 		self.sendMessage(json.dumps(graphMeta))
+		logger.info("Response (graph) %s %s start: %s" %(graphMeta['_id'], graphMeta['name'], 
+									datetime.fromtimestamp(float(graphMeta['start']))))
 
 	def processRequest(self, graphRequest):
 		self.submitPerfQueries(graphRequest)
@@ -108,41 +112,12 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 			a.addResponseCallback(self.graphResponseCallback, url, serieReq)
 			a.addResponseErrback(self.graphResponseErrback, serieReq)
 
-'''
-class GraphServerProtocol(BaseGraphServerProtocol):
-	## set dataprovider in subclass
-	dataprovider = None
-	timeout = 0
-
-	def gQueryResponseCallback(self, response, url, graph_meta=None):
-		graph_meta['series'][0]['data'] = self.dataprovider.response_callback(
-															json.loads(response))		
-		## apply metrilyx transforms
-		mserie = MetrilyxSerie(graph_meta['series'][0])
-		graph_meta['series'][0]['data'] = mserie.data
-		self.sendMessage(json.dumps(graph_meta))
-
-	def gQueryResponseErrback(self, error, url, graph_meta=None):
-		response = self.dataprovider.response_errback(error, graph_meta)
-		self.sendMessage(json.dumps(response))
-
-
-	def submitPerfQueries(self, req_obj):
-		for (url, meta) in self.dataprovider.getQueries(req_obj):
-			d = getPage(url, timeout=self.timeout)
-			d.addCallback(self.gQueryResponseCallback, url, meta)
-			d.addErrback(self.gQueryResponseErrback, url, meta)
-
-	def submitQueries(self, req_obj):
-		self.submitPerfQueries(req_obj)
-
 	"""
 	def onClose(self, wasClean, code, reason):
 		for k in self.active_queries.keys():
 			self.active_queries[k].cancel()
 			del self.active_queries[k]
 	"""
-'''
 
 class EventGraphServerProtocol(GraphServerProtocol):
 	eventDataprovider = None

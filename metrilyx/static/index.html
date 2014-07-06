@@ -39,8 +39,65 @@
 
 	</head>
 	<body ng-app="app">
-		<div id="side-panel" ng-controller="sidePanelController">	
-			<div class="padlr10" style="padding-top:150px;height:100%">
+		<div id="side-panel" ng-controller="sidePanelController" class="offstage animated">	
+			<div class="model-list-ctrl-bar animated">
+				<div class="page-selector-header">
+					<span id="model-list-btn" ng-click="loadPagemodelList('#model-list-btn')" class="model-list-btn list-active pointer padl5 padr15 animated">
+						<i class="glyphicon glyphicon-stats"></i>
+					</span>
+					<span id="heatmap-list-btn" ng-click="loadHeatmapList('#heatmap-list-btn')" class="model-list-btn pointer padl15 animated" style="position:relative;top:1px;">
+						<i class="glyphicon glyphicon-fire"></i>
+					</span>
+					<span onclick="$('#side-panel').addClass('offstage')" class="pointer pull-right animated side-panel-toggle" style="position:relative;top:3px;">
+						<i class="glyphicon glyphicon-chevron-left"></i>
+					</span>
+					<!--<table style="width:100%"><tr>
+						<td id="model-list-btn" class="text-center side-panel-btn interactive model-list-btn list-active pointer" ng-click="loadPagemodelList('#model-list-btn')" title="Page listing">
+								<span><i class="glyphicon glyphicon-stats"></i></span>
+								<span class="edit-panel-btn-label medium">Models</span>
+						</td>
+						<td id="heatmap-list-btn" class="text-center pointer side-panel-btn interactive model-list-btn" ng-click="loadHeatmapList('#heatmap-list-btn')" title="Heatmap listing">
+							<span><i class="glyphicon glyphicon-fire"></i></span>
+							<span class="edit-panel-btn-label medium">Heatmaps</span>
+						</td>
+						<td>
+							<span onclick="$('#side-panel').addClass('offstage')">
+								<i class="glyphicon glyphicon-chevron-left"></i>
+							</span>
+						</td>
+					</tr></table>-->
+				</div>
+				<div class="input-group input-group-sm panel-searchbar model-listing" style="border-top:1px solid #454545;">
+					<span class="input-group-addon" style="padding-right:0px!important;border-right:none!important;padding-left:0px!important">
+						<select class="dark" id="browse-by" ng-model="browseBy" ng-change="onChangeBrowseBy()">
+							<option value="name">Name</option>
+							<option value="tags">Tags</option>
+						</select>
+					</span>
+					<!--<span class="input-group-addon page-icon pointer interactive" onclick="document.getElementById('modelimport').click()" title="Import" style="padding-left:4px;">
+						<i class="glyphicon glyphicon-import"></i>
+						<div class="edit-panel-btn-label">Import</div>
+						<input id="modelimport" type="file" style="display:none;" onchange="angular.element(this).scope().importModel(this.files);">
+					</span>-->
+					<input type="text" class="dark" placeholder="Search" ng-model="modelQuery" style="margin-top:7px;border-color:#555 !important">
+					<!--
+					<a ng-if="modelType==='heatmap/'" href="#/heatmap/new" class="input-group-addon page-icon interactive" title="New">
+						<i class="glyphicon glyphicon-plus"></i>
+						<div class="edit-panel-btn-label">New</div>
+					</a>
+					<a ng-if="modelType===''" href="#/new" class="input-group-addon page-icon interactive" title="New">
+						<i class="glyphicon glyphicon-plus"></i>
+						<div class="edit-panel-btn-label">New</div>
+					</a>-->
+				</div>
+				<div ng-if="browseBy === 'tags'" class="padlr20 small" style="color:#888!important;min-height:0">
+					<span id="tag-back-btn" class="interactive pointer" ng-click="loadList()" style="display:none">
+						<i class="glyphicon glyphicon-chevron-left" style="font-size:14px;"></i>
+					</span>
+					<span class="padl10 padr5" id="selected-tag" style="color:#666;font-size:14px;font-weight:bold;display:none">{{selectedTag}}</span>
+				</div>
+			</div>
+			<div class="padlr10 model-list-container {{browseBy}}">
 				<a ng-repeat="mdl in modelsList | filter:{name:modelQuery} | orderBy:'name'" ng-click="listItemClicked(mdl)" >
 					<div class="page-list-item">
 						<span ng-if="modelType==='heatmap/'" class="page-icon">
@@ -50,64 +107,13 @@
 							<i class="glyphicon glyphicon-stats"></i>
 						</span>
 						<span class="padl5">{{mdl.name}}</span>
-						<span class="pull-right padr10" style="color:#343434">{{mdl.user}}</span>
+						<span class="pull-right padr10" style="color:rgba(45,45,45,0)">{{mdl.user}}</span>
 					</div>
 				</a>
-			</div>
-			<div class="model-list-ctrl-bar">
-				<div class="page-selector-header text-center">
-					<table style="width:100%"><tr>
-						<td id="model-list-btn" class="text-center side-panel-btn interactive model-list-btn list-active pointer" style="border-right: 1px solid #464646;" ng-click="loadPagemodelList('#model-list-btn')" title="Page listing">
-								<span><i class="glyphicon glyphicon-stats"></i></span>
-								<span class="edit-panel-btn-label medium">Models</span>
-						</td>
-						<td id="heatmap-list-btn" class="text-center pointer side-panel-btn interactive model-list-btn" ng-click="loadHeatmapList('#heatmap-list-btn')" title="Heatmap listing" style="border-left: 1px solid #464646;">
-							<span><i class="glyphicon glyphicon-fire"></i></span>
-							<span class="edit-panel-btn-label medium">Heatmaps</span>
-						</td>
-					</tr></table>
-				</div>
-				<div class="padt10 padlr20 small" style="color:#888!important;">
-					<div class="row" style="margin:0">
-						<div class="col-md-6 text-left" style="padding:0">
-							<span id="tag-back-btn" class="interactive pointer" ng-click="loadList()">
-								<i class="glyphicon glyphicon-chevron-left" style="font-size:14px;"></i>
-							</span>
-							<span class="padl10 padr5" style="color:#666;font-size:14px;font-weight:bold;">{{selectedTag}}</span>
-						</div>
-						<div class="col-md-6 text-right" style="padding:0">
-							<span>
-								<span class="padr10">Browse by</span>
-								<select class="dark" style="border-color:#555!important;color:#888!important" ng-model="browseBy" ng-change="onChangeBrowseBy()">
-									<option value="name">Name</option>
-									<option value="tags">Tags</option>
-								</select>
-							</span>
-						</div>
-					</div>
-				</div>
-				<div class="input-group input-group-sm panel-searchbar model-listing">
-					<span class="input-group-addon page-icon pointer interactive" onclick="document.getElementById('modelimport').click()" title="Import" style="padding-left:4px;">
-						<i class="glyphicon glyphicon-import"></i>
-						<div class="edit-panel-btn-label">Import</div>
-						<input id="modelimport" type="file" style="display:none;" onchange="angular.element(this).scope().importModel(this.files);">
-					</span>
-					<input type="text" class="dark" placeholder="Search" ng-model="modelQuery" style="margin-top:7px;border-color:#555 !important">
-					
-					<a ng-if="modelType==='heatmap/'" href="#/heatmap/new" class="input-group-addon page-icon interactive" title="New">
-						<i class="glyphicon glyphicon-plus"></i>
-						<div class="edit-panel-btn-label">New</div>
-					</a>
-					<a ng-if="modelType===''" href="#/new" class="input-group-addon page-icon interactive" title="New">
-						<i class="glyphicon glyphicon-plus"></i>
-						<div class="edit-panel-btn-label">New</div>
-					</a>
-				</div>
 			</div>
 		</div><!-- END #side-panel -->
 
 		<div ng-view></div>
-
 		<!--<div ng-include="jsonHtml"></div>-->
 		<div id="global-alerts" class="alert"></div>
 	</body>

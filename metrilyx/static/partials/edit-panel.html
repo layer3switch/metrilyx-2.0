@@ -1,33 +1,5 @@
 <div class="edit-comp{{editMode}}" id="edit-panel">
 	<div class="edit-panel-ctrl-bar">
-		<div ng-if="modelType!=='adhoc'">
-			<div class="marginlr5" style="padding-top:10px;">
-				<span class="edit-panel-btn pointer interactive padr10" title="Delete" data-toggle="modal" data-target="#confirm-delete">
-					<div class="iblk">
-						<div><i class="glyphicon glyphicon-trash"></i></div>
-						<div class="edit-panel-btn-label">Delete</div>
-					</div>
-				</span>
-				<span ng-click="saveModel()" class="edit-panel-btn pointer interactive" title="Save">
-					<div class="iblk">
-						<div><i class="glyphicon glyphicon-save"></i></div>
-						<div class="edit-panel-btn-label">Save</div>
-					</div>
-				</span>
-				<a ng-if="modelType===''" href="/api/graphmaps/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json" class="edit-panel-btn pointer interactive" title="Export">
-					<div class="iblk">
-						<div><i class="glyphicon glyphicon-export"></i></div>
-						<div class="edit-panel-btn-label">Export</div>
-					</div>
-				</a>
-				<a ng-if="modelType==='heatmap/'" href="/api/heatmaps/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json" class="edit-panel-btn pointer interactive" title="Export">
-					<div class="iblk">
-						<div><i class="glyphicon glyphicon-export"></i></div>
-						<div class="edit-panel-btn-label">Export</div>
-					</div>
-				</a>
-			</div>
-		</div>
 		<div class="input-group input-group-sm panel-searchbar">
 			<input type="text" ng-model="metricQuery" ng-change="searchForMetric()" placeholder="Metric Search" class="dark" style="border:1px solid #666 !important">
 			<span class="input-group-addon nobg" style="padding-right:0px!important;">
@@ -35,7 +7,7 @@
 			</span>
 		</div>
 	</div>
-	<div class="metric-search-result {{modelType}}">
+	<div class="metric-search-result">
 		<div ui-sortable="metricListSortOpts" ng-model="metricQueryResult" drag-copy>
 			<div class="metric interactive page-list-item" ng-repeat="metric in metricQueryResult" ng-model="metric" title="{{metric.query.metric}}" style="color:#ccc">
 				<span>{{metric.query.metric}}</span>

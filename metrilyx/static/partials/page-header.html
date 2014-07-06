@@ -1,9 +1,37 @@
 <div class="page-model-header edit-comp{{editMode}}">
 	<div class="row" style="margin:0;">
 		<div class="col-md-4" style="padding:0;">
-			<span class="pointer interactive" ng-click="toggleEditMode()" title="Edit Page" style="font-size:20px;color:#666">
-				<i class="glyphicon glyphicon-cog"></i>
-			</span>
+			
+			<div class="dropdown">
+				<span class="pointer interactive dropdown-toggle" style="font-size:20px;color:#666" data-toggle="dropdown">
+					<i class="glyphicon glyphicon-cog"></i>
+				</span>
+				<ul class="dropdown-menu page-controls bottom-shadow" role="menu">
+					<li ng-if="editMode === ''" title="Edit">
+						<a href="javascript:void(0)" ng-click="toggleEditMode()">
+							<span class="padr5"><i class="glyphicon glyphicon-edit"></i></span>
+							<span>Edit</span>
+						</a>
+					</li>
+					<li ng-if="editMode === ' edit-mode'" title="Edit">
+						<a href="javascript:void(0)" ng-click="toggleEditMode()">
+							<span class="padr5"><i class="glyphicon glyphicon-ban-circle"></i></span>
+							<span>Cancel</span>
+						</a>
+					</li>
+					<li title="Export">
+						<a ng-if="modelType===''" href="/api/graphmaps/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json">
+							<span class="padr5"><i class="glyphicon glyphicon-cloud-download"></i></span>
+							<span>Export</span>	
+						</a>
+						<a ng-if="modelType==='heatmap/'" href="/api/heatmaps/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json">
+							<span class="padr5"><i class="glyphicon glyphicon-cloud-download"></i></span>
+							<span>Export</span>	
+						</a>
+					</li>
+				</ul>
+			</div>
+			
 			<div ng-if="editMode==''||modelType==='adhoc'" ng-repeat="(tagname, tagvalues) in tagsOnPage" class="btn-group padlr5 padtb3" style="color:#666;">
 			  <span class="pointer interactive dropdown-toggle pad5" data-toggle="dropdown">
 				<span class="small">
@@ -89,10 +117,10 @@
 				</div>
 			</div>
 			<div ng-if="modelType!=='adhoc'" class="tags-panel edit-comp{{editMode}}">
-				<div class="padlr5" style="border-bottom:1px solid #ddd;padding-bottom:3px">
+				<div class="padlr5" style="border-bottom:1px solid #aaa;padding-bottom:3px">
 					<div class="row" style="margin:0;color:#666">
 						<div class="col-md-6 text-left" style="padding:0">
-							<span>Tags</span>
+							<span><b>Tags</b></span>
 						</div>
 						<div class="col-md-6 text-right" style="padding:0">
 							<span class="interactive pointer" data-toggle="modal" data-target="#add-page-tag">
@@ -101,7 +129,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="text-left margint10">
+				<div class="text-left padt10 padlr5" style="border-top: 1px solid #fff">
 					<span ng-repeat="tag in model.tags" class="page-tag">
 						<span class="interactive pointer" title="Remove tag" ng-click="model.tags.splice(models.tags.indexOf(tag),1)">
 							<i class="glyphicon glyphicon-remove" style="font-size: 12px;"></i>

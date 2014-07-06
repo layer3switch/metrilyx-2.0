@@ -26,7 +26,9 @@
 				<span class="btn-group metrics-loaded-list dropup">
 					<span class="metric-loaded-btn interactive" data-toggle="dropdown" title="Metrics successfully loaded">{{graph|loadedSeries}} / {{graph.series.length}}</span>
 					<ul class="dropdown-menu bottom-shadow metric-status">
-						<li ng-repeat="serie in graph.series" ng-attr-class="padlr10 padtb5 {{isSerieLoaded(graph, serie) || 'metric-not-loaded' }}">{{serie.query|metricQuery}}</li>
+						<li ng-repeat="serie in graph.series" class="padlr10 padtb3">
+							<span><span class="query-status {{serie.status}}">&#8226;</span>{{serie.query|metricQuery}}</span>
+						</li>
 			        </ul>
 		        </span>
 			</div>
