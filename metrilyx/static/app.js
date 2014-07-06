@@ -29,6 +29,10 @@ app.config(['$routeProvider',
 				controller: 'adhocGraphController',
 				reloadOnSearch: false
 			})
+			.when('/:pageId/:graphId', {
+				templateUrl: 'partials/adhoc-graph.html',
+				controller: 'adhocGraphController'
+			})
 			.when('/heatmap/:heatmapId', {
 				templateUrl: 'partials/page.html',
 				controller: 'pageController',

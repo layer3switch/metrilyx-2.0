@@ -150,7 +150,6 @@ td.list-active {
 	text-shadow: -2px 2px rgba(0,0,0,0.5);
 }
 #side-panel {
-	/*position: absolute;*/
 	position: fixed;
 	bottom:0;
 	top: 0;
@@ -161,10 +160,10 @@ td.list-active {
 	color: #ccc;
 	overflow-y: hidden;
 	border-right: 1px solid #212121;
-	z-index: 1000;
+	z-index: 1000;/*
 	-webkit-box-shadow: 10px 0 6px -6px rgba(0,0,0,0.3);
 	   -moz-box-shadow: 10px 0 6px -6px rgba(0,0,0,0.3);
-	        box-shadow: 10px 0 6px -6px rgba(0,0,0,0.3);
+	        box-shadow: 10px 0 6px -6px rgba(0,0,0,0.3);*/
 }
 #side-panel.offstage,
 #side-panel.offstage .model-list-container,
@@ -278,8 +277,8 @@ input.form-control.md {
 .page-selector-header {
 	font-size: 26px !important;
 	color:#aaa;
-	padding-top: 10px;
-	padding-bottom: 7px;
+	padding-top: 8px;
+	padding-bottom: 4px;
 	padding-left:15px;
 	padding-right: 10px;
 	text-align: left;
@@ -1005,7 +1004,7 @@ input.dark.info {
 }
 .graph-metric-label.adhoc:hover {
 	cursor: pointer;
-	border-left: 1px solid #428bca;
+	border-left: 1px solid;
 }
 .graph-metric-label:hover {
 	cursor: pointer;

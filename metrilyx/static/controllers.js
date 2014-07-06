@@ -640,7 +640,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		} else {
 			$scope.editMode = " edit-mode";
 		}
-
 		if($routeParams.start) {
 			if($routeParams.end) {
 				$scope.endTime = $routeParams.end;
@@ -716,7 +715,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				$scope.graph = graphModel;
 			}
 		});
-
+		$('#side-panel').addClass('offstage');
 		if($scope.editMode === "") {
 			$scope.metricListSortOpts.disabled = true;
 		} else {
