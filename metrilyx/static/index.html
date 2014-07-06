@@ -42,17 +42,17 @@
 		<div id="side-panel" ng-controller="sidePanelController" class="animated">	
 			<div class="model-list-ctrl-bar animated">
 				<div class="page-selector-header">
-					<span id="model-list-btn" ng-click="loadPagemodelList('#model-list-btn')" class="model-list-btn list-active pointer padl5 padr15 animated">
+					<span id="model-list-btn" ng-click="loadPagemodelList('#model-list-btn')" class="model-list-btn list-active pointer padl5 padr15 animated" title="Models">
 						<i class="glyphicon glyphicon-stats"></i>
 					</span>
-					<span id="heatmap-list-btn" ng-click="loadHeatmapList('#heatmap-list-btn')" class="model-list-btn pointer padl15 animated" style="position:relative;top:1px;">
+					<span id="heatmap-list-btn" ng-click="loadHeatmapList('#heatmap-list-btn')" class="model-list-btn pointer padl15 animated" style="position:relative;top:1px;" title="Heatmaps">
 						<i class="glyphicon glyphicon-fire"></i>
 					</span>
-					<span onclick="$('#side-panel').addClass('offstage')" class="pointer pull-right animated side-panel-toggle" style="position:relative;top:3px;">
+					<span onclick="$('#side-panel').addClass('offstage')" class="pull-right animated side-panel-toggle" style="position:relative;top:3px;cursor:w-resize">
 						<i class="glyphicon glyphicon-chevron-left"></i>
 					</span>
 				</div>
-				<div class="input-group input-group-sm panel-searchbar model-listing" style="border-top:1px solid #555;">
+				<div class="input-group input-group-sm panel-searchbar model-listing" style="border-top:1px solid #606060;">
 					<span class="input-group-addon" style="padding-right:0px!important;border-right:none!important;padding-left:0px!important;">
 						<select class="dark animated" id="browse-by" ng-model="browseBy" ng-change="onChangeBrowseBy()">
 							<option value="name">Name</option>

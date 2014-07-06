@@ -154,12 +154,11 @@ td.list-active {
 	bottom:0;
 	top: 0;
 	left:0;
-	background: rgba(55,55,55,0.95);
+	background: rgba(55,55,55,0.9);
 	padding:0;
 	width: 23.5%;
 	color: #ccc;
 	overflow-y: hidden;
-	border-right: 1px solid #212121;
 	z-index: 1000;/*
 	-webkit-box-shadow: 10px 0 6px -6px rgba(0,0,0,0.3);
 	   -moz-box-shadow: 10px 0 6px -6px rgba(0,0,0,0.3);
