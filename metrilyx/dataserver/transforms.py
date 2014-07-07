@@ -78,7 +78,6 @@ class EventSerie(object):
 			s['timestamp'] = s['timestamp']/1000
 
 
-
 class MetrilyxSerie(object):
 	"""
 	This makes an object containing the original series data (request) with the tsdb
@@ -97,6 +96,14 @@ class MetrilyxSerie(object):
 		else:
 			self.error = False
 			self.uniqueTagsString = self.__uniqueTagsStr()
+			self.__normalizeAliases()
+
+	def __normalizeAliases(self):
+		for s in self._serie['data']:
+			if isinstance(s, dict) and s.get('error'):
+				continue
+			s['alias'] = self.__normalizeAlias(self._serie['alias'], 
+								{'tags': s['tags'],'metric': s['metric']})
 
 	@property
 	def data(self):
@@ -106,6 +113,14 @@ class MetrilyxSerie(object):
 	def __processSerieData(self, dataset):
 		if isinstance(dataset, dict) and dataset.get('error'):
 			return {"alias": self._serie['alias'],"error": dataset.get('error')}
+
+		## normalize alias (i.e. either lambda function or 
+		## string formatting and append unique tags string) 
+		#dataset['alias'] = self.__normalizeAlias(
+		#						self._serie['alias'], {
+		#						'tags': dataset['tags'],
+		#						'metric': dataset['metric']})
+
 		try:
 			dataset['dps'] = self.__normalizeTimestamp(dataset['dps'])
 		except Exception,e:
@@ -117,18 +132,6 @@ class MetrilyxSerie(object):
 		## May remove this as it can be achieved using a yTransform which would be controlled by the user.
 		if self._serie['query']['rate']:
 			dataset['dps'] = self.__rmNegativeRates(dataset['dps'])
-
-		### normalize alias (i.e. either lambda function or string formatting and append unique tags string) 
-		dataset['alias'] = self.__normalizeAlias(self._serie['alias'], {
-											'tags': dataset['tags'],
-											'metric': dataset['metric']})
-		### scan tags to make unique series alias (looks for * and | operators)
-		### apply the unique tag and re-normalize
-		#if self.uniqueTagsString and not self._serie['alias'].startswith("!"):
-		#	dataset['alias'] = self.__normalizeAlias(self._serie['alias']+self.uniqueTagsString, {
-		#		'tags': dataset['tags'],
-		#		'metric': dataset['metric']
-		#		})
 
 		## any custom callback for resulting data set 
 		## e.g. scrape metadata
@@ -184,6 +187,7 @@ class MetrilyxSerie(object):
 			try:
 				normalizedAlias = eval(alias_str[1:])(flat_obj)
 			except Exception,e:
+				#TODO: assign calculated default
 				log.warn("could not transform alias: %s %s" %(obj['metric'], str(e)))
 		else:
 			try:
@@ -234,3 +238,20 @@ class MetrilyxSerie(object):
 			data 	tsdb dps structure
 		"""
 		return [ (ts,val) for ts,val in data if val >= 0 ]
+
+class MetrilyxAnalyticsSerie(MetrilyxSerie):
+	def __init__(self, serie, dataCallback=None):
+		super(MetrilyxAnalyticsSerie,self).__init__(serie, dataCallback)
+		if not self.error:
+			#TODO: make pandas
+			self.__istruct = None
+		else:
+			self.__istruct = None
+
+	def __getInternalStruct(self):
+		out = []
+		for d in self.__idata:
+			out.append((self.__getSerieID(d), Series([d['dps'][k] for k in sorted(d['dps'].keys())], 
+						index=to_datetime([int(ts) for ts in sorted(d['dps'].keys())], unit='s'))))
+		return DataFrame(dict(out))
+

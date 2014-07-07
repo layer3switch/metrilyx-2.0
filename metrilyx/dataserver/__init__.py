@@ -1,3 +1,5 @@
+
+import time
 from pprint import pprint
 
 class GraphEventRequest(object):
@@ -69,10 +71,13 @@ class GraphRequest(object):
 				serie['query']['tags'][k] = v
 
 	def __adjustTimeWindow(self):
+		'''
+		Change query to last 5 min if pie graph
+		'''
 		if self.request.get('end'):
 			if self.request['graphType'] == 'pie':
 				self.request['start'] = self.request['end']-300
 		else:
 			if self.request['graphType'] == 'pie':
-				self.request['start'] = '5m-ago'
+				self.request['start'] = int(time.time()-300)
 
