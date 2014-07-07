@@ -99,8 +99,8 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		mserie = MetrilyxSerie(graphMeta['series'][0])
 		graphMeta['series'][0]['data'] = mserie.data
 		self.sendMessage(json.dumps(graphMeta))
-		logger.info("Response (graph) %s %s start: %s" %(graphMeta['_id'], graphMeta['name'], 
-									datetime.fromtimestamp(float(graphMeta['start']))))
+		logger.info("Response (graph) %s %s start: %s" %(graphMeta['_id'], 
+			graphMeta['name'], datetime.fromtimestamp(float(graphMeta['start']))))
 
 	def processRequest(self, graphRequest):
 		self.submitPerfQueries(graphRequest)
