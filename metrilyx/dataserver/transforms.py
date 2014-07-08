@@ -1,6 +1,10 @@
 
 import logging
 
+import numpy
+from pandas import Series, DataFrame
+from pandas.tseries.tools import to_datetime
+
 log = logging.getLogger(__name__)
 
 def absoluteTime(relTime, convertTo='micro'):
@@ -96,6 +100,7 @@ class MetrilyxSerie(object):
 		else:
 			self.error = False
 			self.uniqueTagsString = self.__uniqueTagsStr()
+			# alias's must always be unique.
 			self.__normalizeAliases()
 
 	def __normalizeAliases(self):
@@ -202,15 +207,6 @@ class MetrilyxSerie(object):
 		
 		return normalizedAlias
 
-	def __sig_figs(self, num):
-		"""
-			for server side precision calculation
-		"""
-		if num != 0:
-			return round(num, config['sig_figs'])
-		else:
-			return 0
-
 	def __normalizeTimestamp(self, data, toMillisecs=True):
 		"""
 		@params
@@ -239,19 +235,58 @@ class MetrilyxSerie(object):
 		"""
 		return [ (ts,val) for ts,val in data if val >= 0 ]
 
+
+### TODO: add error handling on per serie basis
 class MetrilyxAnalyticsSerie(MetrilyxSerie):
 	def __init__(self, serie, dataCallback=None):
 		super(MetrilyxAnalyticsSerie,self).__init__(serie, dataCallback)
 		if not self.error:
-			#TODO: make pandas
-			self.__istruct = None
+			self.__istruct = self.__getInternalStruct()
+			self.__applyTransform()
 		else:
 			self.__istruct = None
 
 	def __getInternalStruct(self):
 		out = []
-		for d in self.__idata:
-			out.append((self.__getSerieID(d), Series([d['dps'][k] for k in sorted(d['dps'].keys())], 
-						index=to_datetime([int(ts) for ts in sorted(d['dps'].keys())], unit='s'))))
+		for d in self._serie['data']:
+			out.append((d['alias'], Series([d['dps'][k] for k in sorted(d['dps'].keys())], 
+				index=to_datetime([int(ts) for ts in sorted(d['dps'].keys())], unit='s'))))
 		return DataFrame(dict(out))
+
+	def __getConvertedTimestamps(self, pSerie, unit='s'):
+		'''
+			pSerie: pandas Series object
+			unit: s, ms, us
+		'''
+		if unit == 's':
+			return pSerie.index.astype(numpy.int64)/1000000000
+		elif unit == 'ms':
+			return pSerie.index.astype(numpy.int64)/1000000
+		elif unit == 'us':
+			return pSerie.index.astype(numpy.int64)/1000
+		else:
+			return pSerie.index.astype(numpy.int64)
+
+	
+	def __getSerieMetadata(self, serie):
+		return dict([(k,v) for k,v in serie.items() if k != 'dps'])
+
+	def data2(self, ts_unit='ms'):
+		if self.error: return { "error": self.error }
+		out = []
+		for s in self._serie['data']:
+			md = self.__getSerieMetadata(s)
+			# remove NaN
+			nonNaSerie = self.__istruct[s['alias']].dropna()
+			md['dps'] = zip(self.__getConvertedTimestamps(nonNaSerie, ts_unit), 
+													nonNaSerie.values)
+			out.append(md)
+		return out
+
+	def __applyTransform(self):
+		if self._serie['yTransform'] != "":
+			try:
+				self.__istruct = eval("%s" %(self._serie['yTransform']))(self.__istruct)
+			except Exception,e:
+				logger.warn("Could not apply yTransform: %s" %(str(e)))
 

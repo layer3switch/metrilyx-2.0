@@ -12,7 +12,7 @@ from autobahn.websocket.compress import PerMessageDeflateOffer, \
 										PerMessageDeflateOfferAccept
 
 from ..httpclients import AsyncHttpJsonClient
-from transforms import MetrilyxSerie, EventSerie
+from transforms import MetrilyxSerie, EventSerie, MetrilyxAnalyticsSerie
 from ..dataserver import GraphRequest, GraphEventRequest
 
 logger = logging.getLogger(__name__)
@@ -96,7 +96,9 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 	def graphResponseCallback(self, response, url, graphMeta):
 		graphMeta['series'][0]['data'] = self.dataprovider.responseCallback(
 											json.loads(response), url, graphMeta)
-		mserie = MetrilyxSerie(graphMeta['series'][0])
+		
+		#mserie = MetrilyxSerie(graphMeta['series'][0])
+		mserie = MetrilyxAnalyticsSerie(graphMeta['series'][0])
 		graphMeta['series'][0]['data'] = mserie.data
 		self.sendMessage(json.dumps(graphMeta))
 		logger.info("Response (graph) %s %s start: %s" %(graphMeta['_id'], 
