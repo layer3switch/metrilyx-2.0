@@ -29,7 +29,7 @@ install_app() {
 		chmod g+w ${APP_HOME}/celerybeat-schedule.db
 		chgrp celery ${APP_HOME}/celerybeat-schedule.db
 	fi
-	[ ! -d "/var/log/metrilyx" ] || mkdir ${LOGDIR};
+	[ -d "${LOGDIR}" ] || mkdir ${LOGDIR};
 	chmod 777 ${LOGDIR}; 
 }
 setup_startup_scripts() {
