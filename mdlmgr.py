@@ -15,7 +15,7 @@ graphSchema = json.load(open("./schemas/graph.json", "rb"))
 
 def printStatus(graph, status, msg):
 	if status in ('ADDED', 'UPDATED'):
-		print "  * %s %s (%s): %s" %(status, graph['name'], graph['_id'], msg)	
+		print "  * %s '%s' (%s): %s" %(status, graph['name'], graph['_id'], msg)	
 	else:
 		print "  %s %s (%s): %s" %(status, graph['name'], graph['_id'], msg)
 
