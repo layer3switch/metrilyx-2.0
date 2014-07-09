@@ -33,6 +33,13 @@ def check_config(default, curr):
 					check_config(v[i], curr[k][i])
 
 
+def setCeleryTasks(config):
+	config["celery"] = {
+		"tasks": ["metrilyx.celerytasks"]
+	}
+
+
+
 CFG_VALID = 0
 NEW_CFG_FILENAME = "metrilyx.conf.new"
 
@@ -52,6 +59,7 @@ currC = loadJsonFile(opts.infile)
 defaultC = loadJsonFile("etc/metrilyx/metrilyx.conf.sample")
 
 check_config(defaultC, currC)
+setCeleryTasks(currC)
 
 if CFG_VALID != 0:
 	print "-----------------"
