@@ -49,7 +49,7 @@ if not opts.infile:
 	sys.exit(1)
 
 currC = loadJsonFile(opts.infile)
-defaultC = loadJsonFile(metrilyxconfig.CONFIG_FILE+".sample")
+defaultC = loadJsonFile("etc/metrilyx/metrilyx.conf.sample")
 
 check_config(defaultC, currC)
 
