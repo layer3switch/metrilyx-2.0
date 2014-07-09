@@ -8,7 +8,7 @@
 
 NAME="metrilyx-dataserver"
 APP_HOME="/opt/metrilyx"
-BIN=${APP_HOME}/${NAME}.py
+BIN=${APP_HOME}/bin/${NAME}.py
 LOGFILE=/var/log/${NAME}.log
 PGREP="/usr/bin/pgrep -f"
 
