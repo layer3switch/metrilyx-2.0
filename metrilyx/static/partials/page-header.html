@@ -1,8 +1,7 @@
 <div class="page-model-header edit-comp{{editMode}}">
 	<div class="row" style="margin:0;">
 		<div class="col-md-4" style="padding:0;">
-			
-			<div class="dropdown">
+			<span class="dropdown">
 				<span class="pointer interactive dropdown-toggle" style="font-size:20px;color:#666" data-toggle="dropdown">
 					<i class="glyphicon glyphicon-cog"></i>
 				</span>
@@ -30,20 +29,7 @@
 						</a>
 					</li>
 				</ul>
-			</div>
-			
-			<div ng-if="editMode==''||modelType==='adhoc'" ng-repeat="(tagname, tagvalues) in tagsOnPage" class="btn-group padlr5 padtb3" style="color:#666;">
-			  <span class="pointer interactive dropdown-toggle pad5" data-toggle="dropdown">
-				<span class="small">
-					<span class="padr5">{{tagname}}</span><span class="caret"></span>
-				</span>
-			  </span>
-			  <ul class="dropdown-menu noshadow result-tags bottom-shadow small" role="menu">
-			    <li ng-repeat="tagvalue in tagvalues|orderBy:'toString()'">
-			    	<a href="javascript:void(0)" ng-click="updateGlobalTag(tagname, tagvalue);">{{tagvalue}}</a>
-			    </li>
-			  </ul>
-			</div>
+			</span>
 		</div>
 		<!-- Page Name/ID -->
 		<div ng-if="modelType!=='adhoc'" class="col-md-4 text-center" style="padding:0">
@@ -93,8 +79,6 @@
 				            	<option value="3h-ago">3 hours</option>
 				            	<option value="2h-ago">2 hours</option>
 				            	<option value="1h-ago">1 hour</option>
-				            	<option value="5m-ago">5 mins</option>
-				            	<option value="1m-ago">1 min</option>
 				            	<option value="absolute">Custom</option>
 				            </select>
 			            </span>
@@ -140,4 +124,16 @@
 			</div>
 		</div>
 	</div><!-- END .row -->
+	<div ng-if="editMode==''||modelType==='adhoc'" ng-repeat="(tagname, tagvalues) in tagsOnPage" class="btn-group padlr5 padtb3" style="color:#666;">
+	  <span class="pointer interactive dropdown-toggle pad5" data-toggle="dropdown">
+		<span class="small">
+			<span class="padr5">{{tagname}}</span><span class="caret"></span>
+		</span>
+	  </span>
+	  <ul class="dropdown-menu noshadow result-tags bottom-shadow small" role="menu">
+	    <li ng-repeat="tagvalue in tagvalues|orderBy:'toString()'">
+	    	<a href="javascript:void(0)" ng-click="updateGlobalTag(tagname, tagvalue);">{{tagvalue}}</a>
+	    </li>
+	  </ul>
+	</div>
 </div>

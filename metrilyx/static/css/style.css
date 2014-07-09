@@ -115,7 +115,9 @@ select[ng-model="timeType"] {
 	color: #ddd;
 }
 .btn-default.gtag-btn {
-	color:#888!important
+	color:#999!important;
+	border-left: none !important;
+	border-radius: 0 3px 3px 0 !important;
 }
 .btn-default.gtag-btn.interactive:hover,
 .interactive:hover {
@@ -125,16 +127,7 @@ select[ng-model="timeType"] {
 .list-active {
 	color: #428bca !important;
 	font-weight: bold !important;
-	/*-moz-box-shadow: none !important;
-    -webkit-box-shadow: none !important;
-    box-shadow: none !important;
-    border-bottom: none !important;*/
 }
-/*
-td.list-active {
-	color: #428bca !important;
-	background-color: #343434 !important;
-}*/
 .shift {
 	position: absolute;
 	left:0;
@@ -1418,4 +1411,17 @@ li[ng-repeat="tagvalue in tagvalues|orderBy:'toString()'"]:last-child > a {
 .metric-search-result {
 	border-bottom:1px solid #454545;
 	margin-top:64px;
+}
+#auto-update {
+	font-size: 12px;
+	position: relative;
+	bottom: 1px;
+	background: none!important;
+	border-color: rgba(0,0,0,0);
+	color: #aaa !important;
+}
+#auto-update > span {
+	position: relative;
+	bottom: 3px;
+	padding-right: 5px;
 }
