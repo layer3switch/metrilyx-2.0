@@ -13,6 +13,9 @@ a {
 ul {
 	list-style-type: none;
 }
+table {
+	border-collapse:collapse;
+}
 input {
 	border: 1px solid #ccc !important;
 	background-color: #eee !important;
@@ -94,6 +97,9 @@ select[ng-model="timeType"] {
 [ng-model="serie.alias"] {
 	font-family: "Courier New", Courier, monospace !important;
 	font-size: 13px !important;
+}
+.iblk {
+	display: inline-block;
 }
 .page-mast {
 	background: rgba(44,44,44,0.8);
