@@ -135,9 +135,12 @@ if [ "$1" == "app" ]; then
 	configure_webserver;
 	configure_uwsgi;
 	setup_startup_scripts;
-else
+elif [ "$1" != "" ]; then
 	echo "Executing $1...";
 	$1;
+else
+	echo "Invalid args!";
+	exit 1;
 fi
 
 
