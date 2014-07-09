@@ -33,13 +33,22 @@ def updateThresholds(graph):
 			return
 		if type(graph['thresholds']['danger']) is str or \
 				type(graph['thresholds']['danger']) is unicode:
-			graph['thresholds']['danger'] = float(graph['thresholds']['danger'])
+			if graph['thresholds']['danger'] == '':
+				graph['thresholds']['danger'] = graphSchema['thresholds']['danger']['min']				
+			else:
+				graph['thresholds']['danger'] = float(graph['thresholds']['danger'])
 		if type(graph['thresholds']['warning']) is str or \
 				type(graph['thresholds']['warning']) is unicode:
-			graph['thresholds']['warning'] = float(graph['thresholds']['warning'])
+			if graph['thresholds']['warning'] == '':
+				graph['thresholds']['warning'] = graphSchema['thresholds']['warning']['min']				
+			else:
+				graph['thresholds']['warning'] = float(graph['thresholds']['warning'])
 		if type(graph['thresholds']['info']) is str or \
 				type(graph['thresholds']['info']) is unicode:
-			graph['thresholds']['info'] = float(graph['thresholds']['info'])
+			if graph['thresholds']['info'] == '':
+				graph['thresholds']['info'] = graphSchema['thresholds']['info']['min']				
+			else:
+				graph['thresholds']['info'] = float(graph['thresholds']['info'])
 
 		graph['thresholds'] = {
 			'danger': {
