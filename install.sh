@@ -3,6 +3,7 @@
 INSTALL_ROOT="/opt";
 INSTALL_TIME=$(date '+%d%b%Y_%H%M%S');
 APP_HOME="${INSTALL_ROOT}/metrilyx";
+LOGDIR="/var/log/metrilyx"
 
 if [[ -f "/etc/redhat-release" ]]; then
 	HTTPD="nginx"
@@ -28,6 +29,8 @@ install_app() {
 		chmod g+w ${APP_HOME}/celerybeat-schedule.db
 		chgrp celery ${APP_HOME}/celerybeat-schedule.db
 	fi
+	[ ! -d "/var/log/metrilyx" ] || mkdir ${LOGDIR};
+	chmod 777 ${LOGDIR}; 
 }
 setup_startup_scripts() {
 	if [[ -f "/etc/redhat-release" ]]; then

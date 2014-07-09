@@ -9,7 +9,7 @@
 NAME="metrilyx-dataserver"
 APP_HOME="/opt/metrilyx"
 BIN=${APP_HOME}/bin/${NAME}.py
-LOGFILE=/var/log/${NAME}.log
+LOGFILE=/var/log/metrilyx/${NAME}.log
 PGREP="/usr/bin/pgrep -f"
 
 ## set -c to 0 spawn servers based on the number of cpus/cores
