@@ -55,9 +55,7 @@ configure_uwsgi() {
 pydeps() {
 	echo "-- Installing python dependencies..."
 	which pip || easy_install pip;
-	pip uninstall autobahn -y;
-	pip uninstall six -y;
-	pip install six;
+	pip list | grep autobahn || { pip uninstall autobahn six -y; pip install six; }
 	for pypkg in $(cat PYPACKAGES); do
 		pip list | grep ${pypkg} || pip install ${pypkg};
 	done;
