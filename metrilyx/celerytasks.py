@@ -101,6 +101,8 @@ def cache_metrics():
 		for a in CACHE_ALPHABETS:
 			cacheTSMetaByTypeForAlpha.apply_async((qtype, a))
 			cacheTSMetaByTypeForAlpha.apply_async((qtype, a.lower()))
+			break
+		break
 	return {'status': 'submitted %d' %((len(CACHE_ALPHABETS)*2)*len(CACHE_QUERY_TYPES))}
 
 @task
