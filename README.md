@@ -51,6 +51,11 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 *	**elasticsearch**
 
 	This is used to store all event annotations.  This is where the data is queried from as well.  Installer packages are available on their site.
+	In order to create the index issue the following command:
+
+		curl -XPOST http://<elasticsearch_host>:<port>/anno_events
+
+	If you've changed the name of the index in the configuration, appropriately change the name in the command above.
 
 *	**mongodb**
 
