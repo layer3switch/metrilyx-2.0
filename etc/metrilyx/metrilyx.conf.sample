@@ -2,6 +2,7 @@
 	"dataprovider": {
 		"name": "OpenTSDB",
 		"uri": "http://<OpenTSDB host>",
+		"port": 4242,
 		"query_endpoint": "/api/query",
 		"search_endpoint": "/api/suggest",
 		"loader_class": "opentsdb.OpenTSDBDataProvider"
