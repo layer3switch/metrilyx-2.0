@@ -102,9 +102,11 @@ import_configs() {
 		echo "  configs...";
 		if [ -f "/opt/${lastInstall}/etc/metrilyx/metrilyx.conf" ]; then
 	        cp /opt/${lastInstall}/etc/metrilyx/metrilyx.conf ${APP_HOME}/etc/metrilyx/metrilyx.conf; 
+	   		echo "  Imported: /opt/${lastInstall}/etc/metrilyx/metrilyx.conf";
 	   	fi
 		if [ -f "/opt/${lastInstall}/metrilyx/static/config.js" ]; then
 			cp /opt/${lastInstall}/metrilyx/static/config.js ${APP_HOME}/metrilyx/static/config.js;
+			echo "  Imported: /opt/${lastInstall}/metrilyx/static/config.js"
 		fi
 	fi
 }
