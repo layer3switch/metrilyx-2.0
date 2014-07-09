@@ -79,7 +79,6 @@ def addEventAnnoDef(graph):
 def updateMultiPaneOptions(graph):
 	if not graph.has_key('multiPane'):
 		graph['multiPane'] = False
-		print " * ADDED (%(name)s) %(_id)s: multiPane" %(graph)
 		printStatus(graph, "ADDED", "multiPane")
 	if not graph.has_key('panes'):
 		graph['panes'] = ["",""]
