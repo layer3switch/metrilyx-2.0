@@ -233,7 +233,7 @@ angular.module('graphing', [])
 				}
 				function getUpdates() {
 					if(ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
-						console.log("issuing update...");
+						//console.log("issuing update...");
 						// 12m-ago seems to be the magic no. otherwise data does not line up //
 						q = getUpdateQuery();
 						scope.requestData(q);
