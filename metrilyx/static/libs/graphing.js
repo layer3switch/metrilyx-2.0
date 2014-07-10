@@ -322,9 +322,6 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
         },
         /*xAxis:DEFAULT_CHART_OPTS.AXIS*/
     }, extraOpts);
-    
-    //console.log(this._graph);
-
     if(this._graph.multiPane) {
         //console.log('parallel view');
         //console.log(this._graph);
@@ -343,6 +340,7 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
                 }));
             currTop += h;
         }
+        //console.log(opts.yAxis);
     } else {
         opts.yAxis = this.__plotBands();
     }
@@ -698,7 +696,7 @@ function upsertLineBasedSeries(args, hcg, timeWindow) {
 function graphing_upsertSeries(data, timeWindow) {
     //console.log(args);
     var hcg = $("[data-graph-id='"+data._id+"']").highcharts();
-    if(hcg == undefined) {
+    if(hcg === undefined) {
         console.log("graph uninitialized: not upserting. name", data.name, "type", data.graphType,"_id", data._id);
         return;
     }

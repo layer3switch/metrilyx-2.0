@@ -247,16 +247,16 @@ angular.module('graphing', [])
 				}
 				function processRecievedData(event) {
 					var data = event.detail;
-					// TODO SET STATUS //
 					setSerieStatus(data, 'loading');
+
+					if(data.series) {
+						var mg = new MetrilyxGraph(data, scope.getTimeWindow(true));
+						mg.applyData();
+					}
 					if(data.annoEvents.data) {
-						//console.log(data._id, data.annoEvents.evenType);
 						anno = new MetrilyxAnnotation(data);
 						anno.applyData();
 					}
-					var mg = new MetrilyxGraph(data, scope.getTimeWindow(true));
-					mg.applyData();
-					
 					var sTags = (new SeriesFormatter(data.series)).seriesTags();
 					scope.$apply(function() { scope.updateTagsOnPage(sTags) });
 					setSerieStatus(data, 'loaded');
