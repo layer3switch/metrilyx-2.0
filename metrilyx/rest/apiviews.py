@@ -69,7 +69,10 @@ class GraphMapViewSet(MapViewSet):
 
 
 	def list(self, request, pk=None):
-		serializer = MapModelListSerializer(self.queryset,many=True)
+		# w/out this not all models show up in the listing.
+		queryset = MapModel.objects.filter(model_type="graph")
+		#serializer = MapModelListSerializer(self.queryset, many=True)
+		serializer = MapModelListSerializer(queryset, many=True)
 		return Response(serializer.data)
 
 	def retrieve(self, request, pk=None):
