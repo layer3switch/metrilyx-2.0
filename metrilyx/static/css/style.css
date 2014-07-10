@@ -1414,8 +1414,6 @@ li[ng-repeat="tagvalue in tagvalues|orderBy:'toString()'"]:last-child > a {
 }
 #auto-update {
 	font-size: 12px;
-	position: relative;
-	bottom: 1px;
 	background: none!important;
 	border-color: rgba(0,0,0,0);
 	color: #aaa !important;
