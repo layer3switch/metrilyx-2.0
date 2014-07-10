@@ -76,6 +76,7 @@ select[ng-model="timeType"] {
 	width: 100%;
 	display: none;
 	opacity: 0.96;
+	z-index: 1000;
 }
 [ng-model="serie.paneIndex"],
 [ng-model="serie.query.aggregator"],
