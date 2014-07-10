@@ -15,7 +15,7 @@ Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database us
 - Regex support for metric, tag key and tag value searches.
 - Additional graph types: spline, area, stacked, pie, line.
 - UI changes and fixes.
-- Performance improvements on certain api calls.
+- Overall performance improvements.
 
 ##### v2.2.0
 - Major performance improvements.
@@ -107,7 +107,9 @@ The provided install script will work with both **RedHat** and **Debian** based 
 - Issue the following command to install the application:
 	
 	$ git clone https://github.com/Ticketmaster/metrilyx-2.0.git
+	
 	$ cd metrilyx-2.0
+	
 	$ ./install.sh app
 
 Assuming all required OS packages are installed, the script will install the needed python modules, nginx configs depending on your distribution and prompt you to edit the metrilyx configuration file.
