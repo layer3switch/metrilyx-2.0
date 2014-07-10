@@ -1295,6 +1295,13 @@ input.threshold-input {
 	background-color: rgba(44,44,44,0.8);
 	color: #ccc !important;
 }
+div[ng-repeat="(tagname, tagvalues) in tagsOnPage"].btn-group {
+	padding-left: 5px;
+	padding-right: 5px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	color: #666;
+}
 li[ng-repeat="tagvalue in tagvalues|orderBy:'toString()'"] > a {
 	color:#ccc !important;
 	border-top: 1px solid #636363;
