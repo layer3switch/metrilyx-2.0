@@ -66,6 +66,7 @@ var DEFAULT_CHART_OPTS = {
             verticalAlign: 'bottom',
             borderWidth: 0,
             itemDistance: 10,
+            maxHeight: 70,
             itemMarginTop:1,
             itemMarginBottom:1,
             itemStyle: {
@@ -164,17 +165,20 @@ function MetrilyxAnnotation(obj) {
 }
 MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
     var ndata = [];
-    //console.log('curr', new Date(chrt.series[serieIdx].data[0].x), new Date(this._data.annoEvents.data[this._data.annoEvents.data.length-1].x));
-    //console.log('new', new Date(this._data.annoEvents.data[0].x), new Date(this._data.annoEvents.data[this._data.annoEvents.data.length-1].x))
     for(var i in chrt.series[serieIdx].data) {
-        if(chrt.series[serieIdx].data[i].x < this._data.annoEvents.data[0].x) {
-            ndata.push({
-                x: chrt.series[serieIdx].data[i].x,
-                title: chrt.series[serieIdx].data[i].title,
-                text: chrt.series[serieIdx].data[i].text,
-                data: chrt.series[serieIdx].data[i].data
-            });
-        } else {break;}
+        try {
+            if(chrt.series[serieIdx].data[i].x < this._data.annoEvents.data[0].x) {
+                ndata.push({
+                    x: chrt.series[serieIdx].data[i].x,
+                    title: chrt.series[serieIdx].data[i].title,
+                    text: chrt.series[serieIdx].data[i].text,
+                    data: chrt.series[serieIdx].data[i].data
+                });
+            } else {break;}
+        } catch(e) {
+            console.error(e);
+            console.log(chrt.series[serieIdx].data, this._data.annoEvents.data);
+        }
     }
     for(var i in this._data.annoEvents.data) {
         ndata.push(this._data.annoEvents.data[i]);

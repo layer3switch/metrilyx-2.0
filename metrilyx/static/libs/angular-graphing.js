@@ -237,7 +237,6 @@ angular.module('graphing', [])
 						// 12m-ago seems to be the magic no. otherwise data does not line up //
 						q = getUpdateQuery();
 						scope.requestData(q);
-						// TODO SET STATUS //
 						setSerieStatus(q, 'updating');
 					}
 					if(currTimer) clearTimeout(currTimer);
@@ -253,7 +252,7 @@ angular.module('graphing', [])
 						var mg = new MetrilyxGraph(data, scope.getTimeWindow(true));
 						mg.applyData();
 					}
-					if(data.annoEvents.data) {
+					if(data.annoEvents.data && data.annoEvents.data.length > 0) {
 						anno = new MetrilyxAnnotation(data);
 						anno.applyData();
 					}
