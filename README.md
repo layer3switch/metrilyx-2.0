@@ -155,7 +155,7 @@ A sample configuration file has been provided.  The configuration file is in JSO
 			"analysis_interval": "1m-ago",
 			"transport": "mongodb",
 			"broker": {
-		    	"host": "127.0.0.1",
+		    	"host": ["127.0.0.1"],
 		    	"port": 27017,
 		    	"database": "jobs", 
 		    	"taskmeta_collection": "taskmeta_collection"
@@ -165,7 +165,7 @@ A sample configuration file has been provided.  The configuration file is in JSO
 			"interval": 5,
 			"datastore": {
 				"mongodb": {
-					"host": "127.0.0.1",
+					"host": ["127.0.0.1"],
 			    	"port": 27017,
 			    	"database": "metrilyx_cache", 
 			    	"collection": "tsmeta_cache"
