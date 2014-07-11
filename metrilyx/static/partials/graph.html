@@ -9,7 +9,7 @@
 			<a href="javascript:void(0)" class="input-group-addon nobg interactive" onclick="$(this).next().show()">
 				<i class="glyphicon glyphicon-cog" style="font-size:14px;"></i>
 			</a>
-			<div ng-include="graphControlsHtml" style="display:none"></div>
+			<div ng-include="graphControlsHtml" style="display:none" data-graph-controls="{{graph._id}}"></div>
 			<span class="form-control" style="border:none;-webkit-box-shadow:none"><strong>{{graph.name}}</strong></span>
 			<span class="input-group-addon nobg interactive" ng-click="reloadGraph(graph);" title="Refresh">
 				<i class="glyphicon glyphicon-refresh interactive" style="font-size:12px;color:#666;font-weight:bold"></i>

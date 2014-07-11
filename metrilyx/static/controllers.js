@@ -583,7 +583,9 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		}
 		$scope.setPlotBands = function(graph) {
 			setPlotBands(graph);
-			$('#'+graph._id+'-thresholds').collapse('hide');
+		}
+		$scope.hideGraphControls = function(graph) {
+			$("[data-graph-controls='"+graph._id+"']").hide();
 		}
 		$scope.removeTag = function(tags, tagkey) {
 			delete tags[tagkey];
