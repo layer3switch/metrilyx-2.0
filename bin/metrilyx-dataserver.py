@@ -21,7 +21,7 @@ from metrilyx.dataserver.protocols import GraphServerProtocol, \
 										EventGraphServerProtocol, \
 										acceptedCompression
 
-LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s] %(message)s"
+LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s %(lineno)d] %(message)s"
 
 def spawnWebsocketServer(uri, logLevel, protocol, externalPort=None):
 	if logLevel == "DEBUG":
