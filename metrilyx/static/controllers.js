@@ -95,13 +95,13 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 					jobj = JSON.parse(evt.target.result);
 					if($scope.modelType === "heatmap/") {
 						Heatmap.saveModel(jobj, function(rslt) {
-							setGlobalAlerts({message: 'Saved '+rslt._id});
+							setGlobalAlerts({message: 'Imported '+rslt._id});
 							flashAlertsBar();
 							document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
 						});
 					} else {
 						Model.saveModel(jobj, function(rslt) {
-							setGlobalAlerts({message: 'Saved '+rslt._id});
+							setGlobalAlerts({message: 'Imported '+rslt._id});
 							flashAlertsBar();
 							document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
 						});
