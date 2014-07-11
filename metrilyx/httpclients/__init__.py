@@ -2,6 +2,7 @@
 
 import httplib
 import json
+import logging
 
 import StringIO
 import gzip
@@ -18,6 +19,8 @@ from twisted.internet.protocol import Protocol
 from metrilyx.metrilyxconfig import config
 
 from pprint import pprint
+
+logger = logging.getLogger(__name__)
 
 class HttpJsonClient(object):
 
@@ -228,7 +231,7 @@ class AsyncHttpJsonClient(object):
         return self.__deferredResponse
 
     def __readErrorCallback(self, error):
-        print error.getErrorMessage()
+        logger.error(error.getErrorMessage())
 
     def addResponseCallback(self, callback, *cbargs):
         self.__deferredResponse.addCallback(callback, *cbargs)
