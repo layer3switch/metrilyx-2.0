@@ -209,11 +209,15 @@ angular.module('graphing', [])
 					out = [];
 					for(var ns in series) {
 						for(var ms in ngModel.$modelValue.series) {
-							qgt = $.extend(true, {}, ngModel.$modelValue.series[ms].query); 
-							$.extend(qgt.tags, scope.globalTags, true);
-							if(equalObjects(qgt, series[ns].query) && ngModel.$modelValue.series[ms].status !== 'querying') {
-								out.push(series[ns]);
-								break;
+							//qgt = $.extend(true, {}, ngModel.$modelValue.series[ms].query); 
+							//$.extend(qgt.tags, scope.globalTags, true);
+							//if(equalObjects(qgt, series[ns].query)) {
+							if(equalObjects(ngModel.$modelValue.series[ms].query, series[ns].query)) {
+								//console.log(ms, ngModel.$modelValue.series[ms].status);
+								if(ngModel.$modelValue.series[ms].status === undefined || ngModel.$modelValue.series[ms].status !== 'querying') {
+									out.push(series[ns]);
+									break;
+								}
 							}
 						}
 					}
@@ -286,12 +290,10 @@ angular.module('graphing', [])
 					// initial populate //
 					hc = $("[data-graph-id='"+graph._id+"']").highcharts();
 					if(hc == undefined) {
-						//console.log('new', graph._id);
-						$("[data-graph-id='"+graph._id+"']").html(
-							"<table class='gif-loader-table'><tr><td> \
-							<img src='/imgs/loader.gif'></td></tr></table>");
+						$("[data-graph-id='"+graph._id+"']").html("<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
 
 						gseries = getSeriesInNonQueryState(graph.series);
+						//console.log('query length', gseries.length);
 						if(gseries.length > 0) {
 							var q = scope.baseQuery(graph);
 							q.series = gseries;
