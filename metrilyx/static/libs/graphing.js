@@ -643,14 +643,14 @@ function upsertLineBasedSeries(args, hcg, timeWindow) {
         for(var d in args.series[j].data) {
             // find series in highcharts //
             var found = false;
-            try {
-                for(var i in hcg.series) {
-                    // may need to add globalTags as part of check //
-                    // series found //
+            for(var i in hcg.series) {
+                // may need to add globalTags as part of check //
+                try {
                     if(equalObjects(args.series[j].query, hcg.series[i].options.query) && 
                             equalObjects(args.series[j].data[d].tags, hcg.series[i].options.tags)) {
                         
                         found = true;
+
                         if(Object.prototype.toString.call(args.series[j].data) === '[object Object]') {
                             if(args.series[j].data.error) {
                                 console.warn("graphing_upsertSeries tsdb error:", 
@@ -662,25 +662,29 @@ function upsertLineBasedSeries(args, hcg, timeWindow) {
                         if(hcg.series[i].options.data.length <= 0) {
                             newData = args.series[j].data[d].dps;
                         } else {
-                            // name , currData, newData //
+                            // name , currData, newData, timeWindow //
                             newData = getNewDataAlignedSeries2({
                                 name: hcg.series[i].options.name,
                                 currData: hcg.series[i].options.data,
                                 newData:  args.series[j].data[d].dps,
                                 timeWindow: timeWindow
                             });
-                            //newData = getNewDataAlignedSeries(hcg.series[i].options.name, 
-                            //        hcg.series[i].options.data, args.series[j].data[d].dps);                   
+                            /*
+                            // name , currData, newData //
+                            newData = getNewDataAlignedSeries(
+                                    hcg.series[i].options.name, 
+                                    hcg.series[i].options.data, 
+                                    args.series[j].data[d].dps);                   
+                            */
                         }
-                        if(newData != false){ 
-                            hcg.series[i].setData(newData, false, null, false);
-                        }
+                        if(newData != false) hcg.series[i].setData(newData, false, null, false);
                         break;
                     }
-                } // END hcg.series //
-            } catch(e) {
-                console.log("upsertLineBasedSeries", args.series[j].query, e);
-            }
+                } catch(e) {
+                    console.log("upsertLineBasedSeries", args.series[j].query, e);
+                }
+            } // END hcg.series //
+            
             if(!found) {
                 if(args.multiPane) {
                     hcg.addSeries(highchartsFormattedSerie(args.series[0].data[d], 

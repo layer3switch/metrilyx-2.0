@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class BasePerfDataProvider(BaseClassWithConfig):
 
 	def responseErrback(self, error, graphMeta):
-		logger.error(str(error))
+		logger.error("%s %s" %(str(graphMeta['series']), str(error)))
 		try:
 			err_obj = json.loads(error.value.response)['error']
 		except Exception,e:
