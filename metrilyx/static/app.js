@@ -520,18 +520,19 @@ function clearAllTimeouts() {
 }
 function setGlobalAlerts(rslt) {
 	if(rslt.error) {
-		$('#global-alerts').removeClass('alert-success');
-		$('#global-alerts').addClass('alert-danger');
-		$('#global-alerts').html("<b>Error: </b>"+rslt.message);
+		$('#global-alerts').removeClass('alert-success')
+							.addClass('alert-danger')
+							.html("<b>Error: </b>"+rslt.message);
 	} else {
-		$('#global-alerts').removeClass('alert-danger');
-		$('#global-alerts').addClass('alert-success');
-		$('#global-alerts').html("<b>Success: </b>"+rslt.message);
+		$('#global-alerts').removeClass('alert-danger')
+							.addClass('alert-success')
+							.html("<b>Success: </b>"+rslt.message);
 	}
 }
 function flashAlertsBar() {
-	$('#global-alerts').fadeIn(500);
-		setTimeout(function() {
-			$('#global-alerts').fadeOut(1000);
-		}, 3000);
+	var ga = $('#global-alerts');
+	$(ga).fadeIn(500);
+	setTimeout(function() {
+		$(ga).fadeOut(1000);
+	}, 3000);
 }
