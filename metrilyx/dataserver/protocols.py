@@ -72,11 +72,14 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 		'''
 		request_obj = self.checkMessage(payload, isBinary)
 		if not request_obj.get("error"):
-			## all checks passed - proceed
-			logger.info("Request %s '%s' start: %s" %(request_obj['_id'], request_obj['name'],
+			try:
+				## all checks passed - proceed
+				logger.info("Request %s '%s' start: %s" %(request_obj['_id'], request_obj['name'],
 										datetime.fromtimestamp(float(request_obj['start']))))
-			graphReq = GraphRequest(request_obj)
-			self.processRequest(graphReq)
+				graphReq = GraphRequest(request_obj)
+				self.processRequest(graphReq)
+			except Exception,e:
+				logger.error(str(e))
 		else:
 			logger.error("Invalid request object: %s" %(str(request_obj)))
 
