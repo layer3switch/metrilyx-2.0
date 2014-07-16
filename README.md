@@ -295,10 +295,12 @@ Similarly to import all existing heatmaps from v2.0, issue the following command
 	$ cd /opt/metrilyx-<timestamp>/heatmaps
 	$ for i in $(ls);do curl -u admin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @./$i; done
 
-#### Postgresql Client Install (only required if using postgres)
+#### Postgresql Client Install 
+(only required if using postgres)
+
 To install the client, first get postrgres's repo rpm.  Once that has been installed, you'll need to install the dependencies for the python postgres client (psycopg2).
 
-		yum -y install postgresql93 postrgresql93-devel
+	yum -y install postgresql93 postrgresql93-devel
 
 You will also need to symlink the pg_config binary as it is not in the path by default.
 
