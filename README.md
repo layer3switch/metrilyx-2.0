@@ -65,7 +65,6 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 
 	This component is only needed if you plan to store your models in a database other than the default sqlite3.  Based on the number of models and usage a proper database may be needed.  Metrilyx has been tested using postgresql and is currently in use at TicketMaster.  In order to install postgres on a RHEL based system, the OS version must be >= 6.5.  MySQL has not been tried due to the lack of JSON support.  Installer packages for postgres are available on their site.
 
-
 #### OS Packages:
 Once the above requirements have been fulfilled, you can run the command below to install the remaining OS packages.
 
@@ -295,6 +294,19 @@ Similarly to import all existing heatmaps from v2.0, issue the following command
 
 	$ cd /opt/metrilyx-<timestamp>/heatmaps
 	$ for i in $(ls);do curl -u admin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @./$i; done
+
+#### Postgresql Client Install (only required if using postgres)
+To install the client, first get postrgres's repo rpm.  Once that has been installed, you'll need to install the dependencies for the python postgres client (psycopg2).
+
+		yum -y install postgresql93 postrgresql93-devel
+
+You will also need to symlink the pg_config binary as it is not in the path by default.
+
+	ln -s /usr/pgsql-9.3/bin/pg_config /usr/local/bin/pg_config
+
+Finally install the python module i.e. psycopg2 
+
+	pip install psycopg2
 
 #### Notes
 - The default username and password for the site are admin and metrilyx respectively. Changing these will cause the application to stop functioning as other configurations also need to be updated.
