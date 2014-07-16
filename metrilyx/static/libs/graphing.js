@@ -122,7 +122,8 @@ function highchartsFormattedSerie(dataObj, dataQuery, graphType, paneIndex) {
     }
 }
 function onAnnotationClick(event) {
-    scope = angular.element($('#event-anno-details')).scope();
+    var ead = $('#event-anno-details');
+    scope = angular.element($(ead)).scope();
     scope.$apply(function(){
         scope.selectedAnno = {
             data: event.point.data,
@@ -132,7 +133,7 @@ function onAnnotationClick(event) {
             color: event.point.series.color
         };
     });
-    $('#event-anno-details').addClass('open');
+    $(ead).addClass('open');
 }
 
 function MetrilyxGraph(graphObj, timeWin) {
