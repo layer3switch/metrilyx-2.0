@@ -13,7 +13,7 @@ class BasePerfDataProvider(BaseClassWithConfig):
 		try:
 			err_obj = json.loads(error.value.response)['error']
 		except Exception,e:
-			err_obj = {'message': str(error.value.response)}
+			err_obj = {'message': str(error)}
 
 		m = re_504.search(err_obj['message'])
 		if m != None:
