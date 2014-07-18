@@ -173,6 +173,8 @@ class EventGraphServerProtocol(GraphServerProtocol):
 		logger.info("Event annotation: sha1=%s type=%s count=%d" %(graph['_id'], 
 									eventType, len(eas.data['annoEvents']['data'])))
 	
+	def eventReponseErrback(self, error, response, url, eventType, graph):
+		logger.error(str(error))
 
 	def submitEventQueries(self, request):
 		## TODO: this will raise an exception 
@@ -187,11 +189,5 @@ class EventGraphServerProtocol(GraphServerProtocol):
 			a = AsyncHttpJsonClient(uri=url, method=method, body=query)
 			a.addResponseCallback(self.eventResponseCallback, 
 					url, graphEvent['eventTypes'][0], request)
-
-		'''
-		for (url, eventType, query) in self.eventDataprovider.queryBuilder.getQuery(request):
-			#print graphMeta['_id'], eventType
-			#print eventType, query
-			a = AsyncHttpJsonRequest(uri=url, method='GET', body=query)
-			a.addResponseCallback(self.eventQueryResponseCallback, eventType, graphMeta, query)
-		'''
+			a.addResponseErrback(self.eventReponseErrback,
+					url, graphEvent['eventTypes'][0], request)
