@@ -167,7 +167,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		var urlParams = $location.search();
 		if(urlParams.start) {
 			if(urlParams.end) {
-				$scope.endTime = urlParams.end;
+				$scope.endTime = parseInt(urlParams.end);
 				$scope.timeType = "absolute";
 				$scope.updatesEnabled = false;
 			} else {
