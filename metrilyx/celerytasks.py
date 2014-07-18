@@ -58,7 +58,8 @@ def run_heat_queries(top=10):
 
 @task
 def cacheTSMetaByTypeForAlpha(qtype, alphabet):
-	r = requests.get(str("%s%s?type=%s&q=%s&%s" %(config['dataprovider']['uri'], 
+	r = requests.get(str("%s:%d%s?type=%s&q=%s&%s" %(config['dataprovider']['uri'], 
+										config['dataprovider']['port'],
 										config['dataprovider']['search_endpoint'], 
 										qtype, alphabet, CACHE_QUERY_PARAMS)))
 	metricList = r.json()
