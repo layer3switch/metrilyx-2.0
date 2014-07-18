@@ -17,7 +17,7 @@ class Annotator(object):
 			self.annotation['timestamp'] = time.time()*1000000
 		if not self.annotation.has_key('_id'):
 			self.annotation['_id'] = hashlib.sha1(json.dumps(self.annotation)).hexdigest()
-		if not self.annotationo.has_key('data'):
+		if not self.annotation.has_key('data'):
 			self.annotation['data'] = {}
 		if not self.annotation.has_key('eventType'):
 			raise RuntimeError("eventType required")
