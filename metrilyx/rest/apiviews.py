@@ -134,7 +134,6 @@ class EventsViewSet(APIView):
 	REQUIRED_WRITE_PARAMS = ('eventType','message', 'tags')
 
 	eds = ElasticsearchDatastore(config['annotations']['dataprovider'])
-	annotator = Annotator()
 
 	def __checkRequest(self, request):
 		if request.body == "":
@@ -188,12 +187,9 @@ class EventsViewSet(APIView):
 			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
 
 		try:
-			annoStr = self.annotator.annotation(reqBody)
-			## this will give an object with the _id
-			annoObj = self.annotator.annotation(annoStr)
-
-			self.eds.add(annoObj)
-			return Response(annoObj)
+			anno = Annotator(reqBody)
+			self.eds.add(anno.annotation)
+			return Response(anno.annotation)
 		except Exception,e:
 			## 503 service unavailable
 			return Response({'error': str(e)},
