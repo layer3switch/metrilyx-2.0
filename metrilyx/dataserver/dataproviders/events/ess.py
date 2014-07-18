@@ -1,11 +1,11 @@
 
-from metrilyx import BaseClassWithConfig
 from ...transforms import absoluteTime
 from ..events import BaseEventDataProvider
 
 from pprint import pprint
 
 class ElasticsearchEventDataProvider(BaseEventDataProvider):
+
 	def responseCallback(self, response):
 		return [ h['_source'] for h in response['hits']['hits'] ]
 
