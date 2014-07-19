@@ -20,8 +20,10 @@
     					<button type="button" class="btn btn-default gtag-btn interactive" ng-click="setGlobalTags(globalTags)" style="background:none;padding-top:9px;padding-bottom:9px;border-color:#777!important;"><i class="glyphicon glyphicon-ok"></i></button>
   					</div>
 					<span id="auto-update" class="input-group-addon">
-						<span>Auto-Update : </span>
-						<input type="checkbox" ng-model="updatesEnabled">
+						<span ng-if="timeType !== 'absolute'" class="animated">
+							<span>Auto-Update : </span>
+							<input type="checkbox" ng-model="updatesEnabled">
+						</span>
 					</span>
 				</span>
 			</span>
