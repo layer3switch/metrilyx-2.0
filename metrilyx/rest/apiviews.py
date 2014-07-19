@@ -187,7 +187,10 @@ class EventsViewSet(APIView):
 			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
 
 		try:
-			anno = Annotator(reqBody)
+			out = dict([(k,v) for k,v in reqBody.items() if k != "tags"])
+			for k,v in reqBody['tags'].items():
+				out[k] = v
+			anno = Annotator(out)
 			self.eds.add(anno.annotation)
 			return Response(anno.annotation)
 		except Exception,e:
