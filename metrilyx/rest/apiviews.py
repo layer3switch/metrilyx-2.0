@@ -194,17 +194,8 @@ class EventsViewSet(APIView):
 			self.eds.add(anno.annotation)
 			return Response(anno.annotation)
 		except Exception,e:
-			## 503 service unavailable
 			return Response({'error': str(e)},
 				status=status.HTTP_503_SERVICE_UNAVAILABLE)
-
-	'''
-	def put(self, request, pk=None):
-		reqBody = self.__checkRequest(json.loads(request.body))
-		if reqBody.has_key('error'):
-			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
-		return Response({})
-	'''
 
 class TagViewSet(viewsets.ViewSet):
 
