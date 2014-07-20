@@ -38,56 +38,52 @@
 		</div>
 		<!-- graph controls overlayed on top of graph -->
 		<div class="graph-face back{{editMode}} animated">
-			<div class="padtb10 padl5 padr4" style="background:rgb(95,95,95);border-bottom:1px solid #505050;border-radius:2px 2px 0 0">
+			<div class="padtb10 padl5 padr4" style="background:rgb(95,95,95);border-bottom:1px solid #505050;border-top:1px solid #777">
 				<div class="input-group input-group-sm" style="width:100%">
-					<a href="javascript:void(0)" class="input-group-addon nobg" onclick="$(this).next().show()" style="padding-right:15px;" title="Graph Controls">
-						<i class="glyphicon glyphicon-cog interactive" style="font-size:14px;color:#ccc;"></i>
-					</a>
-					<div ng-include="graphControlsHtml" style="display:none"></div>
-					<input type="text" ng-model="graph.name" class="form-control dark" placeholder="Graph Name" style="border:1px solid #707070!important">
-					<span class="input-group-addon nobg" title="Show Metric Editor"  style="padding-left:15px;" data-toggle="collapse" data-target="[data-query-set='{{graph._id}}']">
-						<i class="interactive glyphicon glyphicon-chevron-down" style="font-size:12px;color:#ccc;font-weight:bold"></i>
+					<span class="input-group-addon nobg pointer" style="color:#bbb" onclick="$(this).next().show()" title="Graph Controls">
+						<i class="glyphicon glyphicon-cog interactive" style="font-size:14px;"></i>
+					</span>
+					<div ng-include="graphControlsHtml" style="display:none" data-graph-controls="{{graph._id}}"></div>
+					<span class="input-group-addon nobg" title="Show Metric Editor"  style="color:#bbb" data-toggle="collapse" data-target="[data-query-set='{{graph._id}}']">
+						<i class="interactive glyphicon glyphicon-chevron-down" style="font-size:14px"></i>
+					</span>
+					<span title="Preview Graph" ng-click="previewGraph(graph)" class="input-group-addon nobg pointer" style="color:#bbb">
+						<i class="interactive glyphicon glyphicon-eye-open"></i>
+					</span>
+					<input type="text" ng-model="graph.name" class="form-control idark" placeholder="Graph Name">
+					<span class="input-group-addon nobg pointer" style="color:#bbb" ng-click="pod.graphs.splice(pod.graphs.indexOf(graph),1);reflow();" title="Remove Graph">
+						<i class="glyphicon glyphicon-trash interactive" style="font-size:14px;"></i>
 					</span>
 				</div>
 			</div>
-			<div data-query-set="{{graph._id}}" class="collapse in">
-			<div ng-if="graph.graphType!=='pie'"  class="text-left padlr10 small" style="border-top:1px solid #636363;border-bottom:1px solid #454545">
-				<div class="padtb10">
-					<span class="padl5 padr10"><b>Mult-paned layout</b></span>
-					<span class="pull-right padr4"><input type="checkbox" ng-model="graph.multiPane"></span>
-				</div>
-				<div ng-if="graph.multiPane">
-					<ul class="animated padb5" style="margin-bottom:0px;">
-						<li ng-repeat="pane in graph.panes track by $index" class="padtb2">
-							<span>
-								<span class="padr10" style="color:#ccc">Pane <b>{{$index}}</b></span>
-								<input type="text" placeholder="Pane name" style="background:none!important" class="dark" ng-model="graph.panes[$index]">
-								<span ng-if="$index>1">
-									<a href="javascript:void(0)" class="interactive" style="color:#ccc" ng-click="graph.panes.splice($index,1)" title="Remove pane">
-										<i class="glyphicon glyphicon-minus"></i>
-									</a>
+			<div data-query-set="{{graph._id}}" class="collapse in" style="background-color: rgba(66,66,66,0.9);">
+				<div ng-if="graph.graphType!=='pie'"  class="text-left padlr10 small" style="border-top:1px solid #636363;border-bottom:1px solid #454545">
+					<div class="padtb10">
+						<span class="padl5 padr10"><b>Mult-paned layout</b></span>
+						<span class="pull-right padr4"><input type="checkbox" ng-model="graph.multiPane"></span>
+					</div>
+					<div ng-if="graph.multiPane">
+						<ul class="animated padb5" style="margin-bottom:0px;">
+							<li ng-repeat="pane in graph.panes track by $index" class="padtb2">
+								<span>
+									<span class="padr10" style="color:#ccc">Pane <b>{{$index}}</b></span>
+									<input type="text" placeholder="Pane name" style="background:none!important" class="dark" ng-model="graph.panes[$index]">
+									<span ng-if="$index>1">
+										<a href="javascript:void(0)" class="interactive" style="color:#ccc" ng-click="graph.panes.splice($index,1)" title="Remove pane">
+											<i class="glyphicon glyphicon-minus"></i>
+										</a>
+									</span>
 								</span>
-							</span>
-						</li>
-						<li ng-if="graph.panes.length<graph.series.length" class="padt5" title="Add new pane">
-							<a href="javascript:void(0)" class="interactive" style="color:#ddd" ng-click="graph.panes.push('')">
-								<span><i class="glyphicon glyphicon-plus"></i></span>
-							</a>
-						</li>
-					</ul>
+							</li>
+							<li ng-if="graph.panes.length<graph.series.length" class="padt5" title="Add new pane">
+								<a href="javascript:void(0)" class="interactive" style="color:#ddd" ng-click="graph.panes.push('')">
+									<span><i class="glyphicon glyphicon-plus"></i></span>
+								</a>
+							</li>
+						</ul>
+					</div>
 				</div>
-			</div>
-			<div ng-include="queryEditorHtml" style="width:100%"></div>
-			<div class="query-editor-footer">
-				<span class="iblk pointer btn-primary pad5 margin10 marginr5 edit-comp{{editMode}}" title="Preview Graph"  style="font-size:12px;border-radius:2px;padding-top:7px" ng-click="previewGraph(graph)">
-					<i class="glyphicon glyphicon-eye-open" style="font-weight:bold"></i>
-					<span class="pad5">Preview</span>
-				</span>
-				<span class="iblk pointer btn-danger pad5 margin10 marginl5 edit-comp{{editMode}}" title="Remove Graph"  style="font-size:12px;border-radius:2px;padding-top:7px" ng-click="pod.graphs.splice(pod.graphs.indexOf(graph),1);reflow();">
-					<i class="glyphicon glyphicon-trash" style="font-weight:bold"></i>
-					<span class="pad5">Delete</span>
-				</span>
-			</div>
+				<div ng-include="queryEditorHtml" style="width:100%"></div>
 			</div>
 		</div>
 	</div>

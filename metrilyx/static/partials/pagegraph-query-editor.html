@@ -3,12 +3,11 @@
 		<div class="row" style="margin:0">
 			<div class="col-md-9" style="padding:0">
 				<div class="text-left padt10 padlr10 graph-metric-label-header">
-					<span class="padr5" style="font-weight:bold">{{serie.query|metricQuery}}</span>
+					<span class="padr5" style="font-weight:bold">{{serie.query|metricQuery}}<span class="tagstr-label">{{serie.query.tags|tagsString}}</span></span>
 				</div>
-				<div class="tagstr-label">{{serie.query.tags|tagsString}}</div>
 			</div>
 			<div class="col-md-3" style="padding:0">
-				<div class="padr10" style="padding-top:17px">
+				<div class="padr10 padt10">
 					<span class="interactive"  title="Remove metric" ng-click="graph.series.splice(graph.series.indexOf(serie),1);" style="color:#bbb">
 						<i class="glyphicon glyphicon-trash" style="font-size:14px;"></i>
 					</span>
@@ -71,21 +70,4 @@
 	    	</select>
 	    </div>
 	</div>
-	<script type="text/javascript">
-		function toggleQueryEditor(btn) {
-			curr = $(btn).next();
-			if($(curr).hasClass('active')) {
-				$(curr).toggle();
-				return;
-			}
-			$('.graph-metric-label').removeClass('selected');
-			$('[ng-repeat=\'serie in graph.series\']').children('.adhoc-metric-editor').each(function() {
-					$(this).removeClass('active');
-					$(this).hide();
-				}
-			);
-			$(curr).addClass('active');
-			$(curr).toggle();
-		}
-	</script>
 </div>

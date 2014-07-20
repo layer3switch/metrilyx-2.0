@@ -383,6 +383,10 @@ input[ng-model='pod.name'] {
 	box-shadow: inset 0 1px 1px rgba(0,0,0,0.0);
 	text-align: left;
 }
+input[ng-model='graph.name'].idark,
+input[ng-model='pod.name'].edit-mode.idark {
+	color: #ccc !important;
+}
 input[ng-model='graph.name'] {
 	width: 100%;
 	font-size: 14px;
@@ -390,11 +394,14 @@ input[ng-model='graph.name'] {
 	box-shadow: inset 0 1px 1px rgba(0,0,0,0.0);
 	background: none;
 }
-input[ng-model='graph.name'].edit-mode,
-input[ng-model='pod.name'].edit-mode {
+input[ng-model='pod.name'].edit-mode.idark {
+	color: #ccc !important;
+}
+input[ng-model='graph.name'].idark:hover,
+input[ng-model='pod.name'].edit-mode.idark:hover {
 	background:none !important;
 	border:1px solid #777 !important;
-	color: #ccc !important;
+	border-radius:3px;
 	-moz-box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
     -webkit-box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
     box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
@@ -526,16 +533,20 @@ input.ng-invalid.ng-dirty {
 	display: none;
 }
 .graph-controls {
-	width:280px;
+	width:230px;
 	border-radius:3px;
 	border:1px solid #555;
-	border-top: 1px solid #777;
-	/*padding:5px;*/
+	/*border-top: 1px solid #777;*/
+	border-top: none;
+	position: relative;
+	z-index: 1;
+	background:rgba(95,95,95,0.95);
+	margin-bottom:10px;
+}
+[ng-include="graphControlsHtml"] {
 	position:absolute;
 	top:-3px;
 	left:-1px;
-	background:rgba(95,95,95,0.95);
-	z-index: 5;
 }
 .heatmap-query-editor {
 	border:1px solid #555;
@@ -984,8 +995,9 @@ input.dark.info {
 	color: #bbb;
 	opacity: 0.7;
 	font-size:11px;
-	padding-right: 10px;
-	padding-left: 10px;
+	padding-right: 7px;
+	padding-left: 7px;
+	word-wrap:break-word;
 }
 .tagstr-label.adhoc {
 	color: #777;
@@ -1126,35 +1138,24 @@ input.form-control.trans {
 	color: #428bca !important;
 }
 [ng-include="graphHtml"] {
-	/*border: 1px solid #eee;
-	border-radius: 2px;*/
 	border-top: 1px solid #eee;
 	border-bottom: 1px solid #ddd;
-	/*margin:3px;
-	margin-left: 3px;
-	margin-right: 3px;*/
-	perspective: 1000;
 }
 [ng-include="graphHtml"].horizontal {
 	border-left: 1px solid #eee;
 	border-right: 1px solid #ddd;
 	border-bottom: 0px;
 }
-/*
-[ng-include="graphHtml"].horizontal {
-	margin-bottom:6px;
-}*/
+[ng-include="graphHtml"].edit-mode.horizontal {
+	border-left: 0px;
+	border-right: 0px;
+}
 [ng-repeat="graph in pod.graphs"]:first-child > [ng-include="graphHtml"].horizontal {
 	border-left: 0px;
 }
 [ng-repeat="graph in pod.graphs"]:last-child > [ng-include="graphHtml"].horizontal {
 	border-right: 0px;
 }
-/*
-[ng-include="graphHtml"].vertical {
-	margin-left:6px;
-	margin-right:6px;
-}*/
 [ng-repeat="graph in pod.graphs"]:last-child > [ng-include="graphHtml"].vertical {
 	border-bottom: 0px;
 }
@@ -1207,41 +1208,48 @@ input.threshold-input {
 	padding-bottom: 3px;
 }
 .graph-control-details {
-	background: rgba(0,0,0,0.15);
-	-moz-box-shadow: inset 0 0 1em rgba(22,22,22,0.5);
-    -webkit-box-shadow: inset 0 0 1em rgba(22,22,22,0.5);
-    box-shadow: inset 0 0 1em rgba(22,22,22,0.5);
+	background:rgba(95,95,95,0.95);
+	border-radius: 0 2px 2px 2px;
+    position:absolute;
+    left:230px;
+    display: none;
+    width: 280px;
+}
+.graph-control-details.thresh {
+	top: 72px;
+}
+.graph-control-details.anno {
+	top: 106px;
 }
 .graph-face.back {
   position: absolute;
-  /*top:42px;*/
-  top:0;
+  top:0px;
   left:0px;
-  width: 100%;
-  /*min-height: 100%;*/
+  bottom: 0px;
+  right: 0px;
   display: none;
   /*-webkit-transform: rotateY(180deg);*/
   /*padding: 5px;*/
   /*background-color: rgba(255,255,255,0.84);*/
-  background-color: rgba(66,66,66,0.9);
+  /*background-color: rgba(66,66,66,0.9);*/
   color: #ddd;
   border-radius: 0 0 2px 2px;
+  /*
   border-left:1px solid #505050;
   border-right:1px solid #505050;
   border-top: 1px solid #777;
-  border-bottom: 1px solid #666;
-  /*border: 2px solid #ddd;
-  border-top: 1px solid #ddd;*/
-  z-index: 100;
-  /*bottom: 0;*/
+  border-bottom: 1px solid #666;*/
+  /*z-index: 100;*/
   text-align:right; 
+  overflow-y: scroll;
+  overflow-x: visible;
 }
 .graph-face.back.edit-mode {
 	display: block;
-}
+}/*
 .graph-face.back.edit-mode:hover {
-	z-index: 1000;
-}
+	z-index: 1000 !important;
+}*/
 .graph-face.front.edit-mode {
 	padding-top:4px;
 }

@@ -14,7 +14,7 @@
 						</span>
 					</span>
 				</span>
-				<input type="text" class="form-control edit-comp{{editMode}}" ng-model="pod.name" placeholder="Pod Name" disabled="true">
+				<input type="text" class="form-control edit-comp{{editMode}} idark" ng-model="pod.name" placeholder="Pod Name" disabled="true">
 				<span class="edit-comp{{editMode}} input-group-btn pod-btn-bar">
 					<span ng-if="modelType !== 'heatmap/'">
 						<a href="javascript:void(0)" title="Vertical graph layout" ng-click="pod.orientation='vertical';" class="btn interactive pod-header-btn edit-comp{{editMode}} vertical-graphs {{pod.orientation}}"><i class="glyphicon glyphicon-resize-vertical" style="font-weight:bold;"></i></a>
@@ -37,7 +37,7 @@
 						<div ng-switch="modelType">
 							<div ng-switch-when="">
 								<div ng-repeat="graph in pod.graphs" class="col-md-{{pod.graphs.length|columnWidth}}">
-									<div ng-include="graphHtml" ng-model="graph" class="{{pod.orientation}}" ws-highstock-graph></div>
+									<div ng-include="graphHtml" ng-model="graph" class="{{editMode}} {{pod.orientation}}" ws-highstock-graph></div>
 								</div>
 							</div>
 							<!-- heatmap request -->

@@ -1,5 +1,5 @@
 <div class="text-left graph-controls bottom-shadow" style="color:#ccc">
-	<div class="padtb10 padlr10" style="background:rgba(0,0,0,0.1);border-radius: 3px 3px 0 0;border-bottom:1px solid #505050">
+	<div class="padtb10 padlr10" style="background:rgba(0,0,0,0.1);border-radius: 3px 3px 0 0;border-bottom:1px solid #505050;">
 		<span class="pointer interactive" ng-click="hideGraphControls(graph)" title="Close"><i class="glyphicon glyphicon-cog"></i></span>
 	</div>
 	<div class="padlr10 padtb6" style="border-bottom:1px solid #505050;border-top:1px solid #777;">
@@ -11,7 +11,7 @@
 				<option value="large">large</option>
 			</select>
 		</span>
-		<span class="padlr5">
+		<span class="padl5">
 			<span class="small">Type :</span>
 			<select ng-model="graph.graphType" class="dark"> 
 				<option value="line">line</option>
@@ -23,14 +23,14 @@
 		</span>
 	</div>
 	<div ng-if="graph.graphType!=='pie'&&!graph.multiPane" class="text-right">
-		<div class="text-left padlr10 padtb6" style="border-top:1px solid #777;border-bottom:1px solid #505050">
-			<a href="javascript:void(0)" data-toggle="collapse" data-target="[data-graph-thresholds='{{graph._id}}']" style="color:#ccc" class="interactive">
+		<div class="text-left padlr10 padtb6 interactive pointer" style="border-top:1px solid #777;border-bottom:1px solid #505050" onclick="$('.graph-control-details').hide();$(this).next().toggle()">
+			<!--<a href="javascript:void(0)" data-toggle="collapse" data-target="[data-graph-thresholds='{{graph._id}}']" style="color:#ccc" class="interactive">-->
 				<span>Thresholds</span>
-				<span class="padlr5 pull-right"><i class="glyphicon glyphicon-chevron-down"></i></span>
-			</a>
+				<span class="padlr5 pull-right"><i class="glyphicon glyphicon-chevron-right"></i></span>
 		</div>
-		<div data-graph-thresholds="{{graph._id}}" class="collapse padlr10 graph-control-details" style="border-bottom:1px solid #505050;">
-			<div class="padtb10">
+		<!--<div data-graph-thresholds="{{graph._id}}" class="collapse padlr10 graph-control-details" style="border-bottom:1px solid #505050;">-->
+		<div class="padlr10 graph-control-details thresh bottom-shadow" style="border-bottom:1px solid #505050;">
+			<div class="padtb10" style="position:relative;z-index:1">
 				<div>
 					<div class="threshold-label" style="color:rgba(200,74,71,1);">Danger:</div>
 					<input type="text" ng-model="graph.thresholds.danger.max" class="threshold-input trans danger">
@@ -56,13 +56,11 @@
 		</div>
 	</div>
 	<div ng-if="graph.graphType!=='pie'" style="border-top:1px solid #777">
-		<div class="padlr10 padtb6">
-			<a href="javascript:void(0)" data-toggle="collapse" data-target="[data-graph-eventanno='{{graph._id}}']" style="color:#ccc" class="interactive">
-				<span>Event Annotations</span>
-				<span class="padlr5 pull-right"><i class="glyphicon glyphicon-chevron-down"></i></span>
-			</a>
+		<div class="padlr10 padtb6 pointer interactive" onclick="$('.graph-control-details').hide();$(this).next().toggle()">
+				<span>Annotations</span>
+				<span class="padlr5 pull-right"><i class="glyphicon glyphicon-chevron-right"></i></span>
 		</div>
-		<div data-graph-eventanno="{{graph._id}}" class="collapse graph-control-details padlr10">
+		<div class="graph-control-details anno bottom-shadow padlr10">
 			<div class="padtb10">
 				<div>
 			    	<div class="metric-control-label text-left marginb5">Tags :</div>
