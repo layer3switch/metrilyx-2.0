@@ -1231,10 +1231,10 @@ input.threshold-input.wide {
     width: 280px;
 }
 .graph-control-details.thresh {
-	top: 72px;
+	top: 106px;
 }
 .graph-control-details.anno {
-	top: 106px;
+	top: 72px;
 }
 .graph-face.back {
   position: absolute;
