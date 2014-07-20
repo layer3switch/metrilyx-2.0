@@ -1029,7 +1029,8 @@ input.dark.info {
 }
 .graph-metric-label-header {
 	/*border-top: 1px solid #636363;*/
-	font-size:12px
+	font-size:12px;
+	padding-left: 30px;
 }
 .query-status {
 	color: #aaa;
