@@ -67,14 +67,14 @@
 				<td style="color: {{selectedAnno.color}};">
 					<div style="font-size:14px;">
 						<span><b>{{selectedAnno.eventType}}</b></span>
-						<span class="padl10 small" style="color:#888">{{selectedAnno.timestamp|dateTime: true}}</span>
+						<span class="padl10 small" style="color:#aaa">{{selectedAnno.timestamp|dateTime: true}}</span>
 					</div>
 					<div style="font-size:12px" class="padt3">{{selectedAnno.message}}</div>		
 				</td>
 			</tr></table>	
 		</div>
-		<div ng-repeat="(evtKey,evtVal) in selectedAnno.data" class="padtb6 padlr10" style="border-top:1px solid #636363;border-bottom:1px solid #404040">
-			<span class="padr5"><b>{{evtKey}} :</b></span><span class="padl5" style="color: #aaa">{{evtVal}}</span>
+		<div ng-repeat="(evtKey,evtVal) in selectedAnno.data" class="padtb6 padlr10" style="border-top:1px solid #636363;border-bottom:1px solid #343434">
+			<span class="padr5"><b>{{evtKey}} :</b></span><span class="padl5" style="color: #bbb">{{evtVal}}</span>
 		</div>
 	</div>
 </div>
