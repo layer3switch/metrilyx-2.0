@@ -1,6 +1,8 @@
 <div class="text-left graph-controls bottom-shadow" style="color:#ccc">
 	<div class="padtb10 padlr10" style="background:rgba(0,0,0,0.1);border-radius: 3px 3px 0 0;border-bottom:1px solid #505050;">
-		<span class="pointer interactive" ng-click="hideGraphControls(graph)" title="Close"><i class="glyphicon glyphicon-cog"></i></span>
+		<span class="pointer interactive" ng-click="hideGraphControls(graph)" title="Close">
+			<i class="glyphicon glyphicon-cog" style="font-size:14px;"></i>
+		</span>
 	</div>
 	<div class="padlr10 padtb6" style="border-bottom:1px solid #505050;border-top:1px solid #777;">
 		<span class="padr5">
@@ -24,12 +26,13 @@
 	</div>
 	<div ng-if="graph.graphType!=='pie'&&!graph.multiPane" class="text-right">
 		<div class="text-left padlr10 padtb6 interactive pointer" style="border-top:1px solid #777;border-bottom:1px solid #505050" onclick="$('.graph-control-details').hide();$(this).next().toggle()">
-			<!--<a href="javascript:void(0)" data-toggle="collapse" data-target="[data-graph-thresholds='{{graph._id}}']" style="color:#ccc" class="interactive">-->
 				<span>Thresholds</span>
 				<span class="padlr5 pull-right"><i class="glyphicon glyphicon-chevron-right"></i></span>
 		</div>
-		<!--<div data-graph-thresholds="{{graph._id}}" class="collapse padlr10 graph-control-details" style="border-bottom:1px solid #505050;">-->
 		<div class="padlr10 graph-control-details thresh bottom-shadow" style="border-bottom:1px solid #505050;">
+			<div class="padt10 text-left">
+				<span class="glyphicon glyphicon-remove interactive pointer" onclick="$('.graph-control-details').hide();"></span>
+			</div>
 			<div class="padtb10" style="position:relative;z-index:1">
 				<div>
 					<div class="threshold-label" style="color:rgba(200,74,71,1);">Danger:</div>
@@ -60,46 +63,53 @@
 				<span>Annotations</span>
 				<span class="padlr5 pull-right"><i class="glyphicon glyphicon-chevron-right"></i></span>
 		</div>
-		<div class="graph-control-details anno bottom-shadow padlr10">
+		<div class="graph-control-details anno bottom-shadow padlr5">
 			<div class="padtb10">
-				<div>
-			    	<div class="metric-control-label text-left marginb5">Tags :</div>
-			    	<ul style="margin-bottom:5px;padding-left:10px">
-						<li ng-repeat="(tk,tv) in graph.annoEvents.tags" class="padtb3">
-			    			<div class="input-group input-group-sm">
-			    				<span class="input-group-addon trans">{{tk}}</span>
-			    				<input ng-model="graph.annoEvents.tags[tk]" type="text" title="Edit tag values" class="form-control trans">
-			    				<span class="input-group-addon trans interactive pointer" ng-click="removeTag(graph.annoEvents.tags, tk);">		
-			    					<i class="glyphicon glyphicon-remove"></i>
-			    				</span>
-			    			</div>
-						</li>
-					</ul>
-			    </div>
-			    <div class="input-group input-group-sm padb10 padl10">
-			    	<input type="text" class="form-control dark" ng-model="graph.annoEvents.tags" tagkeyvalue style="border-color:#888 !important">
-			    	<span class="input-group-addon nobg" style="color:#ccc;border-color:#888;"><i class="glyphicon glyphicon-search"></i></span>
-			    </div>
-			    <div class="padt10" style="border-top:1px solid #777">
-					<div class="small padb10">Types :</div>
-					<div class="padl7">
-						<div ng-repeat="evtType in graph.annoEvents.eventTypes" class="small removable-tag">
-							<a href="javascript:void(0)" style="color:#ccc" class="interactive" ng-click="graph.annoEvents.eventTypes.splice($index,1)">
-								<i class="glyphicon glyphicon-remove"></i>
-							</a>
-							<span>{{evtType}}</span>
-						</div>
-					</div>
-					<div style="clear:both;"></div>
-					<div class="input-group input-group-sm padt5 padl10">
-				    	<input type="text" class="form-control dark" style="border-color:#888 !important" ng-model="graph.annoEvents.eventTypes" event-types>
-				    	<span class="input-group-addon nobg" style="color:#ccc;border-color:#888;">
-				    		<i class="glyphicon glyphicon-search"></i>
-				    	</span>
-			    	</div>
+				<div class="padb10 text-left">
+					<span class="padl5 glyphicon glyphicon-remove interactive pointer" onclick="$('.graph-control-details').hide();"></span>
 				</div>
-				<div class="gcontrols-apply-btn pointer" title="Apply event annotation changes" ng-click="hideGraphControls(graph);reloadGraph(graph);">
-					<span>Apply</span>
+				<div class="padlr10">
+					<div>
+				    	<div class="small text-left marginb5"><b>Tags :</b></div>
+				    	<ul style="margin-bottom:5px;padding-left:10px">
+							<li ng-repeat="(tk,tv) in graph.annoEvents.tags" class="padtb3">
+				    			<div class="input-group input-group-sm">
+				    				<span class="input-group-addon trans">{{tk}}</span>
+				    				<input ng-model="graph.annoEvents.tags[tk]" type="text" title="Edit tag values" class="form-control trans">
+				    				<span class="input-group-addon trans interactive pointer" ng-click="removeTag(graph.annoEvents.tags, tk);">		
+				    					<i class="glyphicon glyphicon-remove"></i>
+				    				</span>
+				    			</div>
+							</li>
+						</ul>
+				    </div>
+				    <div class="input-group input-group-sm padb10">
+				    	<span class="input-group-addon nobg" style="color:#ccc;border-color:#888;"><i class="glyphicon glyphicon-search"></i></span>
+				    	<input type="text" class="form-control dark" ng-model="graph.annoEvents.tags" tagkeyvalue style="border-color:#888 !important;border-radius:30px;">
+				    </div>
+			    </div>
+			    <div class="padlr10" style="border-top:1px solid #777">
+				    <div class="padt10">
+						<div class="small padb10"><b>Types :</b></div>
+						<div class="padl7">
+							<div ng-repeat="evtType in graph.annoEvents.eventTypes" class="small removable-tag">
+								<a href="javascript:void(0)" style="color:#606060" class="interactive" ng-click="graph.annoEvents.eventTypes.splice($index,1)">
+									<i class="glyphicon glyphicon-remove"></i>
+								</a>
+								<span>{{evtType}}</span>
+							</div>
+						</div>
+						<div style="clear:both;"></div>
+						<div class="input-group input-group-sm padt5">
+					    	<span class="input-group-addon nobg" style="color:#ccc;border-color:#888;">
+					    		<i class="glyphicon glyphicon-search"></i>
+					    	</span>
+					    	<input type="text" class="form-control dark" style="border-radius:30px;border-color:#888 !important" ng-model="graph.annoEvents.eventTypes" event-types>
+				    	</div>
+					</div>
+					<div class="gcontrols-apply-btn pointer" title="Apply event annotation changes" ng-click="hideGraphControls(graph);reloadGraph(graph);">
+						<span>Apply</span>
+					</div>
 				</div>
 			</div>
 		</div>

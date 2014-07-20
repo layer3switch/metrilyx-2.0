@@ -360,12 +360,17 @@ input[ng-model='modelQuery'] {
 }
 [ng-repeat='evtType in graph.annoEvents.eventTypes'].removable-tag {
 	border:1px solid #888;
-	border-radius:3px;
+	border-radius:26px;
 	float:left;
-	padding: 5px;
-	padding-bottom:4px;
+	padding: 4px;
+	padding-left: 8px;
+	padding-right: 8px;
 	display: inline-block;
-	margin: 3px; 
+	margin: 3px;
+	font-size: 11px !important;
+	font-weight: bold;
+	color: #606060;
+	background-color: #ddd;
 }
 input[ng-model*='name'] {
 	border: 1px solid rgba(255,255,255,0) !important;
@@ -542,11 +547,6 @@ input.ng-invalid.ng-dirty {
 	z-index: 1;
 	background:rgba(95,95,95,0.95);
 	margin-bottom:10px;
-}
-[ng-include="graphControlsHtml"] {
-	position:absolute;
-	top:-3px;
-	left:-1px;
 }
 .heatmap-query-editor {
 	border:1px solid #555;
@@ -817,6 +817,12 @@ a.graph-rm-btn.edit-mode {
 	opacity: 1 !important;
 	display: inline-block;
 }*/
+.graph-control-item-body {
+	-moz-box-shadow: inset 0 0 1em rgba(22,22,22,0.5);
+    -webkit-box-shadow: inset 0 0 1em rgba(22,22,22,0.5);
+    box-shadow: inset 0 0 1em rgba(22,22,22,0.5);
+    background: rgba(66,66,66,0.5);
+}
 .threshold-label {
 	font-weight: bold !important;
 	font-size: 12px !important;
@@ -1159,6 +1165,13 @@ input.form-control.trans {
 [ng-repeat="graph in pod.graphs"]:last-child > [ng-include="graphHtml"].vertical {
 	border-bottom: 0px;
 }
+[ng-include="graphControlsHtml"] {
+	color:#ccc;
+	display:none;
+	position:absolute;
+	top:2px;
+	left:-1px;
+}
 .page-tag {
 	background-color: #666;
 	border-radius: 	2px;
@@ -1207,6 +1220,9 @@ input.threshold-input {
 	padding-top: 3px;
 	padding-bottom: 3px;
 }
+input.threshold-input.wide {
+	width: 140px;
+}
 .graph-control-details {
 	background:rgba(95,95,95,0.95);
 	border-radius: 0 2px 2px 2px;
@@ -1240,9 +1256,13 @@ input.threshold-input {
   border-top: 1px solid #777;
   border-bottom: 1px solid #666;*/
   /*z-index: 100;*/
-  text-align:right; 
+  text-align:right;
   overflow-y: scroll;
   overflow-x: visible;
+}
+.graph-control-item {
+	border-top:1px solid #636363;
+	border-bottom:1px solid #454545;
 }
 .graph-face.back.edit-mode {
 	display: block;
