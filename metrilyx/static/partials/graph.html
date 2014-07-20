@@ -75,7 +75,7 @@
 					</span>
 				</div>
 				<div ng-if="graph.graphType!=='pie'&&!graph.multiPane" class="text-right">
-					<div class="text-left pad10 interactive pointer graph-control-item" data-toggle="collapse" data-target="[data-graph-thresholds='{{graph._id}}']" style="font-weight:bold">
+					<div class="text-left pad10 interactive graph-control-item" data-toggle="collapse" data-target="[data-graph-thresholds='{{graph._id}}']" style="font-weight:bold">
 							<span class="padl5 small">
 								<span class="glyphicon glyphicon-signal"></span>
 								<span class="padl5">Thresholds</span>
@@ -108,7 +108,7 @@
 					</div>
 				</div>
 				<div ng-if="graph.graphType!=='pie'"  class="text-left">
-					<div class="graph-control-item pad10 interactive pointer" style="font-weight:bold" data-toggle="collapse" data-target="[data-graph-anno='{{graph._id}}']">
+					<div class="graph-control-item pad10 interactive" style="font-weight:bold" data-toggle="collapse" data-target="[data-graph-anno='{{graph._id}}']">
 						<span class="padl5 small">
 							<span class="glyphicon glyphicon-flag"></span>
 							<span class="padl5">Annotations</span>
@@ -127,7 +127,7 @@
 							    			<div class="input-group input-group-sm">
 							    				<span class="input-group-addon trans">{{tk}}</span>
 							    				<input ng-model="graph.annoEvents.tags[tk]" type="text" title="Edit tag values" class="form-control trans">
-							    				<span class="input-group-addon trans interactive pointer" ng-click="removeTag(graph.annoEvents.tags, tk);">		
+							    				<span class="input-group-addon trans interactive" ng-click="removeTag(graph.annoEvents.tags, tk);">		
 							    					<i class="glyphicon glyphicon-remove"></i>
 							    				</span>
 							    			</div>

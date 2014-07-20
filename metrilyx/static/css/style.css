@@ -159,10 +159,7 @@ select[ng-model="timeType"] {
 	width: 23.5%;
 	color: #ccc;
 	overflow-y: hidden;
-	z-index: 1000;/*
-	-webkit-box-shadow: 10px 0 6px -6px rgba(0,0,0,0.3);
-	   -moz-box-shadow: 10px 0 6px -6px rgba(0,0,0,0.3);
-	        box-shadow: 10px 0 6px -6px rgba(0,0,0,0.3);*/
+	z-index: 1000;
 }
 #side-panel.offstage,
 #side-panel.offstage .model-list-container,
