@@ -97,8 +97,8 @@ angular.module('filters',[]).
 					outstr += k+"="+obj[k]+", ";
 				}
 			}
-			if(outstr === "") return "Tags:";
-			return outstr.replace(/\, $/, "");
+			if(outstr === "") return "";
+			return "{ " + outstr.replace(/\, $/, "") + " }"; 
 		};
 	}).filter('tagsLink', function() {
 		return function(obj) {
