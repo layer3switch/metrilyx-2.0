@@ -622,8 +622,8 @@ div[class*='layout-'] {
 	min-height: 80%;
 }
 .layout.edit-mode:hover, .layout-hover {
-	border: 1px solid rgba(144,151,34,0.8);
-	background: rgba(144,151,34,0.4);
+	/*border: 1px solid rgba(144,151,34,0.5);*/
+	background: rgba(144,151,34,0.2);
 }
 .layout-row.edit-mode {
 	padding-left: 24px !important;
@@ -631,8 +631,9 @@ div[class*='layout-'] {
 }
 .layout-row-hover, 
 .layout-row.edit-mode:hover {
-	border: 1px solid rgba(202,149,66,0.8);
-	background: rgba(202,149,66,0.3);
+	/*border: 1px solid rgba(202,149,66,0.5);*/
+	background: rgba(202,149,66,0.2);
+	cursor: pointer;
 }
 .layout-column {
 	padding-left:0px !important;
@@ -644,8 +645,8 @@ div[class*='layout-'] {
 }
 .layout-column.edit-mode:hover, 
 .layout-column-hover {
-	border: 1px solid rgba(50,105,153,0.5);
-	background: rgba(66,139,202,0.4);
+	/*border: 1px solid rgba(50,105,153,0.5);*/
+	background: rgba(66,139,202,0.2);
 }
 .layout.edit-mode > .dblclick-helper.edit-mode,
 .layout-column.edit-mode > .dblclick-helper.edit-mode {
@@ -1172,14 +1173,14 @@ input.form-control.trans {
 }
 .page-tag {
 	background-color: #666;
-	border-radius: 	2px;
+	border-radius: 	20px;
 	padding:		5px;
-	padding-right: 	7px;
+	padding-right: 	9px;
 	padding-left: 	7px;
 	margin-left:	2px;
 	margin-right:	2px;
 	color: 			#ddd;
-	font-size: 		13px;
+	font-size: 		12px;
 }
 .tags-panel {
 	color:#555;
