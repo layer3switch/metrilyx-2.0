@@ -230,8 +230,7 @@ class TagViewSet(viewsets.ViewSet):
 		return Response(serializer.data)
 
 class SearchViewSet(viewsets.ViewSet): 
-	#tsdb_suggest_url = "%(uri)s%(search_endpoint)s?max=%(suggest_limit)d" %(
-	#													config['dataprovider'])
+
 	metricMetaCache = MetricCacheDatastore(**config['cache']['datastore']['mongodb'])
 
 	def list(self, request, pk=None):
