@@ -614,14 +614,14 @@ div[class*='layout-'] {
 }
 .layout {
 	padding: 0px !important;
-	padding-top: 24px !important;
-	padding-bottom: 24px !important;
 	border-radius: 2px;
 	margin: 0px !important;
 	border: 1px solid rgba(0,0,0,0); /* placholder */
 }
 .layout.edit-mode {
 	min-height: 80%;
+	padding-top: 24px !important;
+	padding-bottom: 24px !important;
 }
 .layout.edit-mode:hover, .layout-hover {
 	background: rgba(197,134,232,0.8);
