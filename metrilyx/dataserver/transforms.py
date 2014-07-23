@@ -182,9 +182,10 @@ class MetrilyxSerie(object):
 		# When alias_str starts with ! we will do an eval for lambda processing
 		if alias_str.startswith("!"):
 			try:
-				normalizedAlias = eval(alias_str[1:])(flat_obj)
+				return eval(alias_str[1:])(flat_obj)
 			except Exception,e:
 				log.warn("could not transform alias: %s %s" %(obj['metric'], str(e)))
+				normalizedAlias = obj['metric']
 		else:
 			try:
 				normalizedAlias = alias_str %(flat_obj)
@@ -192,9 +193,9 @@ class MetrilyxSerie(object):
 				normalizedAlias =  obj['metric']
 			except Exception, e:
 				log.error("could not normalize alias: %s %s" %(obj['metric'], str(e)))
-			## only add unique tags if using string formating.
-			if self.uniqueTagsString:
-				normalizedAlias = normalizedAlias + self.uniqueTagsString %(flat_obj)
+		## only add unique tags if using string formating.
+		if self.uniqueTagsString:
+			normalizedAlias = normalizedAlias + self.uniqueTagsString %(flat_obj)
 		
 		return normalizedAlias
 
