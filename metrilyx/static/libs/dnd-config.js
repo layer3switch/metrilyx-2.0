@@ -58,6 +58,7 @@ var dndconfig = {
 		tolerance: "pointer",
 		cursor: "move",
 		items: ".layout-column",
+		connectWith: [".layout-row"],
 		disabled:true,
 		/*
 		over: function(event, ui) {

@@ -78,9 +78,9 @@ angular.module('pageLayout', [])
 				$(elem).dblclick(function(evt) {
 					if(scope.editMode == "") return;
 					evt.stopPropagation();
-					if(! $(evt.target).hasClass('dblclick-helper')) return;
+					if(! $(evt.target).hasClass('layout-column')) return;
 
-					ypos = evt.pageY-evt.currentTarget.offsetTop;
+					//ypos = evt.pageY-evt.currentTarget.offsetTop;
 					if($(evt.target).hasClass('column-handle')) {
 						ngModel.$modelValue.unshift(
 							JSON.parse(JSON.stringify(scope.droppablePodSchema[0])));
@@ -251,7 +251,6 @@ angular.module('graphing', [])
 				function processRecievedData(event) {
 					var data = event.detail;
 					setSerieStatus(data, 'loading');
-
 					if(data.series) {
 						var mg = new MetrilyxGraph(data, scope.getTimeWindow(true));
 						mg.applyData();
@@ -314,9 +313,14 @@ angular.module('graphing', [])
 					if(graph.series.length == oldValue.series.length) {
 						return;
 					} else if(graph.series.length > oldValue.series.length) {
-						//console.log("add new series");
 						var q = scope.baseQuery(graph);	
-						q.series = [ graph.series[graph.series.length-1] ];
+						q.series = [];
+						// find the new series that was added //
+						for(var gi in graph.series) {
+							if(graph.series[gi].status === undefined) {
+								q.series.push(graph.series[gi]);
+							}
+						}
 						scope.requestData(q);
 						setSerieStatus(q,'querying');
 						if(scope.modelType == 'adhoc') scope.setURL(graph);

@@ -1,5 +1,5 @@
 <div class="layout-column edit-comp{{editMode}} col-md-{{row.length|columnWidth}}" ng-repeat="column in row" ui-sortable="columnSortOpts" ng-model="column" column="true">
-	<div class="dblclick-helper column-helper edit-comp{{editMode}} text-center column-handle">Double-click to add a pod to <b>this column</b></div>
+	<!--<div class="dblclick-helper column-helper edit-comp{{editMode}} text-center column-handle">Double-click to add a pod to <b>this column</b></div>-->
 	<!--<div class="pad20">-->
 	<div ng-repeat="pod in column" class="pod{{editMode}} bottom-shadow" ng-model="pod" pod="true">
 		<div class="pod-header edit-comp{{editMode}} animated">
@@ -67,5 +67,5 @@
 			</div>
 		</div>
 	</div><!-- END .pod -->
-	<div class="dblclick-helper column-helper edit-comp{{editMode}} text-center">Double-click to add a pod to <b>this column</b></div>
+	<!--<div class="dblclick-helper column-helper edit-comp{{editMode}} text-center">Double-click to add a pod to <b>this column</b></div>-->
 </div><!-- END .col-md-X -->

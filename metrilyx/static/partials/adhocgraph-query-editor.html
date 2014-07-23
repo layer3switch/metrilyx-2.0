@@ -1,6 +1,6 @@
 <div class="btn-group" ng-repeat="serie in graph.series">
 	<button type="button" class="animated btn btn-default graph-metric-label adhoc" onclick="toggleQueryEditor(this)">
-		<div class="text-left padb5">
+		<div class="text-left">
 			<span class="interactive"  title="Remove metric" ng-click="graph.series.splice(graph.series.indexOf(serie),1);"><i class="glyphicon glyphicon-remove"></i></span>
 			<span class="padl5" style="font-weight:bold">{{serie.query|metricQuery}}</span>
 		</div>
