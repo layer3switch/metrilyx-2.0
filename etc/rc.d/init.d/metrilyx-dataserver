@@ -10,10 +10,11 @@ NAME="metrilyx-dataserver"
 APP_HOME="/opt/metrilyx"
 BIN=${APP_HOME}/bin/${NAME}.py
 LOGFILE=/var/log/metrilyx/${NAME}.log
+LOGLEVEL="WARNING"
 PGREP="/usr/bin/pgrep -f"
 
 ## set -c to 0 spawn servers based on the number of cpus/cores
-DEFAULT_OPTS="-e 80 -c 0"
+DEFAULT_OPTS="-e 80 -c 0 -l "${LOGLEVEL}
 
 RETVAL=0
 
