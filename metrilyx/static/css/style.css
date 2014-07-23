@@ -33,9 +33,7 @@ input[type=checkbox] {
     outline: none !important;
     cursor: pointer;
     background-color: #eee !important;
-    -webkit-box-shadow: inset 0 0 3px rgba(0,0,0,0.1) !important;
-    -box-shadow: inset 0 0 3px rgba(0,0,0,0.1) !important;
-    -moz-box-shadow: inset 0 0 3px rgba(0,0,0,0.1) !important;
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.1) !important;
 }
 input[type=checkbox]:checked {
 	background-color: #428bca !important;
@@ -48,8 +46,6 @@ select {
     padding-left: 5px !important;
     padding-right: 5px !important;
     margin: 0;
-    -webkit-border-radius:3px !important;
-    -moz-border-radius:3px !important;
     border-radius: 3px !important;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -189,10 +185,6 @@ td.side-panel-btn {
 	padding-top: 16px;
 	padding-bottom: 16px;
 	color: #777;
-	/*border-bottom: 1px solid #464646;
-	-moz-box-shadow: inset 0 -2px 1em rgba(22,22,22,0.3);
-    -webkit-box-shadow: inset 0 -2px 1em rgba(22,22,22,0.3);
-    box-shadow: inset 0 -2px 1em rgba(22,22,22,0.3);*/
 }
 .glyphicon.md {
 	font-size: 1.5em;
@@ -380,8 +372,6 @@ input[ng-model='pod.name'] {
 	top:1px;
 	font-size: 16px;
 	width:100%;
-	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.0);
-	-moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.0);
 	box-shadow: inset 0 1px 1px rgba(0,0,0,0.0);
 	text-align: left;
 }
@@ -392,7 +382,6 @@ input[ng-model='pod.name'].edit-mode.idark {
 input[ng-model='graph.name'] {
 	width: 100%;
 	font-size: 14px;
-	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.0);
 	box-shadow: inset 0 1px 1px rgba(0,0,0,0.0);
 	background: none;
 }
@@ -404,8 +393,6 @@ input[ng-model='pod.name'].edit-mode.idark:hover {
 	background:none !important;
 	border:1px solid #777 !important;
 	border-radius:3px;
-	-moz-box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
-    -webkit-box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
     box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
 }
 input[ng-model='model.name'] {
@@ -742,9 +729,7 @@ ul.ui-autocomplete.ui-widget-content {
 	width: 200px;
 	font-size: 12px;
 	z-index: 1001;
-	-webkit-box-shadow: 0 10px 6px -6px rgba(0,0,0,0.3);
-	   -moz-box-shadow: 0 10px 6px -6px rgba(0,0,0,0.3);
-	        box-shadow: 0 10px 6px -6px rgba(0,0,0,0.3);
+	box-shadow: 0 10px 6px -6px rgba(0,0,0,0.3);
 }
 ul.ui-autocomplete.ui-widget-content > li.ui-menu-item {
 	border-top: 1px solid #636363 !important;
@@ -784,8 +769,6 @@ a.graph-rm-btn {
 	border-radius: 2px;
 }
 .graph-control-item-body {
-	-moz-box-shadow: inset 0 0 1em rgba(22,22,22,0.5);
-    -webkit-box-shadow: inset 0 0 1em rgba(22,22,22,0.5);
     box-shadow: inset 0 0 1em rgba(22,22,22,0.5);
     background: rgba(66,66,66,0.5);
 }
@@ -891,8 +874,6 @@ input.trans {
 	border:1px solid #777 !important;
 	border-radius:3px;
 	color: #ccc !important;
-	-moz-box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
-    -webkit-box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
     box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
 }
 select.dark,
@@ -901,8 +882,6 @@ input.dark {
 	border:1px solid #666 !important;
 	border-radius:3px;
 	color: #ccc !important;
-	-moz-box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
-    -webkit-box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
     box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
 }
 input.trans.danger,
@@ -947,8 +926,6 @@ input.dark.info {
 	border-radius:0 0 2px 2px;
 	background:rgba(66,66,66,0.7);
 	color:#aaa;
-	-moz-box-shadow: inset 0 0 1em rgba(22,22,22,0.5);
-    -webkit-box-shadow: inset 0 0 1em rgba(22,22,22,0.5);
     box-shadow: inset 0 0 1em rgba(22,22,22,0.5);
 }
 .adhoc-metric-editor {
@@ -1042,14 +1019,10 @@ select.select-input {
 	background: none !important;
 	padding-top: 3px !important;
 	color: #666;
-	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
-	-moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
 	box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
 	border: 1px solid #dedede !important;
 }
 select.select-input.borderless {
-	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0);
-	-moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0);
 	box-shadow: inset 0 1px 1px rgba(0,0,0,0);
 	border: 1px solid rgba(0,0,0,0) !important;	
 }
@@ -1082,8 +1055,6 @@ input.form-control.trans {
 	background: none !important;
 	color: #ccc;
 	border-color: #888 !important;
-	-moz-box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
-    -webkit-box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
     box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
 }
 #adhoc-graph {
@@ -1235,13 +1206,9 @@ input.threshold-input.wide {
     display: block;  
  }
 .dropdown-menu.noshadow {
-	-moz-box-shadow: none !important;
-	-webkit-box-shadow: none !important;
 	box-shadow: none !important;
 }
 .dropdown-menu.bottom-shadow {
-	-webkit-box-shadow: 0 10px 6px -6px rgba(0,0,0,0.3) !important;
-    -moz-box-shadow: 0 10px 6px -6px rgba(0,0,0,0.3) !important;
 	box-shadow: 0 10px 6px -6px rgba(0,0,0,0.3) !important;
 }
 .dropdown-menu.result-tags {
@@ -1288,9 +1255,7 @@ li[ng-repeat="tagvalue in tagvalues|orderBy:'toString()'"]:last-child > a {
 	border-bottom: none !important
 }
 .btn-group.open > .dropdown-toggle {
-	-webkit-box-shadow: none !important;
 	box-shadow: none !important;
-	-moz-box-shadow: none !important;
 }
 .dropdown-menu.sp-page-controls,
 .dropdown-menu.page-controls,
@@ -1327,14 +1292,10 @@ li[ng-repeat="tagvalue in tagvalues|orderBy:'toString()'"]:last-child > a {
 	border-radius: 0 0 2px 2px !important;
 }
 .bottom-shadow {
-	-webkit-box-shadow: 0 10px 6px -6px rgba(0,0,0,0.3);
-	   -moz-box-shadow: 0 10px 6px -6px rgba(0,0,0,0.3);
-	        box-shadow: 0 10px 6px -6px rgba(0,0,0,0.3);
+	box-shadow: 0 10px 6px -6px rgba(0,0,0,0.3);
 }
 .none-active {
-    -webkit-box-shadow: 0 10px 6px -6px rgba(0,0,0,0.5);
-	   -moz-box-shadow: 0 10px 6px -6px rgba(0,0,0,0.5);
-	        box-shadow: 0 10px 6px -6px rgba(0,0,0,0.5);
+	box-shadow: 0 10px 6px -6px rgba(0,0,0,0.5);
 }
 .page-footer {
 	position: fixed;
@@ -1366,9 +1327,7 @@ li[ng-repeat="tagvalue in tagvalues|orderBy:'toString()'"]:last-child > a {
 	font-size: 12px;
 	word-wrap:break-word;
 	border-left: 1px solid rgba(255,255,255,0.2);
-	-webkit-box-shadow: -10px 0 6px -6px rgba(0,0,0,0.3);
-	   -moz-box-shadow: -10px 0 6px -6px rgba(0,0,0,0.3);
-	        box-shadow: -10px 0 6px -6px rgba(0,0,0,0.3);
+	box-shadow: -10px 0 6px -6px rgba(0,0,0,0.3);
 }
 #event-anno-details.open {
 	right:0px;
