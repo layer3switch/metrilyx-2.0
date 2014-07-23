@@ -255,7 +255,7 @@ angular.module('graphing', [])
 						var mg = new MetrilyxGraph(data, scope.getTimeWindow(true));
 						mg.applyData();
 					}
-					if(data.annoEvents.data && data.annoEvents.data.length > 0) {
+					if(data.annoEvents && data.annoEvents.data && data.annoEvents.data.length > 0) {
 						anno = new MetrilyxAnnotation(data);
 						anno.applyData();
 					}
