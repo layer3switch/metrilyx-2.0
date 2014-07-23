@@ -2,10 +2,8 @@
 import logging
 import json
 from datetime import datetime
-from pprint import pprint 
 
 from twisted.internet import reactor
-from twisted.web.client import getPage
 
 from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.websocket.compress import PerMessageDeflateOffer, \
@@ -17,18 +15,6 @@ from ..dataserver import GraphRequest, GraphEventRequest
 from dataproviders import re_504
 
 logger = logging.getLogger(__name__)
-
-"""
-def advancedGetPage(url, contextFactory=None, *args, **kwargs):
-	from twisted.web.client import HTTPClientFactory, _makeGetterFactory
-	return _makeGetterFactory(
-		url,
-		HTTPClientFactory,
-		contextFactory=contextFactory,
-		*args, **kwargs)
-
-		# factory.deferred.addCallback....
-"""
 
 ## Enable WebSocket extension "permessage-deflate".
 ## Function to accept offers from the client ..
@@ -119,7 +105,7 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 	def graphResponseCallback(self, respBodyStr, response, url, graphMeta):
 		responseData = self._checkResponse(respBodyStr, response, url, graphMeta)
 		if responseData.has_key('error'):
-			graphMeta['series'][0]['data'] = responseData			
+			graphMeta['series'][0]['data'] = responseData
 		else:
 			graphMeta['series'][0]['data'] = self.dataprovider.responseCallback(
 											responseData['data'], url, graphMeta)
