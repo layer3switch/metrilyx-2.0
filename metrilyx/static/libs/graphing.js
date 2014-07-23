@@ -15,9 +15,8 @@ var DEFAULT_CHART_OPTS = {
     },
     BASIC: {
         colors: [
-            '#7cb5ec','#90ed7d','#f7a35c',
-            '#f15c80','#91e8e1','#8085e9', 
-            '#e4d354','#8085e8','#4CE078','#FF8BF2'],
+            '#7cb5ec','#90ed7d','#f7a35c', '#E8719E',
+            '#f15c80','#91e8e1','#e4d354','#4CE078','#FF8BF2'],
         chart: {
             spacingTop: 20,
             spacingBottom: 5,
