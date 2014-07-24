@@ -3,7 +3,6 @@
 var metrilyxControllers = angular.module('metrilyxControllers', []);
 metrilyxControllers.controller('staticsController', ['$scope', '$route', '$routeParams', '$location',
 	function($scope, $route, $routeParams, $location) {
-		//console.log('tutorials')
 		clearAllTimeouts();
 		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
 		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit-panel.html";
@@ -149,7 +148,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.heatGraphHtml 	= connectionPool.nextConnection()+"/partials/heat-graph.html"
 		$scope.podHtml 			= connectionPool.nextConnection()+"/partials/pod.html";
 		$scope.pageHeaderHtml 	= connectionPool.nextConnection()+"/partials/page-header.html";
-		//$scope.jsonHtml 		= connectionPool.nextConnection()+"/partials/json.html";
 		$scope.graphControlsHtml= connectionPool.nextConnection()+"/partials/graph-controls.html";
 
 		$scope.metricListSortOpts 	= dndconfig.metricList;
@@ -231,7 +229,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				}
 			}
 		});
-		
         $scope.wssock.onopen = function() {
           console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
           console.log("Queued requests:",QUEUED_REQS.length);
@@ -243,7 +240,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
        	}
        	$scope.wssock.onmessage = function(e) {
        		var data = JSON.parse(e.data);
-       		//console.log(data._id, data.annoEvents.eventType);
        		if(data.error) {
        			console.warn(data);
        			setGlobalAlerts(data);
