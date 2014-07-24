@@ -1,8 +1,8 @@
 <div class="page-model-header edit-comp{{editMode}}">
-	<div class="row" style="margin:0;">
+	<div class="row padb5" style="margin:0;border-bottom:1px solid #aaa">
 		<div class="col-md-4" style="padding:0;">
 			<span class="dropdown">
-				<span class="pointer interactive dropdown-toggle" style="font-size:20px;color:#666" data-toggle="dropdown">
+				<span class="pointer interactive dropdown-toggle" style="font-size:18px;color:#666;position:relative;top:5px;" data-toggle="dropdown">
 					<i class="glyphicon glyphicon-cog"></i>
 				</span>
 				<ul class="dropdown-menu page-controls bottom-shadow" role="menu">
@@ -125,7 +125,7 @@
 			</div>
 		</div>
 	</div><!-- END .row -->
-	<div ng-if="editMode==''||modelType==='adhoc'">
+	<div ng-if="editMode==''||modelType==='adhoc'" style="border-top:1px solid #fff" class="padt5">
 		<div ng-repeat="(tagname, tagvalues) in tagsOnPage" class="btn-group">
 		  <span class="pointer interactive dropdown-toggle pad5" data-toggle="dropdown">
 			<span class="small">

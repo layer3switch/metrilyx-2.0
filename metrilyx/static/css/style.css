@@ -98,11 +98,28 @@ select[ng-model="timeType"] {
 .iblk {
 	display: inline-block;
 }
-.page-mast {
-	background: rgba(44,44,44,0.8);
-	border-bottom: 1px solid rgba(77,77,77,0.8);
+#page-mast-trigger {
+	min-height: 12px;
+	position:absolute;
+	top:0px;
+	left:0px;
+	width: 100%;
+	z-index:10;
+}
+#page-mast:hover,
+#page-mast-trigger:hover + #page-mast {
+	top:0px;
+}
+#page-mast {
+	background: rgba(55,55,55,0.9);
+	border-bottom: 1px solid rgba(100,100,100,0.9);
 	padding: 9px;
 	color: #ddd;
+	position: absolute;
+	top: -60px;
+	left:0px;
+	width: 100%;
+	z-index: 10;
 }
 .page-list-btn {
 	display: inline-block;
@@ -215,7 +232,7 @@ input.form-control.md {
 	padding: 0px;
 	min-width: 0;
 	width: 0;
-	top:50px;
+	top:0px;
 	bottom: 0;
 	background-color: #444;
 	border-top: 1px solid #636363;
@@ -460,7 +477,7 @@ input[ng-model='model.name'].edit-mode {
 	overflow-x:none;
 	position: absolute;
 	left:0;
-	top:50px;
+	top:0px;
 	bottom: 0px;
 	width: 100%;
 	float: left;
@@ -475,9 +492,9 @@ input[ng-model='model.name'].edit-mode {
 }
 .page-model-header {
 	margin:0;
-	padding-top: 15px;
-	padding-left:10px;
-	padding-right:10px;
+	padding-top: 10px;
+	padding-left:5px;
+	padding-right:5px;
 }
 .page-model-header.edit-mode {
 	padding-bottom: 10px;
