@@ -227,7 +227,9 @@ angular.module('graphing', [])
 						series: ngModel.$modelValue.series,
 						graphType: ngModel.$modelValue.graphType,
 						tags: scope.globalTags,
-						annoEvents: ngModel.$modelValue.annoEvents
+						annoEvents: ngModel.$modelValue.annoEvents,
+						multiPane: ngModel.$modelValue.multiPane,
+						panes: ngModel.$modelValue.panes
 					};
 				}
 				function getUpdates() {
@@ -250,7 +252,6 @@ angular.module('graphing', [])
 				}
 				function processRecievedData(event) {
 					var data = event.detail;
-					//setSerieStatus(data, 'loading');
 					checkDataErrors(data);
 					if(data.series) {
 						var mg = new MetrilyxGraph(data, scope.getTimeWindow(true));
