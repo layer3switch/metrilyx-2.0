@@ -89,7 +89,7 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 			logger.warning("Request failed %d %s %s %s" %(response.code, respBodyStr, url, str(graphMeta)))
 			m = re_504.search(respBodyStr)
 			if  m != None:
-				return {"error": "code=%d,response=%self" %(response.code, m.group(1))}
+				return {"error": "code=%d,response=%s" %(response.code, m.group(1))}
 			return {"error": "code=%s,response=%s" %(response.code, respBodyStr)}
 
 		try:
