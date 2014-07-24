@@ -1,11 +1,6 @@
 // TODO below here needs fixing //
 var CHART_TEXT_COLOR = '#666';
 var DEFAULT_CHART_OPTS = {
-        /*PLOT_BAND_COLORS: {
-        "info":"rgba(99,177,211,0.25)",
-        "warning":"rgba(224,158,73,0.25)",
-        "info":"rgba(187,74,71,0.25)"
-    }, */
     AXIS:{
         gridLineWidth: 1,
         gridLineColor: "#ddd",
@@ -141,8 +136,12 @@ function MetrilyxGraph(graphObj, timeWin) {
     this.uigraph = $("[data-graph-id='"+this.graphdata._id+"']").highcharts();
 }
 MetrilyxGraph.prototype.newChart = function() {
-    if(dataHasErrors(this.graphdata)) return;
     var copts = new ChartOptions(this.graphdata);
+    if(dataHasErrors(this.graphdata)) {
+        $("[data-graph-id='"+this.graphdata._id+"']").html("");
+        return;
+    }
+    
     if(this.graphdata.graphType == "pie") {
         $("[data-graph-id='"+this.graphdata._id+"']").highcharts(copts.chartDefaultsForType());
     } else {
@@ -327,7 +326,6 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
         /*xAxis:DEFAULT_CHART_OPTS.AXIS*/
     }, extraOpts);
     if(this._graph.multiPane) {
-        //console.log('parallel view');
         //console.log(this._graph);
         h = 100/this._graph.panes.length;
         hstr = h.toString();
@@ -575,8 +573,7 @@ function getPlotBands(thresholds) {
 function dataHasErrors(gObj) {
     for(var s in gObj.series) {
         if(gObj.series[s].data.error !== undefined) {
-            //console.log(gObj.series[s].data.error);
-            if(gObj.series[s].data.error.message) msg = gObj.series[s].data.error.message.substring(0,50)+"...";
+            if(gObj.series[s].data.error.message) msg = gObj.series[s].data.error.message.substring(0,80)+"...";
             else msg = gObj.series[s].data.error.substring(0,50)+"...";
             console.warn(gObj.series[s].query.metric, msg);
             $("[data-graph-status='"+gObj._id+"']").html(
@@ -593,14 +590,12 @@ function dataHasErrors(gObj) {
 }
 function setPlotBands(graph) {
     renderTo = "[data-graph-id='"+graph._id+"']";
-    //hc.showLoading();
     hc = $(renderTo).highcharts();
     if(hc == undefined) {
         console.log("chart undefined", graph._id);
         return;
     }
     hc.options.yAxis = getPlotBands(graph.thresholds);
-    console.log(hc.options.yAxis);
     $(renderTo).highcharts("StockChart",hc.options);  
 }
 function render_lineBasedNewGraph(selector, options) {
@@ -611,7 +606,6 @@ function render_lineBasedNewGraph(selector, options) {
             return false;
         };
     } (Highcharts.seriesTypes.line.prototype.drawPoints));
-    //console.log(options);
     $(selector).highcharts("StockChart", options);
 }
 function upsertPieSeries(args, hcg) {

@@ -191,10 +191,9 @@ angular.module('graphing', [])
 				var evtListenerAdded = false;
 
 				function setSerieStatus(newData, status) {
-					/* status order: querying, updating, loading, loaded */
+					/* status order: querying, updating, loading, loaded, error */
 					for(var ns in newData.series) {
 						for(var ms in ngModel.$modelValue.series) {
-							//console.log(ngModel.$modelValue.series[ms].query, newData.series[ns].query);
 							qgt = $.extend(true, {}, ngModel.$modelValue.series[ms].query); 
 							$.extend(qgt.tags, scope.globalTags, true);
 							if(equalObjects(qgt, newData.series[ns].query)) {
@@ -209,11 +208,7 @@ angular.module('graphing', [])
 					out = [];
 					for(var ns in series) {
 						for(var ms in ngModel.$modelValue.series) {
-							//qgt = $.extend(true, {}, ngModel.$modelValue.series[ms].query); 
-							//$.extend(qgt.tags, scope.globalTags, true);
-							//if(equalObjects(qgt, series[ns].query)) {
 							if(equalObjects(ngModel.$modelValue.series[ms].query, series[ns].query)) {
-								//console.log(ms, ngModel.$modelValue.series[ms].status);
 								if(ngModel.$modelValue.series[ms].status === undefined || ngModel.$modelValue.series[ms].status !== 'querying') {
 									out.push(series[ns]);
 									break;
@@ -237,7 +232,6 @@ angular.module('graphing', [])
 				}
 				function getUpdates() {
 					if(ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
-						//console.log("issuing update...");
 						// 12m-ago seems to be the magic no. otherwise data does not line up //
 						q = getUpdateQuery();
 						scope.requestData(q);
@@ -248,9 +242,16 @@ angular.module('graphing', [])
 						getUpdates();
 					}, 50000);
 				}
+				function checkDataErrors(d) {
+					for(var i in d.series) {
+						if(d.series[i].data.error) setSerieStatus({'series': [d.series[i]]}, 'error');
+						else setSerieStatus({'series': [d.series[i]]}, 'loading');
+					}
+				}
 				function processRecievedData(event) {
 					var data = event.detail;
-					setSerieStatus(data, 'loading');
+					//setSerieStatus(data, 'loading');
+					checkDataErrors(data);
 					if(data.series) {
 						var mg = new MetrilyxGraph(data, scope.getTimeWindow(true));
 						mg.applyData();
@@ -278,7 +279,6 @@ angular.module('graphing', [])
 					return ngModel.$modelValue;
 				}, function(graph, oldValue) {
 					if(!evtListenerAdded && graph._id) {
-						//console.log("adding event listener:", graph._id);
 						scope.wssock.addEventListener(graph._id, processRecievedData);
 						evtListenerAdded = true;
 					}
@@ -286,13 +286,17 @@ angular.module('graphing', [])
 					if(graph.series.length <= 0 && oldValue.series && oldValue.series.length <= 0) return;
 					if(!equalObjects(graph.thresholds, oldValue.thresholds)) return;
 
+					/* ignore status changes */
+					if(graph.series.length === oldValue.series.length) {
+						for(var sl in graph.series) {
+							if(graph.series[sl].status !== oldValue.series[sl].status) return;
+						}
+					}
 					// initial populate //
 					hc = $("[data-graph-id='"+graph._id+"']").highcharts();
 					if(hc == undefined) {
 						$("[data-graph-id='"+graph._id+"']").html("<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
-
 						gseries = getSeriesInNonQueryState(graph.series);
-						//console.log('query length', gseries.length);
 						if(gseries.length > 0) {
 							var q = scope.baseQuery(graph);
 							q.series = gseries;
@@ -333,7 +337,8 @@ angular.module('graphing', [])
 
 				scope.$on("$destroy", function( event ) {
                 	clearTimeout(currTimer);
-                	if(scope.wssock != null) scope.wssock.removeEventListener("graphdata", processRecievedData);
+            		if(scope.wssock != null) 
+            			scope.wssock.removeEventListener("graphdata", processRecievedData);
                 });
 			}
 		};	

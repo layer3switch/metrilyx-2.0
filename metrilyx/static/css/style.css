@@ -981,6 +981,7 @@ input.dark.info {
 	font-weight: bold !important;
 	padding-right: 5px;
 }
+.query-status.error,
 .query-status.querying{
 	color: #FF5450 !important;
 }
