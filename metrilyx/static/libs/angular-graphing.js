@@ -285,18 +285,19 @@ angular.module('graphing', [])
 					}
 					if(!graph.series) return;
 					if(graph.series.length <= 0 && oldValue.series && oldValue.series.length <= 0) return;
+					// ignore threshold changes //
 					if(!equalObjects(graph.thresholds, oldValue.thresholds)) return;
-
-					/* ignore status changes */
+					// ignore status changes //
 					if(graph.series.length === oldValue.series.length) {
 						for(var sl in graph.series) {
 							if(graph.series[sl].status !== oldValue.series[sl].status) return;
 						}
 					}
 					// initial populate //
-					hc = $("[data-graph-id='"+graph._id+"']").highcharts();
+					ehc = $("[data-graph-id='"+graph._id+"']"); 
+					hc = $(ehc).highcharts();
 					if(hc == undefined) {
-						$("[data-graph-id='"+graph._id+"']").html("<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
+						$(ehc).html("<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
 						gseries = getSeriesInNonQueryState(graph.series);
 						if(gseries.length > 0) {
 							var q = scope.baseQuery(graph);

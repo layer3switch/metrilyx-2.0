@@ -152,7 +152,6 @@ MetrilyxGraph.prototype.applyData = function() {
     if(this.uigraph === undefined) {
         this.newChart();
     } else {
-        //graph metadata along with series data.  can be a partial graph
         dhe = dataHasErrors(this.graphdata);
         if(dhe) return;
         $("[data-graph-status='"+this.graphdata._id+"']").html("");
@@ -185,8 +184,9 @@ MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
     chrt.series[serieIdx].setData(ndata);
 }
 MetrilyxAnnotation.prototype.queueDataForRendering = function() {
-    /* queue annotations until graph has been rendering with metric data */
+    // queue annotations until graph has been rendering with metric data //
     var ma = this;
+    // wait until the chart has been initialized //
     var tout = setTimeout(function(){
         wchrt = $("[data-graph-id='"+ma._data._id+"']").highcharts();
         if(wchrt === undefined) {
