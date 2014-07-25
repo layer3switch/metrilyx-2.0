@@ -1,8 +1,8 @@
 <div class="page-model-header edit-comp{{editMode}}">
-	<div class="row padb5" style="margin:0;border-bottom:1px solid #aaa">
+	<div class="row padb5" style="margin:0;border-bottom:1px solid #bbb">
 		<div class="col-md-4" style="padding:0;">
 			<span class="dropdown">
-				<span class="pointer interactive dropdown-toggle" style="font-size:18px;color:#666;position:relative;top:5px;" data-toggle="dropdown">
+				<span class="pointer interactive dropdown-toggle marginl10" style="font-size:18px;color:#666;position:relative;top:2px;" data-toggle="dropdown">
 					<i class="glyphicon glyphicon-cog"></i>
 				</span>
 				<ul class="dropdown-menu page-controls bottom-shadow" role="menu">
@@ -35,7 +35,7 @@
 		<div ng-if="modelType!=='adhoc'" class="col-md-4 text-center" style="padding:0">
 				<div class="row">
 					<div class="col-md-12" style="padding:0px">
-						<input type="text" ng-model="model.name" class="edit-comp{{editMode}}" placeholder="Page Name" title="Page Name" required disabled>
+						<input type="text" ng-model="model.name" class="edit-comp{{editMode}}" placeholder="Page Name" title="Page Name" required>
 						<input type="text" ng-model="model._id" class="edit-comp{{editMode}}" placeholder="Page ID" required style="min-width: 40px;" title="Page ID" page-id>
 					</div>
 				</div>
@@ -66,41 +66,8 @@
 			</div>
 			</div>
 		</div>
-		<!-- time picker -->
+		<!-- page tags -->
 		<div class="col-md-4 text-right" style="padding:0;">
-			<div ng-if="(modelType==='adhoc')||(modelType!=='heatmap/' && editMode==='')">
-				<div class="row" style="margin:0">
-					<div class="col-md-12 text-right" style="padding:0">
-						<span class="animated select-container left-caret">
-							<span class="caret"></span>
-							<select ng-model="timeType" relative-time="true" class="time interactive">
-				            	<option value="24h-ago">24 hours</option>
-				            	<option value="12h-ago">12 hours</option>
-				            	<option value="6h-ago">6 hours</option>
-				            	<option value="3h-ago">3 hours</option>
-				            	<option value="2h-ago">2 hours</option>
-				            	<option value="1h-ago">1 hour</option>
-				            	<option value="absolute">Custom</option>
-				            </select>
-			            </span>
-						<span id="absolute-time" class="time animated btn-group btn-group-sm {{timeType}}">
-							<span ng-model="startTime" date-time class="btn btn-default interactive absolute-time-field">
-								<span>
-									<i class="glyphicon glyphicon-calendar"></i>
-								</span>
-								<span style="padding-left:5px;">{{startTime|dateTime}}</span>
-			                </span>
-			                <span ng-model="endTime" date-time class="btn btn-default interactive absolute-time-field">
-			                	<span><i class="glyphicon glyphicon-calendar"></i></span>
-			                	<span style="padding-left:5px;">{{endTime|dateTime}}</span>
-			                </span>
-			                <button class="btn btn-default interactive" style="padding-top:8px;padding-bottom:8px;" ng-click="setAbsoluteTime()" title="Apply">
-			                	<i class="glyphicon glyphicon-ok"></i>
-			                </button>
-		                </span>
-			        </div>
-				</div>
-			</div>
 			<div ng-if="modelType!=='adhoc'" class="tags-panel edit-comp{{editMode}}">
 				<div class="padlr5" style="border-bottom:1px solid #aaa;padding-bottom:3px">
 					<div class="row" style="margin:0;color:#666">
@@ -125,18 +92,68 @@
 			</div>
 		</div>
 	</div><!-- END .row -->
-	<div ng-if="editMode==''||modelType==='adhoc'" style="border-top:1px solid #fff" class="padt5">
-		<div ng-repeat="(tagname, tagvalues) in tagsOnPage" class="btn-group">
-		  <span class="pointer interactive dropdown-toggle pad5" data-toggle="dropdown">
-			<span class="small">
-				<span class="padr5">{{tagname}}</span><span class="caret"></span>
-			</span>
-		  </span>
-		  <ul class="dropdown-menu noshadow result-tags bottom-shadow small" role="menu">
-		    <li ng-repeat="tagvalue in tagvalues|orderBy:'toString()'">
-		    	<a href="javascript:void(0)" ng-click="updateGlobalTag(tagname, tagvalue);">{{tagvalue}}</a>
-		    </li>
-		  </ul>
+	<div class="row" style="padding:0;margin:0;border-top:1px solid #fff" ng-if="editMode===''">
+		<div class="col-md-4 text-left" style="padding:0;padding-top:10px;">
+			<div class="marginl10">
+				<span style="font-size:13px;font-weight:bold" class="pointer interactive" onclick="$(this).next().children().toggle()">
+					<span>Annotations</span>
+					<span class="caret"></span>
+				</span>
+				<ng-include src="annoControlsHtml"></ng-include>
+			</div>
 		</div>
+		<div class="col-md-4 text-center" style="padding:0">
+			<div ng-if="modelType==''" id="global-tags" title="Tags to be applied to all graphs. These tags do not get saved with the model." style="margin-top:5px;">
+				<input type="text" ng-model="globalTags" key-value-pairs id="global-tags-input">
+				<button id="global-tags-btn" type="button" ng-click="setGlobalTags(globalTags)" class="interactive">
+					<i class="glyphicon glyphicon-ok interactive" style="color:#666"></i>
+				</button>
+			</div>
+		</div>
+		<div class="col-md-4 text-right" style="padding:0;">
+			<div ng-if="(modelType==='adhoc')||(modelType!=='heatmap/')" style="padding-top:5px;">
+				<span class="animated select-container left-caret">
+					<span class="caret"></span>
+					<select ng-model="timeType" relative-time="true" class="time interactive">
+		            	<option value="24h-ago">24 hours</option>
+		            	<option value="12h-ago">12 hours</option>
+		            	<option value="6h-ago">6 hours</option>
+		            	<option value="3h-ago">3 hours</option>
+		            	<option value="2h-ago">2 hours</option>
+		            	<option value="1h-ago">1 hour</option>
+		            	<option value="absolute">Custom</option>
+		            </select>
+	            </span>
+				<span id="absolute-time" class="time animated btn-group btn-group-sm {{timeType}}">
+					<span ng-model="startTime" date-time class="btn btn-default interactive absolute-time-field">
+						<span>
+							<i class="glyphicon glyphicon-calendar"></i>
+						</span>
+						<span style="padding-left:5px;">{{startTime|dateTime}}</span>
+	                </span>
+	                <span ng-model="endTime" date-time class="btn btn-default interactive absolute-time-field">
+	                	<span><i class="glyphicon glyphicon-calendar"></i></span>
+	                	<span style="padding-left:5px;">{{endTime|dateTime}}</span>
+	                </span>
+	                <button class="btn btn-default interactive" style="padding-top:8px;padding-bottom:8px;" ng-click="setAbsoluteTime()" title="Apply">
+	                	<i class="glyphicon glyphicon-ok"></i>
+	                </button>
+	            </span>
+            </div>
+		</div>
+	</div>
+	<div ng-if="editMode==''||modelType==='adhoc'">
+			<div ng-repeat="(tagname, tagvalues) in tagsOnPage" class="btn-group">
+			  <span class="pointer interactive dropdown-toggle pad5" data-toggle="dropdown">
+				<span class="small">
+					<span class="padr5">{{tagname}}</span><span class="caret"></span>
+				</span>
+			  </span>
+			  <ul class="dropdown-menu noshadow result-tags bottom-shadow small" role="menu">
+			    <li ng-repeat="tagvalue in tagvalues|orderBy:'toString()'">
+			    	<a href="javascript:void(0)" ng-click="updateGlobalTag(tagname, tagvalue);">{{tagvalue}}</a>
+			    </li>
+			  </ul>
+			</div>
 	</div>
 </div>

@@ -74,6 +74,38 @@ select[ng-model="timeType"] {
 	opacity: 0.96;
 	z-index: 1000;
 }
+#global-tags {
+	font-size: 13px;
+}
+#global-tags-input {
+	border: 1px solid #bbb !important;
+	border-radius: 20px 0 0 20px;
+	padding-left: 10px;
+	padding-right: 10px;
+	color: #666;
+	box-sizing: border-box;
+	width: 90%;
+	text-align: center;
+	transition: all 0.2s ease;
+}
+#global-tags-input:hover,
+#global-tags-input:active,
+#global-tags-input:focus {
+	outline: none !important;
+	box-shadow: inset 0px 1px 4px rgba(33,33,33,0.2);
+}
+#global-tags-btn {
+	background:none;
+	border-radius: 0 20px 20px 0;
+	height: 24px;
+	border: 1px solid #bbb !important;
+	border-left: none !important;
+	position: relative;
+	left: -4px;
+	top: 2px;
+	padding-right: 10px;
+	padding-left: 6px;
+}
 [ng-model="serie.paneIndex"],
 [ng-model="serie.query.aggregator"],
 [ng-model="metric.query.aggregator"],
@@ -364,6 +396,7 @@ input[ng-model='modelQuery'] {
 [ng-repeat='metric in metricQueryResult'] {
 	word-wrap:break-word;
 }
+[ng-repeat='evtType in globalAnno.eventTypes'].removable-tag,
 [ng-repeat='evtType in graph.annoEvents.eventTypes'].removable-tag {
 	border:1px solid #888;
 	border-radius:26px;
@@ -414,11 +447,14 @@ input[ng-model='pod.name'].edit-mode.idark:hover {
 }
 input[ng-model='model.name'] {
 	font-size: 18px;
+	padding: 0px;
 }
 input[ng-model='model.name'].edit-mode {
 	border: 1px solid #ccc !important;
 	background-color: #eee !important;
 	color: #666;
+	padding-left: 5px;
+	padding-right: 5px;
 }
 [ng-model='model._id'] {
 	opacity: 0;
@@ -924,9 +960,6 @@ input.dark.info {
 .list-group-item.heatgraph-list:last-child {
 	border-bottom:none!important;
 }
-[global-tags] {
-	color: #ccc !important;
-}
 .bg.danger {
 	background:rgba(187,74,71,1);
 }
@@ -1156,7 +1189,6 @@ input.form-control.trans {
 	text-align: center;
 	border:1px solid #888;
 	border-radius:3px;
-	margin-top: 10px;
 	font-size: 13px;
 }
 .gcontrols-apply-btn:hover {
@@ -1186,6 +1218,12 @@ input.threshold-input.wide {
 }
 .graph-control-details.anno {
 	top: 72px;
+}
+.graph-control-details.global-anno {
+	left: 0px;
+	z-index: 10;
+	top: 30px;
+	background:none;
 }
 .graph-face.back {
   position: absolute;

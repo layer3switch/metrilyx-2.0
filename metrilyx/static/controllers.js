@@ -149,6 +149,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.podHtml 			= connectionPool.nextConnection()+"/partials/pod.html";
 		$scope.pageHeaderHtml 	= connectionPool.nextConnection()+"/partials/page-header.html";
 		$scope.graphControlsHtml= connectionPool.nextConnection()+"/partials/graph-controls.html";
+		$scope.annoControlsHtml	= connectionPool.nextConnection()+"/partials/anno-controls.html";
 
 		$scope.metricListSortOpts 	= dndconfig.metricList;
 		$scope.graphSortOpts 		= dndconfig.graph;
@@ -158,7 +159,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.layoutSortOpts 		= dndconfig.layout;
 
 		$scope.selectedAnno = {};
-
+		$scope.globalAnno = {'eventTypes':[], 'tags':{}};
 		// set default to relative time //
 		$scope.timeType = "1h-ago";
 		// relative time or 'absolute' //

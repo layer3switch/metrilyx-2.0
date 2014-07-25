@@ -358,7 +358,6 @@ app.directive('keyValuePairs', function() {
         			return baseTags+kv[0]+"="+retstr;
         		}
 			}
-
 			$(elem).attr('placeholder', 'tag1=val1,tag2=val2');
 			$(elem).autocomplete({
 				source: function(request, response) {
@@ -531,4 +530,16 @@ function flashAlertsBar() {
 	setTimeout(function() {
 		$(ga).fadeOut(1000);
 	}, 3000);
+}
+function drawTri(_id, color) {
+  var canvas = document.getElementById(_id);
+  if (canvas.getContext){
+    var ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.moveTo(canvas.width/2,0);
+    ctx.lineTo(canvas.width,canvas.height);
+    ctx.lineTo(0,canvas.height);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
 }
