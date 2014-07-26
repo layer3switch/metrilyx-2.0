@@ -108,7 +108,7 @@
 	                	<span><i class="glyphicon glyphicon-calendar"></i></span>
 	                	<span style="padding-left:5px;">{{endTime|dateTime}}</span>
 	                </span>
-	                <button class="btn btn-default interactive" style="padding-top:8px;padding-bottom:8px;background:none" ng-click="setAbsoluteTime()" title="Apply">
+	                <button class="btn btn-default interactive" ng-click="setAbsoluteTime()" title="Apply">
 	                	<i class="glyphicon glyphicon-ok"></i>
 	                </button>
 	            </span>
@@ -150,7 +150,7 @@
 					</div>
 				</div>
 				<div class="col-md-10" style="padding:0">
-					<div class="marginl10">
+					<div>
 						<span style="font-size:13px;font-weight:bold;color:#777" class="pointer interactive" onclick="$(this).next().children().toggle()">
 							<span>Annotations</span>
 							<span class="caret"></span>
@@ -183,7 +183,7 @@
 		            </select>
 	            </span>
 				<span id="absolute-time" class="time animated btn-group btn-group-sm {{timeType}}">
-					<span ng-model="startTime" date-time class="btn btn-default interactive absolute-time-field" style="border-radius: 18px 0 0 18px">
+					<span ng-model="startTime" date-time class="btn btn-default interactive absolute-time-field">
 						<span>
 							<i class="glyphicon glyphicon-calendar"></i>
 						</span>
