@@ -154,7 +154,6 @@ app.directive('eventTypes', function() {
 	        	},
 	        	minLength:1,
 	        	select: function( event, ui ) {
-	        		console.log(ctrl.$modelValue);
 	        		for(var i in ctrl.$modelValue) {
 	        			if(ctrl.$modelValue[i] === ui.item.value) {
 	        				$(elem).val('');

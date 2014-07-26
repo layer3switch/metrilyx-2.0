@@ -281,8 +281,8 @@ angular.module('graphing', [])
 				}, function(graph, oldValue) {
 					if(!evtListenerAdded && graph._id) {
 						scope.wssock.addEventListener(graph._id, processRecievedData);
-						scope.addEvtListenerGraphId(graph._id);
 						evtListenerAdded = true;
+						if(scope.modelType === "") scope.addEvtListenerGraphId(graph._id);
 					}
 					if(!graph.series) return;
 					if(graph.series.length <= 0 && oldValue.series && oldValue.series.length <= 0) return;

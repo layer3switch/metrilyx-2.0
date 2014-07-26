@@ -181,7 +181,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			try {
 				$scope.globalAnno = {
 					'eventTypes': urlParams.annotationTypes.split(/\|/),
-					'tags': commaSepStrToDict(urlParams.annotationTags),
+					'tags': commaSepStrToDict(urlParams.annotationTags,":"),
 					'status': $scope.globalAnno.status,
 
 				}
