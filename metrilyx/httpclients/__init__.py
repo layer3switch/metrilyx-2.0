@@ -235,9 +235,6 @@ class AsyncHttpJsonClient(object):
                 }),
                 self.body)
 
-        #self.__d_agent.addCallback(self.__readResponseCallback)
-        #self.__d_agent.addErrback(self.__readErrorCallback)
-
         self.__deferredResponse = Deferred()
         
 
@@ -254,10 +251,8 @@ class AsyncHttpJsonClient(object):
     def addResponseCallback(self, callback, *cbargs):
         self.__d_agent.addCallback(self.__readResponseCallback, callback, *cbargs)
 
-    ## TODO: this function needs validation.
     def addResponseErrback(self, callback, *cbargs):
         self.__d_agent.addErrback(self.__readErrorCallback, callback, *cbargs)
-        #self.__deferredResponse.addErrback(callback, *cbargs)
 
 
 
