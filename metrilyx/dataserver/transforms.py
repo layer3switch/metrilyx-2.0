@@ -43,11 +43,11 @@ class EventSerie(object):
 		graph: graph dictionary
 		eventType: event type of serie
 	'''
-	def __init__(self, serie, graph, eventType):
+	def __init__(self, serie, eventType, originalRequest):
 		self._serie = serie
-		self._graph = graph
 		self.eventType = eventType
 		self.__microToMilli()
+		self.__request = originalRequest
 		self.__data = self.__assembleEventSerie()
 
 	@property
@@ -59,11 +59,7 @@ class EventSerie(object):
 		Returns:
 			series data in highcharts format
 		'''
-		out = {
-			'_id': self._graph['_id'],
-			'annoEvents': self._graph['annoEvents'],
-			'graphType': self._graph['graphType']
-		}
+		out = {'query': self.__request,'annoEvents': {}}
 		out['annoEvents']['eventType'] = self.eventType
 		out['annoEvents']['data'] = [ {
 									'x': s['timestamp'],

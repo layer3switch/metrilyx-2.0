@@ -242,6 +242,7 @@ input.form-control.md {
 	height: 41px;
 	margin-right: 5px;
 }
+
 #stage {
 	width:100%;
 	height: 100%;
@@ -343,7 +344,7 @@ input.form-control.md {
 .edit-panel-btn {
 	font-size: 20px !important;
 	padding: 10px;
-	color: #ccc;
+	color: #888;
 	margin-right: 10px;
 }
 .edit-panel-btn-label {
@@ -448,27 +449,41 @@ input[ng-model='pod.name'].edit-mode.idark:hover {
 input[ng-model='model.name'] {
 	font-size: 18px;
 	padding: 0px;
+	color: #666;
+	outline: none !important;
 }
 input[ng-model='model.name'].edit-mode {
 	border: 1px solid #ccc !important;
 	background-color: #eee !important;
-	color: #666;
 	padding-left: 5px;
 	padding-right: 5px;
+	margin-bottom: 2px;
+}
+input[ng-model='model._id'].edit-mode:active,
+input[ng-model='model._id'].edit-mode:focus,
+input[ng-model='model._id'].edit-mode:hover,
+input[ng-model='model.name'].edit-mode:active,
+input[ng-model='model.name'].edit-mode:focus,
+input[ng-model='model.name'].edit-mode:hover {
+	border-color: #fff !important;
+	box-shadow: inset 0px 1px 4px rgba(33,33,33,0.2);
 }
 [ng-model='model._id'] {
 	opacity: 0;
 	display: none;
 	text-align: center;
 	color: #666;
+	outline: none !important;
 }
 [ng-model='model._id'].edit-mode {
 	display: inline-block;
 	opacity:1;
 	border: 1px solid #ccc;
 	background-color: #eee;
-	padding: 5px;
+	padding-left: 5px;
+	padding-right: 5px;
 	border-radius: 3px;
+	margin-top: 2px;
 }
 [ng-model='model.link_tags'] {
 	opacity: 0;
@@ -1156,18 +1171,24 @@ input.form-control.trans {
 	left:-1px;
 }
 .page-tag {
-	background-color: #666;
-	border-radius: 	20px;
+	background-color: #888;
+	border-radius: 	18px;
 	padding:		5px;
 	padding-right: 	9px;
 	padding-left: 	7px;
 	margin-left:	2px;
 	margin-right:	2px;
-	color: 			#ddd;
-	font-size: 		12px;
+	color: 			#fefefe;
+	font-size: 		11px;
+}
+.page-tag > span > i {
+	position: relative;
+	top: 2px;
 }
 .tags-panel {
-	color:#555;
+	color:#888;
+	padding-top: 10px !important;
+	padding-left: 10px;
 	display: none;
 }
 .tags-panel.edit-mode {
@@ -1413,9 +1434,11 @@ li[ng-repeat="tagvalue in tagvalues|orderBy:'toString()'"]:last-child > a {
 }
 #auto-update {
 	font-size: 12px;
+	font-weight: bold;
 	background: none!important;
 	border-color: rgba(0,0,0,0);
-	color: #aaa !important;
+	color: #888 !important;
+	margin-right: 5px;
 }
 #auto-update > span {
 	position: relative;

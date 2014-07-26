@@ -12,41 +12,6 @@
 				</a>
 			</span>
 		</div>
-		<div class="col-md-6 text-right" style="padding:0px">
-			<span ng-if="modelType=='' && editMode!==' edit-mode'" class="animated">
-				<!--<span class="input-group" title="Tags to be applied to all graphs. These tags do not get saved with the model.">
-					<span class="input-group-addon" style="background:none;color:#ccc;border-color:#777!important">Global Tags</span>
-					<input type="text" ng-model="globalTags" key-value-pairs class="form-control dark" style="border-color: #707070 !important;">
-					<div class="input-group-btn">
-    					<button type="button" class="btn btn-default gtag-btn interactive" ng-click="setGlobalTags(globalTags)" style="background:none;padding-top:9px;padding-bottom:9px;border-color:#777!important;"><i class="glyphicon glyphicon-ok"></i></button>
-  					</div>-->
-					<span id="auto-update">
-						<span ng-if="timeType !== 'absolute'" class="animated">
-							<span>Auto-Update : </span>
-							<input type="checkbox" ng-model="updatesEnabled" style="position:relative;top:3px">
-						</span>
-					</span>
-				<!--</span>-->
-			</span>
-			<span class="animated" ng-if="modelType!=='adhoc' && editMode === ' edit-mode'">
-				<span style="position:relative;top:3px;">
-					<span ng-click="toggleEditMode()" class="edit-panel-btn pointer interactive" title="Cancel">
-						<div class="iblk">
-							<div><i class="glyphicon glyphicon-ban-circle"></i></div>
-						</div>
-					</span>
-					<span ng-click="saveModel()" class="edit-panel-btn pointer interactive" title="Save">
-						<div class="iblk">
-							<div><i class="glyphicon glyphicon-cloud-upload"></i></div>
-						</div>
-					</span>
-					<span class="edit-panel-btn pointer interactive padr10" title="Delete" data-toggle="modal" data-target="#confirm-delete">
-						<div class="iblk">
-							<div><i class="glyphicon glyphicon-trash"></i></div>
-						</div>
-					</span>
-				</span>
-			</span>
-		</div>
+		<div class="col-md-6 text-right" style="padding:0px"></div>
 	</div>
 </div>

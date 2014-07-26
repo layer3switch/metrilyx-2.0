@@ -119,6 +119,7 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap',
 	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap) {
 		var QUEUED_REQS = [];
+		var modelGraphIds = [];
 		$scope.wssock = getWebSocket();
 
 		if($routeParams.heatmapId) {
@@ -159,7 +160,9 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.layoutSortOpts 		= dndconfig.layout;
 
 		$scope.selectedAnno = {};
-		$scope.globalAnno = {'eventTypes':[], 'tags':{}};
+		$scope.globalAnno = {'eventTypes':[], 'tags':{}, 'status': null};
+		$scope.modelGraphIdIdx = {};
+
 		// set default to relative time //
 		$scope.timeType = "1h-ago";
 		// relative time or 'absolute' //
@@ -174,7 +177,16 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			}
 			$scope.startTime = urlParams.start;
 		}
-		 
+		if(urlParams.annotationTypes && urlParams.annotationTags) {
+			try {
+				$scope.globalAnno = {
+					'eventTypes': urlParams.annotationTypes.split(/\|/),
+					'tags': commaSepStrToDict(urlParams.annotationTags),
+					'status': $scope.globalAnno.status,
+
+				}
+			} catch(e) {console.warning("failed to parse annotation data", e);}
+		}
 		if(urlParams.tags) {
 			try {
 				//$scope.$parent
@@ -215,6 +227,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 							console.log(result);
 						} else {
 							$scope.model = result;
+							modelGraphIds = getModelGraphIds();
 						}
 					});
 				} else if($routeParams.heatmapId) {
@@ -230,6 +243,20 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				}
 			}
 		});
+		// index graph id's for the model //
+		function getModelGraphIds() {
+			out = [];
+   			for(var r in $scope.model.layout) {
+   				for(var c in $scope.model.layout[r]) {
+   					for(var p in $scope.model.layout[r][c]) {
+   						for(var g in $scope.model.layout[r][c][p].graphs) {
+   							out.push($scope.model.layout[r][c][p].graphs[g]._id);
+   						}
+   					}
+   				}
+   			}
+       		return out;
+		}
         $scope.wssock.onopen = function() {
           console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
           console.log("Queued requests:",QUEUED_REQS.length);
@@ -245,10 +272,20 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
        			console.warn(data);
        			setGlobalAlerts(data);
        			flashAlertsBar();
-       			return;
+       		} else if(data.annoEvents) {
+       			// annotations //
+       			$scope.globalAnno.status = 'dispatching';
+       			for(var i in $scope.modelGraphIdIdx) {
+       				data._id = i;
+       				var ce = new CustomEvent(data._id, {'detail': data });
+       				$scope.wssock.dispatchEvent(ce);
+       			}
+       			$scope.globalAnno.status = 'dispatched';
+       		} else {
+       			// graph data //
+	       		var ce = new CustomEvent(data._id, {'detail': data });
+	       		$scope.wssock.dispatchEvent(ce);
        		}
-       		var ce = new CustomEvent(data._id, {'detail': data });
-       		$scope.wssock.dispatchEvent(ce);
        	}
         $scope.requestData = function(query) {
         	try {
@@ -267,6 +304,14 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 					$('input.edit-comp').attr('disabled', true); 
 				}
 			}, 150);
+		}
+		// called when a graph adds a ws evt listener //
+		$scope.addEvtListenerGraphId = function(graphId) {
+			$scope.modelGraphIdIdx[graphId] = true;
+			if(Object.keys($scope.modelGraphIdIdx).length === modelGraphIds.length) {
+				// trigger annotation request as all graph elems are loaded //
+				$scope.globalAnno.status = 'load';
+			}
 		}
 		$scope.onEditPanelLoad = function() {
 			document.getElementById('edit-panel').addEventListener('refresh-metric-list',
@@ -394,6 +439,12 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			tmp.end = $scope.endTime;
 			$location.search(tmp);
 		}
+		$scope.setAnnotations = function() {
+			tmp = $location.search();
+			tmp.annotationTypes = $scope.globalAnno.eventTypes.join("|");
+			tmp.annotationTags = dictToCommaSepStr($scope.globalAnno.tags, ":");
+			$location.search(tmp);
+		}
 		$scope.addGraph = function(toPod) {
 			Schema.get({modelType:'graph'}, function(result) {
 				toPod.graphs.push(result);	
@@ -459,7 +510,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				graphType: graphObj.graphType,
 				tags: $scope.globalTags,
 				thresholds: graphObj.thresholds,
-				annoEvents: graphObj.annoEvents,
+				//annoEvents: graphObj.annoEvents,
 				multiPane: graphObj.multiPane,
 				panes: graphObj.panes,
 			};
@@ -851,7 +902,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			} else {
 				srch.start = $scope.timeType;
 			}
-			//console.log(srch.m);
 			$location.search(srch);
 		}
 		$scope.updateTagsOnPage = function(obj) {

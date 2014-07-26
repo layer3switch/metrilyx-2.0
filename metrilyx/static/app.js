@@ -282,6 +282,7 @@ app.directive('tagkeyvalue', function() {
 		}
 	};
 });
+// page id validator //
 app.directive('pageId', function() {
 	return {
 		restrict: 'A',
@@ -309,22 +310,37 @@ app.directive('pageId', function() {
 			});
 		}
 	};
-});/*
-app.directive('graphStatus', function() {
+});
+app.directive('globalAnnotations', function() {
 	return {
 		restrict: 'A',
 		require: '?ngModel',
 		link: function(scope, elem, attrs, ctrl) {
 			if(!ctrl) return;
+
+			function getAnnoQuery(sVal) {
+				return $.extend(scope.getTimeWindow(), {
+								'annoEvents': {
+									'eventTypes': sVal.eventTypes,
+									'tags': sVal.tags
+								},
+								'_id': 'annotations'});
+			}
+
 			scope.$watch(function() {
 				return ctrl.$modelValue;
 			}, function(newVal, oldVal) {
-				//if(!newVal.series) return;
-				console.log(newVal.series.length);
+				if(!newVal) return;
+				if((newVal.eventTypes.length < 1) || (Object.keys(newVal.tags).length < 1)) return;
+				//if((newVal.status === oldVal.status) && (newVal.status !== 'load')) return;
+				if(newVal.status === 'load') {
+					scope.requestData(getAnnoQuery(newVal));
+				}
+				//console.log(newVal);
 			}, true);
 		}
 	};
-});*/
+});
 /*
  * Parse tags object to 'tag1=val1,tag2=val2;'
  * Error checking and validity setting.
@@ -531,15 +547,20 @@ function flashAlertsBar() {
 		$(ga).fadeOut(1000);
 	}, 3000);
 }
-function drawTri(_id, color) {
-  var canvas = document.getElementById(_id);
-  if (canvas.getContext){
-    var ctx = canvas.getContext('2d');
-    ctx.beginPath();
-    ctx.moveTo(canvas.width/2,0);
-    ctx.lineTo(canvas.width,canvas.height);
-    ctx.lineTo(0,canvas.height);
-    ctx.fillStyle = color;
-    ctx.fill();
-  }
+function drawTri(_id, color, direction) {
+	direction = typeof direction !== 'undefined' ? direction : 'up';
+	var canvas = document.getElementById(_id);
+	if (canvas.getContext){
+	    var ctx = canvas.getContext('2d');
+	    ctx.beginPath();
+	    switch(direction) {
+	    	default:
+			    ctx.moveTo(canvas.width/2,0);
+			    ctx.lineTo(canvas.width,canvas.height);
+			    ctx.lineTo(0,canvas.height);
+			    break;
+		}
+	    ctx.fillStyle = color;
+	    ctx.fill();
+	}
 }

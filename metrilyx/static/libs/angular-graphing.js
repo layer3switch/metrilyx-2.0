@@ -227,7 +227,7 @@ angular.module('graphing', [])
 						series: ngModel.$modelValue.series,
 						graphType: ngModel.$modelValue.graphType,
 						tags: scope.globalTags,
-						annoEvents: ngModel.$modelValue.annoEvents,
+						//annoEvents: ngModel.$modelValue.annoEvents,
 						multiPane: ngModel.$modelValue.multiPane,
 						panes: ngModel.$modelValue.panes
 					};
@@ -281,6 +281,7 @@ angular.module('graphing', [])
 				}, function(graph, oldValue) {
 					if(!evtListenerAdded && graph._id) {
 						scope.wssock.addEventListener(graph._id, processRecievedData);
+						scope.addEvtListenerGraphId(graph._id);
 						evtListenerAdded = true;
 					}
 					if(!graph.series) return;

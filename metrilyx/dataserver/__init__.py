@@ -9,7 +9,7 @@ class GraphEventRequest(object):
 	def __init__(self, request):
 		self.__checkRequest(request)
 		self.request = request
-		self.__applyGlobalTagsToEvents()
+		#self.__applyGlobalTagsToEvents()
 
 	def __applyGlobalTagsToEvents(self):
 		'''

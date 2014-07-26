@@ -133,23 +133,24 @@ function onAnnotationClick(event) {
 function MetrilyxGraph(graphObj, timeWin) {
     this.timeWindow = timeWin;
     this.graphdata = graphObj;
-    this.uigraph = $("[data-graph-id='"+this.graphdata._id+"']").highcharts();
+    this._chartElem = $("[data-graph-id='"+this.graphdata._id+"']");
 }
 MetrilyxGraph.prototype.newChart = function() {
     var copts = new ChartOptions(this.graphdata);
     if(dataHasErrors(this.graphdata)) {
-        $("[data-graph-id='"+this.graphdata._id+"']").html("");
+        $(this._chartElem).html("");
         return;
     }
     
     if(this.graphdata.graphType == "pie") {
-        $("[data-graph-id='"+this.graphdata._id+"']").highcharts(copts.chartDefaultsForType());
+        $(this._chartElem).highcharts(copts.chartDefaultsForType());
     } else {
-        render_lineBasedNewGraph("[data-graph-id='"+this.graphdata._id+"']", copts.chartDefaultsForType());
+        //render_lineBasedNewGraph("[data-graph-id='"+this.graphdata._id+"']", copts.chartDefaultsForType());
+        render_lineBasedNewGraph(this._chartElem, copts.chartDefaultsForType());
     }
 }
 MetrilyxGraph.prototype.applyData = function() {
-    if(this.uigraph === undefined) {
+    if($(this._chartElem).highcharts() === undefined) {
         this.newChart();
     } else {
         dhe = dataHasErrors(this.graphdata);
@@ -160,6 +161,8 @@ MetrilyxGraph.prototype.applyData = function() {
 }
 function MetrilyxAnnotation(obj) {
     this._data = obj;
+    this._chartElem = $("[data-graph-id='"+this._data._id+"']");
+    this._statusElem = $("[data-graph-status='"+this._data._id+"']");
 }
 MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
     var ndata = [];
@@ -184,13 +187,14 @@ MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
     chrt.series[serieIdx].setData(ndata);
 }
 MetrilyxAnnotation.prototype.queueDataForRendering = function() {
-    // queue annotations until graph has been rendering with metric data //
+    // queue annotations until graph is rendered with metric data //
     var ma = this;
     // wait until the chart has been initialized //
-    var tout = setTimeout(function(){
-        wchrt = $("[data-graph-id='"+ma._data._id+"']").highcharts();
+    var tout = setTimeout(function() {
+        var wchrt = $(ma._chartElem).highcharts();
         if(wchrt === undefined) {
             clearTimeout(tout);
+            $(ma._statusElem).html("<span class='small'>waiting for graph to initialize (annotations)...</span>");
             ma.queueDataForRendering();
         } else {
             wsf = new SeriesFormatter(ma._data.annoEvents.data);
@@ -322,8 +326,7 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
         },
         navigator: {
             enabled: false
-        },
-        /*xAxis:DEFAULT_CHART_OPTS.AXIS*/
+        }
     }, extraOpts);
     if(this._graph.multiPane) {
         //console.log(this._graph);
@@ -352,7 +355,6 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
     } else {
         $.extend(opts,{'series':this._sfmt.lineSeries(this._graph.multiPane)},true);
     }
-    //console.log(this._graph._id, opts);
     return opts;
 }
 ChartOptions.prototype.areaChartDefaults = function(extraOpts) {
@@ -398,7 +400,6 @@ SeriesFormatter.prototype.seriesTags = function() {
     var tags = {};
     for(var i in this.metSeries) {
         for(var d in this.metSeries[i].data) {
-            //console.log(this.metSeries[i].data[d].tags);
             for(var j in this.metSeries[i].data[d].tags) {
                 if(tags[j]) {
                     if(tags[j].indexOf(this.metSeries[i].data[d].tags[j]) < 0) {
@@ -656,20 +657,12 @@ function upsertLineBasedSeries(args, hcg, timeWindow) {
                         if(hcg.series[i].options.data.length <= 0) {
                             newData = args.series[j].data[d].dps;
                         } else {
-                            // name , currData, newData, timeWindow //
-                            newData = getNewDataAlignedSeries2({
+                            newData = getDataAlignedSeriesForTimeWindow({
                                 name: hcg.series[i].options.name,
                                 currData: hcg.series[i].options.data,
                                 newData:  args.series[j].data[d].dps,
                                 timeWindow: timeWindow
                             });
-                            /*
-                            // name , currData, newData //
-                            newData = getNewDataAlignedSeries(
-                                    hcg.series[i].options.name, 
-                                    hcg.series[i].options.data, 
-                                    args.series[j].data[d].dps);                   
-                            */
                         }
                         if(newData != false) hcg.series[i].setData(newData, false, null, false);
                         break;
@@ -709,7 +702,8 @@ function graphing_upsertSeries(data, timeWindow) {
     }
     hcg.redraw();
 }
-function getNewDataAlignedSeries2(args) {
+// params: name , currData, newData, timeWindow //
+function getDataAlignedSeriesForTimeWindow(args) {
     if(args.newData.length <= 0) return false;
 
     newStartTime = args.newData[0][0];
@@ -748,6 +742,7 @@ function getNewDataAlignedSeries2(args) {
         return false;
     }
 }
+/*
 function getNewDataAlignedSeries(args) {
 //function getNewDataAlignedSeries(dataName, currData, newData) {
     if(args.newData.length <= 0) return false;
@@ -784,4 +779,4 @@ function getNewDataAlignedSeries(args) {
         return false;
     }
 }
-
+*/
