@@ -63,7 +63,7 @@ select[ng-model="timeType"] {
 	padding-top: 5px !important;
 	padding-bottom: 5px !important;
 	font-weight: bold;
-	color: #666;
+	color: #777;
 }
 #global-alerts {
 	position: fixed;
@@ -155,10 +155,10 @@ select[ng-model="timeType"] {
 }
 .page-list-btn {
 	display: inline-block;
-	padding-left: 7px;
+	padding-left: 10px;
 	padding-right: 9px;
-	font-size: 22px;
-	color: #ddd;
+	font-size: 18px;
+	color: #888;
 }
 .btn-default.gtag-btn {
 	color:#999!important;
