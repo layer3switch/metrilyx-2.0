@@ -79,6 +79,7 @@ select[ng-model="timeType"] {
 }
 #global-tags-input {
 	border: 1px solid #bbb !important;
+	border-right: none !important;
 	border-radius: 20px 0 0 20px;
 	padding-left: 10px;
 	padding-right: 10px;
@@ -93,18 +94,22 @@ select[ng-model="timeType"] {
 #global-tags-input:focus {
 	outline: none !important;
 	box-shadow: inset 0px 1px 4px rgba(33,33,33,0.2);
+	border-color: #999 !important;
 }
 #global-tags-btn {
 	background:none;
 	border-radius: 0 20px 20px 0;
 	height: 24px;
 	border: 1px solid #bbb !important;
-	border-left: none !important;
 	position: relative;
 	left: -4px;
-	top: 2px;
+	top: 1px;
 	padding-right: 10px;
 	padding-left: 6px;
+	font-size:11px;
+}
+#global-tags-btn:hover {
+	border-color: #999 !important;
 }
 [ng-model="serie.paneIndex"],
 [ng-model="serie.query.aggregator"],
@@ -646,15 +651,28 @@ input.metric-control {
 .time {
 	font-size: 13px !important;
 }
-.absolute-time-field {
+.btn-default.absolute-time-field {
 	padding-right: 7px;
 	padding-left: 7px;
+	background: none !important; 
 }
 #absolute-time {
 	/*float: left;*/
 	display: none;
 	background: none;
 }
+#absolute-time > button.btn-default,
+#absolute-time > .btn-default.absolute-time-field {
+	font-size: 11px !important;
+}
+#absolute-time > button.btn-default {
+	padding-top:7px;
+	padding-bottom:8px;
+	padding-left: 7px;
+	background:none;
+	border-radius: 0 18px 18px 0;
+}
+
 #absolute-time.absolute {
 	display: inline-block !important;
 }
@@ -1171,14 +1189,15 @@ input.form-control.trans {
 	left:-1px;
 }
 .page-tag {
-	background-color: #888;
+	/*background-color: #888;*/
+	border:1px solid #888;
 	border-radius: 	18px;
 	padding:		5px;
 	padding-right: 	9px;
 	padding-left: 	7px;
 	margin-left:	2px;
 	margin-right:	2px;
-	color: 			#fefefe;
+	color: 			#888;
 	font-size: 		11px;
 }
 .page-tag > span > i {
@@ -1187,7 +1206,7 @@ input.form-control.trans {
 }
 .tags-panel {
 	color:#888;
-	padding-top: 10px !important;
+	padding-top: 15px !important;
 	padding-left: 10px;
 	display: none;
 }
