@@ -316,14 +316,33 @@ app.directive('globalAnnotations', function() {
 		require: '?ngModel',
 		link: function(scope, elem, attrs, ctrl) {
 			if(!ctrl) return;
-
-			function getAnnoQuery(sVal) {
-				return $.extend(scope.getTimeWindow(), {
-								'annoEvents': {
-									'eventTypes': sVal.eventTypes,
-									'tags': sVal.tags
-								},
-								'_id': 'annotations'});
+			var currTimer;
+			function getAnnoQuery(sVal, timeWindow) {
+				annoq = {
+					'annoEvents': {
+						'eventTypes': sVal.eventTypes,
+						'tags': sVal.tags
+					},
+					'_id': 'annotations'
+				};
+				if(timeWindow && timeWindow.start) {
+					return $.extend(timeWindow, annoq);
+				} else {
+					return $.extend(scope.getTimeWindow(), annoq);
+				}
+			}
+			function getUpdates() {
+				if(ctrl.$modelValue && scope.updatesEnabled && (ctrl.$modelValue.eventTypes.length > 0) && (Object.keys(ctrl.$modelValue.tags).length > 0)) {		
+					console.log("updating anno");
+					q = getAnnoQuery(ctrl.$modelValue, {
+							'start': Math.floor(((new Date()).getTime() - ANNO_FETCH_TIME_WIN)/1000)
+						});
+					scope.requestData(q);
+				}
+				if(currTimer) clearTimeout(currTimer);
+				currTimer = setTimeout(function() { 
+					getUpdates();
+				}, ANNO_POLL_INTERVAL-1000);
 			}
 
 			scope.$watch(function() {
@@ -331,11 +350,10 @@ app.directive('globalAnnotations', function() {
 			}, function(newVal, oldVal) {
 				if(!newVal) return;
 				if((newVal.eventTypes.length < 1) || (Object.keys(newVal.tags).length < 1)) return;
-				//if((newVal.status === oldVal.status) && (newVal.status !== 'load')) return;
 				if(newVal.status === 'load') {
 					scope.requestData(getAnnoQuery(newVal));
+					setTimeout(function() {getUpdates();}, ANNO_FETCH_TIME_WIN);
 				}
-				//console.log(newVal);
 			}, true);
 		}
 	};

@@ -220,7 +220,7 @@ angular.module('graphing', [])
 				}
 				function getUpdateQuery() {
 					return { 
-						start: Math.floor(((new Date()).getTime() - 900000)/1000),
+						start: Math.floor(((new Date()).getTime() - METRIC_FETCH_TIME_WIN)/1000),
 						size: ngModel.$modelValue.size,
 						_id: ngModel.$modelValue._id,
 						name: ngModel.$modelValue.name,
@@ -234,7 +234,6 @@ angular.module('graphing', [])
 				}
 				function getUpdates() {
 					if(ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
-						// 12m-ago seems to be the magic no. otherwise data does not line up //
 						q = getUpdateQuery();
 						scope.requestData(q);
 						setSerieStatus(q, 'updating');
@@ -242,7 +241,7 @@ angular.module('graphing', [])
 					if(currTimer) clearTimeout(currTimer);
 					currTimer = setTimeout(function() { 
 						getUpdates();
-					}, 50000);
+					}, METRIC_POLL_INTERVAL);
 				}
 				function checkDataErrors(d) {
 					for(var i in d.series) {

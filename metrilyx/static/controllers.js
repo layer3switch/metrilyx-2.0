@@ -152,12 +152,12 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.graphControlsHtml= connectionPool.nextConnection()+"/partials/graph-controls.html";
 		$scope.annoControlsHtml	= connectionPool.nextConnection()+"/partials/global-anno-controls.html";
 
-		$scope.metricListSortOpts 	= dndconfig.metricList;
-		$scope.graphSortOpts 		= dndconfig.graph;
-		$scope.podSortOpts 			= dndconfig.pod;
-		$scope.columnSortOpts 		= dndconfig.column;
-		$scope.rowSortOpts 			= dndconfig.row;
-		$scope.layoutSortOpts 		= dndconfig.layout;
+		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
+		$scope.graphSortOpts 		= DNDCONFIG.graph;
+		$scope.podSortOpts 			= DNDCONFIG.pod;
+		$scope.columnSortOpts 		= DNDCONFIG.column;
+		$scope.rowSortOpts 			= DNDCONFIG.row;
+		$scope.layoutSortOpts 		= DNDCONFIG.layout;
 
 		$scope.selectedAnno = {};
 		$scope.globalAnno = {'eventTypes':[], 'tags':{}, 'status': null};
@@ -687,7 +687,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
 		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/adhocgraph-query-editor.html";
 
-		$scope.metricListSortOpts 	= dndconfig.metricList;
+		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
 		
 		$scope.metricQueryResult = [];
 		$scope.tagsOnPage = {};
