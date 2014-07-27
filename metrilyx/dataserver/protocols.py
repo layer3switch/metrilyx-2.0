@@ -117,7 +117,7 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 											responseData['data'], url, graphMeta)
 			mserie = MetrilyxSerie(graphMeta['series'][0])
 			graphMeta['series'][0]['data'] = mserie.data
-		
+
 		self.sendMessage(json.dumps(graphMeta))
 		logger.info("Response (graph) %s '%s' start: %s" %(graphMeta['_id'], 
 			graphMeta['name'], datetime.fromtimestamp(float(graphMeta['start']))))
@@ -146,11 +146,8 @@ class EventGraphServerProtocol(GraphServerProtocol):
 		if isinstance(graphOrAnnoRequest, GraphRequest):	
 			# submit graph data queries
 			self.submitPerfQueries(graphOrAnnoRequest)
-			# submit event queries
-			#self.submitEventQueries(graphOrAnnoRequest.request)
-			#return;
 		elif graphOrAnnoRequest['_id'] == 'annotations':
-			#print "+++++++ TBI ++++++++++"
+			# submit annnotation queries
 			self.submitEventQueries(graphOrAnnoRequest)
 		
 	def eventResponseCallback(self, data, response, url, eventType, request):
