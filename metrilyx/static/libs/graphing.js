@@ -118,16 +118,20 @@ function highchartsFormattedSerie(dataObj, dataQuery, graphType, paneIndex) {
 function onAnnotationClick(event) {
     var ead = $('#event-anno-details');
     scope = angular.element($(ead)).scope();
-    scope.$apply(function(){
-        scope.selectedAnno = {
-            data: event.point.data,
-            eventType: event.point.title,
-            message: event.point.text,
-            timestamp: event.point.x,
-            color: event.point.series.color
-        };
-    });
-    $(ead).addClass('open');
+    if(scope) {
+        scope.$apply(function(){
+            scope.selectedAnno = {
+                data: event.point.data,
+                eventType: event.point.title,
+                message: event.point.text,
+                timestamp: event.point.x,
+                color: event.point.series.color
+            };
+        });
+        $(ead).addClass('open');
+    } else {
+        console.warning('Counld not get scope for #event-anno-details!');
+    }
 }
 
 function MetrilyxGraph(graphObj, timeWin) {
@@ -425,7 +429,9 @@ SeriesFormatter.prototype.flagsSeries = function(eventType) {
         },
         y: -48,
         stackDistance: 20,
-        states : {hover : {fillColor: '#ddd'}},
+        states : {
+            hover : {fillColor: '#ddd'},
+        },
         events: {
             click: onAnnotationClick
         }

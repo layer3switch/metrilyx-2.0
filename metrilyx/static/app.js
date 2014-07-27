@@ -333,7 +333,6 @@ app.directive('globalAnnotations', function() {
 			}
 			function getUpdates() {
 				if(ctrl.$modelValue && scope.updatesEnabled && (ctrl.$modelValue.eventTypes.length > 0) && (Object.keys(ctrl.$modelValue.tags).length > 0)) {		
-					console.log("updating anno");
 					q = getAnnoQuery(ctrl.$modelValue, {
 							'start': Math.floor(((new Date()).getTime() - ANNO_FETCH_TIME_WIN)/1000)
 						});
@@ -350,7 +349,8 @@ app.directive('globalAnnotations', function() {
 			}, function(newVal, oldVal) {
 				if(!newVal) return;
 				if((newVal.eventTypes.length < 1) || (Object.keys(newVal.tags).length < 1)) return;
-				if(newVal.status === 'load') {
+				// load, reload, dispatched, dispatching //
+				if(newVal.status === 'load' || newVal.status === 'reload') {
 					scope.requestData(getAnnoQuery(newVal));
 					setTimeout(function() {getUpdates();}, ANNO_FETCH_TIME_WIN);
 				}

@@ -418,7 +418,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				});
 			});
 		}
-		// Load initial empty page -> pod -> graph //
 		$scope.setUpdatesEnabled = function(value) {
 			$scope.updatesEnabled = value;
 		}
@@ -671,18 +670,22 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.modelType 		= "adhoc";
 		$scope.timeType 		= "1h-ago";
 		$scope.editMode 		= " edit-mode";
+		$scope.updatesEnabled 	= false;
 		
 		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
 		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit-panel.html";
 		$scope.pageHeaderHtml 	= connectionPool.nextConnection()+"/partials/page-header.html";
 		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
 		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/adhocgraph-query-editor.html";
+		$scope.annoControlsHtml	= connectionPool.nextConnection()+"/partials/global-anno-controls.html";
 
 		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
 		
 		$scope.metricQueryResult = [];
 		$scope.tagsOnPage = {};
 		$scope.graph = {};
+		$scope.globalAnno = {'eventTypes':[], 'tags':{}, 'status': null};
+		$scope.globalTags = {};
 
 		if($routeParams.editMode==="false") {
 			$scope.editMode = "";
@@ -698,7 +701,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			}
 			$scope.startTime = $routeParams.start;
 		}
-
 		Schema.get({modelType: 'graph'}, function(graphModel) {
 			if($routeParams.size){ 
 				graphModel.size = $routeParams.size;
@@ -764,6 +766,15 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				$scope.graph = graphModel;
 			}
 		});
+		if($routeParams.annotationTypes && $routeParams.annotationTags) {
+			try {
+				$scope.globalAnno = {
+					'eventTypes': $routeParams.annotationTypes.split(/\|/),
+					'tags': commaSepStrToDict($routeParams.annotationTags),
+					'status': 'load',
+				}
+			} catch(e) {console.warning("failed to parse annotation data", e);}
+		}
 		$('#side-panel').addClass('offstage');
 		if($scope.editMode === "") {
 			$scope.metricListSortOpts.disabled = true;
@@ -786,15 +797,23 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			flashAlertsBar();*/	
 		}
 		function onMessageWssock(e) {
-			var data = JSON.parse(e.data);
+       		var data = JSON.parse(e.data);
        		if(data.error) {
        			console.warn(data);
        			setGlobalAlerts(data);
        			flashAlertsBar();
-       			return;
+       		} else if(data.annoEvents) {
+       			// annotations //
+       			$scope.globalAnno.status = 'dispatching';
+   				data._id = $scope.graph._id;
+   				var ce = new CustomEvent(data._id, {'detail': data });
+   				$scope.wssock.dispatchEvent(ce);
+       			$scope.globalAnno.status = 'dispatched';
+       		} else {
+       			// graph data //
+	       		var ce = new CustomEvent(data._id, {'detail': data });
+	       		$scope.wssock.dispatchEvent(ce);
        		}
-       		var ce = new CustomEvent(data._id, {'detail': data });
-       		$scope.wssock.dispatchEvent(ce);
 		}
 		function setupWebSocket() {
 			$scope.wssock = getWebSocket();
@@ -804,6 +823,9 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		}
         setupWebSocket();
         
+        $scope.setUpdatesEnabled = function(value) {
+			$scope.updatesEnabled = value;
+		}
 		$scope.onEditPanelLoad = function() {
 			document.getElementById('edit-panel').addEventListener('refresh-metric-list',
 				function() {
@@ -813,7 +835,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		}
 		$scope.removeTag = function(tags, tagkey) {
 			delete tags[tagkey];
-		}
+		}/*
 		$scope.getTimeWindow = function() {
 			if($scope.timeType == "absolute"){
 				if($scope.endTime) 
@@ -830,6 +852,43 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 					start: Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime($scope.timeType)),
 					end: Math.ceil((new Date()).getTime()/1000)
 				};
+			}
+		}*/
+		$scope.getTimeWindow = function(inMilli) {
+			if($scope.timeType == "absolute"){
+				if($scope.endTime) {
+					if(inMilli) {
+						return {
+							end: $scope.endTime*1000, 
+							start: $scope.startTime*1000};
+					}
+					return {
+						end: $scope.endTime, 
+						start: $scope.startTime
+					};
+				}
+				if(inMilli) {
+					return {
+						start: $scope.startTime*1000, 
+						end: Math.ceil((new Date()).getTime())
+					};
+				}
+				return {
+					start: $scope.startTime, 
+					end: Math.ceil((new Date()).getTime()/1000)
+				};
+			} else {
+				if(inMilli) {
+					return {
+						start: (Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime($scope.timeType)))*1000,
+						end: Math.ceil((new Date()).getTime())
+					};
+				} else {
+					return {
+						start: Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime($scope.timeType)),
+						end: Math.ceil((new Date()).getTime()/1000)
+					};
+				}
 			}
 		}
 		$scope.baseQuery = function(graphObj) {
@@ -901,7 +960,24 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			} else {
 				srch.start = $scope.timeType;
 			}
+			srch.annotationTypes = $scope.globalAnno.eventTypes.join("|");
+			srch.annotationTags = dictToCommaSepStr($scope.globalAnno.tags, ":");
 			$location.search(srch);
+		}
+		$scope.setAnnotations = function() {
+			// re-initialize graph //
+			$scope.reloadGraph();
+			$scope.globalAnno.status = 'reload';
+			tmp = $location.search();
+			tmp.annotationTypes = $scope.globalAnno.eventTypes.join("|");
+			tmp.annotationTags = dictToCommaSepStr($scope.globalAnno.tags, ":");
+			$location.search(tmp);
+			$('.graph-control-details.global-anno').hide();
+		}
+		// called when a graph adds a ws evt listener //
+		$scope.addEvtListenerGraphId = function(graphId) {
+			// in adhoc mode there is only 1 graph //
+			//$scope.globalAnno.status = 'load';
 		}
 		$scope.updateTagsOnPage = function(obj) {
 			var top = $scope.tagsOnPage;
@@ -927,7 +1003,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			// this may be very expensive //
 			for(var k in top) top[k].sort();
 			$scope.tagsOnPage = top;
-			//console.log($scope.tagsOnPage);
 		}
 		$scope.reloadGraph = function(gobj) {
 			if(!gobj) gobj = $scope.graph;

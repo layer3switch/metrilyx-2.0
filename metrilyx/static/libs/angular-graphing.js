@@ -233,6 +233,7 @@ angular.module('graphing', [])
 					};
 				}
 				function getUpdates() {
+					//console.log('requesting metrics updates...', scope.updatesEnabled);
 					if(ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
 						q = getUpdateQuery();
 						scope.requestData(q);
