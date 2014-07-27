@@ -340,6 +340,22 @@ app.directive('globalAnnotations', function() {
 		}
 	};
 });
+app.directive('tooltipArrow', function() {
+	return {
+		restrict: 'A',
+		require: '?ngModel',
+		link: function(scope, elem, attrs, ctrl) {
+			if(!ctrl) return;
+			//console.log(elem);
+			var canvas = document.createElement('canvas');
+			canvas.width = attrs.width;
+			canvas.height = attrs.height;
+			$(elem).append(canvas);
+			drawTriOnCanvas(canvas, attrs.color, attrs.direction);
+		}
+	}
+});
+
 /*
  * Parse tags object to 'tag1=val1,tag2=val2;'
  * Error checking and validity setting.
@@ -546,13 +562,23 @@ function flashAlertsBar() {
 		$(ga).fadeOut(1000);
 	}, 3000);
 }
-function drawTri(_id, color, direction) {
+// wrapper to drawTriOnCanvas //
+function drawTriBySelector(selector, color, direction) {
 	direction = typeof direction !== 'undefined' ? direction : 'up';
-	var canvas = document.getElementById(_id);
+	var canvas = $(selector)[0];
+	drawTriOnCanvas(canvas, color, direction);
+}
+// draw triangle on canvas //
+function drawTriOnCanvas(canvas, color, direction) {
 	if (canvas.getContext){
 	    var ctx = canvas.getContext('2d');
 	    ctx.beginPath();
 	    switch(direction) {
+	    	case 'left':
+				ctx.moveTo(canvas.width,0);
+			    ctx.lineTo(canvas.width,canvas.height);
+			    ctx.lineTo(0,canvas.height/2);
+	    		break;
 	    	default:
 			    ctx.moveTo(canvas.width/2,0);
 			    ctx.lineTo(canvas.width,canvas.height);

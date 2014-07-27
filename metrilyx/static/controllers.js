@@ -257,6 +257,14 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
    			}
        		return out;
 		}
+		$scope.drawTriBySelector = function(selector, color, direction) {
+			console.log(selector);
+			console.log($(selector)[0]);
+			//console.log(sel);
+			//if(sel.getContext) console.log('hi');
+			//else console.log('no');
+			//drawTriOnCanvas(sel, color, direction);
+		}
         $scope.wssock.onopen = function() {
           console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
           console.log("Queued requests:",QUEUED_REQS.length);

@@ -1,9 +1,6 @@
 <div class="graph-control-details global-anno bottom-shadow" style="color: #ccc">
-	<div style="position:relative;left: 30px;">
-		<canvas id='anno-tri' width="30" height="12"></canvas>
-		<script type="text/javascript">$(drawTri('anno-tri', 'rgba(95,95,95,0.95)'));</script>
-	</div>
-	<div class="padtb10 padlr5" style="background:rgba(95,95,95,0.9);border-radius:3px">
+	<div ng-model="graph._id" tooltip-arrow width="30" height="12" color="rgba(95,95,95,0.9)" direction="up" style="position:relative;left:25px;"></div>
+	<div class="padtb10 padlr5" style="background:rgba(95,95,95,0.9);border-radius:2px">
 		<div class="padlr10" style="border-bottom:1px solid #606060">
 			<div>
 		    	<div class="small text-left marginb5"><b>Tags :</b></div>

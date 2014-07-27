@@ -125,7 +125,14 @@ select[ng-model="timeType"] {
 }
 [ng-model="graph.size"].dark,
 [ng-model="graph.graphType"].dark {
-	border: 1px solid #777 !important;
+	transition: all 0.35s ease !important;
+	border: 1px solid rgba(0,0,0,0) !important;
+	box-shadow: none;
+}
+[ng-model="graph.size"].dark:hover,
+[ng-model="graph.graphType"].dark:hover {
+	border: 1px solid #808080 !important;
+	box-shadow: inset 0 2px 1em rgba(0,0,0,0.2);
 }
 [ng-model="serie.yTransform"],
 [ng-model="serie.alias"] {
@@ -597,12 +604,13 @@ input.ng-invalid.ng-dirty {
 .graph-controls {
 	width:230px;
 	border-radius:3px;
+	/*
 	border:1px solid #555;
-	/*border-top: 1px solid #777;*/
+	border-top: 1px solid #777;
 	border-top: none;
+	background:rgba(95,95,95,0.95);*/
 	position: relative;
 	z-index: 1;
-	background:rgba(95,95,95,0.95);
 	margin-bottom:10px;
 }
 .heatmap-query-editor {
@@ -1188,8 +1196,8 @@ input.form-control.trans {
 	color:#ccc;
 	display:none;
 	position:absolute;
-	top:2px;
-	left:-1px;
+	top: 32px;
+	left:0px;
 }
 .page-tag {
 	/*background-color: #888;*/
@@ -1240,10 +1248,21 @@ input.form-control.trans {
 	background-color: #428bca;
 }
 input.threshold-input {
-	width: 94px;
+	width: 92px;
 	line-height: 1.2 !important;
-	padding-top: 3px;
-	padding-bottom: 3px;
+	font-size: 12px !important;
+	padding-top: 3px !important;
+	padding-bottom: 3px !important;
+	transition: all 0.35s ease !important;
+	border: 1px solid rgba(0,0,0,0) !important;
+	box-shadow: none;
+	outline: none !important;
+}
+input.threshold-input:active,
+input.threshold-input:focus,
+input.threshold-input:hover {
+	border: 1px solid #808080 !important;
+	box-shadow: inset 0 2px 1em rgba(0,0,0,0.2) !important;
 }
 input.threshold-input.wide {
 	width: 140px;
@@ -1252,12 +1271,12 @@ input.threshold-input.wide {
 	background:rgba(95,95,95,0.95);
 	border-radius: 0 2px 2px 2px;
     position:absolute;
-    left:230px;
+    left: 232px;
     display: none;
     width: 280px;
 }
 .graph-control-details.thresh {
-	top: 106px;
+	top: 35px;
 }
 .graph-control-details.anno {
 	top: 72px;

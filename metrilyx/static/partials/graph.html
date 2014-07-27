@@ -6,7 +6,7 @@
 			</div>
 		</div>
 		<div class="input-group input-group-sm text-center padtb5" style="width:100%">
-			<a href="javascript:void(0)" class="input-group-addon nobg interactive" onclick="$(this).next().show()">
+			<a href="javascript:void(0)" class="input-group-addon nobg interactive" onclick="$(this).next().toggle()">
 				<i class="glyphicon glyphicon-cog" style="font-size:14px;"></i>
 			</a>
 			<div ng-include="graphControlsHtml" data-graph-controls="{{graph._id}}"></div>
@@ -56,7 +56,7 @@
 			<div data-query-set="{{graph._id}}" class="collapse in" style="background-color: rgba(66,66,66,0.9);">
 				<div class="pad10 text-left graph-control-item">
 					<span class="padlr5">
-						<span class="small">Size :</span>
+						<span class="small"><b>Size :</b></span>
 						<select ng-model="graph.size" ng-change="reflow()" class="dark">
 							<option value="small">small</option>
 							<option value="medium">medium</option>
@@ -64,7 +64,7 @@
 						</select>
 					</span>
 					<span class="padl5">
-						<span class="small">Type :</span>
+						<span class="small"><b>Type :</b></span>
 						<select ng-model="graph.graphType" class="dark"> 
 							<option value="line">line</option>
 							<option value="spline">spline</option>
