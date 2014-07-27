@@ -532,7 +532,6 @@ function dictToCommaSepStr(obj, delim) {
     for(var i in obj) {
         tstr += i+delim+obj[i]+",";
     }
-    //return tstr.replace(/\,$/,';');
     return tstr.replace(/\,$/,'');
 }
 /*
@@ -540,13 +539,12 @@ function dictToCommaSepStr(obj, delim) {
  * return: { key1: val1, key2: val2 }
  */
 function commaSepStrToDict(tagsStr, delim) {
-	if(delim === undefined) delim = "=";
+	//if(delim === undefined) delim = "=";
 	if(tagsStr == "") return {};
-	d = {};
+	var d = {};
 	kvpairs = tagsStr.replace(/;$/, '').split(",");
-	//kvpairs = tagsStr.split(",");
 	for(var i in kvpairs) {
-		kv = kvpairs[i].split(delim);
+		kv = kvpairs[i].split(/:|=/);
 		if(kv.length != 2) continue;
 		if(kv[0] == "") continue;
 		d[kv[0]] = kv[1];

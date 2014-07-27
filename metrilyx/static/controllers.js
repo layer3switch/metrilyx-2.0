@@ -181,9 +181,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			try {
 				$scope.globalAnno = {
 					'eventTypes': urlParams.annotationTypes.split(/\|/),
-					'tags': commaSepStrToDict(urlParams.annotationTags,":"),
+					'tags': commaSepStrToDict(urlParams.annotationTags),
 					'status': $scope.globalAnno.status,
-
 				}
 			} catch(e) {console.warning("failed to parse annotation data", e);}
 		}
@@ -256,14 +255,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
    				}
    			}
        		return out;
-		}
-		$scope.drawTriBySelector = function(selector, color, direction) {
-			console.log(selector);
-			console.log($(selector)[0]);
-			//console.log(sel);
-			//if(sel.getContext) console.log('hi');
-			//else console.log('no');
-			//drawTriOnCanvas(sel, color, direction);
 		}
         $scope.wssock.onopen = function() {
           console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
@@ -345,7 +336,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$scope.setGlobalTags($scope.globalTags);
 		}
 		$scope.setGlobalTags = function(gblTags) {
-			tagsLoc = dictToCommaSepStr(gblTags, "=");
+			tagsLoc = dictToCommaSepStr(gblTags, ":");
 			tmp = $location.search();
 			if(tagsLoc == "") {
 				if(tmp.tags) {
@@ -751,7 +742,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 							'aggregator': met[0],
 							'rate': rate,
 							'metric': met[met.length-1],
-							'tags': commaSepStrToDict(arr[2],":")
+							'tags': commaSepStrToDict(arr[2])
 						}
 					});
 				}
