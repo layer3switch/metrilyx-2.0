@@ -57,7 +57,7 @@
 			"port": 9200,
 			"use_ssl": false,
 			"search_endpoint": "_search",
-			"index": "anno_events",
+			"index": "eventannotations",
 			"result_size": 10000000,
 			"loader_class": "ess.ElasticsearchEventDataProvider"
 		}
