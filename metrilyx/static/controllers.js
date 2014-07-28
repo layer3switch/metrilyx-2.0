@@ -141,16 +141,17 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$('.modal-backdrop').remove();
 		$('#side-panel').addClass('offstage');
 
-		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
-		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit-panel.html";
-		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
-		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/pagegraph-query-editor.html";
-		$scope.graphHtml 		= connectionPool.nextConnection()+"/partials/graph.html";
-		$scope.heatGraphHtml 	= connectionPool.nextConnection()+"/partials/heat-graph.html"
-		$scope.podHtml 			= connectionPool.nextConnection()+"/partials/pod.html";
-		$scope.pageHeaderHtml 	= connectionPool.nextConnection()+"/partials/page-header.html";
-		$scope.graphControlsHtml= connectionPool.nextConnection()+"/partials/graph-controls.html";
-		$scope.annoControlsHtml	= connectionPool.nextConnection()+"/partials/global-anno-controls.html";
+		$scope.pageMastHtml			= connectionPool.nextConnection()+"/partials/page-mast.html";
+		$scope.editPanelHtml		= connectionPool.nextConnection()+"/partials/edit-panel.html";
+		$scope.thresholdsHtml		= connectionPool.nextConnection()+"/partials/thresholds.html";
+		$scope.queryEditorHtml		= connectionPool.nextConnection()+"/partials/pagegraph-query-editor.html";
+		$scope.graphHtml 			= connectionPool.nextConnection()+"/partials/graph.html";
+		$scope.heatGraphHtml 		= connectionPool.nextConnection()+"/partials/heat-graph.html"
+		$scope.podHtml 				= connectionPool.nextConnection()+"/partials/pod.html";
+		$scope.pageHeaderHtml 		= connectionPool.nextConnection()+"/partials/page-header.html";
+		$scope.graphControlsHtml	= connectionPool.nextConnection()+"/partials/graph-controls.html";
+		$scope.annoControlsHtml		= connectionPool.nextConnection()+"/partials/global-anno-controls.html";
+		$scope.eventAnnoDetailsHtml = connectionPool.nextConnection()+"/partials/event-anno-details.html";
 
 		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
 		$scope.graphSortOpts 		= DNDCONFIG.graph;
@@ -672,12 +673,13 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.editMode 		= " edit-mode";
 		$scope.updatesEnabled 	= false;
 		
-		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
-		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit-panel.html";
-		$scope.pageHeaderHtml 	= connectionPool.nextConnection()+"/partials/page-header.html";
-		$scope.thresholdsHtml	= connectionPool.nextConnection()+"/partials/thresholds.html";
-		$scope.queryEditorHtml	= connectionPool.nextConnection()+"/partials/adhocgraph-query-editor.html";
-		$scope.annoControlsHtml	= connectionPool.nextConnection()+"/partials/global-anno-controls.html";
+		$scope.pageMastHtml			= connectionPool.nextConnection()+"/partials/page-mast.html";
+		$scope.editPanelHtml		= connectionPool.nextConnection()+"/partials/edit-panel.html";
+		$scope.pageHeaderHtml 		= connectionPool.nextConnection()+"/partials/page-header.html";
+		$scope.thresholdsHtml		= connectionPool.nextConnection()+"/partials/thresholds.html";
+		$scope.queryEditorHtml		= connectionPool.nextConnection()+"/partials/adhocgraph-query-editor.html";
+		$scope.annoControlsHtml		= connectionPool.nextConnection()+"/partials/global-anno-controls.html";
+		$scope.eventAnnoDetailsHtml = connectionPool.nextConnection()+"/partials/event-anno-details.html";
 
 		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
 		

@@ -40,6 +40,7 @@ var AUTHCONFIG = {
 var WS_URI = "ws://"+SERVER_NAME+"/api/data?compressed=true";
 // Annotation poll interval //
 var ANNO_POLL_INTERVAL = 75000;
+// Annotation fetch time window //
 var ANNO_FETCH_TIME_WIN = 300000;
 
 // DO NOT TOUCH BELOW TIHS UNLESS YOU KNOW WHAT YOU ARE DOING //
