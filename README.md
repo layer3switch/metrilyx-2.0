@@ -1,18 +1,20 @@
 Metrilyx v2.3.0
 ===============
-Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database used to store large amounts of data.  It allows for analyzing, cross cutting and viewing of time series data in a simple manner.
+Metrilyx is a web based dashboard engine to OpenTSDB, a time series database used to store large amounts of data.  It allows for analyzing, cross cutting and viewing of time series data in a simple manner.
 
 #### Features:
 - Easy to use UI for dashboard creation.
+- Annotate various events.
 - Multiple graph types: spline, area, stacked, pie, line.
 - Data provided via websockets for low protocol overhead.
-- Event annotations.
 - Regex support for metric, tag key and tag value searches.
 - Supports distributed and HA setup
 
 ##### v2.3.0
-- Event annotations.
-- Regex support for metric, tag key and tag value searches.
+- Event annotations for both adhoc and dashboard view.
+- Cleaner URL params for user readability.
+- Auto updates when viewing adhoc graphs.
+- Regex support for metric, tag-key and tag-value searches.
 - Additional graph types: spline, area, stacked, pie, line.
 - UI changes and fixes.
 - Overall performance improvements.
