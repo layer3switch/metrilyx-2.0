@@ -1,24 +1,23 @@
 module.exports = function(grunt) {
   'use strict';
+  var BASE_TASK_DIR = './tasks/options/';
 
-  require('jit-grunt')(grunt);
+  //dynamically load tasks
+  var fs = require('fs');
+  var dirs = fs.readdirSync(BASE_TASK_DIR);
+  var options = {pkg: grunt.file.readJSON('package.json')};
+  dirs.forEach(function(fileName) {
+    var key = fileName.substr(0, fileName.indexOf('.js')),
+    option = require(BASE_TASK_DIR + fileName);
 
-  var BASE_TASK_DIR = './tasks/options'
+    options[key] = option;
+  });
 
-  var OPTION = {
-    clean: require(BASE_TASK_DIR + '/clean'),
-    concat_sourcemap: require(BASE_TASK_DIR + '/concat_sourcemap'),
-    karma: require(BASE_TASK_DIR + '/karma')
-  }
 
   // Project configuration
-  grunt.initConfig({
-    // Metadata
-    pkg: grunt.file.readJSON('package.json'),
-    clean: OPTION.clean,
-    concat_sourcemap: OPTION.concat_sourcemap,
-    karma: OPTION.karma
-  });
+  require('jit-grunt')(grunt);
+  grunt.initConfig(options);
+
 
   // Default task
   grunt.registerTask('test', ['clean:debug', 'concat_sourcemap', 'karma:ci']);

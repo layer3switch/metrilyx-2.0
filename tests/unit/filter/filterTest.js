@@ -1,9 +1,12 @@
 module('Filter Test', {
   setup: function() {
-    // prepare something for all following tests
-    this.$filter = getFilter();
+    var t = this;
+    t.$filter = getFilter();
   },
-  teardown: function() {}
+  teardown: function() {
+    var t = this;
+    delete t.$filter;
+  }
 });
 
 
@@ -13,13 +16,13 @@ test('Filter: dotsToDashes', function() {
   var testData = [{
     input: ['...'],
     output: '---'
-  },{
+  }, {
     input: ['aa...zz'],
     output: 'aa---zz'
-  },{
+  }, {
     input: ['a.b.c.d'],
     output: 'a-b-c-d'
-  },{
+  }, {
     input: ['a-l-l-d-a-s-h'],
     output: 'a-l-l-d-a-s-h'
   }];
@@ -35,16 +38,16 @@ test('Filter: columnWidth', function() {
   var testData = [{
     input: [12],
     output: 1
-  },{
+  }, {
     input: [3],
     output: 4
-  },{
+  }, {
     input: [4],
     output: 3
-  },{
+  }, {
     input: [2],
     output: 6
-  },{
+  }, {
     input: [6],
     output: 2
   }];
@@ -60,7 +63,7 @@ test('Filter: invert', function() {
   var testData = [{
     input: [true],
     output: false
-  },{
+  }, {
     input: [false],
     output: true
   }];
@@ -97,19 +100,19 @@ test('Filter: rateString', function() {
   var testData = [{
     input: ['rateString'],
     output: 'rate:'
-  },{
+  }, {
     input: ['123'],
     output: 'rate:'
-  },{
+  }, {
     input: ['false'],
     output: 'rate:'
-  },{
+  }, {
     input: ['true'],
     output: 'rate:'
-  },{
+  }, {
     input: [false],
     output: ''
-  },{
+  }, {
     input: [undefined],
     output: ''
   }];
@@ -124,7 +127,10 @@ test('Filter: rateString', function() {
 
 
 test('Filter: tagsString', function() {
-  var mockObject = {ka: 'va', kb: 'vb'};
+  var mockObject = {
+    ka: 'va',
+    kb: 'vb'
+  };
 
   var testMethod = 'tagsString';
   var testMethodFun = this.$filter(testMethod);
@@ -149,7 +155,10 @@ test('Filter: tagsString', function() {
 
 
 test('Filter: tagsLink', function() {
-  var mockObject = {ka: 'va', kb: 'vb'};
+  var mockObject = {
+    ka: 'va',
+    kb: 'vb'
+  };
 
   var testMethod = 'tagsLink';
   var testMethodFun = this.$filter(testMethod);
@@ -159,6 +168,70 @@ test('Filter: tagsLink', function() {
   }, {
     input: [''],
     output: ''
+  }];
+
+
+  runTest(testMethod, testMethodFun, testData, equal);
+});
+
+
+
+
+test('Filter: metricQuery', function() {
+  var testMethod = 'metricQuery';
+  var testMethodFun = this.$filter(testMethod);
+  var testData = [{
+    input: [{
+      rate: true,
+      aggregator: 'SUM',
+      metric: 'TestMetric_1'
+    }],
+    output: 'SUM:rate:TestMetric_1'
+  }, {
+    input: [{
+      aggregator: 'AVG',
+      metric: 'TestMetric_2'
+    }],
+    output: 'AVG:TestMetric_2'
+  }];
+
+
+  runTest(testMethod, testMethodFun, testData, equal);
+});
+
+
+
+test('Filter: loadedSeries', function() {
+  function createSeries(status) {
+    status = status || 'loading';
+
+    return {
+      status: status
+    }
+  }
+
+  var mockGraph = {
+    series: []
+  };
+  for (var i = 0; i < 7; i++)
+    mockGraph.series.push(createSeries('loading'));
+
+  for (var i = 0; i < 3; i++)
+    mockGraph.series.push(createSeries('querying'));
+
+  //this will create 3 querying series and 7 loading series
+
+  var testMethod = 'loadedSeries';
+  var testMethodFun = this.$filter(testMethod);
+  var testData = [{
+    input: [mockGraph, false],
+    output: 7
+  }, {
+    input: [mockGraph],
+    output: 7
+  }, {
+    input: [mockGraph, true],
+    output: 70
   }];
 
 

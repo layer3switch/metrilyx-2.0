@@ -13,6 +13,12 @@
     QUnit.equal.call(this, actual, expected, message);
   }
 
+
+  function notEqual(actual, expected, message) {
+    message = getAssertionMessage(actual, expected, message);
+    QUnit.notEqual.call(this, actual, expected, message);
+  }
+
   function strictEqual(actual, expected, message) {
     message = getAssertionMessage(actual, expected, message);
     QUnit.strictEqual.call(this, actual, expected, message);
@@ -44,9 +50,39 @@
     return getInjector().get('$compile');
   }
 
+  function getDirective(elem, scope){
+    return getInjector().get('$compile')(elem)(scope);
+  }
+
   function initRootScope() {
     return getInjector().get('$rootScope').$new();
   }
+
+
+  //use for dependencies injection override
+  var providerHash = {};//used for backup and reset of provider
+  function setProvider(name, fn){
+    //backup
+    if (providerHash[name] === undefined){
+      providerHash[name] = getInjector().get(name);
+    }
+
+    app.config(function($provide) {
+      $provide.provider(name, function() {
+        this.$get = fn;
+      });
+    });
+  }
+
+  function resetProvider(name){
+    if (providerHash[name] !== undefined){
+      setProvider(name, function(){
+        return providerHash[name];
+      })
+    }
+  }
+
+
 
   //spy
   function createSpyMethods(obj, methods) {
@@ -61,6 +97,12 @@
     return obj;
   }
 
+  //dump
+  console.dump = function(){
+    for (var k = 0; k < arguments.length; k++)
+      console.debug(JSON.stringify(arguments[k]));
+  }
+
   window.exists = exists;
   window.equal = equal;
   window.strictEqual = strictEqual;
@@ -70,7 +112,10 @@
   window.getInjector = getInjector;
   window.getFilter = getFilter;
   window.getCompiled = getCompiled;
+  window.getDirective = getDirective;
   window.initRootScope = initRootScope;
+  window.setProvider= setProvider;
+  window.resetProvider= resetProvider;
 
   window.createSpyMethods = createSpyMethods;
 })();

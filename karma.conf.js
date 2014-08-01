@@ -10,6 +10,7 @@ module.exports = function(config) {
       'tmp/result/tests/app.js',
       //test dependencies
       'tests/lib/*.js',
+      'tests/mock/*.js',
       'tests/test-helper.js',
       //tests
       'tmp/result/tests/tests.js'

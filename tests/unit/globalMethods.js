@@ -1,4 +1,4 @@
- module('GlobalScope Methods', {
+module('GlobalScope Methods', {
   setup: function() {},
   teardown: function() {}
 });

@@ -3,8 +3,6 @@ module('wsHighstockGraph directive', {
     var t = this;
 
     // prepare something for all following tests
-    t.$compile = getCompiled();
-
     t.getNewScope = function(g) {
       var $scope = initRootScope();
       $scope = createSpyMethods($scope, ['disableDragDrop', 'requestData']);
@@ -26,81 +24,13 @@ module('wsHighstockGraph directive', {
       return $scope;
     }
 
-
-    t.initDirective = function($scope) {
-      return t.$compile('<div ng-model="graph" class="{{pod.orientation}}" ws-highstock-graph></div>')($scope);
-    }
-
-
-    //exposed methods
-    function mockSerieData(name, status) {
-      status = status || 'loading';
-
-      return {
-        "alias": name,
-        "yTransform": "",
-        "query": {
-          "aggregator": "sum",
-          "rate": false,
-          "metric": name + "_metric",
-          "tags": {}
-        },
-        "$$hashKey": "00O",
-        "status": status
-      }
-    }
-    t.mockSerieData = mockSerieData;
-
-    t.createMockGraph = function(graphs) {
-      var commonMock = {
-        "multiPane": false,
-        "panes": ["", ""],
-        "name": "",
-        "thresholds": {
-          "danger": {
-            "max": "",
-            "min": ""
-          },
-          "warning": {
-            "max": "",
-            "min": ""
-          },
-          "info": {
-            "max": "",
-            "min": ""
-          }
-        },
-        "annoEvents": {
-          "eventTypes": [],
-          "tags": {}
-        },
-        "graphType": "line",
-        "_id": "cdf5bdb1ca9b4990aca4fb139f30471f",
-        "size": "large",
-        "$promise": {},
-        "$resolved": true
-      }
-
-      var series = [];
-      angular.forEach(graphs, function(g) {
-        if (g.status !== undefined && g.alias !== undefined)
-          series.push(mockSerieData(g.alias, g.status));
-        else
-          series.push(mockSerieData(g));
-      });
-
-
-      return $.extend(commonMock, {
-        series: series
-      });
-    }
-
+    t.elem = '<div ng-model="graph" class="{{pod.orientation}}" ws-highstock-graph></div>';
 
     t.assertGraph = function(graph1, graph2, oldSeries, newSeries, operation, expectedChangeSeries) {
       equal(graph1.series.length, oldSeries.length, "graph1.series.length == oldSeries.length");
       equal(graph2.series.length, newSeries.length, "graph2.series.length == newSeries.length");
-      deepEqual(graph1.series, oldSeries, "graph1.series == oldSeries");
-      deepEqual(graph2.series, newSeries, "graph2.series == newSeries");
+      strictEqual(graph1.series, oldSeries, "graph1.series == oldSeries");
+      strictEqual(graph2.series, newSeries, "graph2.series == newSeries");
 
 
       //make sure the difference is the new one
@@ -118,7 +48,7 @@ module('wsHighstockGraph directive', {
           }
         });
 
-        equal(JSON.stringify(diffSerie), JSON.stringify(t.mockSerieData(expectedChangeSeries, 'querying')), 'Added series must be ' + expectedChangeSeries);
+        equal(JSON.stringify(diffSerie), JSON.stringify(GraphMocker.mockSeries(expectedChangeSeries, 'querying')), 'Added series must be ' + expectedChangeSeries);
       } else {
         angular.forEach(newSeries, function(val) {
           oldSeriesHash[val.alias] = true;
@@ -130,12 +60,17 @@ module('wsHighstockGraph directive', {
           }
         });
 
-        equal(JSON.stringify(diffSerie), JSON.stringify(t.mockSerieData(expectedChangeSeries, 'loading')), 'Removed series must be ' + expectedChangeSeries);
+        equal(JSON.stringify(diffSerie), JSON.stringify(GraphMocker.mockSeries(expectedChangeSeries, 'loading')), 'Removed series must be ' + expectedChangeSeries);
       }
     }
 
   },
-  teardown: function() {}
+  teardown: function() {
+    var t = this;
+    delete t.assertGraph;
+    delete t.getNewScope;
+    delete t.elem;
+  }
 });
 
 
@@ -143,11 +78,11 @@ test('wsHighstockGraph - adding a new series at the end', function() {
   var t = this;
 
   //prepare data for directive
-  var graph1 = t.createMockGraph(['graph_1111', 'graph_2222']),
-    graph2 = t.createMockGraph(['graph_1111', 'graph_2222', 'graph_3333']);
+  var graph1 = GraphMocker.mockGraph(['graph_1111', 'graph_2222']),
+    graph2 = GraphMocker.mockGraph(['graph_1111', 'graph_2222', 'graph_3333']);
 
   var $scope = t.getNewScope(graph1);
-  var element = t.initDirective($scope);
+  var element = getDirective(t.elem, $scope);
 
   var oldSeries = $scope.graph.series;
   $scope.graph = graph2;
@@ -163,11 +98,11 @@ test('wsHighstockGraph - adding a new series in the middle', function() {
   var t = this;
 
   //prepare data for directive
-  var graph1 = t.createMockGraph(['graph_1111', 'graph_3333']),
-    graph2 = t.createMockGraph(['graph_1111', 'graph_2222', 'graph_3333']);
+  var graph1 = GraphMocker.mockGraph(['graph_1111', 'graph_3333']),
+    graph2 = GraphMocker.mockGraph(['graph_1111', 'graph_2222', 'graph_3333']);
 
   var $scope = t.getNewScope(graph1);
-  var element = t.initDirective($scope);
+  var element = getDirective(t.elem, $scope);
 
   var oldSeries = $scope.graph.series;
   $scope.graph = graph2;
@@ -184,11 +119,11 @@ test('wsHighstockGraph - adding a new series in the middle', function() {
   var t = this;
 
   //prepare data for directive
-  var graph1 = t.createMockGraph(['graph_2222', 'graph_3333']),
-    graph2 = t.createMockGraph(['graph_1111', 'graph_2222', 'graph_3333']);
+  var graph1 = GraphMocker.mockGraph(['graph_2222', 'graph_3333']),
+    graph2 = GraphMocker.mockGraph(['graph_1111', 'graph_2222', 'graph_3333']);
 
   var $scope = t.getNewScope(graph1);
-  var element = t.initDirective($scope);
+  var element = getDirective(t.elem, $scope);
 
   var oldSeries = $scope.graph.series;
   $scope.graph = graph2;
@@ -205,11 +140,11 @@ test('wsHighstockGraph - removing a series at the end', function() {
   var t = this;
 
   //prepare data for directive
-  var graph1 = t.createMockGraph(['graph_1111', 'graph_2222', 'graph_3333']),
-    graph2 = t.createMockGraph(['graph_1111', 'graph_2222']);
+  var graph1 = GraphMocker.mockGraph(['graph_1111', 'graph_2222', 'graph_3333']),
+    graph2 = GraphMocker.mockGraph(['graph_1111', 'graph_2222']);
 
   var $scope = t.getNewScope(graph1);
-  var element = t.initDirective($scope);
+  var element = getDirective(t.elem, $scope);
 
   var oldSeries = $scope.graph.series;
   $scope.graph = graph2;
@@ -226,11 +161,11 @@ test('wsHighstockGraph - removing a series in the middle', function() {
   var t = this;
 
   //prepare data for directive
-  var graph1 = t.createMockGraph(['graph_1111', 'graph_2222', 'graph_3333']),
-    graph2 = t.createMockGraph(['graph_1111', 'graph_3333']);
+  var graph1 = GraphMocker.mockGraph(['graph_1111', 'graph_2222', 'graph_3333']),
+    graph2 = GraphMocker.mockGraph(['graph_1111', 'graph_3333']);
 
   var $scope = t.getNewScope(graph1);
-  var element = t.initDirective($scope);
+  var element = getDirective(t.elem, $scope);
 
   var oldSeries = $scope.graph.series;
   $scope.graph = graph2;
@@ -249,11 +184,11 @@ test('wsHighstockGraph - removing a series in the beginning', function() {
   var t = this;
 
   //prepare data for directive
-  var graph1 = t.createMockGraph(['graph_1111', 'graph_2222', 'graph_3333']),
-    graph2 = t.createMockGraph(['graph_2222', 'graph_3333']);
+  var graph1 = GraphMocker.mockGraph(['graph_1111', 'graph_2222', 'graph_3333']),
+    graph2 = GraphMocker.mockGraph(['graph_2222', 'graph_3333']);
 
   var $scope = t.getNewScope(graph1);
-  var element = t.initDirective($scope);
+  var element = getDirective(t.elem, $scope);
 
   var oldSeries = $scope.graph.series;
   $scope.graph = graph2;
