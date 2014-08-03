@@ -1,13 +1,13 @@
 <div class="btn-group" ng-repeat="serie in graph.series">
 	<button type="button" class="animated btn btn-default graph-metric-label adhoc" onclick="toggleQueryEditor(this)">
-		<div class="text-left padb5">
+		<div class="text-left">
 			<span class="interactive"  title="Remove metric" ng-click="graph.series.splice(graph.series.indexOf(serie),1);"><i class="glyphicon glyphicon-remove"></i></span>
 			<span class="padl5" style="font-weight:bold">{{serie.query|metricQuery}}</span>
 		</div>
-		<div class="tagstr-label adhoc">{{serie.query.tags|tagsString}}</div>
+		<div class="tagstr-label adhoc"><span style="color: #aaa">Tags : </span>{{serie.query.tags|tagsString}}</div>
 	</button>
 	<div class="adhoc-metric-editor bottom-shadow">
-	    <div class="padb10">
+	    <div class="padb10 padl5" style="border-bottom:1px solid #505050">
 		    <div class="row" style="margin:0">
 		    	<div class="col-md-8 text-left" style="padding:0px !important">
 			    	<span class="metric-control-label adhoc">Aggregator : </span>
@@ -25,7 +25,7 @@
 		    </div>
 	    </div>
 	    <div class="padt10" style="border-top:1px solid #777;">
-	    	<div class="metric-control-label adhoc text-left">Tags : </div>
+	    	<div class="metric-control-label adhoc text-left" style="padding-left:5px!important;">Tags : </div>
 	    	<ul style="margin-bottom:5px;margin-top:5px;padding-left:10px">
 				<li ng-repeat="(tk,tv) in serie.query.tags" class="padtb3">
 	    			<div class="input-group input-group-sm">
@@ -38,21 +38,21 @@
 				</li>
 			</ul>
 	    </div>
-	    <div class="input-group input-group-sm padb10 padl10" style="border-bottom:1px solid #777">
+	    <div class="input-group input-group-sm padb10 padl10" style="border-bottom:1px solid #505050;">
 	    	<input type="text" class="form-control trans" ng-model="serie.query.tags" tagkeyvalue style="border-color:#888 !important">
 	    	<span class="input-group-addon trans">
 	    		<i class="glyphicon glyphicon-search"></i>
 	    	</span>
 	    </div>
-	    <div class="input-group input-group-sm padt10">
+	    <div class="input-group input-group-sm padt10 padl5" style="border-top:1px solid #777">
 	    	<span class="input-group-addon nobg metric-control-label adhoc">Alias : </span>
 	    	<input type="text" class="form-control trans" ng-model="serie.alias">
 	    </div>
-	    <div class="input-group input-group-sm padt5 padb10" style="border-bottom:1px solid #777">
+	    <div class="input-group input-group-sm padt5 padb10 padl5" style="border-bottom:1px solid #505050">
 	    	<span class="input-group-addon nobg metric-control-label adhoc">Y-Transform : </span>
 	    	<input type="text" class="form-control trans" ng-model="serie.yTransform">
 	    </div>
-	    <div class="pull-right padt10">
+	    <div class="text-right padt10" style="border-top:1px solid #777">
     		<span class="pointer interactive padr8" ng-click="reloadGraph(graph);">
     			<i class="glyphicon glyphicon-ok"></i>
     		</span>

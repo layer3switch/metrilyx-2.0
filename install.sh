@@ -3,6 +3,7 @@
 INSTALL_ROOT="/opt";
 INSTALL_TIME=$(date '+%d%b%Y_%H%M%S');
 APP_HOME="${INSTALL_ROOT}/metrilyx";
+LOGDIR="/var/log/metrilyx"
 
 if [[ -f "/etc/redhat-release" ]]; then
 	HTTPD="nginx"
@@ -28,6 +29,8 @@ install_app() {
 		chmod g+w ${APP_HOME}/celerybeat-schedule.db
 		chgrp celery ${APP_HOME}/celerybeat-schedule.db
 	fi
+	[ -d "${LOGDIR}" ] || mkdir ${LOGDIR};
+	chmod 777 ${LOGDIR}; 
 }
 setup_startup_scripts() {
 	if [[ -f "/etc/redhat-release" ]]; then
@@ -52,9 +55,7 @@ configure_uwsgi() {
 pydeps() {
 	echo "-- Installing python dependencies..."
 	which pip || easy_install pip;
-	pip uninstall autobahn -y;
-	pip uninstall six -y;
-	pip install six;
+	pip list | grep autobahn || { pip uninstall autobahn six -y; pip install six; }
 	for pypkg in $(cat PYPACKAGES); do
 		pip list | grep ${pypkg} || pip install ${pypkg};
 	done;
@@ -96,12 +97,13 @@ import_configs() {
 	lastInstall=$(ls -t /opt/ | grep 'metrilyx-' | xargs | awk "{print \$1}")
 	if [ "$lastInstall" != "" ]; then
 		echo "- Importing existing data...";
-		echo "  configs...";
-		if [ -f "${APP_HOME}-${INSTALL_TIME}/etc/metrilyx/metrilyx.conf" ]; then
+		if [ -f "/opt/${lastInstall}/etc/metrilyx/metrilyx.conf" ]; then
 	        cp /opt/${lastInstall}/etc/metrilyx/metrilyx.conf ${APP_HOME}/etc/metrilyx/metrilyx.conf; 
+	   		echo "  * Imported: /opt/${lastInstall}/etc/metrilyx/metrilyx.conf";
 	   	fi
-		if [ -f "${APP_HOME}-${INSTALL_TIME}/metrilyx/static/config.js" ]; then
+		if [ -f "/opt/${lastInstall}/metrilyx/static/config.js" ]; then
 			cp /opt/${lastInstall}/metrilyx/static/config.js ${APP_HOME}/metrilyx/static/config.js;
+			echo "  * Imported: /opt/${lastInstall}/metrilyx/static/config.js"
 		fi
 	fi
 }
@@ -135,9 +137,12 @@ if [ "$1" == "app" ]; then
 	configure_webserver;
 	configure_uwsgi;
 	setup_startup_scripts;
-else
+elif [ "$1" != "" ]; then
 	echo "Executing $1...";
 	$1;
+else
+	echo "Invalid args!";
+	exit 1;
 fi
 
 

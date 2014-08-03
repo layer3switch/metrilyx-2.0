@@ -6,8 +6,18 @@ from pprint import pprint
 from metrilyxconfig import config
 import celerytasks
 
+
+def brokerHostStr(config):
+    '''
+    This converts the host array to a host:port string
+    '''
+    return ",".join(["%s:%s" %(h,config['port']) for h in config['host']])
+
 CELERY_IMPORTS = config['celery']['tasks']
-BROKER_URL = config['heatmaps']['transport']+"://%(host)s:%(port)s/%(database)s" %(config['heatmaps']['broker']) 
+BROKER_URL = config['heatmaps']['transport']+\
+    "://"+brokerHostStr(config['heatmaps']['broker'])+\
+    "/"+str(config['heatmaps']['broker']['database'])
+
 CELERY_RESULT_BACKEND = config['heatmaps']['transport']
 CELERY_MONGODB_BACKEND_SETTINGS = config['heatmaps']['broker']
 CELERY_ACCEPT_CONTENT = ['pickle', 'json']

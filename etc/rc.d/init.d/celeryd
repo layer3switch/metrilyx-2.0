@@ -17,19 +17,7 @@
 # Default-Stop:      0 1 6
 # Short-Description: celery task worker daemon
 ### END INIT INFO
-#
-#
-# To implement separate init scripts, copy this script and give it a different
-# name:
-# I.e., if my new application, "little-worker" needs an init, I
-# should just use:
-#
-#   cp /etc/init.d/celeryd /etc/init.d/little-worker
-#
-# You can then configure this by manipulating /etc/default/little-worker.
-#
-VERSION=10.0
-#echo "celery init v${VERSION}."
+
 if [ $(id -u) -ne 0 ]; then
     echo "Error: This program can only be used by the root user."
     echo "       Unprivileged users must use the 'celery multi' utility, "
@@ -48,7 +36,7 @@ SCRIPT_NAME="$(basename "$SCRIPT_FILE")"
 
 DEFAULT_USER="celery"
 DEFAULT_PID_FILE="/var/run/celery/%n.pid"
-DEFAULT_LOG_FILE="/var/log/celery/%n.log"
+DEFAULT_LOG_FILE="/var/log/metrilyx/%n.log"
 DEFAULT_LOG_LEVEL="INFO"
 DEFAULT_NODES="celery"
 DEFAULT_CELERYD="-m celery worker --detach"

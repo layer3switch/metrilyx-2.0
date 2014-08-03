@@ -7,7 +7,7 @@ from metrilyxconfig import config
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APPEND_SLASH = False
 CORS_ORIGIN_ALLOW_ALL = True
 

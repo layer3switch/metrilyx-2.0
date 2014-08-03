@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
 import os
-import json
 import sys
+sys.path.append(os.path.dirname(os.path.dirname(
+						os.path.abspath(__file__))))
+import json						
+from optparse import OptionParser
 from pprint import pprint
 
 
@@ -12,27 +15,42 @@ from metrilyx.models import *
 
 graphSchema = json.load(open("./schemas/graph.json", "rb"))
 
+def printStatus(graph, status, msg):
+	if status in ('ADDED', 'UPDATED'):
+		print "  * %s '%s' (%s): %s" %(status, graph['name'], graph['_id'], msg)	
+	else:
+		print "  %s %s (%s): %s" %(status, graph['name'], graph['_id'], msg)
+
 def updateThresholds(graph):
 	if graph['graphType'] == "pie": 
-		print graph['_id'],  "skipping pie graph"
+		printStatus(graph, "SKIPPING", "pie graph")
 		return
 	if not graph.has_key('thresholds'):
 		graph['thresholds'] = graphSchema['thresholds']
-		print graph['_id'], "thresholds added"
+		printStatus(graph, "ADDED", "thresholds")
 
 	else:
 		if type(graph['thresholds']['danger']) is dict: 
-			print graph['_id'], "skipping already in upgraded"
+			printStatus(graph, "SKIPPING", "already upgraded")
 			return
 		if type(graph['thresholds']['danger']) is str or \
 				type(graph['thresholds']['danger']) is unicode:
-			graph['thresholds']['danger'] = float(graph['thresholds']['danger'])
+			if graph['thresholds']['danger'] == '':
+				graph['thresholds']['danger'] = graphSchema['thresholds']['danger']['min']				
+			else:
+				graph['thresholds']['danger'] = float(graph['thresholds']['danger'])
 		if type(graph['thresholds']['warning']) is str or \
 				type(graph['thresholds']['warning']) is unicode:
-			graph['thresholds']['warning'] = float(graph['thresholds']['warning'])
+			if graph['thresholds']['warning'] == '':
+				graph['thresholds']['warning'] = graphSchema['thresholds']['warning']['min']				
+			else:
+				graph['thresholds']['warning'] = float(graph['thresholds']['warning'])
 		if type(graph['thresholds']['info']) is str or \
 				type(graph['thresholds']['info']) is unicode:
-			graph['thresholds']['info'] = float(graph['thresholds']['info'])
+			if graph['thresholds']['info'] == '':
+				graph['thresholds']['info'] = graphSchema['thresholds']['info']['min']				
+			else:
+				graph['thresholds']['info'] = float(graph['thresholds']['info'])
 
 		graph['thresholds'] = {
 			'danger': {
@@ -48,30 +66,32 @@ def updateThresholds(graph):
 				'max': graph['thresholds']['warning']
 			}
 		}
-		print graph['_id'], "thresholds updated"
-		#print model._id, graph['thresholds']
+		printStatus(graph, "UPDATED", "thresholds")
 
 def addEventAnnoDef(graph):
 	if not graph.has_key('annoEvents'):
 		graph['annoEvents'] = graphSchema['annoEvents']
-		print graph['_id'], "added event annotation"
+		printStatus(graph, "ADDED", "event annotation")
 	else:
 		if graph['annoEvents'].has_key('types'):
 			graph['annoEvents']['eventTypes'] = graph['annoEvents']['types']
 			del graph['annoEvents']['types']
-			print graph['_id'], "updated event annotation"
+			printStatus(graph, "UPDATED", "event annotation")
 
 def updateMultiPaneOptions(graph):
 	if not graph.has_key('multiPane'):
 		graph['multiPane'] = False
+		printStatus(graph, "ADDED", "multiPane")
 	if not graph.has_key('panes'):
 		graph['panes'] = ["",""]
+		printStatus(graph, "ADDED", "panes")
 	else:
 		while(len(graph['panes'])<2):
 			graph['panes'].append("")
 	for s in graph['series']:
 		if not s.has_key('paneIndex'):
 			s['paneIndex'] = 0
+			printStatus(graph, "ADDED", "paneIndex")
 
 def processGraphLayout(model):
 	for row in model.layout:
@@ -89,11 +109,29 @@ def processHeatLayout(model):
 				for graph in pod['graphs']:
 					updateThresholds(graph)
 
+parser = OptionParser()
+parser.add_option("--commit", "-c", dest="commit", default=False, action="store_true")
+
+(opts,args) = parser.parse_args()
+
 models = MapModel.objects.all()
-for m in models:
-	if m.model_type == "graph":
-		processGraphLayout(m)
-		m.save()
-	elif m.model_type == "heat":
-		processHeatLayout(m)
-		m.save()
+if not opts.commit:
+	print "--- DRYRUN ---\n"
+	for m in models:
+		print "[%s]" %(m._id)
+		if m.model_type == "graph":
+			processGraphLayout(m)
+		elif m.model_type == "heat":
+			processHeatLayout(m)
+		print ""
+	print "--- DRYRUN ---"
+else:
+	for m in models:
+		print "[%s]" %(m._id)
+		if m.model_type == "graph":
+			processGraphLayout(m)
+			m.save()
+		elif m.model_type == "heat":
+			processHeatLayout(m)
+			m.save()
+		print ""

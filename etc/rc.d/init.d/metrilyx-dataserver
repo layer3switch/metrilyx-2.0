@@ -8,12 +8,13 @@
 
 NAME="metrilyx-dataserver"
 APP_HOME="/opt/metrilyx"
-BIN=${APP_HOME}/${NAME}.py
-LOGFILE=/var/log/${NAME}.log
+BIN=${APP_HOME}/bin/${NAME}.py
+LOGFILE=/var/log/metrilyx/${NAME}.log
+LOGLEVEL="WARNING"
 PGREP="/usr/bin/pgrep -f"
 
 ## set -c to 0 spawn servers based on the number of cpus/cores
-DEFAULT_OPTS="-e 80 -c 0"
+DEFAULT_OPTS="-e 80 -c 0 -l${LOGLEVEL}"
 
 RETVAL=0
 
@@ -22,7 +23,7 @@ start() {
 	if [ "$PIDS" = "" ]; then
 		echo -n "${NAME} starting... "
 		${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
-		sleep 1;
+		sleep 2;
 		PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
 		if [ "$PIDS" = "" ]; then
 			echo "[failed]";

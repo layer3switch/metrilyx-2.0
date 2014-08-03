@@ -2,6 +2,7 @@
 
 import httplib
 import json
+import logging
 
 import StringIO
 import gzip
@@ -18,6 +19,8 @@ from twisted.internet.protocol import Protocol
 from metrilyx.metrilyxconfig import config
 
 from pprint import pprint
+
+logger = logging.getLogger(__name__)
 
 class HttpJsonClient(object):
 
@@ -179,7 +182,8 @@ class JsonBodyProducer(object):
         pass
 
 class AsyncHttpResponseProtocol(Protocol):
-    def __init__(self, finished_deferred):
+    def __init__(self, finished_deferred, headers):
+        self.headers = headers
         self.finished = finished_deferred
         #self.remaining = 1024 * 50
         self.data = ""
@@ -189,9 +193,21 @@ class AsyncHttpResponseProtocol(Protocol):
         self.data += bytes
         #    self.remaining -= len(bytes[:self.remaining])
 
+    def __ungzip_(self):
+        try:   
+            compressedstream = StringIO.StringIO(self.data)
+            gzipper = gzip.GzipFile(fileobj=compressedstream)
+            return gzipper.read()
+        except Exception,e:
+            logger.error(e)
+            return json.dumps({"error": str(e)})
+
     def connectionLost(self, reason):
-        #print 'Finished receiving body:', reason.getErrorMessage()
-        self.finished.callback(self.data)
+        if self.headers.hasHeader('content-encoding') and \
+                ('gzip' in self.headers.getRawHeaders('content-encoding')):
+            self.finished.callback(self.__ungzip_())
+        else:
+            self.finished.callback(self.data)
 
 class AsyncHttpJsonClient(object):
     '''
@@ -209,33 +225,34 @@ class AsyncHttpJsonClient(object):
             self.method = 'GET'
 
         self.agent = Agent(reactor)
-        d = self.agent.request(
-            self.method,
-            self.uri,
-            Headers({
-                'User-Agent': ['AsyncHttpJsonRequest'],
-                'Content-Type': ['application/json']    
-            }),
-            self.body)
-
-        d.addCallback(self.__readResponseCallback)
-        d.addErrback(self.__readErrorCallback)
+        self.__d_agent = self.agent.request(
+                self.method,
+                self.uri,
+                Headers({
+                    'User-Agent': ['AsyncHttpJsonRequest'],
+                    'Content-Type': ['application/json'],
+                    'Accept-Encoding': ['gzip']
+                }),
+                self.body)
 
         self.__deferredResponse = Deferred()
+        
 
-    def __readResponseCallback(self, response):
-        response.deliverBody(AsyncHttpResponseProtocol(self.__deferredResponse))
+
+    def __readResponseCallback(self, response, userCb, *cbargs):
+        response.deliverBody(AsyncHttpResponseProtocol(self.__deferredResponse, response.headers))
+        self.__deferredResponse.addCallback(userCb, *([response]+list(cbargs)))
         return self.__deferredResponse
 
-    def __readErrorCallback(self, error):
-        print error.getErrorMessage()
+    def __readErrorCallback(self, error, userCb, *cbargs):
+        logger.warning(error.getErrorMessage())
+        self.__deferredResponse.addCallback(userCb, *cbargs)
 
     def addResponseCallback(self, callback, *cbargs):
-        self.__deferredResponse.addCallback(callback, *cbargs)
+        self.__d_agent.addCallback(self.__readResponseCallback, callback, *cbargs)
 
-    ## TODO: this function needs validation.
     def addResponseErrback(self, callback, *cbargs):
-        self.__deferredResponse.addErrback(callback, *cbargs)
+        self.__d_agent.addErrback(self.__readErrorCallback, callback, *cbargs)
 
 
 

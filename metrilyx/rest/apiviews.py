@@ -69,7 +69,9 @@ class GraphMapViewSet(MapViewSet):
 
 
 	def list(self, request, pk=None):
-		serializer = MapModelListSerializer(self.queryset,many=True)
+		# w/out this not all models show up in the listing.
+		queryset = MapModel.objects.filter(model_type="graph")
+		serializer = MapModelListSerializer(queryset, many=True)
 		return Response(serializer.data)
 
 	def retrieve(self, request, pk=None):
@@ -132,7 +134,6 @@ class EventsViewSet(APIView):
 	REQUIRED_WRITE_PARAMS = ('eventType','message', 'tags')
 
 	eds = ElasticsearchDatastore(config['annotations']['dataprovider'])
-	annotator = Annotator()
 
 	def __checkRequest(self, request):
 		if request.body == "":
@@ -186,24 +187,15 @@ class EventsViewSet(APIView):
 			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
 
 		try:
-			annoStr = self.annotator.annotation(reqBody)
-			## this will give an object with the _id
-			annoObj = self.annotator.annotation(annoStr)
-
-			self.eds.add(annoObj)
-			return Response(annoObj)
+			out = dict([(k,v) for k,v in reqBody.items() if k != "tags"])
+			for k,v in reqBody['tags'].items():
+				out[k] = v
+			anno = Annotator(out)
+			self.eds.add(anno.annotation)
+			return Response(anno.annotation)
 		except Exception,e:
-			## 503 service unavailable
 			return Response({'error': str(e)},
 				status=status.HTTP_503_SERVICE_UNAVAILABLE)
-
-	'''
-	def put(self, request, pk=None):
-		reqBody = self.__checkRequest(json.loads(request.body))
-		if reqBody.has_key('error'):
-			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
-		return Response({})
-	'''
 
 class TagViewSet(viewsets.ViewSet):
 
@@ -238,8 +230,7 @@ class TagViewSet(viewsets.ViewSet):
 		return Response(serializer.data)
 
 class SearchViewSet(viewsets.ViewSet): 
-	#tsdb_suggest_url = "%(uri)s%(search_endpoint)s?max=%(suggest_limit)d" %(
-	#													config['dataprovider'])
+
 	metricMetaCache = MetricCacheDatastore(**config['cache']['datastore']['mongodb'])
 
 	def list(self, request, pk=None):

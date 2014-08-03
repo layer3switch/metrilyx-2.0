@@ -9,11 +9,11 @@ logger = logging.getLogger(__name__)
 class BasePerfDataProvider(BaseClassWithConfig):
 
 	def responseErrback(self, error, graphMeta):
-		logger.error(str(error))
+		logger.error("%s - %s" %(str(error),str(graphMeta['series'])))
 		try:
 			err_obj = json.loads(error.value.response)['error']
 		except Exception,e:
-			err_obj = {'message': str(error.value.response)}
+			err_obj = {'message': str(error)}
 
 		m = re_504.search(err_obj['message'])
 		if m != None:
@@ -21,8 +21,7 @@ class BasePerfDataProvider(BaseClassWithConfig):
 		else:
 			graphMeta['series'][0]['data'] = {"error": err_obj['message'][:100]}
 
-		logger.error("BasePerfDataProvider.responseErrback: %s %s" %(
-			str(graphMeta['series'][0]['query']), err_obj['message']))
+		#logger.error("%s %s" %(str(graphMeta['series']), err_obj['message']))
 		
 		return graphMeta
 

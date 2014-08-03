@@ -5,6 +5,11 @@
 		<meta http-equiv="pragma" content="no-cache" />
 		<meta http-equiv="cache-control" content="no-cache" />
 		
+		<link rel="stylesheet" href="css/style.css">
+		<link rel="stylesheet" href="css/layout.css">
+		<link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css">
+		<link rel="stylesheet" href="libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css">
+		
 		<script src="config.js"></script>
 		<script src="libs/jquery/jquery-1.10.2.min.js"></script>
 		<script src="libs/jquery/jquery-addons.js"></script>
@@ -12,7 +17,6 @@
 		<script src="libs/highstock/2.0.1/js/highstock.js"></script>
 
 		<script src="libs/graphing.js"></script>
-		<script src="libs/dnd-config.js"></script>
 		
 		<script src="libs/bootstrap-datetimepicker/js/moment.min.js"></script>
 		<script src="libs/bootstrap/js/bootstrap.min.js"></script>
@@ -30,12 +34,6 @@
 		<script src="services.js"></script>
 		<script src="libs/angular-graphing.js"></script>
 		<script src="libs/angular-heatmap.js"></script>
-		
-		<link rel="stylesheet" href="css/style.css">
-		<link rel="stylesheet" href="css/layout.css">
-		<link rel="stylesheet" href="css/graphics.css">
-		<link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css">
-		<link rel="stylesheet" href="libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css">
 
 	</head>
 	<body ng-app="app">
@@ -48,7 +46,7 @@
 					<span id="heatmap-list-btn" ng-click="loadHeatmapList('#heatmap-list-btn')" class="model-list-btn pointer padl15 animated" style="position:relative;top:1px;" title="Heatmaps">
 						<i class="glyphicon glyphicon-fire"></i>
 					</span>
-					<span onclick="$('#side-panel').addClass('offstage')" class="pull-right animated side-panel-toggle" style="position:relative;top:3px;cursor:w-resize">
+					<span onclick="$('#side-panel').addClass('offstage')" title="Close" class="pull-right animated side-panel-toggle" style="position:relative;top:3px;cursor:w-resize">
 						<i class="glyphicon glyphicon-chevron-left"></i>
 					</span>
 				</div>

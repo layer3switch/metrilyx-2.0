@@ -8,7 +8,8 @@ class OpenTSDBDataProvider(BasePerfDataProvider):
 			if method is 'GET' and the query is url encoded.
 		'''
 		try:
-			baseUrl = "%s%s?start=%s" %(self.uri, self.query_endpoint, request['start'])
+			baseUrl = "%s:%d%s?start=%s" %(self.uri, self.port,
+							self.query_endpoint, request['start'])
 		except Exception,e:
 			print e, request
 			raise RuntimeError(e)

@@ -2,10 +2,8 @@
 import logging
 import json
 from datetime import datetime
-from pprint import pprint 
 
 from twisted.internet import reactor
-from twisted.web.client import getPage
 
 from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.websocket.compress import PerMessageDeflateOffer, \
@@ -14,21 +12,10 @@ from autobahn.websocket.compress import PerMessageDeflateOffer, \
 from ..httpclients import AsyncHttpJsonClient
 from transforms import MetrilyxSerie, EventSerie, MetrilyxAnalyticsSerie
 from ..dataserver import GraphRequest, GraphEventRequest
+from dataproviders import re_504
 
 logger = logging.getLogger(__name__)
-
-"""
-def advancedGetPage(url, contextFactory=None, *args, **kwargs):
-	from twisted.web.client import HTTPClientFactory, _makeGetterFactory
-	return _makeGetterFactory(
-		url,
-		HTTPClientFactory,
-		contextFactory=contextFactory,
-		*args, **kwargs)
-
-		# factory.deferred.addCallback....
-"""
-
+from pprint import pprint
 ## Enable WebSocket extension "permessage-deflate".
 ## Function to accept offers from the client ..
 def acceptedCompression(offers):
@@ -72,14 +59,23 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 		request_obj = self.checkMessage(payload, isBinary)
 		if not request_obj.get("error"):
 			## all checks passed - proceed
-			logger.info("Request %s %s start: %s" %(request_obj['_id'], request_obj['name'],
-										datetime.fromtimestamp(float(request_obj['start']))))
-			graphReq = GraphRequest(request_obj)
-			self.processRequest(graphReq)
+			try:
+				if request_obj['_id'] == 'annotations':
+					## annotation request
+					logger.info("Annotation Request: %s" %(str(request_obj)))
+					self.processRequest(request_obj)
+				else:
+					## graph request	
+					logger.info("Request %s '%s' start: %s" %(request_obj['_id'], 
+						request_obj['name'], datetime.fromtimestamp(float(request_obj['start']))))
+					graphReq = GraphRequest(request_obj)
+					self.processRequest(graphReq)
+			except Exception,e:
+				logger.error(str(e) + " " + str(request_obj))
 		else:
 			logger.error("Invalid request object: %s" %(str(request_obj)))
 
-	def processRequest(self, graphRequest):
+	def processRequest(self, graphOrAnnoRequest):
 		'''
 			This is a stub that is overwritten in 'GraphServerProtocol'
 		'''
@@ -90,18 +86,41 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 
 	def graphResponseErrback(self, error, graphMeta):
 		# call dataprovider errback (diff for diff backends)
+		logger.error("%s" %(str(error)))
 		errResponse = self.dataprovider.responseErrback(error, graphMeta)
 		self.sendMessage(json.dumps(errResponse))
 
-	def graphResponseCallback(self, response, url, graphMeta):
-		graphMeta['series'][0]['data'] = self.dataprovider.responseCallback(
-											json.loads(response), url, graphMeta)
-		
-		#mserie = MetrilyxSerie(graphMeta['series'][0])
-		mserie = MetrilyxAnalyticsSerie(graphMeta['series'][0])
-		graphMeta['series'][0]['data'] = mserie.data
+	def _checkResponse(self, respBodyStr, response, url):
+		if response.code < 200 or response.code > 304:
+			logger.warning("Request failed %d %s %s" %(response.code, respBodyStr, url))
+			m = re_504.search(respBodyStr)
+			if  m != None:
+				return {"error": "code=%d,response=%s" %(response.code, m.group(1))}
+			return {"error": "code=%s,response=%s" %(response.code, respBodyStr)}
+
+		try:
+			d = json.loads(respBodyStr)
+			if isinstance(d, dict) and d.has_key('error'):
+				logger.warning(str(d))
+				return d
+			return {'data': d}
+		except Exception, e:
+			logger.warning("%s %s" %(str(e), url))
+			return {"error": str(e)}
+
+	def graphResponseCallback(self, respBodyStr, response, url, graphMeta):
+		responseData = self._checkResponse(respBodyStr, response, url)
+		if responseData.has_key('error'):
+			graphMeta['series'][0]['data'] = responseData
+		else:
+			graphMeta['series'][0]['data'] = self.dataprovider.responseCallback(
+											responseData['data'], url, graphMeta)
+			mserie = MetrilyxSerie(graphMeta['series'][0])
+			#mserie = MetrilyxAnalyticsSerie(graphMeta['series'][0])
+			graphMeta['series'][0]['data'] = mserie.data
+
 		self.sendMessage(json.dumps(graphMeta))
-		logger.info("Response (graph) %s %s start: %s" %(graphMeta['_id'], 
+		logger.info("Response (graph) %s '%s' start: %s" %(graphMeta['_id'], 
 			graphMeta['name'], datetime.fromtimestamp(float(graphMeta['start']))))
 
 	def processRequest(self, graphRequest):
@@ -124,31 +143,31 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 class EventGraphServerProtocol(GraphServerProtocol):
 	eventDataprovider = None
 
-	def processRequest(self, graphRequest):
-		# submit graph data queries
-		self.submitPerfQueries(graphRequest)
-		# submit event queries
-		self.submitEventQueries(graphRequest.request)
+	def processRequest(self, graphOrAnnoRequest):
+		if isinstance(graphOrAnnoRequest, GraphRequest):	
+			# submit graph data queries
+			self.submitPerfQueries(graphOrAnnoRequest)
+		elif graphOrAnnoRequest['_id'] == 'annotations':
+			# submit annnotation queries
+			self.submitEventQueries(graphOrAnnoRequest)
+		
+	def eventResponseCallback(self, data, response, url, eventType, request):
+		dct = self._checkResponse(data, response, url)
+		if dct.has_key('error'):
+			logger.error(str(dct))
+			return
 
-	def eventResponseCallback(self, data, eventType, graph):
-		try:
-			dct = json.loads(data)
-			if dct.has_key('error'):
-				logger.error(str(dct))
-				return
+		eas = EventSerie(self.eventDataprovider.responseCallback(dct['data']), eventType, request)
+		if len(eas.data['annoEvents']['data']) < 1:
+			logger.info("Event annotation: type=%s no data" %(eventType))
+			return
 
-			eas = EventSerie(self.eventDataprovider.responseCallback(dct),
-														graph, eventType)
-			if len(eas.data['annoEvents']['data']) < 1:
-				logger.info("Event annotation: type=%s no data (%s)" %(
-													eventType, graph['_id']))
-				return
-
-			self.sendMessage(json.dumps(eas.data))
-			logger.info("Event annotation: sha1=%s type=%s count=%d" %(graph['_id'], 
-										eventType, len(eas.data['annoEvents']['data'])))
-		except Exception,e:
-			logger.error("%s %s" %(str(e), str(data)))
+		self.sendMessage(json.dumps(eas.data))
+		logger.info("Event annotation: type=%s count=%d" %(eventType, 
+									len(eas.data['annoEvents']['data'])))
+	
+	def eventReponseErrback(self, error, url, eventType, request):
+		logger.error(str(error))
 
 	def submitEventQueries(self, request):
 		## TODO: this will raise an exception 
@@ -162,12 +181,6 @@ class EventGraphServerProtocol(GraphServerProtocol):
 			(url, method, query) = self.eventDataprovider.getQuery(graphEvent)
 			a = AsyncHttpJsonClient(uri=url, method=method, body=query)
 			a.addResponseCallback(self.eventResponseCallback, 
-					graphEvent['eventTypes'][0], request)
-
-		'''
-		for (url, eventType, query) in self.eventDataprovider.queryBuilder.getQuery(request):
-			#print graphMeta['_id'], eventType
-			#print eventType, query
-			a = AsyncHttpJsonRequest(uri=url, method='GET', body=query)
-			a.addResponseCallback(self.eventQueryResponseCallback, eventType, graphMeta, query)
-		'''
+					url, graphEvent['eventTypes'][0], request)
+			a.addResponseErrback(self.eventReponseErrback,
+					url, graphEvent['eventTypes'][0], request)

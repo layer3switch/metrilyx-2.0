@@ -29,10 +29,6 @@ app.config(['$routeProvider',
 				controller: 'adhocGraphController',
 				reloadOnSearch: false
 			})
-			.when('/:pageId/:graphId', {
-				templateUrl: 'partials/adhoc-graph.html',
-				controller: 'adhocGraphController'
-			})
 			.when('/heatmap/:heatmapId', {
 				templateUrl: 'partials/page.html',
 				controller: 'pageController',
@@ -97,8 +93,8 @@ angular.module('filters',[]).
 					outstr += k+"="+obj[k]+", ";
 				}
 			}
-			if(outstr === "") return "Tags:";
-			return outstr.replace(/\, $/, "");
+			if(outstr === "") return "";
+			return "{ " + outstr.replace(/\, $/, "") + " }"; 
 		};
 	}).filter('tagsLink', function() {
 		return function(obj) {
@@ -158,7 +154,6 @@ app.directive('eventTypes', function() {
 	        	},
 	        	minLength:1,
 	        	select: function( event, ui ) {
-	        		console.log(ctrl.$modelValue);
 	        		for(var i in ctrl.$modelValue) {
 	        			if(ctrl.$modelValue[i] === ui.item.value) {
 	        				$(elem).val('');
@@ -286,6 +281,7 @@ app.directive('tagkeyvalue', function() {
 		}
 	};
 });
+// page id validator //
 app.directive('pageId', function() {
 	return {
 		restrict: 'A',
@@ -313,22 +309,71 @@ app.directive('pageId', function() {
 			});
 		}
 	};
-});/*
-app.directive('graphStatus', function() {
+});
+app.directive('globalAnnotations', function() {
 	return {
 		restrict: 'A',
 		require: '?ngModel',
 		link: function(scope, elem, attrs, ctrl) {
 			if(!ctrl) return;
+			var currTimer;
+			function getAnnoQuery(sVal, timeWindow) {
+				annoq = {
+					'annoEvents': {
+						'eventTypes': sVal.eventTypes,
+						'tags': sVal.tags
+					},
+					'_id': 'annotations'
+				};
+				if(timeWindow && timeWindow.start) {
+					return $.extend(timeWindow, annoq);
+				} else {
+					return $.extend(scope.getTimeWindow(), annoq);
+				}
+			}
+			function getUpdates() {
+				if(ctrl.$modelValue && scope.updatesEnabled && (ctrl.$modelValue.eventTypes.length > 0) && (Object.keys(ctrl.$modelValue.tags).length > 0)) {		
+					q = getAnnoQuery(ctrl.$modelValue, {
+							'start': Math.floor(((new Date()).getTime() - ANNO_FETCH_TIME_WIN)/1000)
+						});
+					scope.requestData(q);
+				}
+				if(currTimer) clearTimeout(currTimer);
+				currTimer = setTimeout(function() { 
+					getUpdates();
+				}, ANNO_POLL_INTERVAL-1000);
+			}
+
 			scope.$watch(function() {
 				return ctrl.$modelValue;
 			}, function(newVal, oldVal) {
-				//if(!newVal.series) return;
-				console.log(newVal.series.length);
+				if(!newVal) return;
+				if((newVal.eventTypes.length < 1) || (Object.keys(newVal.tags).length < 1)) return;
+				// load, reload, dispatched, dispatching //
+				if(newVal.status === 'load' || newVal.status === 'reload') {
+					scope.requestData(getAnnoQuery(newVal));
+					setTimeout(function() {getUpdates();}, ANNO_FETCH_TIME_WIN);
+				}
 			}, true);
 		}
 	};
-});*/
+});
+app.directive('tooltipArrow', function() {
+	return {
+		restrict: 'A',
+		require: '?ngModel',
+		link: function(scope, elem, attrs, ctrl) {
+			if(!ctrl) return;
+			//console.log(elem);
+			var canvas = document.createElement('canvas');
+			canvas.width = attrs.width;
+			canvas.height = attrs.height;
+			$(elem).append(canvas);
+			drawTriOnCanvas(canvas, attrs.color, attrs.direction);
+		}
+	}
+});
+
 /*
  * Parse tags object to 'tag1=val1,tag2=val2;'
  * Error checking and validity setting.
@@ -362,7 +407,6 @@ app.directive('keyValuePairs', function() {
         			return baseTags+kv[0]+"="+retstr;
         		}
 			}
-
 			$(elem).attr('placeholder', 'tag1=val1,tag2=val2');
 			$(elem).autocomplete({
 				source: function(request, response) {
@@ -488,7 +532,6 @@ function dictToCommaSepStr(obj, delim) {
     for(var i in obj) {
         tstr += i+delim+obj[i]+",";
     }
-    //return tstr.replace(/\,$/,';');
     return tstr.replace(/\,$/,'');
 }
 /*
@@ -496,13 +539,12 @@ function dictToCommaSepStr(obj, delim) {
  * return: { key1: val1, key2: val2 }
  */
 function commaSepStrToDict(tagsStr, delim) {
-	if(delim === undefined) delim = "=";
+	//if(delim === undefined) delim = "=";
 	if(tagsStr == "") return {};
-	d = {};
+	var d = {};
 	kvpairs = tagsStr.replace(/;$/, '').split(",");
-	//kvpairs = tagsStr.split(",");
 	for(var i in kvpairs) {
-		kv = kvpairs[i].split(delim);
+		kv = kvpairs[i].split(/:|=/);
 		if(kv.length != 2) continue;
 		if(kv[0] == "") continue;
 		d[kv[0]] = kv[1];
@@ -520,18 +562,46 @@ function clearAllTimeouts() {
 }
 function setGlobalAlerts(rslt) {
 	if(rslt.error) {
-		$('#global-alerts').removeClass('alert-success');
-		$('#global-alerts').addClass('alert-danger');
-		$('#global-alerts').html("<b>Error: </b>"+rslt.message);
+		$('#global-alerts').removeClass('alert-success')
+							.addClass('alert-danger')
+							.html("<b>Error: </b>"+rslt.message);
 	} else {
-		$('#global-alerts').removeClass('alert-danger');
-		$('#global-alerts').addClass('alert-success');
-		$('#global-alerts').html("<b>Success: </b>"+rslt.message);
+		$('#global-alerts').removeClass('alert-danger')
+							.addClass('alert-success')
+							.html("<b>Success: </b>"+rslt.message);
 	}
 }
 function flashAlertsBar() {
-	$('#global-alerts').fadeIn(500);
-		setTimeout(function() {
-			$('#global-alerts').fadeOut(1000);
-		}, 3000);
+	var ga = $('#global-alerts');
+	$(ga).fadeIn(500);
+	setTimeout(function() {
+		$(ga).fadeOut(1000);
+	}, 3000);
+}
+// wrapper to drawTriOnCanvas //
+function drawTriBySelector(selector, color, direction) {
+	direction = typeof direction !== 'undefined' ? direction : 'up';
+	var canvas = $(selector)[0];
+	drawTriOnCanvas(canvas, color, direction);
+}
+// draw triangle on canvas //
+function drawTriOnCanvas(canvas, color, direction) {
+	if (canvas.getContext){
+	    var ctx = canvas.getContext('2d');
+	    ctx.beginPath();
+	    switch(direction) {
+	    	case 'left':
+				ctx.moveTo(canvas.width,0);
+			    ctx.lineTo(canvas.width,canvas.height);
+			    ctx.lineTo(0,canvas.height/2);
+	    		break;
+	    	default:
+			    ctx.moveTo(canvas.width/2,0);
+			    ctx.lineTo(canvas.width,canvas.height);
+			    ctx.lineTo(0,canvas.height);
+			    break;
+		}
+	    ctx.fillStyle = color;
+	    ctx.fill();
+	}
 }

@@ -2,6 +2,7 @@
 	"dataprovider": {
 		"name": "OpenTSDB",
 		"uri": "http://<OpenTSDB host>",
+		"port": 4242,
 		"query_endpoint": "/api/query",
 		"search_endpoint": "/api/suggest",
 		"loader_class": "opentsdb.OpenTSDBDataProvider"
@@ -10,7 +11,7 @@
 		"analysis_interval": "1m-ago",
 		"transport": "mongodb",
 		"broker": {
-	    	"host": "127.0.0.1",
+	    	"host": ["127.0.0.1"],
 	    	"port": 27017,
 	    	"database": "jobs", 
 	    	"taskmeta_collection": "taskmeta_collection"
@@ -21,7 +22,7 @@
 		"retention_period": 12,
 		"datastore": {
 			"mongodb": {
-				"host": "127.0.0.1",
+				"host": ["127.0.0.1"],
 		    	"port": 27017,
 		    	"database": "metrilyx_cache", 
 		    	"collection": "tsmeta_cache"
@@ -56,7 +57,7 @@
 			"port": 9200,
 			"use_ssl": false,
 			"search_endpoint": "_search",
-			"index": "anno_events",
+			"index": "eventannotations",
 			"result_size": 10000000,
 			"loader_class": "ess.ElasticsearchEventDataProvider"
 		}

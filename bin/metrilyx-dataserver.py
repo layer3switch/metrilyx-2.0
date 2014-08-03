@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
+import os
 import sys
+sys.path.append(os.path.dirname(os.path.dirname(
+						os.path.abspath(__file__))))
 import json
 import time
 import logging
@@ -18,7 +21,7 @@ from metrilyx.dataserver.protocols import GraphServerProtocol, \
 										EventGraphServerProtocol, \
 										acceptedCompression
 
-LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s] %(message)s"
+LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s %(lineno)d] %(message)s"
 
 def spawnWebsocketServer(uri, logLevel, protocol, externalPort=None):
 	if logLevel == "DEBUG":

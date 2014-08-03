@@ -1,21 +1,23 @@
 Metrilyx v2.3.0
 ===============
-Metrilyx is a web based dashboard engine  to OpenTSDB, a time series database used to store large amounts of data.  It allows for analyzing, cross cutting and viewing of time series data in a simple manner.
+Metrilyx is a web based dashboard engine to OpenTSDB, a time series database used to store large amounts of data.  It allows for analyzing, cross cutting and viewing of time series data in a simple manner.
 
 #### Features:
 - Easy to use UI for dashboard creation.
+- Annotate various events.
 - Multiple graph types: spline, area, stacked, pie, line.
 - Data provided via websockets for low protocol overhead.
-- Event annotations.
 - Regex support for metric, tag key and tag value searches.
 - Supports distributed and HA setup
 
 ##### v2.3.0
-- Event annotations.
-- Regex support for metric, tag key and tag value searches.
+- Event annotations for both adhoc and dashboard view.
+- Cleaner URL params for user readability.
+- Auto updates when viewing adhoc graphs.
+- Regex support for metric, tag-key and tag-value searches.
 - Additional graph types: spline, area, stacked, pie, line.
 - UI changes and fixes.
-- Performance improvements on certain api calls.
+- Overall performance improvements.
 
 ##### v2.2.0
 - Major performance improvements.
@@ -51,6 +53,11 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 *	**elasticsearch**
 
 	This is used to store all event annotations.  This is where the data is queried from as well.  Installer packages are available on their site.
+	In order to create the index issue the following command:
+
+		curl -XPOST http://<elasticsearch_host>:<port>/eventannotations
+
+	If you've changed the name of the index in the configuration, appropriately change the name in the command above.
 
 *	**mongodb**
 
@@ -59,7 +66,6 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 *	**postgresql >= 9.3** (optional)
 
 	This component is only needed if you plan to store your models in a database other than the default sqlite3.  Based on the number of models and usage a proper database may be needed.  Metrilyx has been tested using postgresql and is currently in use at TicketMaster.  In order to install postgres on a RHEL based system, the OS version must be >= 6.5.  MySQL has not been tried due to the lack of JSON support.  Installer packages for postgres are available on their site.
-
 
 #### OS Packages:
 Once the above requirements have been fulfilled, you can run the command below to install the remaining OS packages.
@@ -102,10 +108,12 @@ The provided install script will work with both **RedHat** and **Debian** based 
 - Issue the following command to install the application:
 	
 	$ git clone https://github.com/Ticketmaster/metrilyx-2.0.git
+	
 	$ cd metrilyx-2.0
+	
 	$ ./install.sh app
 
-Assuming all required OS packages are installed, the script will install the needed python modules, nginx configs depending on your distribution and prompt you to edit the metrilyx configuration file.
+Assuming all required OS packages are installed, the script will install the needed python modules, nginx configs depending on your distribution and prompt you to edit the metrilyx configuration files.
 
 After you have completed editing the configuration file, start the modelmanager and dataserver processes, then restart nginx.  Also start celeryd and celerybeat which consume and run periodic jobs repsectively.
 	
@@ -148,7 +156,7 @@ A sample configuration file has been provided.  The configuration file is in JSO
 			"analysis_interval": "1m-ago",
 			"transport": "mongodb",
 			"broker": {
-		    	"host": "127.0.0.1",
+		    	"host": ["127.0.0.1"],
 		    	"port": 27017,
 		    	"database": "jobs", 
 		    	"taskmeta_collection": "taskmeta_collection"
@@ -158,7 +166,7 @@ A sample configuration file has been provided.  The configuration file is in JSO
 			"interval": 5,
 			"datastore": {
 				"mongodb": {
-					"host": "127.0.0.1",
+					"host": ["127.0.0.1"],
 			    	"port": 27017,
 			    	"database": "metrilyx_cache", 
 			    	"collection": "tsmeta_cache"
@@ -193,7 +201,7 @@ A sample configuration file has been provided.  The configuration file is in JSO
 				"port": 9200,
 				"use_ssl": false,
 				"search_endpoint": "_search",
-				"index": "anno_events",
+				"index": "eventannotations",
 				"result_size": 10000000,
 				"loader_class": "ess.ElasticsearchEventDataProvider"
 			}
@@ -224,6 +232,13 @@ The interval at which to refresh the cache.  This is in minutes.
 
 ###### result_size
 Maximum number of results to return.  Setting this value too high may cause performance issues.
+
+##### annotations
+In order to use annotations they need to be enabled in the config.  Aside from the necessary port and server info, certain mappings need to be added for each event type in elasticsearch.  Here's an example of an 'Alarm' mapping with a mapping configuration that has been provided (*etc/metrilyx/ess-mapping-alarm.conf*).
+
+	curl -XPUT http://ess_host:ess_port/eventannotations/_mapping/Alarm -d @/opt/metrilyx/etc/metrilyx/ess-mapping-alarm.conf
+
+You can easily add a new type by replacing 'Alarm' in the url as well as sample file with your desired name.
 
 #### /opt/metrilyx/metrilyx/static/config.js
 This is the client side configuration file. A sample for this configuration has also been provided.
@@ -288,6 +303,21 @@ Similarly to import all existing heatmaps from v2.0, issue the following command
 
 	$ cd /opt/metrilyx-<timestamp>/heatmaps
 	$ for i in $(ls);do curl -u admin:metrilyx http://localhost/api/heatmaps -H "Content-Type:application/json" -d @./$i; done
+
+#### Postgresql Client Install 
+(only required if using postgres)
+
+To install the client, first get postrgres's repo rpm.  Once that has been installed, you'll need to install the dependencies for the python postgres client (psycopg2).
+
+	yum -y install postgresql93 postrgresql93-devel
+
+You will also need to symlink the pg_config binary as it is not in the path by default.
+
+	ln -s /usr/pgsql-9.3/bin/pg_config /usr/local/bin/pg_config
+
+Finally install the python module i.e. psycopg2 
+
+	pip install psycopg2
 
 #### Notes
 - The default username and password for the site are admin and metrilyx respectively. Changing these will cause the application to stop functioning as other configurations also need to be updated.

@@ -9,7 +9,7 @@ class GraphEventRequest(object):
 	def __init__(self, request):
 		self.__checkRequest(request)
 		self.request = request
-		self.__applyGlobalTagsToEvents()
+		#self.__applyGlobalTagsToEvents()
 
 	def __applyGlobalTagsToEvents(self):
 		'''
@@ -47,6 +47,7 @@ class GraphRequest(object):
 
 	def __init__(self, request):
 		self.__checkRequest(request)
+		self.__cleanRequest(request)
 		self.request = request
 		self.__applyGlobalTagsToSeries()
 		self.__adjustTimeWindow()
@@ -59,6 +60,12 @@ class GraphRequest(object):
 			obj = dict([ (k,v) for k,v in self.request.items() if k != "series" ])
 			obj['series'] = [serie]
 			yield obj
+
+	def __cleanRequest(self, request):
+		if request.has_key('series'):
+			for s in request['series']:
+				if s.has_key('$$hashKey'):
+					del s['$$hashKey']
 
 	def __checkRequest(self, request):
 		for k in self.REQUIRED_REQUEST_KEYS:

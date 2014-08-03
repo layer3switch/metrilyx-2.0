@@ -47,11 +47,11 @@ class EventSerie(object):
 		graph: graph dictionary
 		eventType: event type of serie
 	'''
-	def __init__(self, serie, graph, eventType):
+	def __init__(self, serie, eventType, originalRequest):
 		self._serie = serie
-		self._graph = graph
 		self.eventType = eventType
 		self.__microToMilli()
+		self.__request = originalRequest
 		self.__data = self.__assembleEventSerie()
 
 	@property
@@ -63,11 +63,7 @@ class EventSerie(object):
 		Returns:
 			series data in highcharts format
 		'''
-		out = {
-			'_id': self._graph['_id'],
-			'annoEvents': self._graph['annoEvents'],
-			'graphType': self._graph['graphType']
-		}
+		out = {'query': self.__request,'annoEvents': {}}
 		out['annoEvents']['eventType'] = self.eventType
 		out['annoEvents']['data'] = [ {
 									'x': s['timestamp'],
@@ -190,10 +186,11 @@ class MetrilyxSerie(object):
 		# When alias_str starts with ! we will do an eval for lambda processing
 		if alias_str.startswith("!"):
 			try:
-				normalizedAlias = eval(alias_str[1:])(flat_obj)
+				return eval(alias_str[1:])(flat_obj)
 			except Exception,e:
 				#TODO: assign calculated default
 				log.warn("could not transform alias: %s %s" %(obj['metric'], str(e)))
+				normalizedAlias = obj['metric']
 		else:
 			try:
 				normalizedAlias = alias_str %(flat_obj)
@@ -201,9 +198,9 @@ class MetrilyxSerie(object):
 				normalizedAlias =  obj['metric']
 			except Exception, e:
 				log.error("could not normalize alias: %s %s" %(obj['metric'], str(e)))
-			## only add unique tags if using string formating.
-			if self.uniqueTagsString:
-				normalizedAlias = normalizedAlias + self.uniqueTagsString %(flat_obj)
+		## only add unique tags if using string formating.
+		if self.uniqueTagsString:
+			normalizedAlias = normalizedAlias + self.uniqueTagsString %(flat_obj)
 		
 		return normalizedAlias
 
