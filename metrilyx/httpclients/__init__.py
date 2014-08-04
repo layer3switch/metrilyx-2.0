@@ -20,7 +20,7 @@ from metrilyx.metrilyxconfig import config
 
 from pprint import pprint
 
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
 
 class HttpJsonClient(object):
 
@@ -199,7 +199,7 @@ class AsyncHttpResponseProtocol(Protocol):
             gzipper = gzip.GzipFile(fileobj=compressedstream)
             return gzipper.read()
         except Exception,e:
-            logger.error(e)
+            #logger.error(e)
             return json.dumps({"error": str(e)})
 
     def connectionLost(self, reason):
@@ -245,7 +245,7 @@ class AsyncHttpJsonClient(object):
         return self.__deferredResponse
 
     def __readErrorCallback(self, error, userCb, *cbargs):
-        logger.warning(error.getErrorMessage())
+        #logger.warning(error.getErrorMessage())
         self.__deferredResponse.addCallback(userCb, *cbargs)
 
     def addResponseCallback(self, callback, *cbargs):
