@@ -115,9 +115,10 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		else:
 			graphMeta['series'][0]['data'] = self.dataprovider.responseCallback(
 											responseData['data'], url, graphMeta)
-			mserie = MetrilyxSerie(graphMeta['series'][0])
-			#mserie = MetrilyxAnalyticsSerie(graphMeta['series'][0])
-			graphMeta['series'][0]['data'] = mserie.data
+			
+			#mserie = MetrilyxSerie(graphMeta['series'][0])
+			mserie = MetrilyxAnalyticsSerie(graphMeta['series'][0])
+			graphMeta['series'][0]['data'] = mserie.data()
 
 		self.sendMessage(json.dumps(graphMeta))
 		logger.info("Response (graph) %s '%s' start: %s" %(graphMeta['_id'], 

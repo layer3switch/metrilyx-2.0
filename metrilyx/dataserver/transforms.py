@@ -268,7 +268,7 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 	def __getSerieMetadata(self, serie):
 		return dict([(k,v) for k,v in serie.items() if k != 'dps'])
 
-	def data2(self, ts_unit='ms'):
+	def data(self, ts_unit='ms'):
 		if self.error: return { "error": self.error }
 		out = []
 		for s in self._serie['data']:
