@@ -48,7 +48,9 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 	
 *	**nginx**
 
-	This is used as the proxy layer to the model manager as well as the websocket data server. Installer packages are available on their site.
+	This is used as the proxy layer to the model manager as well as the websocket data server. Installer packages are available on their site. Here's a link to the page for linux: 
+
+		http://nginx.org/en/linux_packages.html#stable
 
 *	**elasticsearch**
 
@@ -72,27 +74,27 @@ Once the above requirements have been fulfilled, you can run the command below t
 
 ##### RHEL:
 
-	yum -y install libuuid uuid python-setuptools python-devel gcc
+	yum -y install libuuid uuid python-setuptools python-devel gcc git
 	
 ##### Debian:
 
-	apt-get install libuuid1 uuid-runtime nginx python-setuptools python-dev libpython-dev make
+	apt-get install libuuid1 uuid-runtime nginx python-setuptools python-dev libpython-dev make git-core
 
 #### Python Packages:
-	uuid
-	django
-	djangorestframework
-	django-filter
-	django-cors-headers
-	django-reversion
-	twisted	
-	celery
-	requests
-	jsonfield
-	uwsgi
-	pymongo
-	six
-	autobahn
+	uuid==1.30
+	pymongo==2.7
+	django==1.6.5
+	djangorestframework==2.3.13
+	django-filter==0.7
+	django-cors-headers==0.12
+	django-reversion==1.8.0
+	celery==3.1.11
+	requests==2.2.1
+	jsonfield==0.9.20
+	twisted==14.0.0
+	uwsgi==2.0.4
+	autobahn==0.8.8
+	elasticsearch==1.0.0
 
 Installing autobahn throws an error if **six** hasn't been install beforehand or is not the correct version.  To correct this, uninstall six and autobahn and re-install both as follows:
 
@@ -234,9 +236,13 @@ The interval at which to refresh the cache.  This is in minutes.
 Maximum number of results to return.  Setting this value too high may cause performance issues.
 
 ##### annotations
-In order to use annotations they need to be enabled in the config.  Aside from the necessary port and server info, certain mappings need to be added for each event type in elasticsearch.  Here's an example of an 'Alarm' mapping with a mapping configuration that has been provided (*etc/metrilyx/ess-mapping-alarm.conf*).
+In order to use annotations they need to be enabled in the config.  Create the index by issuing the following command:
 
-	curl -XPUT http://ess_host:ess_port/eventannotations/_mapping/Alarm -d @/opt/metrilyx/etc/metrilyx/ess-mapping-alarm.conf
+	curl -XPOST http://<elasticsearch_host>:<port>/eventannotations
+
+Certain mappings need to be added for each event type in elasticsearch.  Here's an example of an 'Alarm' mapping with a mapping configuration that has been provided (*etc/metrilyx/ess-mapping-alarm.conf*).
+
+	curl -XPUT http://<ess_host>:<ess_port>/eventannotations/_mapping/Alarm -d @/opt/metrilyx/etc/metrilyx/ess-mapping-alarm.conf
 
 You can easily add a new type by replacing 'Alarm' in the url as well as sample file with your desired name.
 
