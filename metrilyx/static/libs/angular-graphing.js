@@ -184,6 +184,7 @@ angular.module('graphing', [])
 	.factory('WsHighstockGraphHelper', function(){
 		return function (scope, ngModel) {
 			var t = this;
+			var currTimer;
 
 			function setSerieStatus(newData, status) {
 				/* status order: querying, updating, loading, loaded, error */
@@ -283,6 +284,8 @@ angular.module('graphing', [])
 			//not used yet, exposed for testing
 			t.getUpdateQuery = getUpdateQuery;
 			t.checkDataErrors = checkDataErrors;
+
+			scope.$on("$destroy", function( event ) { clearTimeout(currTimer); });
 		}
 	})
 	//helper factory
@@ -293,7 +296,6 @@ angular.module('graphing', [])
 			link: function(scope, elem, attrs, ngModel) {
 				if(!ngModel) return;
 
-				var currTimer;
 				var evtListenerAdded = false;
 				var wsHelper = new WsHighstockGraphHelper(scope, ngModel);
 
@@ -371,7 +373,6 @@ angular.module('graphing', [])
 				}, true);
 
 				scope.$on("$destroy", function( event ) {
-                	clearTimeout(currTimer);
             		if(scope.wssock != null)
             			scope.wssock.removeEventListener("graphdata", processRecievedData);
                 });
