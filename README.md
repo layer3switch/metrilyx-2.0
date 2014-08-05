@@ -52,14 +52,9 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 
 		http://nginx.org/en/linux_packages.html#stable
 
-*	**elasticsearch**
+*	**elasticsearch** (optional: only if enabled)
 
 	This is used to store all event annotations.  This is where the data is queried from as well.  Installer packages are available on their site.
-	In order to create the index issue the following command:
-
-		curl -XPOST http://<elasticsearch_host>:<port>/eventannotations
-
-	If you've changed the name of the index in the configuration, appropriately change the name in the command above.
 
 *	**mongodb**
 
@@ -173,8 +168,7 @@ A sample configuration file has been provided.  The configuration file is in JSO
 			    	"database": "metrilyx_cache", 
 			    	"collection": "tsmeta_cache"
 		    	}
-	    	},
-	    	"result_size": 50
+	    	}
 		},
 		"databases":[
 			{
@@ -232,13 +226,12 @@ This is where the metric metadata cache settings can be changed.  The only confi
 ###### interval
 The interval at which to refresh the cache.  This is in minutes.
 
-###### result_size
-Maximum number of results to return.  Setting this value too high may cause performance issues.
-
 ##### annotations
 In order to use annotations they need to be enabled in the config.  Create the index by issuing the following command:
 
 	curl -XPOST http://<elasticsearch_host>:<port>/eventannotations
+
+If you've changed the name of the index in the configuration file, appropriately change the name in the command above.
 
 Certain mappings need to be added for each event type in elasticsearch.  Here's an example of an 'Alarm' mapping with a mapping configuration that has been provided (*etc/metrilyx/ess-mapping-alarm.conf*).
 
