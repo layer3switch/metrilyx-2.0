@@ -11,8 +11,10 @@ module('WsHighstockGraphHelper Test', {
     }
 
     t.scope = {
-      updatesEnabled: false
+      updatesEnabled: false,
+      "$on" : function(event, cb){}
     }
+
 
     t.ngmodel = {
       $modelValue: GraphMocker.mockGraph(['graph_1111', 'graph_2222', {
