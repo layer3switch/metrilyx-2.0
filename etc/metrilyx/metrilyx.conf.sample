@@ -3,6 +3,7 @@
 		"name": "OpenTSDB",
 		"uri": "http://<OpenTSDB host>",
 		"port": 4242,
+		"suggest_limit": 50,
 		"query_endpoint": "/api/query",
 		"search_endpoint": "/api/suggest",
 		"loader_class": "opentsdb.OpenTSDBDataProvider"
@@ -18,6 +19,7 @@
 		}
 	},
 	"cache": {
+		"enabled": false,
 		"interval": 5,
 		"retention_period": 12,
 		"datastore": {
@@ -27,8 +29,7 @@
 		    	"database": "metrilyx_cache", 
 		    	"collection": "tsmeta_cache"
 	    	}
-    	},
-    	"result_size": 50
+    	}
 	},
 	"databases":[
 		{
