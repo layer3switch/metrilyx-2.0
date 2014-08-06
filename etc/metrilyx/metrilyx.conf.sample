@@ -5,7 +5,8 @@
 		"port": 4242,
 		"query_endpoint": "/api/query",
 		"search_endpoint": "/api/suggest",
-		"loader_class": "opentsdb.OpenTSDBDataProvider"
+		"loader_class": "opentsdb.OpenTSDBDataProvider",
+		"suggest_limit": 50
 	},
 	"heatmaps": {
 		"analysis_interval": "1m-ago",

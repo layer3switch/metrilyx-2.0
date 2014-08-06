@@ -68,7 +68,7 @@ Installing autobahn throws an error if **six** hasn't been install beforehand or
 	$ pip uninstall six -y
 	$ pip install six
 	$ pip install autobahn
-	
+
 ## Installation:
 The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below to install the application after the above mentioned requirements have been satisfied. The default install destination is **/opt/metrilyx**.	
 
@@ -95,8 +95,12 @@ After you have completed editing the configuration file, start the modelmanager 
 
 **Note**: The default nginx configuration file may conflict with the metrilyx one.  In this case you'll need to disable the default one or edit the configuration file to accomodate for metrilyx's nginx configuration.
 
+### Heat Maps
+Heatmaps are used to view your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10.  This is usually the tag containing a value of '*'.
 
-#### Postgresql
+In order to use heatmaps, you will need a mongodb server.  Heatmap computations are performed using celery (a python distributed processing framework) which uses mongodb for its backend.  For scalability more celery worker nodes can be added.
+
+#### Postgresql Install
 If you would like to use postgres for the backend database instead of the default sqlite, you can do so my moving the provided postgres database configuration above the sqlite one in ***metrilyx.conf***.  Fill in the remainder options based on your postgresql instance.
 
 ###### ***Before performing the next step please export all of your existing models.***
@@ -108,3 +112,39 @@ To initialize django for postgres, issue the command below.  If you get prompted
 	$ cd /opt/metrilyx && ./install.sh init_django
 
 If you have existing models in sqlite follow the instructions to export/import them.
+
+#### Postgresql Client Install 
+(only required if using postgres)
+
+To install the client, first get postrgres's yum repo rpm.  Once that has been installed, you'll need to install the dependencies for the python postgres client (psycopg2).
+
+	yum -y install postgresql93 postrgresql93-devel
+
+You will also need to symlink the pg_config binary as it is not in the path by default.
+
+	ln -s /usr/pgsql-9.3/bin/pg_config /usr/local/bin/pg_config
+
+Finally install the python module i.e. psycopg2 
+
+	pip install psycopg2
+
+## Upgrade
+Upgrades are extactly similar to the install process with a couple of extra steps.  During the install process, the application directory gets copied with the current date and time keeping an existing state of your application.  After the install process has been completed you will need to perform the following steps to bring your existing models into the new installation.
+
+##### sqlite
+You can simply copy the sqlite db file from the previous installation into the current one.
+
+##### Postgresql/MySQL
+No additional steps are required.
+
+Once you have the data in the database you will need to upgrade the model schema of each model.  To do this run the following commands:
+
+	$ cd /opt/metrilyx
+	$ ./bin/mdlmgr.py
+
+The second command won't actually upgrade the model but give you an idea of what will change along with any errors.  If everything checks out run the same command with the --commit options like so:
+
+	$ ./bin/mdlmgr.py --commit
+
+Thats it.
+

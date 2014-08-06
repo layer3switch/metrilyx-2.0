@@ -1,8 +1,8 @@
 Roadmap
 =======
 
-##### v2.4.0
-- Metric operators i.e. perform math against different series.
+##### v2.3.x - v2.4.0
+- Metric operatorations i.e. perform math against different series.
 
 ##### v2.3.1
 - Complex annotation tag queries 
