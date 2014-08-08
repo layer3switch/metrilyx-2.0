@@ -118,7 +118,7 @@ If you have existing models in sqlite follow the instructions to export/import t
 
 To install the client, first get postrgres's yum repo rpm.  Once that has been installed, you'll need to install the dependencies for the python postgres client (psycopg2).
 
-	yum -y install postgresql93 postrgresql93-devel
+	yum -y install postgresql93 postrgresql93-devel libpqxx-devel
 
 You will also need to symlink the pg_config binary as it is not in the path by default.
 
