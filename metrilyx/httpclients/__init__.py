@@ -1,15 +1,26 @@
 
 
 import httplib
-try:
-    import json
-except:
-    import simplejson as json
+import json
+import logging
 
 import StringIO
 import gzip
 
+from zope.interface import implements
+
+from twisted.internet import reactor
+from twisted.web.client import Agent
+from twisted.web.http_headers import Headers
+from twisted.web.iweb import IBodyProducer
+from twisted.internet.defer import Deferred, succeed
+from twisted.internet.protocol import Protocol
+
+from metrilyx.metrilyxconfig import config
+
 from pprint import pprint
+
+logger = logging.getLogger(__name__)
 
 class HttpJsonClient(object):
 
@@ -106,9 +117,14 @@ class OpenTSDBResponse(object):
             return self._data
 
 class OpenTSDBClient(object):
-    def __init__(self, host, port=80):
-        self.host = host
-        self.port = port
+    def __init__(self, **kwargs):
+        for k,v in kwargs.items():
+            if k == 'uri':
+                setattr(self, 'host', v.split("/")[-1])
+            else:
+                setattr(self, k,v)
+        if not kwargs.has_key('port'):
+            self.port = 80
 
     def __get_tags_string(self, tags):
         tagstr = "{"
@@ -127,9 +143,11 @@ class OpenTSDBClient(object):
             q_str += self.__get_tags_string(q['tags'])
             cq_str += "&" + q_str
         if query.has_key('end'):
-            return "/api/query?start=%s&end=%s%s" %(query['start'], query['end'], cq_str)
+            return "%s?start=%s&end=%s%s" %(self.query_endpoint,
+                                query['start'], query['end'], cq_str)
         else:
-            return "/api/query?start=%s%s" %(query['start'], cq_str)
+            return "%s?start=%s%s" %(self.query_endpoint,
+                                        query['start'], cq_str)
     
     def query(self, q):
         """
@@ -143,9 +161,98 @@ class OpenTSDBClient(object):
             q_str = self.__build_metric_query(q)
             return OpenTSDBResponse(hjc.GET(q_str))
         else:
-            #print q
-            return OpenTSDBResponse(hjc.GET("/api/query?"+q))
+            return OpenTSDBResponse(hjc.GET(self.query_endpoint+"?"+q))
+   
+## ASYNC ##     
+class JsonBodyProducer(object):
+    implements(IBodyProducer)
+
+    def __init__(self, body):
+        self.body = json.dumps(body)
+        self.length = len(self.body)
+
+    def startProducing(self, consumer):
+        consumer.write(self.body)
+        return succeed(None)
+
+    def pauseProducing(self):
+        pass
+
+    def stopProducing(self):
+        pass
+
+class AsyncHttpResponseProtocol(Protocol):
+    def __init__(self, finished_deferred, headers):
+        self.headers = headers
+        self.finished = finished_deferred
+        #self.remaining = 1024 * 50
+        self.data = ""
+
+    def dataReceived(self, bytes):
+        #if self.remaining:
+        self.data += bytes
+        #    self.remaining -= len(bytes[:self.remaining])
+
+    def __ungzip_(self):
+        try:   
+            compressedstream = StringIO.StringIO(self.data)
+            gzipper = gzip.GzipFile(fileobj=compressedstream)
+            return gzipper.read()
+        except Exception,e:
+            logger.error(e)
+            return json.dumps({"error": str(e)})
+
+    def connectionLost(self, reason):
+        if self.headers.hasHeader('content-encoding') and \
+                ('gzip' in self.headers.getRawHeaders('content-encoding')):
+            self.finished.callback(self.__ungzip_())
+        else:
+            self.finished.callback(self.data)
+
+class AsyncHttpJsonClient(object):
+    '''
+        Supports json request payload on both HTTP GET and POST
+    '''
+    def __init__(self, **kwargs):
+        # uri, method, body
+        for k,v in kwargs.items():
+            setattr(self, k, v)
+        if not kwargs.has_key('body'):
+            self.body = None
+        else:
+            self.body = JsonBodyProducer(self.body)
+        if not kwargs.has_key('method'):
+            self.method = 'GET'
+
+        self.agent = Agent(reactor)
+        self.__d_agent = self.agent.request(
+                self.method,
+                self.uri,
+                Headers({
+                    'User-Agent': ['AsyncHttpJsonRequest'],
+                    'Content-Type': ['application/json'],
+                    'Accept-Encoding': ['gzip']
+                }),
+                self.body)
+
+        self.__deferredResponse = Deferred()
         
+
+
+    def __readResponseCallback(self, response, userCb, *cbargs):
+        response.deliverBody(AsyncHttpResponseProtocol(self.__deferredResponse, response.headers))
+        self.__deferredResponse.addCallback(userCb, *([response]+list(cbargs)))
+        return self.__deferredResponse
+
+    def __readErrorCallback(self, error, userCb, *cbargs):
+        logger.warning(error.getErrorMessage())
+        self.__deferredResponse.addCallback(userCb, *cbargs)
+
+    def addResponseCallback(self, callback, *cbargs):
+        self.__d_agent.addCallback(self.__readResponseCallback, callback, *cbargs)
+
+    def addResponseErrback(self, callback, *cbargs):
+        self.__d_agent.addErrback(self.__readErrorCallback, callback, *cbargs)
 
 
 

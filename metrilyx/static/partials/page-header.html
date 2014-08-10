@@ -1,38 +1,45 @@
 <div class="page-model-header edit-comp{{editMode}}">
-	<div class="row" style="margin:0;">
+	<div class="row padb5" style="margin:0;border-bottom:1px solid #bbb">
 		<div class="col-md-4" style="padding:0;">
-			<span class="pointer interactive" ng-click="toggleEditMode()" title="Edit Page" style="font-size:20px;color:#666">
-				<i class="glyphicon glyphicon-cog"></i>
+			<span class="page-list-btn pointer interactive" title="Page List" onclick="$('#side-panel').removeClass('offstage');">
+				<i class="glyphicon glyphicon-list"></i>
 			</span>
-			<div ng-repeat="(tagname, tagvalues) in tagsOnPage" class="btn-group padb10" style="color:#666">
-			  <span class="pointer interactive dropdown-toggle pad5" data-toggle="dropdown">
-				<span><span class="caret"></span><span class="padl5">{{tagname}}</span></span>
-			  </span>
-			  <ul class="dropdown-menu" role="menu" style="background:rgba(255,255,255,0.93);">
-			    <li ng-repeat="tagvalue in tagvalues">
-			    	<a href="javascript:void(0)" style="border-top:1px solid #eee;margin-left:5px;margin-right:5px;color:#666;" ng-click="updateGlobalTag(tagname, tagvalue);">{{tagvalue}}</a>
-			    </li>
-			  </ul>
+			<div ng-if="modelType!=='adhoc'" class="tags-panel edit-comp{{editMode}}">
+				<span class="interactive pointer" data-toggle="modal" data-target="#add-page-tag" title="Add page tag" style="position:relative;top:3px;">
+					<span><i class="glyphicon glyphicon-tag" style="font-size:16px;"></i></span>
+					<span style="position:relative;left:-10px;bottom:9px;">
+						<i class="glyphicon glyphicon-plus" style="font-size:11px;"></i>
+					</span>
+				</span>
+				<span ng-repeat="tag in model.tags" class="page-tag">
+					<span class="interactive pointer" title="Remove tag" ng-click="model.tags.splice(models.tags.indexOf(tag),1)">
+						<i class="glyphicon glyphicon-remove"></i>
+					</span>
+					<span>{{tag}}</span>
+				</span>
+					
 			</div>
 		</div>
 		<!-- Page Name/ID -->
 		<div ng-if="modelType!=='adhoc'" class="col-md-4 text-center" style="padding:0">
-				<div class="row">
-					<div class="col-md-12" style="padding:0px">
-						<input type="text" ng-model="model.name" class="edit-comp{{editMode}}" placeholder="Page Name" title="Page Name" required disabled>
-						<input type="text" ng-model="model._id" class="edit-comp{{editMode}}" placeholder="Page ID" required style="min-width: 40px;" title="Page ID" page-id>
-					</div>
+			<div class="row">
+				<div class="col-md-12" style="padding:0px">
+					<input type="text" ng-model="model.name" class="edit-comp{{editMode}}" placeholder="Page Name" title="Page Name" required style="width:100%">
+					<input type="text" ng-model="model._id" class="edit-comp{{editMode}}" placeholder="Page ID" required style="min-width: 40px;width:100%;" title="Page ID" page-id>
 				</div>
+			</div>
 		</div>
 		<div ng-if="modelType==='adhoc'" class="col-md-4 text-center" style="padding:0">
-			<div class="padt5">
 			<div class="row" style="margin:0;font-size:12px;">
 				<div class="col-md-12">
 					<span class="padlr5">
 						<span style="color:#888">Type :</span>
 						<select ng-model="graph.graphType" class="select-input borderless" style="font-size:13px;color:#555;">
+							<option value="area">area</option>
 							<option value="line">line</option>
-							<option value="pie">pie</option>	
+							<option value="pie">pie</option>
+							<option value="spline">spline</option>
+							<option value="stacked">stacked</option>
 						</select>
 					</span>
 					<span class="padlr5">
@@ -45,67 +52,135 @@
 					</span>
 				</div>
 			</div>
-			</div>
 		</div>
-		<!-- time picker -->
+		<!-- page tags -->
 		<div class="col-md-4 text-right" style="padding:0;">
-			<div ng-if="(modelType==='adhoc')||(modelType!=='heatmap/' && editMode==='')">
-				<div class="row" style="margin:0">
-					<div class="col-md-12 text-right" style="padding:0">
-						<span class="animated select-container left-caret">
-							<span class="caret"></span>
-							<select ng-model="timeType" relative-time="true" class="time interactive">
-				            	<option value="24h-ago">24 hours</option>
-				            	<option value="12h-ago">12 hours</option>
-				            	<option value="6h-ago">6 hours</option>
-				            	<option value="3h-ago">3 hours</option>
-				            	<option value="2h-ago">2 hours</option>
-				            	<option value="1h-ago">1 hour</option>
-				            	<option value="5m-ago">5 mins</option>
-				            	<option value="1m-ago">1 min</option>
-				            	<option value="absolute">Custom</option>
-				            </select>
-			            </span>
-						<span id="absolute-time" class="time animated btn-group btn-group-sm {{timeType}}">
-							<span ng-model="startTime" date-time class="btn btn-default interactive absolute-time-field">
-								<span>
-									<i class="glyphicon glyphicon-calendar"></i>
-								</span>
-								<span style="padding-left:5px;">{{startTime|dateTime}}</span>
-			                </span>
-			                <span ng-model="endTime" date-time class="btn btn-default interactive absolute-time-field">
-			                	<span><i class="glyphicon glyphicon-calendar"></i></span>
-			                	<span style="padding-left:5px;">{{endTime|dateTime}}</span>
-			                </span>
-			                <button class="btn btn-default interactive" style="padding-top:8px;padding-bottom:8px;" ng-click="setAbsoluteTime()" title="Apply">
-			                	<i class="glyphicon glyphicon-ok"></i>
-			                </button>
-		                </span>
-			        </div>
-				</div>
-			</div>
-			<div ng-if="modelType!=='adhoc'" class="tags-panel edit-comp{{editMode}}">
-				<div class="padlr5" style="border-bottom:1px solid #ddd;padding-bottom:3px">
-					<div class="row" style="margin:0;color:#666">
-						<div class="col-md-6 text-left" style="padding:0">
-							<span>Tags</span>
-						</div>
-						<div class="col-md-6 text-right" style="padding:0">
-							<span class="interactive pointer" data-toggle="modal" data-target="#add-page-tag">
-								<i class="glyphicon glyphicon-plus" style="font-size: 12px;"></i>
-							</span>	
-						</div>
-					</div>
-				</div>
-				<div class="text-left margint10">
-					<span ng-repeat="tag in model.tags" class="page-tag">
-						<span>{{tag}}</span>
-						<span class="interactive pointer" title="Remove tag" ng-click="model.tags.splice(models.tags.indexOf(tag),1)">
-							<i class="glyphicon glyphicon-remove" style="font-size: 12px;"></i>
-						</span>
+			<span ng-if="(modelType=='' && editMode!==' edit-mode')||(modelType==='adhoc')" class="animated">	
+				<span id="auto-update">
+					<span ng-if="timeType !== 'absolute'" class="animated">
+						<span>Auto-Update : </span>
+						<input type="checkbox" ng-model="updatesEnabled" style="position:relative;top:3px;" ng-change="setUpdatesEnabled(updatesEnabled);">
 					</span>
-				</div>
-			</div>
+				</span>
+			</span>
+			<span class="animated" ng-if="modelType!=='adhoc' && editMode === ' edit-mode'">
+				<span style="position:relative;top:3px;">
+					<span ng-click="toggleEditMode()" class="edit-panel-btn pointer interactive" title="Cancel">
+						<div class="iblk">
+							<div><i class="glyphicon glyphicon-ban-circle"></i></div>
+						</div>
+					</span>
+					<span ng-click="saveModel()" class="edit-panel-btn pointer interactive" title="Save">
+						<div class="iblk">
+							<div><i class="glyphicon glyphicon-cloud-upload"></i></div>
+						</div>
+					</span>
+					<span class="edit-panel-btn pointer interactive padr10" title="Delete" data-toggle="modal" data-target="#confirm-delete">
+						<div class="iblk">
+							<div><i class="glyphicon glyphicon-trash"></i></div>
+						</div>
+					</span>
+				</span>
+			</span>
 		</div>
 	</div><!-- END .row -->
+	<div class="row" style="padding:0;margin:0;border-top:1px solid #fff;padding-bottom:5px;border-bottom:1px solid #bbb">
+		<div class="col-md-4 text-left" style="padding:0;padding-top:10px;">
+			<div class="row" style="margin:0">
+				<div ng-attr-class="{{modelType==='' && 'col-md-2'}}" style="padding:0" ng-if="modelType===''">
+					<div class="dropdown">
+						<span class="pointer interactive dropdown-toggle marginl10" style="font-size:18px;position:relative;top:-1px;color:#777" data-toggle="dropdown">
+							<i class="glyphicon glyphicon-cog"></i>
+						</span>
+						<ul class="dropdown-menu page-controls bottom-shadow" role="menu">
+							<li ng-if="editMode === ''" title="Edit">
+								<a href="javascript:void(0)" ng-click="toggleEditMode()">
+									<span class="padr5"><i class="glyphicon glyphicon-edit"></i></span>
+									<span>Edit</span>
+								</a>
+							</li>
+							<li ng-if="editMode === ' edit-mode'" title="Edit">
+								<a href="javascript:void(0)" ng-click="toggleEditMode()">
+									<span class="padr5"><i class="glyphicon glyphicon-ban-circle"></i></span>
+									<span>Cancel</span>
+								</a>
+							</li>
+							<li title="Export">
+								<a ng-if="modelType===''" href="/api/graphmaps/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json">
+									<span class="padr5"><i class="glyphicon glyphicon-cloud-download"></i></span>
+									<span>Export</span>	
+								</a>
+								<a ng-if="modelType==='heatmap/'" href="/api/heatmaps/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json">
+									<span class="padr5"><i class="glyphicon glyphicon-cloud-download"></i></span>
+									<span>Export</span>	
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div ng-attr-class="{{modelType==='adhoc' && 'col-md-12' || 'col-md-10'}}" style="padding:0">
+					<div ng-attr-class="{{modelType==='adhoc' && 'marginl15'}}">
+						<span style="font-size:13px;font-weight:bold;color:#777" class="pointer interactive" onclick="$(this).next().children().toggle()">
+							<span>Annotations</span>
+							<span class="caret"></span>
+						</span>
+						<ng-include src="annoControlsHtml" ng-model="globalAnno" global-annotations></ng-include>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div ng-if="modelType===''" class="col-md-4 text-center" style="padding:0">
+			<div id="global-tags" title="Tags to be applied to all graphs. These tags do not get saved with the model." style="margin-top:5px;">
+				<input type="text" ng-model="globalTags" key-value-pairs id="global-tags-input">
+				<button id="global-tags-btn" type="button" ng-click="setGlobalTags(globalTags)" class="interactive">
+					<i class="glyphicon glyphicon-ok interactive" style="color:#666"></i>
+				</button>
+			</div>
+		</div>
+		<div ng-attr-class="{{modelType==='adhoc' && 'col-md-8' || 'col-md-4'}}" style="padding:0;text-align:right;">
+			<div ng-if="(modelType==='adhoc')||(modelType!=='heatmap/')" style="padding-top:5px;">
+				<span class="animated select-container left-caret">
+					<span class="caret"></span>
+					<select ng-model="timeType" relative-time="true" class="time interactive">
+		            	<option value="24h-ago">24 hours</option>
+		            	<option value="12h-ago">12 hours</option>
+		            	<option value="6h-ago">6 hours</option>
+		            	<option value="3h-ago">3 hours</option>
+		            	<option value="2h-ago">2 hours</option>
+		            	<option value="1h-ago">1 hour</option>
+		            	<option value="absolute">Custom</option>
+		            </select>
+	            </span>
+				<span id="absolute-time" class="time animated btn-group btn-group-sm {{timeType}}">
+					<span ng-model="startTime" date-time class="btn btn-default interactive absolute-time-field">
+						<span>
+							<i class="glyphicon glyphicon-calendar"></i>
+						</span>
+						<span style="padding-left:5px;">{{startTime|dateTime}}</span>
+	                </span>
+	                <span ng-model="endTime" date-time class="btn btn-default interactive absolute-time-field">
+	                	<span><i class="glyphicon glyphicon-calendar"></i></span>
+	                	<span style="padding-left:5px;">{{endTime|dateTime}}</span>
+	                </span>
+	                <button class="btn btn-default interactive" ng-click="setAbsoluteTime()" title="Apply">
+	                	<i class="glyphicon glyphicon-ok"></i>
+	                </button>
+	            </span>
+            </div>
+		</div>
+	</div>
+	<div ng-if="editMode==''||modelType==='adhoc'" style="padding-top:5px;border-top:1px solid #fff">
+		<div ng-repeat="(tagname, tagvalues) in tagsOnPage" class="btn-group">
+		  <span class="pointer interactive dropdown-toggle pad5" data-toggle="dropdown">
+			<span class="small">
+				<span class="padr5">{{tagname}}</span><span class="caret"></span>
+			</span>
+		  </span>
+		  <ul class="dropdown-menu noshadow result-tags bottom-shadow small" role="menu">
+		    <li ng-repeat="tagvalue in tagvalues|orderBy:'toString()'">
+		    	<a href="javascript:void(0)" ng-click="updateGlobalTag(tagname, tagvalue);">{{tagvalue}}</a>
+		    </li>
+		  </ul>
+		</div>
+	</div>
 </div>

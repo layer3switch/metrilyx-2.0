@@ -8,6 +8,15 @@ from metrilyxconfig import config
 from pprint import pprint
 
 
+class EventType(models.Model):
+	name = models.CharField(max_length=32)
+	_id = models.CharField(max_length=32, primary_key=True)
+	metadata = jsonfield.JSONField(default={},null=True,blank=True)
+
+	def save(self, *args, **kwargs):
+		self._id = self.name.lower()
+		super(EventType, self).save(*args, **kwargs)	
+
 class HeatQuery(models.Model):
 	"""
 	Model for storing heat queries.  Queries are extracted from the
@@ -31,7 +40,7 @@ class MapModel(models.Model):
 
 	_id = models.CharField(max_length=128,primary_key=True)
 	name = models.CharField(max_length=128, default="", blank=True)
-	layout = jsonfield.JSONField()
+	layout = layout = jsonfield.JSONField(default=[], null=True, blank=True)
 	user = models.ForeignKey('auth.User', related_name='mapmodels')
 	group = models.ForeignKey('auth.Group', related_name='mapmodels', null=True, blank=True)
 	tags = jsonfield.JSONField(default=[], null=True, blank=True)
@@ -47,7 +56,7 @@ class MapModel(models.Model):
 								graph['_id'] = metrilyx.new_uuid()
 							if graph.get('series'):
 								for s in graph['series']:
-									if s.get('loading'): del s['loading']
+									if s.get('status'): del s['status']
 									if s.get('data'): del s['data']
 
 	def __get_heat_query(self, serie_query, name=""):

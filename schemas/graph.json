@@ -3,9 +3,15 @@
 	"graphType": "line",
 	"size": "medium",
 	"thresholds": {
-		"danger"	: 999999999999999999,
-		"warning"	: 9999999999999999,
-		"info"		: 999999999999999
+		"danger"	: {"max": 9999999999999999, "min": 9999999999999999},
+		"warning"	: {"max": 999999999999999, "min": 999999999999999},
+		"info"		: {"max": 99999999999999, "min": 99999999999999}
 	},
+	"annoEvents": {
+		"eventTypes": [],
+		"tags": {}
+	},
+	"multiPane": false,
+	"panes": ["",""],
 	"series": []
 }

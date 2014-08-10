@@ -4,13 +4,13 @@ import json
 import time
 import requests
 
+from elasticsearch import Elasticsearch
 
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status, viewsets, permissions, filters
 
@@ -18,14 +18,16 @@ from celery import Celery
 
 import metrilyx
 
-from custom_permissions import IsGroupOrReadOnly, IsCreatorOrReadOnly
+from custompermissions import IsGroupOrReadOnly, IsCreatorOrReadOnly
 from serializers import *
-from models import * 
+from ..models import * 
 
-from datastores import *
-from httpclients import HttpJsonClient
+from ..datastores.ess import ElasticsearchDatastore
+from ..datastores.mongodb import MetricCacheDatastore
+from ..annotations import Annotator
 
-from metrilyxconfig import config
+from ..metrilyxconfig import config
+from metrilyx import metrilyxconfig
 
 from pprint import pprint
 
@@ -53,6 +55,11 @@ class MapViewSet(viewsets.ModelViewSet):
 		obj.user = self.request.user
 
 
+class EventTypeViewSet(viewsets.ModelViewSet):
+	queryset = EventType.objects.all()
+	serializer_class = EventTypeSerializer
+	permission_classes = (IsCreatorOrReadOnly,)
+
 class GraphMapViewSet(MapViewSet):
 	
 	queryset = MapModel.objects.filter(model_type="graph")
@@ -60,6 +67,13 @@ class GraphMapViewSet(MapViewSet):
 	def pre_save(self, obj):
 		super(GraphMapViewSet,self).pre_save(obj)
 		obj.model_type = "graph"
+
+
+	def list(self, request, pk=None):
+		# w/out this not all models show up in the listing.
+		queryset = MapModel.objects.filter(model_type="graph")
+		serializer = MapModelListSerializer(queryset, many=True)
+		return Response(serializer.data)
 
 	def retrieve(self, request, pk=None):
 		export_model = request.GET.get('export', None)
@@ -82,6 +96,10 @@ class HeatMapViewSet(MapViewSet):
 	def pre_save(self, obj):
 		super(HeatMapViewSet,self).pre_save(obj)
 		obj.model_type = "heat"
+
+	def list(self, request, pk=None):
+		serializer = MapModelListSerializer(self.queryset, many=True)
+		return Response(serializer.data)
 
 	def retrieve(self, request, pk=None):
 		export_model = request.GET.get('export', None)
@@ -111,6 +129,74 @@ class SchemaViewSet(viewsets.ViewSet):
 			return Response(schema)
 		except Exception,e:
 			return Response({"error": str(e)})
+
+class EventsViewSet(APIView):
+	REQUIRED_QUERY_PARAMS = ('start','eventTypes','tags')
+	REQUIRED_WRITE_PARAMS = ('eventType','message', 'tags')
+
+	eds = ElasticsearchDatastore(config['annotations']['dataprovider'])
+
+	def __checkRequest(self, request):
+		if request.body == "":
+			return {'error': 'no query specified'}
+		try:
+			jsonReq = json.loads(request.body)
+		except Exception,e:
+			return {'error': 'json parse: %s' %(str(e))}
+
+		if request.method == 'GET':
+			for rp in self.REQUIRED_QUERY_PARAMS:
+				if rp not in jsonReq.keys():
+					return {'error':'%s key required' %(rp)}
+			if type(jsonReq['tags']) is not dict:
+				return {'error': 'Invalid tags'}
+		else:
+			for rp in self.REQUIRED_WRITE_PARAMS:
+				if rp not in jsonReq.keys():
+					return {'error': 'missing parameter: %s' %(rp)}
+		return jsonReq
+
+	def get(self, request, pk=None):
+		'''
+			request object:
+				types:
+				tags:
+				start:
+				end: (optional)
+		'''
+		reqBody = self.__checkRequest(request)
+		if reqBody.has_key('error'):
+			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
+			
+		# always yield's 1 when split=False
+		for (url, eventTypes, query) in self.eds.queryBuilder.getQuery(reqBody,split=False):
+			essRslt = self.eds.search(query)
+			## TODO: potentially need to add error checking 
+			rslt = [r['_source'] for r in essRslt['hits']['hits']]
+			return Response(rslt)
+	
+	def post(self, request, pk=None):
+		'''
+			request object:
+				eventType:
+				tags:
+				message:
+				timestamp:
+		'''
+		reqBody = self.__checkRequest(request)
+		if reqBody.has_key('error'):
+			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
+
+		try:
+			out = dict([(k,v) for k,v in reqBody.items() if k != "tags"])
+			for k,v in reqBody['tags'].items():
+				out[k] = v
+			anno = Annotator(out)
+			self.eds.add(anno.annotation)
+			return Response(anno.annotation)
+		except Exception,e:
+			return Response({'error': str(e)},
+				status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 class TagViewSet(viewsets.ViewSet):
 
@@ -145,13 +231,16 @@ class TagViewSet(viewsets.ViewSet):
 		return Response(serializer.data)
 
 class SearchViewSet(viewsets.ViewSet): 
-	tsdb_suggest_url = "%(uri)s%(search_endpoint)s?max=%(suggest_limit)d" %(config['dataproviders'][0])
+
+	metricMetaCache = MetricCacheDatastore(**config['cache']['datastore']['mongodb'])
 
 	def list(self, request, pk=None):
-		return Response(['graphmaps', 'heatmaps', 'metrics', 'tagk', 'tagv'])
+		return Response(['graphmaps', 'heatmaps', 'metrics', 'tagk', 'tagv', 'event_types'])
 
 	def retrieve(self, request, pk=None):
 		query = request.GET.get('q', '')
+		limit = request.GET.get('limit', config['cache']['result_size'])
+
 		if query == '':
 			response = []
 		elif pk == 'graphmaps':
@@ -160,12 +249,17 @@ class SearchViewSet(viewsets.ViewSet):
 			response = serializer_obj.data
 		elif pk == 'heatmaps':
 			models_obj = MapModel.objects.filter(name__contains=query, model_type='heat')
+			#print models_obj
 			serializer_obj = MapModelSerializer(models_obj, many=True)
 			response = serializer_obj.data
-		elif pk in ('metrics','tagk','tagv'):
-			request_url = "%s&type=%s&q=%s" %(self.tsdb_suggest_url, pk, query)
-			resp = requests.get(request_url)
-			response = resp.json()
+		elif pk == 'metrics':
+			response = self.metricMetaCache.search({'type': 'metric', 'query': query}, limit=limit)
+		elif pk in ('tagk','tagv'):
+			response = self.metricMetaCache.search({'type': pk, 'query': query}, limit=limit)
+		elif pk == 'event_types':
+			models_obj = EventType.objects.filter(name__contains=query)
+			serializer_obj = EventTypeSerializer(models_obj,many=True)
+			response = serializer_obj.data
 		else:
 			response = {"error": "Invalid search: %s" %(pk)}
 		return Response(response)

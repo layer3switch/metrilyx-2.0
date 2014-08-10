@@ -1,9 +1,10 @@
-
+"""
+This module contains classes for datastores not supported by django. 
+e.g. NoSQL, filebased
+"""
 import os
 import re
 import json
-
-from pprint import pprint 
 
 def jsonFromFile(filepath):
 	if os.path.exists(filepath):

@@ -3,6 +3,78 @@ import logging
 
 log = logging.getLogger(__name__)
 
+def absoluteTime(relTime, convertTo='micro'):
+	'''
+		Args:
+			relTime: relative time or absolute time in seconds
+		Returns:
+			Time in nano/micro/milli seconds
+	'''
+	if type(relTime) != str or "-ago" not in relTime:
+		return relTime
+
+	val = int(relTime.split("-")[0][:-1])
+	unit = relTime.split("-")[0][-1]
+	
+	if unit == 's':
+		retVal = time.time() - val
+	elif unit == 'm':
+		retVal = time.time() - (val*60)
+	elif unit == 'h':
+		retVal = time.time() - (val*3600)
+	elif unit == 'd':
+		retVal = time.time() - (val*86400)
+	elif unit == 'w':
+		retVal = time.time() - (val*604800)
+	
+	if convertTo == 'nano':
+		retVal *= 1000000000
+	elif convertTo == 'micro':
+		retVal *= 1000000
+	elif convertTo == 'milli':
+		retVal *= 1000
+
+	return retVal
+
+class EventSerie(object):
+	'''
+	Args:
+		serie: event serie 
+		graph: graph dictionary
+		eventType: event type of serie
+	'''
+	def __init__(self, serie, eventType, originalRequest):
+		self._serie = serie
+		self.eventType = eventType
+		self.__microToMilli()
+		self.__request = originalRequest
+		self.__data = self.__assembleEventSerie()
+
+	@property
+	def data(self):
+		return self.__data
+
+	def __assembleEventSerie(self):
+		'''
+		Returns:
+			series data in highcharts format
+		'''
+		out = {'query': self.__request,'annoEvents': {}}
+		out['annoEvents']['eventType'] = self.eventType
+		out['annoEvents']['data'] = [ {
+									'x': s['timestamp'],
+									'text': s['message'],
+									'title': s['eventType'],
+									'data': s['data']
+									} for s in self._serie ]
+		return out
+	
+	def __microToMilli(self):
+		for s in self._serie:
+			s['timestamp'] = s['timestamp']/1000
+
+
+
 class MetrilyxSerie(object):
 	"""
 	This makes an object containing the original series data (request) with the tsdb
@@ -12,93 +84,76 @@ class MetrilyxSerie(object):
 		serie 			: single serie component of a graph (i.e. the metric query to tsdb)
 		data_callback	: callback for each unique series
 	"""
-	def __init__(self, serie, data_callback=None):
+	def __init__(self, serie, dataCallback=None):
 		self._serie = serie
-		self._data = serie['data']
-		self._data_callback = data_callback
+		self._dataCallback = dataCallback
 
-		if type(self._data) == dict and self._data.get('error'):
-				self.error = self._data.get('error')
+		if isinstance(self._serie['data'], dict) and self._serie['data'].get('error'):
+				self.error = self._serie['data'].get('error')
 		else:
 			self.error = False
+			self.uniqueTagsString = self.__uniqueTagsStr()
 
 	@property
 	def data(self):
 		if self.error: return { "error": self.error }
-		data = []
-		for r in self._data:
-			data.append(self.__process_serie(r))
-		return data
+		return [ self.__processSerieData(r) for r in self._serie['data'] ]
 
-	def __apply_ytransform(self, dataset, yTransform):
-		if yTransform == "":
-			return dataset
-		## eval causes a hang.
+	def __processSerieData(self, dataset):
+		if isinstance(dataset, dict) and dataset.get('error'):
+			return {"alias": self._serie['alias'],"error": dataset.get('error')}
 		try:
-			dps = []
-			for ts, val in dataset:
-				dps.append(( ts, eval(yTransform)(val) ))
-			return dps
+			dataset['dps'] = self.__normalizeTimestamp(dataset['dps'])
 		except Exception,e:
-			log.warn("could not apply yTransform: %s", str(e))
-			return dataset
-
-	def __process_serie(self, dataset):
-		#data = response
-		if type(dataset) == dict and dataset.get('error'):
-			return {
-				"alias": self._serie['alias'],
-				"error": dataset.get('error'),
-				}
-		try:
-			dataset['dps'] = self.__convert_timestamp(dataset['dps'])
-		except Exception,e:
-			log.error("could not normalize datapoints: %s %s" %(dataset['metric'], str(e)))
+			log.error("Coudn't normalize timestamp: %s %s" %(dataset['metric'], str(e)))
 
 		### todo: add tsdb performance header
 		#dataset['perf'] = self._serie['perf']
 		dataset['dps'] = self.__apply_ytransform(dataset['dps'], self._serie['yTransform'])
-		### normalize alias (i.e. either lambda function or string formatting)
-		dataset['alias'] = self.__normalize_alias(self._serie['alias'], {
-			'tags': dataset['tags'],
-			'metric': dataset['metric']
-			})
+		## May remove this as it can be achieved using a yTransform which would be controlled by the user.
+		if self._serie['query']['rate']:
+			dataset['dps'] = self.__rmNegativeRates(dataset['dps'])
+
+		### normalize alias (i.e. either lambda function or string formatting and append unique tags string) 
+		dataset['alias'] = self.__normalizeAlias(self._serie['alias'], {
+											'tags': dataset['tags'],
+											'metric': dataset['metric']})
 		### scan tags to make unique series alias (looks for * and | operators)
-		uq = self.__determine_uniqueness(self._serie['query'])
-		nstr = ""
-		for u in uq:
-			talias = "%(" + u + ")s"
-			if talias not in self._serie['alias']:
-				nstr += " " + talias
-		### apply the unique tag and normalize
-		if nstr and not self._serie['alias'].startswith("!"):
-			dataset['alias'] = self.__normalize_alias(self._serie['alias']+nstr, {
-				'tags': dataset['tags'],
-				'metric': dataset['metric']
-				})
+		### apply the unique tag and re-normalize
+		#if self.uniqueTagsString and not self._serie['alias'].startswith("!"):
+		#	dataset['alias'] = self.__normalizeAlias(self._serie['alias']+self.uniqueTagsString, {
+		#		'tags': dataset['tags'],
+		#		'metric': dataset['metric']
+		#		})
 
 		## any custom callback for resulting data set 
 		## e.g. scrape metadata
-		if self._data_callback != None:
-			self._data_callback(dataset)
-
-		## clean rate
-		if self._serie['query']['rate']:
-			#print "removing negative rates"
-			dataset['dps'] = self.__remove_negative_rates(dataset['dps'])
+		if self._dataCallback != None:
+			self._dataCallback(dataset)
 
 		return dataset
 
-	def __determine_uniqueness(self, query):
+	def __apply_ytransform(self, dataset, yTransform):
+		if yTransform == "":
+			return dataset
+		try:
+			## eval may cause a hang.
+			return [ ( ts, eval(yTransform)(val) ) for ts, val in dataset ]
+		except Exception,e:
+			log.warn("could not apply yTransform: %s", str(e))
+			return dataset
+
+	def __uniqueTagsStr(self):
 		"""
 			Finds all tags in query with a '*' or '|' or multiple values
 		"""
-		uniques = []
-		for k,v in query['tags'].items():
-			if v == "*" or "|" in v:
-				uniques.append("tags."+k)
-		return uniques
-
+		uniques = ["tags."+k for k,v in self._serie['query']['tags'].items() if v == "*" or "|" in v]
+		nstr = ""
+		for u in uniques:
+			talias = "%(" + u + ")s"
+			if talias not in self._serie['alias']:
+				nstr += " " + talias
+		return nstr
 
 	def __flatten_dict(self,d):
 		def flatten_dict_gen(d):
@@ -112,28 +167,33 @@ class MetrilyxSerie(object):
 
 		return dict((key, value) for (key, value) in list(flatten_dict_gen(d)))
 
-	def __normalize_alias(self, alias_str, obj):
+	def __normalizeAlias(self, alias_str, obj):
 		"""
 		@args:
 			alias_str 	string to format
 			obj 		dict containing atleast 'tags' and 'metric' keys
 		"""
 		flat_obj = self.__flatten_dict(obj)
-
+		normalizedAlias = alias_str
 		# When alias_str starts with ! we will do an eval for lambda processing
 		if alias_str.startswith("!"):
 			try:
 				return eval(alias_str[1:])(flat_obj)
 			except Exception,e:
 				log.warn("could not transform alias: %s %s" %(obj['metric'], str(e)))
-
-		try:
-			return alias_str %(flat_obj)
-		except KeyError:
-			return obj['metric']
-		except Exception, e:
-			log.error("could not normalize alias: %s %s" %(obj['metric'], str(e)))
-			return alias_str
+				normalizedAlias = obj['metric']
+		else:
+			try:
+				normalizedAlias = alias_str %(flat_obj)
+			except KeyError:
+				normalizedAlias =  obj['metric']
+			except Exception, e:
+				log.error("could not normalize alias: %s %s" %(obj['metric'], str(e)))
+		## only add unique tags if using string formating.
+		if self.uniqueTagsString:
+			normalizedAlias = normalizedAlias + self.uniqueTagsString %(flat_obj)
+		
+		return normalizedAlias
 
 	def __sig_figs(self, num):
 		"""
@@ -144,17 +204,27 @@ class MetrilyxSerie(object):
 		else:
 			return 0
 
-	def __convert_timestamp(self, data):
+	def __normalizeTimestamp(self, data, toMillisecs=True):
 		"""
-		Convert to milliseconds
-		Convert dict to tuple
-		Sort by timestamp
 		@params
-				tsdb dps structure
+			data 		: list or dict
+			toMillisecs : multiply timestamp by 1000
 		"""
-		return [ (int(ts)*1000, data[ts]) for ts in sorted(data) ]
+		if type(data) is dict:
+			if toMillisecs:
+				return [ (int(ts)*1000, data[ts]) for ts in sorted(data) ]
+			else:
+				return [ (int(ts), data[ts]) for ts in sorted(data) ]
+		else:
+			# assume it's a list
+			log.warn("Data not a dict. Processing as list: %s" %(str(type(data))))
+			if toMillisecs:
+				return [ (int(tsval[0])*1000, tsval[1]) for tsval in sorted(data) ]
+			else:
+				return [ (int(tsval[0]), tsval[1]) for ts in sorted(data) ]
 
-	def __remove_negative_rates(self, data):
+
+	def __rmNegativeRates(self, data):
 		"""
 		Remove negative rates as current version of TSDB can't handle it 
 		@params

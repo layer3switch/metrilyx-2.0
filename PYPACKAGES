@@ -5,9 +5,10 @@ djangorestframework
 django-filter
 django-cors-headers
 django-reversion
+django-jsonfield
 celery
 requests
-jsonfield
 twisted
 uwsgi
 autobahn
+elasticsearch

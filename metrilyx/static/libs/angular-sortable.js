@@ -62,9 +62,8 @@ angular.module('ui.sortable', [])
 
             callbacks.start = function(e, ui) {
               // Save the starting position of dragged item
-              // Metrilyx: seems it's the length of the arr rather than the index
               ui.item.sortable = {
-                index: ui.item.index()-1,
+                index: ui.item.index(),
                 cancel: function () {
                   ui.item.sortable._isCanceled = true;
                 },
@@ -74,8 +73,7 @@ angular.module('ui.sortable', [])
                 _isCanceled: false
               };
               // Metrilyx additions
-              if(attrs.dragCopy !== undefined) ui.item.sortable.index = ui.item.index();
-              if(ui.item.sortable.index < 0) ui.item.sortable.index = 0;
+              //if(attrs.dragCopy !== undefined) ui.item.sortable.index = ui.item.index();
             };
 
             callbacks.activate = function(/*e, ui*/) {

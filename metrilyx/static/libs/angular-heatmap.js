@@ -22,6 +22,13 @@ angular.module('heatmaps', [])
 				}, function(newValue, oldValue) {
 					if(newValue.series === undefined) return;
 					if(newValue.series.length < 1) return;
+					if(newValue.series.length > 1) {
+						/* can only have 1 query per pod */
+						newValue.series = [ newValue.series[0] ];
+						setGlobalAlerts({'error': true, 'message': 'Only one heatmap query allowed per pod'});
+						flashAlertsBar();
+						return;
+					}
 					Heat.getData(newValue.series[0].query,
 						function(result) {
 							// check for errors//
@@ -41,13 +48,13 @@ angular.module('heatmaps', [])
 
 function getSeverity(data, thresholds) {
 		var sev = "default";
-		if(data['value'] >= parseFloat(thresholds.info)) {
+		if(data['value'] >= parseFloat(thresholds.info.min) && data['value'] <= parseFloat(thresholds.info.max)) {
 			sev = "info";
 		}
-		if(data['value'] >= parseFloat(thresholds.warning)) {
+		if(data['value'] >= parseFloat(thresholds.warning.min) && data['value'] <= parseFloat(thresholds.warning.max)) {
 			sev = "warning";
 		}
-		if(data['value'] >= parseFloat(thresholds.danger)) {
+		if(data['value'] >= parseFloat(thresholds.danger.min) && data['value'] <= parseFloat(thresholds.danger.max)) {
 			sev = "danger";
 		}
 		return sev;

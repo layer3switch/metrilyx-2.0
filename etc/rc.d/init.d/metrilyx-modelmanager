@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # chkconfig: 234 90 10
-# description: OpenStack Notification Monitor
+# description: Metilyx API server.
 #
 
 [ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
@@ -9,7 +9,7 @@
 NAME="metrilyx-modelmanager"
 BIN=uwsgi
 APP_HOME="/opt/metrilyx"
-LOGFILE=/var/log/${NAME}.log
+LOGFILE=/var/log/metrilyx/${NAME}.log
 PGREP="/usr/bin/pgrep -f"
 
 DEFAULT_OPTS="--ini ${APP_HOME}/etc/metrilyx/uwsgi.conf"
