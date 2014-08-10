@@ -80,6 +80,25 @@ yTransform is a python lambda function that is applied to each datapoint.
 	
 	lambda x: x/1024
 
+## Importing and Exporting Models
+Models can be imported and exported if needed through the UI as well as through the api for automation.
+
+### Importing/Export via UI
+In the UI you can find the **import** button just underneath the button to create a new dashboard and the **export** button underneath the edit button.
+
+### Importing/Export via API
+To import a model using the API you can issue a command similar to the one below to import a graphmap i.e. page model replacing the appropriate values:
+
+- curl -u admin:metrilyx http://localhost**/api/graphmaps** -H "Content-Type:application/json" -d @</path/to/json/model>
+
+The above will import a graphmap (i.e. page).  To import a heatmap you can use the following endpoint:
+
+- curl -u admin:metrilyx http://localhost**/api/heatmaps** -H "Content-Type:application/json" -d @</path/to/heatmap/model>
+	
+Models can similarly be exported (graphmap or heatmap) as follows:
+
+- curl http://localhost/api/graphmaps/<graphmap_id>?export=true
+
 ## Event Annotations
 Event annotations to mark points on the graph where interesting events have happened.  Events contain a type, tags, message and any arbitrary user data represented as JSON.  Here is a sample of the complete structure of an event:
 

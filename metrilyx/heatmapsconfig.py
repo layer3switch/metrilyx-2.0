@@ -37,7 +37,9 @@ if config["cache"]["enabled"]:
         'task': 'metrilyx.celerytasks.cache_metrics',
         'schedule': crontab(minute=str("*/%d" %(config['cache']['interval'])))
     }
-    CELERYBEAT_SCHEDULE['metric-cache-expirer'] = {
-        'task': 'metrilyx.celerytasks.expire_metrics_cache',
-        'schedule': crontab(minute=str("*/%d" %(config['cache']['retention_period'])))
-    }
+    ## TODO: re-work logic
+    #CELERYBEAT_SCHEDULE['metric-cache-expirer'] = {
+    #    'task': 'metrilyx.celerytasks.expire_metrics_cache',
+    #    'schedule': crontab(minute=str("*/%d" %(config['cache']['retention_period'])))
+    #}
+
