@@ -24,7 +24,9 @@ from ..models import *
 
 from ..datastores.ess import ElasticsearchDatastore
 from ..datastores.mongodb import MetricCacheDatastore
+
 from ..annotations import Annotator
+
 
 from ..metrilyxconfig import config
 from metrilyx import metrilyxconfig
@@ -44,6 +46,9 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 class MapViewSet(viewsets.ModelViewSet):
+	"""
+	This class is not directly used.  It is subclassed by heatmaps and graphmaps.
+	"""
 	serializer_class = MapModelSerializer
 	permission_classes = (permissions.IsAuthenticatedOrReadOnly,
 			IsGroupOrReadOnly, IsCreatorOrReadOnly)
@@ -230,16 +235,41 @@ class TagViewSet(viewsets.ViewSet):
 		serializer = MapModelSerializer(objs, many=True)
 		return Response(serializer.data)
 
+class OpenTSDBMetaSearch(object):
+    """
+    Class to handle metric metadata searches.  This class is used when
+    metric metadata caching is disabled.
+    """
+    def __init__(self, config):
+    	self.suggest_limit = config["suggest_limit"]
+        self.tsdb_suggest_url = "%(uri)s%(search_endpoint)s" %(config)
+
+    def search(self, obj, limit=None):
+        if obj["type"] == "metric":
+            obj["type"] = "metrics"
+        if limit != None:
+        	resp = requests.get("%s?max=%d&type=%s&q=%s" %(self.tsdb_suggest_url, 
+        										limit, obj['type'], obj['query']))
+        else:
+        	resp = requests.get("%s?max=%d&type=%s&q=%s" %(self.tsdb_suggest_url, 
+        							self.suggest_limit, obj['type'], obj['query']))
+        return resp.json()
+
 class SearchViewSet(viewsets.ViewSet): 
 
-	metricMetaCache = MetricCacheDatastore(**config['cache']['datastore']['mongodb'])
+	def __init__(self, *args, **kwargs):
+		super(SearchViewSet, self).__init__(*args, **kwargs)
+		if config["cache"]["enabled"]:
+			self.metricMetaSearch = MetricCacheDatastore(**config['cache']['datastore']['mongodb'])			
+		else:
+			self.metricMetaSearch = OpenTSDBMetaSearch(config["dataprovider"])
 
 	def list(self, request, pk=None):
 		return Response(['graphmaps', 'heatmaps', 'metrics', 'tagk', 'tagv', 'event_types'])
 
 	def retrieve(self, request, pk=None):
 		query = request.GET.get('q', '')
-		limit = request.GET.get('limit', config['cache']['result_size'])
+		limit = request.GET.get('limit', config['dataprovider']['suggest_limit'])
 
 		if query == '':
 			response = []
@@ -253,9 +283,9 @@ class SearchViewSet(viewsets.ViewSet):
 			serializer_obj = MapModelSerializer(models_obj, many=True)
 			response = serializer_obj.data
 		elif pk == 'metrics':
-			response = self.metricMetaCache.search({'type': 'metric', 'query': query}, limit=limit)
+			response = self.metricMetaSearch.search({'type': 'metric', 'query': query}, limit=limit)
 		elif pk in ('tagk','tagv'):
-			response = self.metricMetaCache.search({'type': pk, 'query': query}, limit=limit)
+			response = self.metricMetaSearch.search({'type': pk, 'query': query}, limit=limit)
 		elif pk == 'event_types':
 			models_obj = EventType.objects.filter(name__contains=query)
 			serializer_obj = EventTypeSerializer(models_obj,many=True)
