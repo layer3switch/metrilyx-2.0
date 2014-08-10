@@ -89,6 +89,7 @@ else:
 	else:
 		pprint(currC)
 		CFG_VALID = 0
+
 if not opts.dryrun:
 	print """ *******************************************************
   Before using the newly generated config file, please
