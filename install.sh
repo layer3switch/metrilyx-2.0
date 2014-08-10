@@ -128,6 +128,8 @@ fi
 
 
 echo ""
+echo " ** CONFIGURATION OPTIONS CHANGED **"
+echo ""
 echo " ** If you choose to use heatmaps set the config options"
 echo " ** (/opt/metrilyx/etc/metrilyx/metrilyx.conf) and start celerybeat and celeryd."
 echo ""
