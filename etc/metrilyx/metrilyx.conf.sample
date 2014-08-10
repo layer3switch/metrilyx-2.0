@@ -10,6 +10,7 @@
 		"suggest_limit": 50
 	},
 	"heatmaps": {
+		"enabled": false,
 		"analysis_interval": "1m-ago",
 		"transport": "mongodb",
 		"broker": {
