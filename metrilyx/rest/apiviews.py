@@ -1,6 +1,7 @@
 
 import os
 import json
+import time
 import requests
 
 from elasticsearch import Elasticsearch

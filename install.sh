@@ -59,6 +59,8 @@ pydeps() {
 	for pypkg in $(cat PYPACKAGES); do
 		pip list | grep ${pypkg} || pip install ${pypkg};
 	done;
+	pip uninstall autobahn;
+	pip install autobahn;
 }
 install_ess() {
 	if [ "$(rpm -qa | grep elasticsearch)" == "" ]; then
@@ -146,6 +148,8 @@ else
 fi
 
 
+echo ""
+echo " ** CONFIGURATION OPTIONS CHANGED **"
 echo ""
 echo " ** If you choose to use heatmaps set the config options"
 echo " ** (/opt/metrilyx/etc/metrilyx/metrilyx.conf) and start celerybeat and celeryd."

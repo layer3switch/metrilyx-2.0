@@ -750,6 +750,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 						}
 					});
 				}
+				//console.log(graphModel);
 				$scope.graph = graphModel;
 				$scope.reloadGraph();
 				setTimeout(function() {
