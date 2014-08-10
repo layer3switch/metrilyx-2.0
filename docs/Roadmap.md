@@ -1,13 +1,16 @@
 Roadmap
 =======
 
-##### v2.3.x - v2.4.0
+##### v2.3.3 - v2.4.0
 - Metric operatorations i.e. perform math against different series.
 
+##### v2.3.2
+- Complex annotation tag queries
+
 ##### v2.3.1
-- Complex annotation tag queries 
-- Pluggable cache layer
-- Unit tests
+- Enable/Disable cache layer.
+- Performance related configuration changes.
+- Angularjs unit tests.
 
 ##### v2.3.0
 - Event annotations for both adhoc and dashboard view.
