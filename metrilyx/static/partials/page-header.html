@@ -34,7 +34,7 @@
 				<div class="col-md-12">
 					<span class="padlr5">
 						<span style="color:#888">Type :</span>
-						<select ng-model="graph.graphType" class="select-input borderless" style="font-size:13px;color:#555;">
+						<select ng-model="graph.graphType" class="select-input borderless" style="font-size:13px;color:#555;" ng-change="reloadGraph()">
 							<option value="area">area</option>
 							<option value="line">line</option>
 							<option value="pie">pie</option>
