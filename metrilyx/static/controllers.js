@@ -753,11 +753,13 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				//console.log(graphModel);
 				$scope.graph = graphModel;
 				$scope.reloadGraph();
+				/*
 				setTimeout(function() {
 					$("[data-graph-id='"+$scope.graph._id+"']").html(
 						"<table class='gif-loader-table'><tr><td> \
 						<img src='/imgs/loader.gif'></td></tr></table>");
 				},400);
+				*/
 			} else {
 				// initial empty page
 				graphModel.thresholds.danger.max = '';
@@ -1015,12 +1017,13 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 
 			q = $scope.baseQuery(gobj)
 			q.series = gobj.series;
-			$scope.requestData(q);
+			
 			// destroy current graph //
 			try { $("[data-graph-id='"+gobj._id+"']").highcharts().destroy(); } catch(e) {};
 			$("[data-graph-id='"+gobj._id+"']").html(
 				"<table class='gif-loader-table'><tr><td> \
 				<img src='/imgs/loader.gif'></td></tr></table>");
+			$scope.requestData(q);
 		}
 
 		$scope.disableDragDrop = function() {
