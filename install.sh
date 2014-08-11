@@ -109,6 +109,14 @@ import_configs() {
 		fi
 	fi
 }
+postgresql() {
+	## requires postgres repo to be installed
+	if [ -e "/etc/redhat-release" ]; then
+		yum -y install postgresql93 postrgresql93-devel libpqxx libpqxx-devel
+		ln -s /usr/pgsql-9.3/bin/pg_config /usr/local/bin/pg_config
+		pip install psycopg2
+	fi
+}
 init_postgres() {
 	/etc/init.d/postgresql-9.3 initdb;
 	/etc/init.d/postgresql-9.3 start;
