@@ -20,6 +20,8 @@ from metrilyx.metrilyxconfig import config
 from metrilyx.dataserver.protocols import GraphServerProtocol, \
 										EventGraphServerProtocol, \
 										acceptedCompression
+from metrilyx.dataserver.dataproviders import getEventDataProvider, \
+										getPerfDataProvider
 
 LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s %(lineno)d] %(message)s"
 
@@ -49,6 +51,7 @@ def spawnServers(protocol):
 		procs.append(proc)
 	return procs
 
+"""
 def getPerfDataProvider():
 	mc = config['dataprovider']['loader_class'].split(".")
 	mod = __import__('metrilyx.dataserver.dataproviders.perf.%s'%(
@@ -60,6 +63,7 @@ def getEventDataProvider():
 	mod = __import__('metrilyx.dataserver.dataproviders.events.%s' %(
 									".".join(mc[:-1])), fromlist=['*'])
 	return eval("mod.%s(config['annotations']['dataprovider'])" %(mc[-1]))
+"""
 
 def getLogger(level):
 	try:
