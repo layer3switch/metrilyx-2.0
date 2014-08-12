@@ -120,7 +120,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap) {
 		var QUEUED_REQS = [];
 		var modelGraphIds = [];
-		$scope.wssock = getWebSocket();
 
 		if($routeParams.heatmapId) {
 			$scope.modelType = "heatmap/";
@@ -257,16 +256,16 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
    			}
        		return out;
 		}
-        $scope.wssock.onopen = function() {
+		function onOpenWssock() {
           console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
           console.log("Queued requests:",QUEUED_REQS.length);
           while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());
        	}
-       	$scope.wssock.onclose = function(e) {
+       	function onCloseWssock(e) {
           console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
           $scope.wssock = null;
        	}
-       	$scope.wssock.onmessage = function(e) {
+       	function onMessageWssock(e) {
        		var data = JSON.parse(e.data);
        		if(data.error) {
        			console.warn(data);
@@ -287,12 +286,26 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 	       		$scope.wssock.dispatchEvent(ce);
        		}
        	}
+       	function setupWebSocket() {
+			$scope.wssock = getWebSocket();
+        	$scope.wssock.onopen = onOpenWssock;
+       		$scope.wssock.onclose = onCloseWssock;
+       		$scope.wssock.onmessage = onMessageWssock;
+		}
+		setupWebSocket();
         $scope.requestData = function(query) {
         	try {
 				$scope.wssock.send(JSON.stringify(query));
         	} catch(e) {
         		// in CONNECTING state. //
-        		if(e.code === 11) QUEUED_REQS.push(JSON.stringify(query));
+        		if(e.code === 11) {
+        			QUEUED_REQS.push(JSON.stringify(query));
+        		} else {
+        			//QUEUED_REQS.push(JSON.stringify(query));
+        			//console.log('Reconnecting...')
+        			//setupWebSocket();
+        			// TODO: display alert
+        		}
         	}
         }
 		$scope.onPageHeaderLoad = function() {

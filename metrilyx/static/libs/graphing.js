@@ -675,6 +675,7 @@ function upsertLineBasedSeries(args, hcg, timeWindow) {
                     }
                 } catch(e) {
                     console.log("upsertLineBasedSeries", args.series[j].query, e);
+                    console.log(hcg.series[i].options);
                 }
             } // END hcg.series //
             
