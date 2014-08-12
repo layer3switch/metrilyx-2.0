@@ -168,11 +168,23 @@ function MetrilyxAnnotation(obj) {
     this._chartElem = $("[data-graph-id='"+this._data._id+"']");
     this._statusElem = $("[data-graph-status='"+this._data._id+"']");
 }
+MetrilyxAnnotation.prototype.compareAnno = function(a,b) {
+    if (a.x < b.x) return -1;
+    if (a.x > b.x) return 1;
+    return 0;
+}
 MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
     var ndata = [];
     for(var i in chrt.series[serieIdx].data) {
         try {
             if(chrt.series[serieIdx].data[i].x < this._data.annoEvents.data[0].x) {
+                ndata.push({
+                    x: chrt.series[serieIdx].data[i].x,
+                    title: chrt.series[serieIdx].data[i].title,
+                    text: chrt.series[serieIdx].data[i].text,
+                    data: chrt.series[serieIdx].data[i].data
+                });
+            } else if(!equalObjects(chrt.series[serieIdx].data[i], this._data.annoEvents.data[0])) {
                 ndata.push({
                     x: chrt.series[serieIdx].data[i].x,
                     title: chrt.series[serieIdx].data[i].title,
@@ -188,7 +200,7 @@ MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
     for(var i in this._data.annoEvents.data) {
         ndata.push(this._data.annoEvents.data[i]);
     }
-    chrt.series[serieIdx].setData(ndata);
+    chrt.series[serieIdx].setData(ndata.sort(this.compareAnno));
 }
 MetrilyxAnnotation.prototype.queueDataForRendering = function() {
     // queue annotations until graph is rendered with metric data //
