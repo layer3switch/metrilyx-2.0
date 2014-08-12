@@ -27,10 +27,10 @@ from ..datastores.mongodb import MetricCacheDatastore
 
 from ..annotations import Annotator
 
-
 from ..metrilyxconfig import config
 from metrilyx import metrilyxconfig
-
+from metrilyx.dataserver import GraphEventRequest
+from metrilyx.dataserver.dataproviders import getEventDataProvider
 from pprint import pprint
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -173,12 +173,33 @@ class EventsViewSet(APIView):
 		if reqBody.has_key('error'):
 			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
 			
+		gevt = {
+			"_id": "annotations",
+			"annoEvents": {
+				"tags": reqBody["tags"],
+				"eventTypes": reqBody["eventTypes"]
+			},
+			"start": reqBody["start"]
+		}
+		if reqBody.has_key("end"):
+			gevt["end"] = reqBody["end"]
+		
+		ger = GraphEventRequest(gevt)
+		out = []
+		for gr in ger.split():
+			for (url, et, query) in self.eds.queryBuilder.getQuery(gr, split=False):
+				rslt = self.eds.search(query)
+				if len(rslt["hits"]["hits"]) > 0:
+					out += [r['_source'] for r in rslt['hits']['hits']]
+		return Response(out)			
+				
 		# always yield's 1 when split=False
-		for (url, eventTypes, query) in self.eds.queryBuilder.getQuery(reqBody,split=False):
-			essRslt = self.eds.search(query)
+		#for (url, eventTypes, query) in self.eds.queryBuilder.getQuery(reqBody,split=False):
+		#	essRslt = self.eds.search(query)
 			## TODO: potentially need to add error checking 
-			rslt = [r['_source'] for r in essRslt['hits']['hits']]
-			return Response(rslt)
+		#	if len(essRslt["hits"]["hits"]) > 0:
+		#		return Response([r['_source'] for r in essRslt['hits']['hits']])
+		#	return Response([])
 	
 	def post(self, request, pk=None):
 		'''
