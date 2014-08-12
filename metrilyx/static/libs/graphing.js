@@ -168,7 +168,7 @@ function MetrilyxAnnotation(obj) {
     this._chartElem = $("[data-graph-id='"+this._data._id+"']");
     this._statusElem = $("[data-graph-status='"+this._data._id+"']");
 }
-MetrilyxAnnotation.prototype.compareAnno = function(a,b) {
+MetrilyxAnnotation.prototype.sortAnno = function(a,b) {
     if (a.x < b.x) return -1;
     if (a.x > b.x) return 1;
     return 0;
@@ -200,7 +200,7 @@ MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
     for(var i in this._data.annoEvents.data) {
         ndata.push(this._data.annoEvents.data[i]);
     }
-    chrt.series[serieIdx].setData(ndata.sort(this.compareAnno));
+    chrt.series[serieIdx].setData(ndata.sort(this.sortAnno));
 }
 MetrilyxAnnotation.prototype.queueDataForRendering = function() {
     // queue annotations until graph is rendered with metric data //
