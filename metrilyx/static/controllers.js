@@ -116,8 +116,8 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 		document.getElementById('side-panel').addEventListener('refresh-model-list', function(evt){$scope.loadList();});
 	}
 ]);
-metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap) {
+metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap', 'EventTypes',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap, EventTypes) {
 		var QUEUED_REQS = [];
 		var modelGraphIds = [];
 
@@ -186,6 +186,14 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				}
 			} catch(e) {console.warning("failed to parse annotation data", e);}
 		}
+		EventTypes.listTypes(function(rslt) {
+			out = [];
+			for(var i in rslt) {
+				if(rslt[i].name === undefined || $scope.globalAnno.eventTypes.indexOf(rslt[i].name) >= 0) continue;
+				out.push(rslt[i].name);
+			}
+			$scope.annoEventTypes = out;
+		});
 		if(urlParams.tags) {
 			try {
 				//$scope.$parent
@@ -677,8 +685,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		});
 }]);
 
-metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model) {
+metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'EventTypes',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, EventTypes) {
 		var QUEUED_REQS = [];
 
 		$scope.modelType 		= "adhoc";
@@ -793,6 +801,14 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				}
 			} catch(e) {console.warning("failed to parse annotation data", e);}
 		}
+		EventTypes.listTypes(function(rslt) {
+			out = [];
+			for(var i in rslt) {
+				if(rslt[i].name === undefined || $scope.globalAnno.eventTypes.indexOf(rslt[i].name) >= 0) continue;
+				out.push(rslt[i].name);
+			}
+			$scope.annoEventTypes = out;
+		});
 		$('#side-panel').addClass('offstage');
 		if($scope.editMode === "") {
 			$scope.metricListSortOpts.disabled = true;

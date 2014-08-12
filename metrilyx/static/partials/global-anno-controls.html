@@ -23,27 +23,27 @@
 		    	<input type="text" class="form-control dark" ng-model="globalAnno.tags" tagkeyvalue style="border-color:#888 !important;border-radius:30px;">
 		    </div>
 	    </div>
-	    <div class="padlr10" style="border-top:1px solid #808080;border-bottom:1px solid #606060;">
-		    <div class="padtb10">
+	    <div class="padlr10" style="border-top:1px solid #808080;">
+		    <div class="padt10">
 				<div class="small"><b>Types :</b></div>
-				<div class="padl7">
+				<div class="padl7 padb10">
 					<div ng-repeat="evtType in globalAnno.eventTypes" class="small removable-tag">
-						<a href="javascript:void(0)" style="color:#606060" class="interactive" ng-click="globalAnno.eventTypes.splice($index,1)">
+						<a href="javascript:void(0)" style="color:#606060" class="interactive" ng-click="annoEventTypes.push(globalAnno.eventTypes.splice($index,1)[0])">
 							<i class="glyphicon glyphicon-remove"></i>
 						</a>
 						<span>{{evtType}}</span>
 					</div>
 				</div>
 				<div style="clear:both;"></div>
-				<div class="input-group input-group-sm padt5">
-			    	<span class="input-group-addon nobg" style="color:#ccc;border-color:#888;padding-left:0">
-			    		<i class="glyphicon glyphicon-search"></i>
-			    	</span>
-			    	<input type="text" class="form-control dark" style="border-radius:30px;border-color:#888 !important" ng-model="globalAnno.eventTypes" event-types>
+		    	<div style="border-top: 1px solid #606060">
+		    		<div class="small interactive event-type-item" ng-repeat="aetype in annoEventTypes" ng-click="globalAnno.eventTypes.push(annoEventTypes.splice($index,1)[0])">
+		    			<span class="interactive glyphicon glyphicon-plus"></span>
+		    			<span class="padl5">{{aetype}}</span>
+		    		</div>
 		    	</div>
 			</div>
 		</div>
-		<div class="padt10 padlr10" style="border-top:1px solid #808080!important">
+		<div class="padt10 padlr10 marginlr10" style="border-top:1px solid #808080!important">
 			<div class="gcontrols-apply-btn pointer" title="Apply event annotation changes" ng-click="setAnnotations()" >
 				<span>Apply</span>
 			</div>
