@@ -5,7 +5,8 @@ Roadmap
 - Metric operatorations i.e. perform math against different series.
 
 ##### v2.3.2
-- Complex annotation tag queries
+- Complex annotation tag queries in particular the OR operator.
+- Site analytics
 
 ##### v2.3.1
 - Enable/Disable cache layer.
