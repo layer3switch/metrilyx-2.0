@@ -38,7 +38,7 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 		}
 		$scope.listItemClicked = function(obj) {
 			if($scope.browseBy == 'tags' && $scope.selectedTag == '') {
-				if($scope.modelType == 'heatmap/') {	
+				if($scope.modelType == 'heatmap/') {
 					Tags.listModelsByTag({'model_type': 'heat'}, {'tagname':obj.name}, function(result){
 						$scope.modelsList = result;
 					});
@@ -89,7 +89,7 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 		$scope.importModel = function(fileList) {
 			var freader = new FileReader();
 			//console.log(fileList[0].name);
-			freader.onload = function(evt) {	
+			freader.onload = function(evt) {
 				try {
 					jobj = JSON.parse(evt.target.result);
 					if($scope.modelType === "heatmap/") {
@@ -112,7 +112,7 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 			freader.readAsText(fileList[0]);
 		}
 
-		$scope.loadList();	
+		$scope.loadList();
 		document.getElementById('side-panel').addEventListener('refresh-model-list', function(evt){$scope.loadList();});
 	}
 ]);
@@ -301,7 +301,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				if($scope.editMode === ' edit-mode') {
 					$('input.edit-comp').attr('disabled', false);
 				} else {
-					$('input.edit-comp').attr('disabled', true); 
+					$('input.edit-comp').attr('disabled', true);
 				}
 			}, 150);
 		}
@@ -326,7 +326,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			for(var t in tagsArr) {
 				ctag = tagsArr[t].replace(/\s+$/,'');
 				ctag = ctag.replace(/^\s+/,'');
-				if($scope.model.tags.indexOf(ctag) < 0) 
+				if($scope.model.tags.indexOf(ctag) < 0)
 					$scope.model.tags.push(ctag);
 			}
 			$('#add-page-tag').modal('hide');
@@ -390,34 +390,43 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		}
 		$scope.setTimeType = function(newRelativeTime, reloadPage) {
 			$scope.timeType = newRelativeTime;
-			if(reloadPage !== undefined && reloadPage) 
+			if(reloadPage !== undefined && reloadPage)
 				$scope.delayLoadPageModel($routeParams.pageId);
 		}
+
+		var timerSearchForMetric;
 		$scope.searchForMetric = function(args) {
-			/* 
-				'this.metricQuery' must be used rather than '$scope.metricQuery' because 
+			/*
+				'this.metricQuery' must be used rather than '$scope.metricQuery' because
 				edit-panel is ng-include so a new scope gets created.
 			*/
-			var qstr;
-			if(args && args !== "") qstr = args;
-			if(this.metricQuery && this.metricQuery !== "") qstr = this.metricQuery;
-			if(qstr == "" || qstr == undefined) {
-				$scope.metricQueryResult = [];
-				return;
-			}
-			Metrics.suggest(qstr, function(result) {
-				$scope.metricQuery = qstr;
-				Schema.get({modelType:'metric'}, function(graphModel) {
-					var arr = [];
-					for(var i in result) {
-						obj = JSON.parse(JSON.stringify(graphModel));
-						obj.alias = result[i];
-						obj.query.metric = result[i];
-						arr.push(obj);
-					}
-					$scope.metricQueryResult = arr;
+			if (timerSearchForMetric)
+				clearTimeout(timerSearchForMetric);
+
+			var myThis = this;
+			$scope.metricQueryResult = [];//clear result
+			timerSearchForMetric = setTimeout(function(){
+				var qstr;
+				if(args && args !== "") qstr = args;
+				if(myThis.metricQuery && myThis.metricQuery !== "") qstr = myThis.metricQuery;
+				if(qstr == "" || qstr == undefined) {
+					$scope.metricQueryResult = [];
+					return;
+				}
+				Metrics.suggest(qstr, function(result) {
+					$scope.metricQuery = qstr;
+					Schema.get({modelType:'metric'}, function(graphModel) {
+						var arr = [];
+						for(var i in result) {
+							obj = JSON.parse(JSON.stringify(graphModel));
+							obj.alias = result[i];
+							obj.query.metric = result[i];
+							arr.push(obj);
+						}
+						$scope.metricQueryResult = arr;
+					});
 				});
-			});
+			}, 1000);
 		}
 		$scope.setUpdatesEnabled = function(value) {
 			$scope.updatesEnabled = value;
@@ -446,8 +455,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		}
 		$scope.addGraph = function(toPod) {
 			Schema.get({modelType:'graph'}, function(result) {
-				toPod.graphs.push(result);	
-				$scope.reflow();			
+				toPod.graphs.push(result);
+				$scope.reflow();
 			});
 		}
 		$scope.graphSizeChanged = function() {
@@ -470,22 +479,22 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				if($scope.endTime) {
 					if(inMilli) {
 						return {
-							end: $scope.endTime*1000, 
+							end: $scope.endTime*1000,
 							start: $scope.startTime*1000};
 					}
 					return {
-						end: $scope.endTime, 
+						end: $scope.endTime,
 						start: $scope.startTime
 					};
 				}
 				if(inMilli) {
 					return {
-						start: $scope.startTime*1000, 
+						start: $scope.startTime*1000,
 						end: Math.ceil((new Date()).getTime())
 					};
 				}
 				return {
-					start: $scope.startTime, 
+					start: $scope.startTime,
 					end: Math.ceil((new Date()).getTime()/1000)
 				};
 			} else {
@@ -542,7 +551,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			if($scope.timeType != "absolute") $scope.updatesEnabled = true;
 			$(".graph-metrics-panel").collapse('hide');
 			if($scope.modelType == "") {
-				$("[ng-include='thresholdsHtml']").collapse('hide');	
+				$("[ng-include='thresholdsHtml']").collapse('hide');
 			}
 			$('input.edit-comp').attr('disabled',true);
 			$scope.editMode = "";
@@ -614,13 +623,13 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				}
 			} else {
 				if($routeParams.heatmapId == 'new') {
-					Heatmap.saveModel($scope.model, 
+					Heatmap.saveModel($scope.model,
 						function(result) {
 							_saveModelCallback(result);
 						}
 					);
 				} else {
-					Heatmap.editModel({'pageId': $scope.model._id}, $scope.model, 
+					Heatmap.editModel({'pageId': $scope.model._id}, $scope.model,
 						function(result) {
 							_saveModelCallback(result);
 						}
@@ -672,7 +681,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.timeType 		= "1h-ago";
 		$scope.editMode 		= " edit-mode";
 		$scope.updatesEnabled 	= false;
-		
+
 		$scope.pageMastHtml			= connectionPool.nextConnection()+"/partials/page-mast.html";
 		$scope.editPanelHtml		= connectionPool.nextConnection()+"/partials/edit-panel.html";
 		$scope.pageHeaderHtml 		= connectionPool.nextConnection()+"/partials/page-header.html";
@@ -682,7 +691,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.eventAnnoDetailsHtml = connectionPool.nextConnection()+"/partials/event-anno-details.html";
 
 		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
-		
+
 		$scope.metricQueryResult = [];
 		$scope.tagsOnPage = {};
 		$scope.graph = {};
@@ -704,7 +713,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			$scope.startTime = $routeParams.start;
 		}
 		Schema.get({modelType: 'graph'}, function(graphModel) {
-			if($routeParams.size){ 
+			if($routeParams.size){
 				graphModel.size = $routeParams.size;
 			} else {
 				graphModel.size = "large";
@@ -722,7 +731,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 								'warning': {max:wmm[0],min:wmm[1]},
 								'info': {max:imm[0],min:imm[1]}
 							}
-						} 
+						}
 					} catch(e) {
 						console.warn("cannot set thresholds", e);
 					}
@@ -739,7 +748,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 					met = arr[1].split(":");
 					rate = false;
 					if(met.length == 3) rate = true;
-					graphModel.series.push({	
+					graphModel.series.push({
 						'alias': arr[3],
 						'yTransform': arr[4],
 						'query':{
@@ -788,16 +797,16 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
           	console.log("Queued requests:",QUEUED_REQS.length);
           	setTimeout(function() {
-          		while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());	
-          	}, 750);	
+          		while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());
+          	}, 750);
 		}
 		function onCloseWssock(e) {
 			console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
 			$scope.wssock = null;
 			/*
-			setGlobalAlerts({'error': 'Disconnected', 'message': "Disconnected (clean=" + e.wasClean + ", code=" + 
+			setGlobalAlerts({'error': 'Disconnected', 'message': "Disconnected (clean=" + e.wasClean + ", code=" +
 					e.code + ", reason='" + e.reason + "')"});
-			flashAlertsBar();*/	
+			flashAlertsBar();*/
 		}
 		function onMessageWssock(e) {
        		var data = JSON.parse(e.data);
@@ -825,7 +834,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
        		$scope.wssock.onmessage = onMessageWssock;
 		}
         setupWebSocket();
-        
+
         $scope.setUpdatesEnabled = function(value) {
 			$scope.updatesEnabled = value;
 		}
@@ -841,13 +850,13 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		}/*
 		$scope.getTimeWindow = function() {
 			if($scope.timeType == "absolute"){
-				if($scope.endTime) 
+				if($scope.endTime)
 					return {
 						start: parseFloat($scope.startTime),
 						end: parseFloat($scope.endTime)
 					};
 				return {
-					start: parseFloat($scope.startTime), 
+					start: parseFloat($scope.startTime),
 					end: Math.ceil((new Date()).getTime()/1000)
 				};
 			} else {
@@ -862,22 +871,22 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				if($scope.endTime) {
 					if(inMilli) {
 						return {
-							end: $scope.endTime*1000, 
+							end: $scope.endTime*1000,
 							start: $scope.startTime*1000};
 					}
 					return {
-						end: $scope.endTime, 
+						end: $scope.endTime,
 						start: $scope.startTime
 					};
 				}
 				if(inMilli) {
 					return {
-						start: $scope.startTime*1000, 
+						start: $scope.startTime*1000,
 						end: Math.ceil((new Date()).getTime())
 					};
 				}
 				return {
-					start: $scope.startTime, 
+					start: $scope.startTime,
 					end: Math.ceil((new Date()).getTime()/1000)
 				};
 			} else {
@@ -910,7 +919,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
         $scope.requestData = function(query) {
         	jsonQuery = JSON.stringify(query);
         	try {
-				$scope.wssock.send(jsonQuery);	
+				$scope.wssock.send(jsonQuery);
         	} catch(e) {
         		// in CONNECTING state. //
         		if(e.code === 11) {
@@ -1056,26 +1065,35 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			}
 		}
 
+
+		var timerSearchForMetric;
 		$scope.searchForMetric = function(args) {
-			var qstr;
-			if(args && args !== "") qstr = args;
-			if(this.metricQuery && this.metricQuery !== "") qstr = this.metricQuery;
-			if(qstr == "" || qstr == undefined) return;
-			Metrics.suggest(qstr, function(result) {
-				$scope.metricQuery = qstr;
-				Schema.get({modelType:'metric'}, function(graphModel) {
-					var arr = [];
-					for(var i in result) {
-						obj = JSON.parse(JSON.stringify(graphModel));
-						obj.alias = result[i];
-						obj.query.metric = result[i];
-						arr.push(obj);
-					}
-					$scope.metricQueryResult = arr;
+			if (timerSearchForMetric)
+				clearTimeout(timerSearchForMetric);
+
+			var myThis = this;
+			$scope.metricQueryResult = [];//clear result
+			timerSearchForMetric = setTimeout(function(){
+				var qstr;
+				if(args && args !== "") qstr = args;
+				if(myThis.metricQuery && myThis.metricQuery !== "") qstr = myThis.metricQuery;
+				if(qstr == "" || qstr == undefined) return;
+				Metrics.suggest(qstr, function(result) {
+					$scope.metricQuery = qstr;
+					Schema.get({modelType:'metric'}, function(graphModel) {
+						var arr = [];
+						for(var i in result) {
+							obj = JSON.parse(JSON.stringify(graphModel));
+							obj.alias = result[i];
+							obj.query.metric = result[i];
+							arr.push(obj);
+						}
+						$scope.metricQueryResult = arr;
+					});
 				});
-			});
+			}, 1000);
 		}
-		
+
 		$scope.loadHome = function() {
 			$location.path('/graph').search({});
 			$route.reload();
@@ -1123,4 +1141,3 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			$scope.wssock = null;
 		});
 }]);
-
