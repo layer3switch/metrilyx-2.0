@@ -37,7 +37,8 @@ metrilyxServices.factory('Metrics', ['$http', 'Auth', function($http, Auth) {
 			    dfd.resolve([]);
 			} else if(cache[query] === undefined){
 			    Auth.clearCredentials();
-			    $http.get("/api/search/metrics?q=" + query).success(function(res){
+			    $http.get(connectionPool.nextConnection()+"/api/search/metrics?q="+query)
+			    	.success(function(res){
 						cache[query] = res;
 						dfd.resolve(res);
 					});
