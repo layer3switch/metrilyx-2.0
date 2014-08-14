@@ -683,7 +683,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			try {$scope.wssock.close();} catch(e){};
 			$scope.wssock = null;
 		});
-		SITE_ANALYTICS.send({page: "/"+$routeParams.pageId, title: $routeParams.pageId});
+		submitAnalytics({page: "/"+$routeParams.pageId, title: $routeParams.pageId});
 }]);
 
 metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'EventTypes',
@@ -1155,6 +1155,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			try {$scope.wssock.close();} catch(e){};
 			$scope.wssock = null;
 		});
-		SITE_ANALYTICS.send({title:'adhoc',page:'/graph'});
+		submitAnalytics({title:'adhoc',page:'/graph'});
 }]);
 

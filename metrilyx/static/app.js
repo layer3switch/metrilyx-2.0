@@ -605,3 +605,6 @@ function drawTriOnCanvas(canvas, color, direction) {
 	    ctx.fill();
 	}
 }
+function submitAnalytics(args) {
+	if(SITE_ANALYTICS.enabled) SITE_ANALYTICS.send(args);
+}
