@@ -22,6 +22,7 @@ A sample configuration file has been provided.  The configuration file is in JSO
 			"suggest_limit": 50
 		},
 		"heatmaps": {
+			"enabled": false,
 			"analysis_interval": "1m-ago",
 			"transport": "mongodb",
 			"broker": {
@@ -42,7 +43,8 @@ A sample configuration file has been provided.  The configuration file is in JSO
 			    	"collection": "tsmeta_cache"
 		    	}
 	    	},
-	    	"result_size": 50
+	    	"result_size": 50,
+	    	"enabled": false
 		},
 		"databases":[
 			{
