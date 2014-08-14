@@ -117,18 +117,24 @@ function highchartsFormattedSerie(dataObj, dataQuery, graphType, paneIndex) {
 }
 function onAnnotationClick(event) {
     var ead = $('#event-anno-details');
+    var newAnno = {
+        data: event.point.data,
+        eventType: event.point.title,
+        message: event.point.text,
+        timestamp: event.point.x,
+        color: event.point.series.color,
+        isOpen: true
+    };
     scope = angular.element($(ead)).scope();
     if(scope) {
         scope.$apply(function(){
-            scope.selectedAnno = {
-                data: event.point.data,
-                eventType: event.point.title,
-                message: event.point.text,
-                timestamp: event.point.x,
-                color: event.point.series.color
-            };
+            if(equalObjects(scope.selectedAnno, newAnno) && $(ead).hasClass('open')) {
+                $(ead).removeClass('open');
+            } else {
+                scope.selectedAnno = newAnno;
+                $(ead).addClass('open');
+            }
         });
-        $(ead).addClass('open');
     } else {
         console.warning('Counld not get scope for #event-anno-details!');
     }
