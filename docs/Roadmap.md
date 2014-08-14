@@ -6,6 +6,7 @@ Roadmap
 
 ##### v2.3.2
 - Complex annotation tag queries
+- Toggle annotation detail visibility.
 
 ##### v2.3.1
 - Enable/Disable cache layer.
