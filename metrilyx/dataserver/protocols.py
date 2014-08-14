@@ -177,9 +177,9 @@ class EventGraphServerProtocol(GraphServerProtocol):
 		graphEvtReq = GraphEventRequest(request)
 		
 		for graphEvent in graphEvtReq.split():
-			(url, method, query) = self.eventDataprovider.getQuery(graphEvent)
-			a = AsyncHttpJsonClient(uri=url, method=method, body=query)
-			a.addResponseCallback(self.eventResponseCallback, 
-					url, graphEvent['eventTypes'][0], request)
-			a.addResponseErrback(self.eventReponseErrback,
-					url, graphEvent['eventTypes'][0], request)
+			for (url, method, query) in self.eventDataprovider.getQuery(graphEvent):
+				a = AsyncHttpJsonClient(uri=url, method=method, body=query)
+				a.addResponseCallback(self.eventResponseCallback, 
+						url, graphEvent['eventTypes'][0], request)
+				a.addResponseErrback(self.eventReponseErrback,
+						url, graphEvent['eventTypes'][0], request)

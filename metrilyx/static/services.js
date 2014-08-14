@@ -138,6 +138,17 @@ metrilyxServices.factory('Tags', ['$resource', 'Auth',
 		});
 	}
 ]);
+metrilyxServices.factory('EventTypes', ['$resource', 'Auth',
+	function($resource, Auth) {
+		Auth.clearCredentials();
+		return $resource(connectionPool.nextConnection()+'/api/event_types/:eventType', {}, {
+			listTypes: {
+				method:'GET', 
+				isArray:true
+			}
+		});
+	}
+]);
 metrilyxServices.factory('Schema', ['$resource', 'Auth',
 	function($resource, Auth) {
 		Auth.clearCredentials();

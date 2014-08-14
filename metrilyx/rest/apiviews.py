@@ -21,15 +21,14 @@ import metrilyx
 from custompermissions import IsGroupOrReadOnly, IsCreatorOrReadOnly
 from serializers import *
 from ..models import * 
-
-from ..datastores.ess import ElasticsearchDatastore
 from ..datastores.mongodb import MetricCacheDatastore
 
 from ..annotations import Annotator
 
-
 from ..metrilyxconfig import config
 from metrilyx import metrilyxconfig
+from metrilyx.dataserver import GraphEventRequest
+from metrilyx.dataserver.dataproviders import getEventDataProvider
 
 from pprint import pprint
 
@@ -139,7 +138,7 @@ class EventsViewSet(APIView):
 	REQUIRED_QUERY_PARAMS = ('start','eventTypes','tags')
 	REQUIRED_WRITE_PARAMS = ('eventType','message', 'tags')
 
-	eds = ElasticsearchDatastore(config['annotations']['dataprovider'])
+	eventDataProvider = getEventDataProvider()
 
 	def __checkRequest(self, request):
 		if request.body == "":
@@ -173,12 +172,25 @@ class EventsViewSet(APIView):
 		if reqBody.has_key('error'):
 			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
 			
-		# always yield's 1 when split=False
-		for (url, eventTypes, query) in self.eds.queryBuilder.getQuery(reqBody,split=False):
-			essRslt = self.eds.search(query)
-			## TODO: potentially need to add error checking 
-			rslt = [r['_source'] for r in essRslt['hits']['hits']]
-			return Response(rslt)
+		gevt = {
+			"_id": "annotations",
+			"annoEvents": {
+				"tags": reqBody["tags"],
+				"eventTypes": reqBody["eventTypes"]
+			},
+			"start": reqBody["start"]
+		}
+		if reqBody.has_key("end"):
+			gevt["end"] = reqBody["end"]
+		
+		ger = GraphEventRequest(gevt)
+		out = []
+		for gr in ger.split():
+			for (url, et, query) in self.eventDataProvider.queryBuilder.getQuery(gr, split=False):
+				rslt = self.eventDataProvider.search(query)
+				if len(rslt["hits"]["hits"]) > 0:
+					out += [r['_source'] for r in rslt['hits']['hits']]
+		return Response(out)			
 	
 	def post(self, request, pk=None):
 		'''
@@ -197,7 +209,7 @@ class EventsViewSet(APIView):
 			for k,v in reqBody['tags'].items():
 				out[k] = v
 			anno = Annotator(out)
-			self.eds.add(anno.annotation)
+			self.eventDataProvider.add(anno.annotation)
 			return Response(anno.annotation)
 		except Exception,e:
 			return Response({'error': str(e)},

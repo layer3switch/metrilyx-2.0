@@ -1493,3 +1493,11 @@ li[ng-repeat="tagvalue in tagvalues|orderBy:'toString()'"]:last-child > a {
 	bottom: 3px;
 	padding-right: 5px;
 }
+.event-type-item {
+	padding-left: 10px;
+	font-weight: bold;
+	border-top:1px solid #808080;
+	border-bottom:1px solid #606060;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}

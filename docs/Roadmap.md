@@ -7,6 +7,7 @@ Roadmap
 ##### v2.3.2
 - Complex annotation tag queries in particular the OR operator.
 - Site analytics
+- Toggle annotation detail visibility.
 
 ##### v2.3.1
 - Enable/Disable cache layer.
