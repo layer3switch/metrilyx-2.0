@@ -20,5 +20,5 @@ Metrilyx is a web based dashboard engine to OpenTSDB, a time series database use
 
 **Notes**
 
-- Please be aware that although the project has a MIT license, the graphing library is under the creative commons license.
+- Please be aware that although the project has a Apache license, the graphing library is under the creative commons license.
 - The default username and password for the site are admin and metrilyx respectively. Changing these will cause the application to stop functioning as other configurations also need to be updated.  This should not be harmful as metrilyx does not store any sensitive information.
