@@ -32,20 +32,19 @@ metrilyxServices.factory('Metrics', ['$http', 'Auth', function($http, Auth) {
 
     return {
         suggest: function(query, callback) {
-				var dfd = $.Deferred();
-
-				if (query == "") {
-				    dfd.resolve([]);
-				} else if(cache[query] === undefined){
-				    Auth.clearCredentials();
-				    $http.get(connectionPool.nextConnection()+"/api/search/metrics?q=" + query).success(function(res){
-							cache[query] = res;
-							dfd.resolve(res);
-						});
-				} else {
-					dfd.resolve(cache[query]);
-				}
-				dfd.done(callback);
+			var dfd = $.Deferred();
+			if (query == "") {
+			    dfd.resolve([]);
+			} else if(cache[query] === undefined){
+			    Auth.clearCredentials();
+			    $http.get("/api/search/metrics?q=" + query).success(function(res){
+						cache[query] = res;
+						dfd.resolve(res);
+					});
+			} else {
+				dfd.resolve(cache[query]);
+			}
+			dfd.done(callback);
 		}
     };
 }]);
