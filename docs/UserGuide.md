@@ -100,7 +100,7 @@ Models can similarly be exported (graphmap or heatmap) as follows:
 - curl http://localhost/api/graphmaps/<graphmap_id>?export=true
 
 ## Event Annotations
-Event annotations to mark points on the graph where interesting events have happened.  Events contain a type, tags, message and any arbitrary user data represented as JSON.  Here is a sample of the complete structure of an event:
+Event annotations are used to mark points on the graph where interesting events have happened.  Events contain a type, tags, message and any arbitrary user data represented as JSON.  Here is a sample of the complete structure of an event:
 
 ### Event Structure
 
@@ -122,13 +122,14 @@ Event annotations to mark points on the graph where interesting events have happ
 	}
 	
 ### Firing Events
-The event structure to fire an event is shown below.  To fire an event submit a POST request with the body below.
+Events can be submitted to Metrilyx via the API.  The 2 available options are:
+- Provided script fire-event.py
+- Submitting a HTTP POST request.
 
 ##### fire-event.py
-This is a helper script that can be sued to fire an event. Issue:
+This is a helper script that can be used to fire an event. To see the available options issue the following command:
 
-	./fire-event.py -h
-to see options and syntax.
+	./bin/fire-event.py -h
 
 ##### Using HTTP POST method.
 When using POST requests, they should be made to the **/api/annotations** endpoint.  The description of the POST payload is described below.
