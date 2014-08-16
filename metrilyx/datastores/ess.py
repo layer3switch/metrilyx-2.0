@@ -1,5 +1,4 @@
 
-from elasticsearch import Elasticsearch
 from metrilyx import BaseClassWithConfig
 from ..dataserver.transforms import absoluteTime
 	
@@ -65,25 +64,3 @@ class ElasticsearchAnnotationQueryBuilder(object):
 				}
 			q.update(self.resultSize())
 			yield (url, request['eventTypes'], q)
-
-
-
-class ElasticsearchDatastore(BaseClassWithConfig):
-	def __init__(self, config):
-		super(ElasticsearchDatastore, self).__init__(config)
-		self.ds = Elasticsearch([{
-			'host': self.host,
-			'port': self.port,
-			'use_ssl': self.use_ssl
-			}])
-
-		self.queryBuilder = ElasticsearchAnnotationQueryBuilder(**config)
-
-	def add(self, item):
-		return self.ds.index(index=self.index, 
-				doc_type=item['eventType'], 
-				id=item['_id'], 
-				body=item)
-
-	def search(self, q):
-		return self.ds.search(index=self.index, body=q)

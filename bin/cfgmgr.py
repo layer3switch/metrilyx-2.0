@@ -50,7 +50,7 @@ parser = OptionParser()
 
 parser.add_option("--infile", "-i", dest="infile")
 parser.add_option("--outfile", "-o", dest="outfile", default=NEW_CFG_FILENAME)
-
+parser.add_option("--dryrun", "-n", dest="dryrun", default=False, action="store_true")
 (opts,args) = parser.parse_args()
 
 if not opts.infile:
@@ -68,20 +68,30 @@ if CFG_VALID != 0:
 	print "-----------------"
 	print " ** %d missing options! **\n" %(CFG_VALID)
 else:
-	print "Configuration passed!"
-	
+	print " * Configuration passed!"
+	print " ======================="
 if not os.path.exists(opts.outfile):
-	json.dump(currC, open(opts.outfile, "wb"), indent=4)
-	print "New config file written: %s\n" %(opts.outfile)
+	if not opts.dryrun:
+		json.dump(currC, open(opts.outfile, "wb"), indent=4)
+		print " * New config file written: %s\n" %(opts.outfile)
+	else:
+		print " * New config file"
+		print " ================="
+		pprint(currC)
 	CFG_VALID = 0
 else:
-	ans = raw_input("* Overwrite existing file: %s? [y/n] " %(opts.outfile))
-	if ans.lower() in ('y','yes'):
-		json.dump(currC, open(opts.outfile, "wb"), indent=4)
-		print "\nNew config file written: %s\n" %(opts.outfile)
+	if not opts.dryrun:
+		ans = raw_input("* Overwrite existing file: %s? [y/n] " %(opts.outfile))
+		if ans.lower() in ('y','yes'):
+			json.dump(currC, open(opts.outfile, "wb"), indent=4)
+			print "\nNew config file written: %s\n" %(opts.outfile)
+			CFG_VALID = 0
+	else:
+		pprint(currC)
 		CFG_VALID = 0
 
-print """ *******************************************************
+if not opts.dryrun:
+	print """ *******************************************************
   Before using the newly generated config file, please
   fill in the appropriate values that may be missing. 
  ********************************************************\n"""

@@ -1,6 +1,6 @@
 
 function relativeToAbsoluteTime(timeStr) {
-	numUnit = timeStr.match(/([0-9]+)(m|h|w)-ago$/);
+	numUnit = timeStr.match(/([0-9]+)(m|h|d|w)-ago$/);
 	num = parseInt(numUnit[1]);
 	switch(numUnit[2]) {
 		case "m":
@@ -9,8 +9,11 @@ function relativeToAbsoluteTime(timeStr) {
 		case "h":
 			return num*3600;
 			break;
+		case "d":
+			return num*86400
+			break;
 		case "w":
-			return num*86400;
+			return num*604800;
 			break;
 		default:
 			break;
@@ -23,7 +26,7 @@ angular.module('pageLayout', [])
 			require: '?ngModel',
 			link: function(scope, elem, attrs, ngModel) {
 				if(!ngModel) return;
-				
+
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
@@ -95,7 +98,7 @@ angular.module('pageLayout', [])
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
 					if(scope.editMode == " edit-mode") {
-						$(elem).find('.graph-metrics-panel').each(function() { 
+						$(elem).find('.graph-metrics-panel').each(function() {
 							$(this).collapse('show');
 						});
 						scope.enableDragDrop();
@@ -112,7 +115,7 @@ angular.module('pageLayout', [])
 			require: '?ngModel',
 			link: function(scope, elem, attrs, ngModel) {
 				if(!ngModel) return;
-				
+
 				$(elem).dblclick(function(evt) {
 					if(scope.editMode == "") return;
 					if(evt.offsetX < $(evt.currentTarget).width()/2) {
@@ -180,91 +183,124 @@ angular.module('pageLayout', [])
 
 /* graph initialization and loading */
 angular.module('graphing', [])
-	.directive('wsHighstockGraph', [ function() {
+	angular.module('graphing', [])
+	.factory('WsHighstockGraphHelper', function(){
+		return function (scope, ngModel) {
+			var t = this;
+			var currTimer;
+
+			function setSerieStatus(newData, status) {
+				/* status order: querying, updating, loading, loaded, error */
+				for (var ns in newData.series) {
+					for (var ms in ngModel.$modelValue.series) {
+						qgt = $.extend(true, {}, ngModel.$modelValue.series[ms].query);
+						$.extend(qgt.tags, scope.globalTags, true);
+						if (equalObjects(qgt, newData.series[ns].query)) {
+							ngModel.$modelValue.series[ms].status = status;
+							break;
+						}
+					}
+				}
+			}
+
+
+			// only get series data that is not in 'querying' state //
+			function getSeriesInNonQueryState(series) {
+				out = [];
+				for (var ns in series) {
+					for (var ms in ngModel.$modelValue.series) {
+						if (equalObjects(ngModel.$modelValue.series[ms].query, series[ns].query)) {
+							if (ngModel.$modelValue.series[ms].status === undefined || ngModel.$modelValue.series[ms].status !== 'querying') {
+								out.push(series[ns]);
+								break;
+							}
+						}
+					}
+				}
+				return out;
+			}
+
+			function getUpdateQuery() {
+				return {
+					start: Math.floor(((new Date()).getTime() - METRIC_FETCH_TIME_WIN) / 1000),
+					size: ngModel.$modelValue.size,
+					_id: ngModel.$modelValue._id,
+					name: ngModel.$modelValue.name,
+					series: ngModel.$modelValue.series,
+					graphType: ngModel.$modelValue.graphType,
+					tags: scope.globalTags,
+					//annoEvents: ngModel.$modelValue.annoEvents,
+					multiPane: ngModel.$modelValue.multiPane,
+					panes: ngModel.$modelValue.panes
+				};
+			}
+
+			function getUpdates() {
+				//console.log('requesting metrics updates...', scope.updatesEnabled);
+				if (ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
+					q = getUpdateQuery();
+					scope.requestData(q);
+					setSerieStatus(q, 'updating');
+				}
+				if (currTimer) clearTimeout(currTimer);
+				currTimer = setTimeout(function() {
+					getUpdates();
+				}, METRIC_POLL_INTERVAL);
+			}
+
+			function checkDataErrors(d) {
+				for (var i in d.series) {
+					if (d.series[i].data.error) setSerieStatus({
+						'series': [d.series[i]]
+					}, 'error');
+					else setSerieStatus({
+						'series': [d.series[i]]
+					}, 'loading');
+				}
+			}
+
+			function processRecievedData(event) {
+				var data = event.detail;
+				checkDataErrors(data);
+				if (data.series) {
+					var mg = new MetrilyxGraph(data, scope.getTimeWindow(true));
+					mg.applyData();
+				}
+				if (data.annoEvents && data.annoEvents.data && data.annoEvents.data.length > 0) {
+					anno = new MetrilyxAnnotation(data);
+					anno.applyData();
+				}
+				var sTags = (new SeriesFormatter(data.series)).seriesTags();
+				scope.$apply(function() {
+					scope.updateTagsOnPage(sTags)
+				});
+				setSerieStatus(data, 'loaded');
+			}
+
+
+			//exposed public method
+			t.setSerieStatus =  setSerieStatus;
+			t.getSeriesInNonQueryState = getSeriesInNonQueryState;
+			t.getUpdates = getUpdates;
+			t.processRecievedData = processRecievedData;
+
+			//not used yet, exposed for testing
+			t.getUpdateQuery = getUpdateQuery;
+			t.checkDataErrors = checkDataErrors;
+
+			scope.$on("$destroy", function( event ) { clearTimeout(currTimer); });
+		}
+	})
+	//helper factory
+	.directive('wsHighstockGraph', ['WsHighstockGraphHelper', function(WsHighstockGraphHelper) {
 		return {
 			restrict: 'A',
 			require: '?ngModel',
 			link: function(scope, elem, attrs, ngModel) {
 				if(!ngModel) return;
 
-				var currTimer;
 				var evtListenerAdded = false;
-
-				function setSerieStatus(newData, status) {
-					/* status order: querying, updating, loading, loaded, error */
-					for(var ns in newData.series) {
-						for(var ms in ngModel.$modelValue.series) {
-							qgt = $.extend(true, {}, ngModel.$modelValue.series[ms].query); 
-							$.extend(qgt.tags, scope.globalTags, true);
-							if(equalObjects(qgt, newData.series[ns].query)) {
-								ngModel.$modelValue.series[ms].status = status;
-								break;
-							}
-						}
-					}
-				}
-				// only get series data that is not in 'querying' state //
-				function getSeriesInNonQueryState(series) {
-					out = [];
-					for(var ns in series) {
-						for(var ms in ngModel.$modelValue.series) {
-							if(equalObjects(ngModel.$modelValue.series[ms].query, series[ns].query)) {
-								if(ngModel.$modelValue.series[ms].status === undefined || ngModel.$modelValue.series[ms].status !== 'querying') {
-									out.push(series[ns]);
-									break;
-								}
-							}
-						}
-					}
-					return out;
-				}
-				function getUpdateQuery() {
-					return { 
-						start: Math.floor(((new Date()).getTime() - METRIC_FETCH_TIME_WIN)/1000),
-						size: ngModel.$modelValue.size,
-						_id: ngModel.$modelValue._id,
-						name: ngModel.$modelValue.name,
-						series: ngModel.$modelValue.series,
-						graphType: ngModel.$modelValue.graphType,
-						tags: scope.globalTags,
-						//annoEvents: ngModel.$modelValue.annoEvents,
-						multiPane: ngModel.$modelValue.multiPane,
-						panes: ngModel.$modelValue.panes
-					};
-				}
-				function getUpdates() {
-					//console.log('requesting metrics updates...', scope.updatesEnabled);
-					if(ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
-						q = getUpdateQuery();
-						scope.requestData(q);
-						setSerieStatus(q, 'updating');
-					}
-					if(currTimer) clearTimeout(currTimer);
-					currTimer = setTimeout(function() { 
-						getUpdates();
-					}, METRIC_POLL_INTERVAL);
-				}
-				function checkDataErrors(d) {
-					for(var i in d.series) {
-						if(d.series[i].data.error) setSerieStatus({'series': [d.series[i]]}, 'error');
-						else setSerieStatus({'series': [d.series[i]]}, 'loading');
-					}
-				}
-				function processRecievedData(event) {
-					var data = event.detail;
-					checkDataErrors(data);
-					if(data.series) {
-						var mg = new MetrilyxGraph(data, scope.getTimeWindow(true));
-						mg.applyData();
-					}
-					if(data.annoEvents && data.annoEvents.data && data.annoEvents.data.length > 0) {
-						anno = new MetrilyxAnnotation(data);
-						anno.applyData();
-					}
-					var sTags = (new SeriesFormatter(data.series)).seriesTags();
-					scope.$apply(function() { scope.updateTagsOnPage(sTags) });
-					setSerieStatus(data, 'loaded');
-				}
+				var wsHelper = new WsHighstockGraphHelper(scope, ngModel);
 
 				if(scope.editMode == " edit-mode") {
 					$(elem).find("input[ng-model*=name]").each(function() {
@@ -273,14 +309,15 @@ angular.module('graphing', [])
 				} else {
 					scope.disableDragDrop();
 				}
+
 				// start updates after 50 seconds //
-				setTimeout(function() {getUpdates();},50000);
-				
+				setTimeout(function() {wsHelper.getUpdates();},50000);
+
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(graph, oldValue) {
 					if(!evtListenerAdded && graph._id) {
-						scope.wssock.addEventListener(graph._id, processRecievedData);
+						scope.wssock.addEventListener(graph._id, wsHelper.processRecievedData);
 						evtListenerAdded = true;
 						if(scope.modelType === "") scope.addEvtListenerGraphId(graph._id);
 					}
@@ -295,15 +332,15 @@ angular.module('graphing', [])
 						}
 					}
 					// initial populate //
-					ehc = $("[data-graph-id='"+graph._id+"']"); 
+					ehc = $("[data-graph-id='"+graph._id+"']");
 					hc = $(ehc).highcharts();
 					if(hc == undefined) {
 						$(ehc).html("<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
-						gseries = getSeriesInNonQueryState(graph.series);
+						gseries = wsHelper.getSeriesInNonQueryState(graph.series);
 						if(gseries.length > 0) {
 							var q = scope.baseQuery(graph);
 							q.series = gseries;
-							setSerieStatus(q, 'querying');
+							wsHelper.setSerieStatus(q, 'querying');
 							scope.requestData(q);
 						}
 						if(scope.modelType == 'adhoc') scope.setURL(graph);
@@ -313,14 +350,14 @@ angular.module('graphing', [])
 					if(graph.graphType != oldValue.graphType) {
 						//console.log("graph type changed. re-rendering");
 						scope.reloadGraph(graph);
-						setSerieStatus(graph, 'querying');
+						wsHelper.setSerieStatus(graph, 'querying');
 						return;
 					};
 					// check length //
 					if(graph.series.length == oldValue.series.length) {
 						return;
 					} else if(graph.series.length > oldValue.series.length) {
-						var q = scope.baseQuery(graph);	
+						var q = scope.baseQuery(graph);
 						q.series = [];
 						// find the new series that was added //
 						for(var gi in graph.series) {
@@ -329,7 +366,7 @@ angular.module('graphing', [])
 							}
 						}
 						scope.requestData(q);
-						setSerieStatus(q,'querying');
+						wsHelper.setSerieStatus(q,'querying');
 						if(scope.modelType == 'adhoc') scope.setURL(graph);
 					} else {
 						//console.log("removing series");
@@ -339,12 +376,11 @@ angular.module('graphing', [])
 				}, true);
 
 				scope.$on("$destroy", function( event ) {
-                	clearTimeout(currTimer);
-            		if(scope.wssock != null) 
+            		if(scope.wssock != null)
             			scope.wssock.removeEventListener("graphdata", processRecievedData);
                 });
 			}
-		};	
+		};
 	}]);
 angular.module('timeframe', [])
 	.directive('dateTime', ['$location', function($location) {
@@ -357,6 +393,14 @@ angular.module('timeframe', [])
 				$(elem).datetimepicker({
 					useStrict: true
 				});
+				//console.log(scope.startTime,scope.endTime);
+				if(scope.timeType === "absolute") {
+					if(attrs.ngModel == "startTime") {
+						$(elem).data("DateTimePicker").setDate(new Date(scope.startTime*1000));
+					} else if(attrs.ngModel == "endTime") {
+						$(elem).data("DateTimePicker").setDate(new Date(scope.endTime*1000));
+					}
+				}
 				$(elem).on("change.dp",function (e) {
 					if(e.date != undefined) {
 						try {
@@ -372,7 +416,7 @@ angular.module('timeframe', [])
 								scope.setEndTime(etime);
 								$('[ng-model=startTime]').data("DateTimePicker").setEndDate(e.date);
 							}
-							scope.$apply();		
+							scope.$apply();
 						} catch(e) {
 							console.log(e);
 						}
@@ -386,7 +430,7 @@ angular.module('timeframe', [])
 			restrict: 'A',
 			require: '?ngModel',
 			link: function(scope, elem, attrs, ngModel) {
-				if(!ngModel) return;							
+				if(!ngModel) return;
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
@@ -394,15 +438,14 @@ angular.module('timeframe', [])
 					if(newValue === oldValue) return;
 					if(newValue == "absolute") {
 						scope.setTimeType(newValue);
-						//scope.setTimeType(scope.timeType);
 						if(scope.modelType !== 'adhoc') scope.setUpdatesEnabled(false);
-							d = new Date();
-							endTime = Math.ceil(d.getTime()/1000);
-							startTime = endTime - relativeToAbsoluteTime(oldValue);
-							scope.setStartTime(startTime);
-							$('[ng-model=startTime]').data("DateTimePicker").setDate(new Date(startTime*1000));
-							scope.setEndTime(endTime);
-							$('[ng-model=startTime]').data("DateTimePicker").setDate(new Date(endTime*1000));
+						d = new Date();
+						endTime = Math.ceil(d.getTime()/1000);
+						startTime = endTime - relativeToAbsoluteTime(oldValue);
+						scope.setStartTime(startTime);
+						$('[ng-model=startTime]').data("DateTimePicker").setDate(new Date(startTime*1000));
+						scope.setEndTime(endTime);
+						$('[ng-model=startTime]').data("DateTimePicker").setDate(new Date(endTime*1000));
 					} else {
 						if(scope.modelType === 'adhoc') {
 							scope.setTimeType(newValue);
@@ -424,13 +467,13 @@ angular.module('timeframe', [])
 function mousePos(e) {
 	var x;
 	var y;
-	if (e.pageX || e.pageY) { 
+	if (e.pageX || e.pageY) {
 	  x = e.pageX;
 	  y = e.pageY;
-	} else { 
-	  x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft; 
-	  y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop; 
-	} 
+	} else {
+	  x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+	  y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+	}
 	x -= e.currentTarget.offsetLeft;
 	y -= e.currentTarget.offsetTop;
 	return {'x':x,'y':y}

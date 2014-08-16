@@ -1,5 +1,7 @@
 
 import time
+import itertools
+
 from pprint import pprint
 
 class GraphEventRequest(object):
@@ -16,8 +18,9 @@ class GraphEventRequest(object):
 			Applies global tags to events.  For now, this takes precendence over
 			other tags specified.
 		'''
-		for k,v in self.request['tags'].items():
-			self.request['annoEvents']['tags'][k] = v
+		if self.request.has_key("tags"):
+			for k,v in self.request['tags'].items():
+				self.request['annoEvents']['tags'][k] = v
 
 	def __checkRequest(self, request):
 		for k in self.REQUIRED_EVENT_KEYS:
@@ -31,16 +34,25 @@ class GraphEventRequest(object):
 					len(request['annoEvents']['tags'].keys()) < 1:
 			raise NameError('Must specify atleast 1 event type and a pair of tags')
 
+	def __tagsQueries(self, tags):
+		"""
+			OR queries
+		"""
+		normalized = dict([(tk, tv.split("|")) for tk, tv in tags.items()])
+		out = dict([(k,[ {k:val} for val in v ]) for k,v in normalized.items()])
+		return [ dict([i.items()[0] for i in it]) for it in itertools.product(*out.values()) ]
+
 	def split(self):
 		for etype in self.request['annoEvents']['eventTypes']:
-			erequest = {
-				'start': self.request['start']*1000000,
-				'tags': self.request['annoEvents']['tags'],
-				'eventTypes': [etype]
-			}
-			if self.request.has_key('end'):
-				erequest['end'] = self.request['end']*1000000
-			yield erequest
+			for t in self.__tagsQueries(self.request['annoEvents']['tags']):
+				erequest = {
+					'start': self.request['start']*1000000,
+					'tags': t,
+					'eventTypes': [etype]
+				}
+				if self.request.has_key('end'):
+					erequest['end'] = self.request['end']*1000000
+				yield erequest
 
 class GraphRequest(object):
 	REQUIRED_REQUEST_KEYS = ('_id', 'start', 'graphType', 'series',)

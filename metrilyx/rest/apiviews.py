@@ -1,6 +1,7 @@
 
 import os
 import json
+import time
 import requests
 
 from elasticsearch import Elasticsearch
@@ -20,13 +21,14 @@ import metrilyx
 from custompermissions import IsGroupOrReadOnly, IsCreatorOrReadOnly
 from serializers import *
 from ..models import * 
-
-from ..datastores.ess import ElasticsearchDatastore
 from ..datastores.mongodb import MetricCacheDatastore
+
 from ..annotations import Annotator
 
 from ..metrilyxconfig import config
 from metrilyx import metrilyxconfig
+from metrilyx.dataserver import GraphEventRequest
+from metrilyx.dataserver.dataproviders import getEventDataProvider
 
 from pprint import pprint
 
@@ -43,6 +45,9 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 class MapViewSet(viewsets.ModelViewSet):
+	"""
+	This class is not directly used.  It is subclassed by heatmaps and graphmaps.
+	"""
 	serializer_class = MapModelSerializer
 	permission_classes = (permissions.IsAuthenticatedOrReadOnly,
 			IsGroupOrReadOnly, IsCreatorOrReadOnly)
@@ -133,7 +138,7 @@ class EventsViewSet(APIView):
 	REQUIRED_QUERY_PARAMS = ('start','eventTypes','tags')
 	REQUIRED_WRITE_PARAMS = ('eventType','message', 'tags')
 
-	eds = ElasticsearchDatastore(config['annotations']['dataprovider'])
+	eventDataProvider = getEventDataProvider()
 
 	def __checkRequest(self, request):
 		if request.body == "":
@@ -167,12 +172,25 @@ class EventsViewSet(APIView):
 		if reqBody.has_key('error'):
 			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
 			
-		# always yield's 1 when split=False
-		for (url, eventTypes, query) in self.eds.queryBuilder.getQuery(reqBody,split=False):
-			essRslt = self.eds.search(query)
-			## TODO: potentially need to add error checking 
-			rslt = [r['_source'] for r in essRslt['hits']['hits']]
-			return Response(rslt)
+		gevt = {
+			"_id": "annotations",
+			"annoEvents": {
+				"tags": reqBody["tags"],
+				"eventTypes": reqBody["eventTypes"]
+			},
+			"start": reqBody["start"]
+		}
+		if reqBody.has_key("end"):
+			gevt["end"] = reqBody["end"]
+		
+		ger = GraphEventRequest(gevt)
+		out = []
+		for gr in ger.split():
+			for (url, et, query) in self.eventDataProvider.queryBuilder.getQuery(gr, split=False):
+				rslt = self.eventDataProvider.search(query)
+				if len(rslt["hits"]["hits"]) > 0:
+					out += [r['_source'] for r in rslt['hits']['hits']]
+		return Response(out)			
 	
 	def post(self, request, pk=None):
 		'''
@@ -191,7 +209,7 @@ class EventsViewSet(APIView):
 			for k,v in reqBody['tags'].items():
 				out[k] = v
 			anno = Annotator(out)
-			self.eds.add(anno.annotation)
+			self.eventDataProvider.add(anno.annotation)
 			return Response(anno.annotation)
 		except Exception,e:
 			return Response({'error': str(e)},
@@ -229,16 +247,41 @@ class TagViewSet(viewsets.ViewSet):
 		serializer = MapModelSerializer(objs, many=True)
 		return Response(serializer.data)
 
+class OpenTSDBMetaSearch(object):
+    """
+    Class to handle metric metadata searches.  This class is used when
+    metric metadata caching is disabled.
+    """
+    def __init__(self, config):
+    	self.suggest_limit = config["suggest_limit"]
+        self.tsdb_suggest_url = "%(uri)s%(search_endpoint)s" %(config)
+
+    def search(self, obj, limit=None):
+        if obj["type"] == "metric":
+            obj["type"] = "metrics"
+        if limit != None:
+        	resp = requests.get("%s?max=%d&type=%s&q=%s" %(self.tsdb_suggest_url, 
+        										limit, obj['type'], obj['query']))
+        else:
+        	resp = requests.get("%s?max=%d&type=%s&q=%s" %(self.tsdb_suggest_url, 
+        							self.suggest_limit, obj['type'], obj['query']))
+        return resp.json()
+
 class SearchViewSet(viewsets.ViewSet): 
 
-	metricMetaCache = MetricCacheDatastore(**config['cache']['datastore']['mongodb'])
+	def __init__(self, *args, **kwargs):
+		super(SearchViewSet, self).__init__(*args, **kwargs)
+		if config["cache"]["enabled"]:
+			self.metricMetaSearch = MetricCacheDatastore(**config['cache']['datastore']['mongodb'])			
+		else:
+			self.metricMetaSearch = OpenTSDBMetaSearch(config["dataprovider"])
 
 	def list(self, request, pk=None):
 		return Response(['graphmaps', 'heatmaps', 'metrics', 'tagk', 'tagv', 'event_types'])
 
 	def retrieve(self, request, pk=None):
 		query = request.GET.get('q', '')
-		limit = request.GET.get('limit', config['cache']['result_size'])
+		limit = request.GET.get('limit', config['dataprovider']['suggest_limit'])
 
 		if query == '':
 			response = []
@@ -252,9 +295,9 @@ class SearchViewSet(viewsets.ViewSet):
 			serializer_obj = MapModelSerializer(models_obj, many=True)
 			response = serializer_obj.data
 		elif pk == 'metrics':
-			response = self.metricMetaCache.search({'type': 'metric', 'query': query}, limit=limit)
+			response = self.metricMetaSearch.search({'type': 'metric', 'query': query}, limit=limit)
 		elif pk in ('tagk','tagv'):
-			response = self.metricMetaCache.search({'type': pk, 'query': query}, limit=limit)
+			response = self.metricMetaSearch.search({'type': pk, 'query': query}, limit=limit)
 		elif pk == 'event_types':
 			models_obj = EventType.objects.filter(name__contains=query)
 			serializer_obj = EventTypeSerializer(models_obj,many=True)

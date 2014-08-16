@@ -80,8 +80,27 @@ yTransform is a python lambda function that is applied to each datapoint.
 	
 	lambda x: x/1024
 
+## Importing and Exporting Models
+Models can be imported and exported if needed through the UI as well as through the api for automation.
+
+### Importing/Export via UI
+In the UI you can find the **import** button just underneath the button to create a new dashboard and the **export** button underneath the edit button.
+
+### Importing/Export via API
+To import a model using the API you can issue a command similar to the one below to import a graphmap i.e. page model replacing the appropriate values:
+
+- curl -u admin:metrilyx http://localhost**/api/graphmaps** -H "Content-Type:application/json" -d @</path/to/json/model>
+
+The above will import a graphmap (i.e. page).  To import a heatmap you can use the following endpoint:
+
+- curl -u admin:metrilyx http://localhost**/api/heatmaps** -H "Content-Type:application/json" -d @</path/to/heatmap/model>
+	
+Models can similarly be exported (graphmap or heatmap) as follows:
+
+- curl http://localhost/api/graphmaps/<graphmap_id>?export=true
+
 ## Event Annotations
-Event annotations to mark points on the graph where interesting events have happened.  Events contain a type, tags, message and any arbitrary user data represented as JSON.  Here is a sample of the complete structure of an event:
+Event annotations are used to mark points on the graph where interesting events have happened.  Events contain a type, tags, message and any arbitrary user data represented as JSON.  Here is a sample of the complete structure of an event:
 
 ### Event Structure
 
@@ -103,13 +122,14 @@ Event annotations to mark points on the graph where interesting events have happ
 	}
 	
 ### Firing Events
-The event structure to fire an event is shown below.  To fire an event submit a POST request with the body below.
+Events can be submitted to Metrilyx via the API.  The 2 available options are:
+- Provided script fire-event.py
+- Submitting a HTTP POST request.
 
 ##### fire-event.py
-This is a helper script that can be sued to fire an event. Issue:
+This is a helper script that can be used to fire an event. To see the available options issue the following command:
 
-	./fire-event.py -h
-to see options and syntax.
+	./bin/fire-event.py -h
 
 ##### Using HTTP POST method.
 When using POST requests, they should be made to the **/api/annotations** endpoint.  The description of the POST payload is described below.
@@ -117,10 +137,11 @@ When using POST requests, they should be made to the **/api/annotations** endpoi
 
 | Field | Description | Example | Required |
 |-------|-------------|---------|----------|
-|**eventType** | A pre-defined event type.  A list of event types can be found at the /api/event_types endpoint. | Maintenance | **Yes** | 
-|	**message** | This is the string used when hovering over the event on the graph. | "Scheduled Network Maintenance"| **Yes** |
-|	**tags** | Any arbitrary tags that can be used later for searching/filtering. | {"host":"foo.bar.com","severity":"Warning"}| **Yes** | 
-|	**data** | This can be any arbitrary JSON data.  It must be a single level JSON structure. This is the data used as details which are shown when clicking on the event| {"Priority": "P1", "On Call": "Jon Doe", "Contact Email": "Jon.Doe@bar.com" }| No |
+| **timestamp** | Epoch time in milliseconds.  If not provided the current time is used. | 1408129158000 (Aug 15 11:59:22 2014) | **No** |
+| **eventType** | A pre-defined event type.  A list of event types can be found at the /api/event_types endpoint. | Maintenance | **Yes** | 
+| **message** | This is the string used when hovering over the event on the graph. | "Scheduled Network Maintenance"| **Yes** |
+| **tags** | Any arbitrary tags that can be used later for searching/filtering. | {"host":"foo.bar.com","severity":"Warning"}| **Yes** | 
+| **data** | This can be any arbitrary JSON data.  It must be a single level JSON structure. This is the data used as details which are shown when clicking on the event| {"Priority": "P1", "On Call": "Jon Doe", "Contact Email": "Jon.Doe@bar.com" }| No |
 
 **e.g.:**
 
