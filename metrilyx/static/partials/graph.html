@@ -160,35 +160,35 @@
 							</div>
 						</div>
 					</div>
-					<!-- BEGIN multi-pane -->
-					<div class="graph-control-item small">
-						<div class="pad10">
-							<span class="padl5 padr10" style="font-weight:bold">
-								<span class="glyphicon glyphicon-align-justify"></span>
-								<span class="padl5">Mult-paned layout</span>
-							</span>
-							<span class="pull-right padr4"><input type="checkbox" ng-model="graph.multiPane"></span>
-						</div>
-						<div ng-if="graph.multiPane" class="padlr10">
-							<ul class="animated padb5" style="margin-bottom:0px;">
-								<li ng-repeat="pane in graph.panes track by $index" class="padtb2">
-									<span>
-										<span class="padr10" style="color:#ccc">Pane <b>{{$index}}</b></span>
-										<input type="text" placeholder="Pane name" style="background:none!important" class="dark" ng-model="graph.panes[$index]">
-										<span ng-if="$index>1">
-											<a href="javascript:void(0)" class="interactive" style="color:#ccc" ng-click="graph.panes.splice($index,1)" title="Remove pane">
-												<i class="glyphicon glyphicon-minus"></i>
-											</a>
-										</span>
+				</div>
+				<!-- BEGIN multi-pane -->
+				<div class="graph-control-item small text-left">
+					<div class="pad10">
+						<span class="padl5 padr10" style="font-weight:bold">
+							<span class="glyphicon glyphicon-align-justify"></span>
+							<span class="padl5">Mult-paned layout</span>
+						</span>
+						<span class="pull-right padr4"><input type="checkbox" ng-model="graph.multiPane"></span>
+					</div>
+					<div ng-if="graph.multiPane" class="padlr10">
+						<ul class="animated padb5" style="margin-bottom:0px;">
+							<li ng-repeat="pane in graph.panes track by $index" class="padtb2">
+								<span>
+									<span class="padr10" style="color:#ccc">Pane <b>{{$index}}</b></span>
+									<input type="text" placeholder="Pane name" style="background:none!important" class="dark" ng-model="graph.panes[$index]">
+									<span ng-if="$index>1">
+										<a href="javascript:void(0)" class="interactive" style="color:#ccc" ng-click="graph.panes.splice($index,1)" title="Remove pane">
+											<i class="glyphicon glyphicon-minus"></i>
+										</a>
 									</span>
-								</li>
-								<li ng-if="graph.panes.length<graph.series.length" class="padt5" title="Add new pane">
-									<a href="javascript:void(0)" class="interactive" style="color:#ddd" ng-click="graph.panes.push('')">
-										<span><i class="glyphicon glyphicon-plus"></i></span>
-									</a>
-								</li>
-							</ul>
-						</div>
+								</span>
+							</li>
+							<li ng-if="graph.panes.length<graph.series.length" class="padt5" title="Add new pane">
+								<a href="javascript:void(0)" class="interactive" style="color:#ddd" ng-click="graph.panes.push('')">
+									<span><i class="glyphicon glyphicon-plus"></i></span>
+								</a>
+							</li>
+						</ul>
 					</div>
 				</div>
 				<div class="graph-control-item pad10 text-left" style="font-weight:bold">
