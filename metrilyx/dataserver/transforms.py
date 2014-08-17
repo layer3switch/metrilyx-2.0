@@ -256,12 +256,16 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 			unit: s, ms, us
 		'''
 		if unit == 's':
+			# seconds
 			return pSerie.index.astype(numpy.int64)/1000000000
 		elif unit == 'ms':
+			# milliseconds
 			return pSerie.index.astype(numpy.int64)/1000000
 		elif unit == 'us':
+			# microseconds
 			return pSerie.index.astype(numpy.int64)/1000
 		else:
+			# nanoseconds
 			return pSerie.index.astype(numpy.int64)
 
 	
@@ -276,7 +280,7 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 			# remove NaN
 			nonNaSerie = self.__istruct[s['alias']].dropna()
 			md['dps'] = zip(self.__getConvertedTimestamps(nonNaSerie, ts_unit), 
-													nonNaSerie.values)
+															nonNaSerie.values)
 			out.append(md)
 		return out
 
