@@ -151,6 +151,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.graphControlsHtml	= connectionPool.nextConnection()+"/partials/graph-controls.html";
 		$scope.annoControlsHtml		= connectionPool.nextConnection()+"/partials/global-anno-controls.html";
 		$scope.eventAnnoDetailsHtml = connectionPool.nextConnection()+"/partials/event-anno-details.html";
+		$scope.metricOperationsHtml	= connectionPool.nextConnection()+"/partials/metric-operations.html";
 
 		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
 		$scope.graphSortOpts 		= DNDCONFIG.graph;
@@ -542,6 +543,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				//annoEvents: graphObj.annoEvents,
 				multiPane: graphObj.multiPane,
 				panes: graphObj.panes,
+				operations: graphObj.operations
 			};
 			//console.log('series', graphObj.series.length);
 			return $.extend(true, q, $scope.getTimeWindow());
@@ -942,7 +944,8 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				graphType: graphObj.graphType,
 				tags: {},
 				thresholds: graphObj.thresholds,
-				annoEvents: graphObj.annoEvents
+				annoEvents: graphObj.annoEvents,
+				operations: graphObj.operations
 			};
 			$.extend(q, $scope.getTimeWindow(),true);
 			return q;

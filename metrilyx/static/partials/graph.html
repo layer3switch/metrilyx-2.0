@@ -2,7 +2,7 @@
 	<div class="graph-face front{{editMode}}">
 		<div class="graph-progress loaded{{graph|loadedSeries:false}}{{graph.series.length}}">
 			<div class="progress" style="margin-top:0px!important;margin-bottom:0px!important;height:4px;text-align:bottom;">
-					<div class="progress-bar" role="progressbar" aria-valuenow="graph|loadedSeries: true" aria-valuemin="0" aria-valuemax="100" style="width: {{graph|loadedSeries: true}}%;background-color: #428bca"></div>
+				<div class="progress-bar" role="progressbar" aria-valuenow="graph|loadedSeries: true" aria-valuemin="0" aria-valuemax="100" style="width: {{graph|loadedSeries: true}}%;background-color: #428bca"></div>
 			</div>
 		</div>
 		<div class="input-group input-group-sm text-center padtb5" style="width:100%">
@@ -198,6 +198,7 @@
 					</span>
 				</div>
 				<div ng-include="queryEditorHtml" style="width:100%"></div>
+				<div ng-include="metricOperationsHtml"></div>
 			</div>
 			</div>
 		</div><!-- END graph controls overlayed on top of graph -->

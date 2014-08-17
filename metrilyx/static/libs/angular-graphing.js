@@ -231,7 +231,8 @@ angular.module('graphing', [])
 					tags: scope.globalTags,
 					//annoEvents: ngModel.$modelValue.annoEvents,
 					multiPane: ngModel.$modelValue.multiPane,
-					panes: ngModel.$modelValue.panes
+					panes: ngModel.$modelValue.panes,
+					operations: ngModel.$modelValue.operations
 				};
 			}
 

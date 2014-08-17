@@ -70,23 +70,37 @@ The above will generate a label with the short name of a host.
 
 #### yTransform
 ---------------
-yTransform is a python lambda function that is applied to each datapoint.
+yTransform is a python lambda function that is applied to the datapoints.  The datapoints are stored in a **pandas DataFrame**, so any function that can be applied to the **DataFrame** from the **pandas** library can theoretically be used.
 
-**e.g.:**
+A **DataFrame** can be thought of as a table with the timestamp as the row index and the metric alias as the column name.  
+
+##### Examples
+Each lambda variable (**x** in the examples below) refers to a complete DataFrame.  Hence, operations are applied to the complete DataFrame.
 	
-	##
-	# Convert bytes to kilobytes
-	##
-	
-	lambda x: x/1024
+* Convert bytes to kilobytes:
+
+		lambda x: x / 1024
+
+* Add 5 to each value:
+		
+		lambda x: x + 5
+
+* Get values not equal to 0:
+
+		lambda x: x[ numpy.abs(x) > 0 ]
+
+* Get value greater than 1000:
+
+		lambda x: x[ x > 1000 ]
+
 
 ## Importing and Exporting Models
 Models can be imported and exported if needed through the UI as well as through the api for automation.
 
-### Importing/Export via UI
+#### Importing/Export via UI
 In the UI you can find the **import** button just underneath the button to create a new dashboard and the **export** button underneath the edit button.
 
-### Importing/Export via API
+#### Importing/Export via API
 To import a model using the API you can issue a command similar to the one below to import a graphmap i.e. page model replacing the appropriate values:
 
 - curl -u admin:metrilyx http://localhost**/api/graphmaps** -H "Content-Type:application/json" -d @</path/to/json/model>

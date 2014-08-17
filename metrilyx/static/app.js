@@ -82,19 +82,7 @@ angular.module('filters',[]).
 		}
 	}).filter('tagsString', function() {
 		return function(obj, html) {
-			html=true;
-			var outstr = "";
-			if(html) {
-				for(var k in obj) {
-					outstr += k+"="+obj[k]+", ";
-				}
-			} else {
-				for(var k in obj) {
-					outstr += k+"="+obj[k]+", ";
-				}
-			}
-			if(outstr === "") return "";
-			return "{ " + outstr.replace(/\, $/, "") + " }"; 
+			return tagsString(obj, html);
 		};
 	}).filter('tagsLink', function() {
 		return function(obj) {
@@ -107,11 +95,7 @@ angular.module('filters',[]).
 		}
 	}).filter('metricQuery', function() {
 		return function(query) {
-			if(query.rate) {
-				return query.aggregator+":rate:"+query.metric;
-			} else {
-				return query.aggregator+":"+query.metric;
-			}
+			return metricQueryString(query);
 		}
 	}).filter('loadedSeries', function() {
 		/*
@@ -373,7 +357,6 @@ app.directive('tooltipArrow', function() {
 		}
 	}
 });
-
 /*
  * Parse tags object to 'tag1=val1,tag2=val2;'
  * Error checking and validity setting.
@@ -522,6 +505,31 @@ function getLoadedSeries(graph, inPercent) {
 	if(inPercent) return (cnt/graph.series.length)*100;
 	return cnt;
 }
+
+function metricQueryString(query) {
+	if(query.rate) {
+		return query.aggregator+":rate:"+query.metric;
+	} else {
+		return query.aggregator+":"+query.metric;
+	}
+}
+
+function tagsString(obj, html) {
+	html=true;
+	var outstr = "";
+	if(html) {
+		for(var k in obj) {
+			outstr += k+"="+obj[k]+", ";
+		}
+	} else {
+		for(var k in obj) {
+			outstr += k+"="+obj[k]+", ";
+		}
+	}
+	if(outstr === "") return "";
+	return "{ " + outstr.replace(/\, $/, "") + " }"; 
+};
+
 /*
  * args: { key1: val1, key2: val2 }
  * return: key1=val1,key2=val2
