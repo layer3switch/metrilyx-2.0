@@ -161,7 +161,7 @@
 						</div>
 					</div>
 				</div>
-				<div ng-if="graph.graphType!=='pie'">
+				<div ng-if="graph.graphType!=='pie' && (graph.series.length > 1)">
 					<!-- BEGIN multi-pane -->
 					<div class="graph-control-item small text-left">
 						<div class="pad10">

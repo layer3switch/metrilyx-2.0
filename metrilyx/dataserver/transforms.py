@@ -5,6 +5,8 @@ import numpy
 from pandas import Series, DataFrame
 from pandas.tseries.tools import to_datetime
 
+from metrilyx.dataserver import QueryUUID, TagsUUID
+
 log = logging.getLogger(__name__)
 
 def absoluteTime(relTime, convertTo='micro'):
@@ -78,7 +80,65 @@ class EventSerie(object):
 			s['timestamp'] = s['timestamp']/1000
 
 
-class MetrilyxSerie(object):
+class BasicSerie(object):
+
+	def _flatten_dict(self, d):
+		def flatten_dict_gen(d):
+			for k, v in d.items():
+				if isinstance(v, dict):
+					for item in flatten_dict_gen(v):
+						value = item[1]
+						yield (k + "." + item[0], value)
+				else:
+					yield (k, v)
+
+		return dict((key, value) for (key, value) in list(flatten_dict_gen(d)))
+
+		
+	def _normalizeAlias(self, alias_str, obj):
+		"""
+		@args:
+			alias_str 	string to format
+			obj 		dict containing atleast 'tags' and 'metric' keys
+		"""
+		flat_obj = self._flatten_dict(obj)
+		normalizedAlias = alias_str
+		# When alias_str starts with ! we will do an eval for lambda processing
+		if alias_str.startswith("!"):
+			try:
+				return eval(alias_str[1:])(flat_obj)
+			except Exception,e:
+				#TODO: assign calculated default
+				log.warn("could not transform alias: %s %s" %(obj['metric'], str(e)))
+				normalizedAlias = obj['metric']
+		else:
+			try:
+				normalizedAlias = alias_str %(flat_obj)
+			except KeyError:
+				normalizedAlias =  obj['metric']
+			except Exception, e:
+				log.error("could not normalize alias: %s %s" %(obj['metric'], str(e)))
+		return normalizedAlias
+
+	def _getConvertedTimestamps(self, pSerie, unit='s'):
+		'''
+			pSerie: pandas Series object
+			unit: s, ms, us
+		'''
+		if unit == 's':
+			# seconds
+			return pSerie.index.astype(numpy.int64)/1000000000
+		elif unit == 'ms':
+			# milliseconds
+			return pSerie.index.astype(numpy.int64)/1000000
+		elif unit == 'us':
+			# microseconds
+			return pSerie.index.astype(numpy.int64)/1000
+		else:
+			# nanoseconds
+			return pSerie.index.astype(numpy.int64)
+
+class MetrilyxSerie(BasicSerie):
 	"""
 	This makes an object containing the original series data (request) with the tsdb
 	data appropriately added in.
@@ -88,22 +148,27 @@ class MetrilyxSerie(object):
 		data_callback	: callback for each unique series
 	"""
 	def __init__(self, serie, dataCallback=None):
+		super(MetrilyxSerie, self).__init__()
 		self._serie = serie
 		self._dataCallback = dataCallback
+		self.uuid = QueryUUID(self._serie['query'])
 
 		if isinstance(self._serie['data'], dict) and self._serie['data'].get('error'):
-				self.error = self._serie['data'].get('error')
+			self.error = self._serie['data'].get('error')
 		else:
 			self.error = False
 			self.uniqueTagsString = self.__uniqueTagsStr()
-			# alias's must always be unique.
+			## assign uuid id's to result dataset
+			for d in self._serie['data']:
+				d['uuid'] = TagsUUID(d['tags']).uuid
+			
 			self.__normalizeAliases()
 
 	def __normalizeAliases(self):
 		for s in self._serie['data']:
 			if isinstance(s, dict) and s.get('error'):
 				continue
-			s['alias'] = self.__normalizeAlias(self._serie['alias'], 
+			s['alias'] = self._normalizeAlias(self._serie['alias'], 
 								{'tags': s['tags'],'metric': s['metric']})
 
 	@property
@@ -114,13 +179,6 @@ class MetrilyxSerie(object):
 	def __processSerieData(self, dataset):
 		if isinstance(dataset, dict) and dataset.get('error'):
 			return {"alias": self._serie['alias'],"error": dataset.get('error')}
-
-		## normalize alias (i.e. either lambda function or 
-		## string formatting and append unique tags string) 
-		#dataset['alias'] = self.__normalizeAlias(
-		#						self._serie['alias'], {
-		#						'tags': dataset['tags'],
-		#						'metric': dataset['metric']})
 
 		try:
 			dataset['dps'] = self.__normalizeTimestamp(dataset['dps'])
@@ -163,41 +221,14 @@ class MetrilyxSerie(object):
 				nstr += " " + talias
 		return nstr
 
-	def __flatten_dict(self,d):
-		def flatten_dict_gen(d):
-			for k, v in d.items():
-				if isinstance(v, dict):
-					for item in flatten_dict_gen(v):
-						value = item[1]
-						yield (k + "." + item[0], value)
-				else:
-					yield (k, v)
-
-		return dict((key, value) for (key, value) in list(flatten_dict_gen(d)))
-
-	def __normalizeAlias(self, alias_str, obj):
+	def _normalizeAlias(self, alias_str, obj):
 		"""
 		@args:
 			alias_str 	string to format
 			obj 		dict containing atleast 'tags' and 'metric' keys
 		"""
-		flat_obj = self.__flatten_dict(obj)
-		normalizedAlias = alias_str
-		# When alias_str starts with ! we will do an eval for lambda processing
-		if alias_str.startswith("!"):
-			try:
-				return eval(alias_str[1:])(flat_obj)
-			except Exception,e:
-				#TODO: assign calculated default
-				log.warn("could not transform alias: %s %s" %(obj['metric'], str(e)))
-				normalizedAlias = obj['metric']
-		else:
-			try:
-				normalizedAlias = alias_str %(flat_obj)
-			except KeyError:
-				normalizedAlias =  obj['metric']
-			except Exception, e:
-				log.error("could not normalize alias: %s %s" %(obj['metric'], str(e)))
+		flat_obj = self._flatten_dict(obj)
+		normalizedAlias = super(MetrilyxSerie, self)._normalizeAlias(alias_str, flat_obj)
 		## only add unique tags if using string formating.
 		if self.uniqueTagsString:
 			normalizedAlias = normalizedAlias + self.uniqueTagsString %(flat_obj)
@@ -238,36 +269,18 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 	def __init__(self, serie, dataCallback=None):
 		super(MetrilyxAnalyticsSerie,self).__init__(serie, dataCallback)
 		if not self.error:
-			self.__istruct = self.__getInternalStruct()
+			self._istruct = self.__getInternalStruct()
 			self.__applyTransform()
 		else:
-			self.__istruct = None
+			self._istruct = None
 
 	def __getInternalStruct(self):
 		out = []
 		for d in self._serie['data']:
-			out.append((d['alias'], Series([d['dps'][k] for k in sorted(d['dps'].keys())], 
+			## TODO: change to use d['uuid']
+			out.append((d['uuid'], Series([d['dps'][k] for k in sorted(d['dps'].keys())], 
 				index=to_datetime([int(ts) for ts in sorted(d['dps'].keys())], unit='s'))))
 		return DataFrame(dict(out))
-
-	def __getConvertedTimestamps(self, pSerie, unit='s'):
-		'''
-			pSerie: pandas Series object
-			unit: s, ms, us
-		'''
-		if unit == 's':
-			# seconds
-			return pSerie.index.astype(numpy.int64)/1000000000
-		elif unit == 'ms':
-			# milliseconds
-			return pSerie.index.astype(numpy.int64)/1000000
-		elif unit == 'us':
-			# microseconds
-			return pSerie.index.astype(numpy.int64)/1000
-		else:
-			# nanoseconds
-			return pSerie.index.astype(numpy.int64)
-
 	
 	def __getSerieMetadata(self, serie):
 		return dict([(k,v) for k,v in serie.items() if k != 'dps'])
@@ -277,9 +290,9 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 		out = []
 		for s in self._serie['data']:
 			md = self.__getSerieMetadata(s)
-			# remove NaN
-			nonNaSerie = self.__istruct[s['alias']].dropna()
-			md['dps'] = zip(self.__getConvertedTimestamps(nonNaSerie, ts_unit), 
+			## clean out infinity and nan
+			nonNaSerie = self._istruct[s['uuid']].replace([numpy.inf, -numpy.inf], numpy.nan).dropna()
+			md['dps'] = zip(self._getConvertedTimestamps(nonNaSerie, ts_unit), 
 															nonNaSerie.values)
 			out.append(md)
 		return out
@@ -287,7 +300,62 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 	def __applyTransform(self):
 		if self._serie['yTransform'] != "":
 			try:
-				self.__istruct = eval("%s" %(self._serie['yTransform']))(self.__istruct)
+				self._istruct = eval("%s" %(self._serie['yTransform']))(self._istruct)
 			except Exception,e:
 				logger.warn("Could not apply yTransform: %s" %(str(e)))
+
+
+class SecondariesGraph(BasicSerie):
+
+	def __init__(self, metrilyxGraphRequest):
+		super(SecondariesGraph, self).__init__()
+		self.__request = metrilyxGraphRequest
+
+	def add(self, metrilyxAnalyticsSerie):
+		## TODO: check type
+		idx = self.__findSerieIdxInRequest(metrilyxAnalyticsSerie)
+		if idx < 0:
+			raise NameError("Serie not found in request: %s" %(str(metrilyxAnalyticsSerie._serie['query'])))
+		self.__request['series'][idx]['data'] = metrilyxAnalyticsSerie
+
+	def __findSerieIdxInRequest(self, metrilyxAnalyticsSerie):
+		if not isinstance(metrilyxAnalyticsSerie, MetrilyxAnalyticsSerie):
+			raise NameError("Added type must be 'MetrilyxAnalyticsSerie'")
+
+		for i in range(len(self.__request['series'])):
+			if self.__request['series'][i]['query'] == metrilyxAnalyticsSerie._serie['query']:
+				return i
+		return -1
+
+	def __serieIdTags(self, val):
+		return dict([tkv.split('=') for tkv in val[1:-1].split(',')])
+
+	def __secondaryMetricName(self, metricSource, uuid):
+		return '(' + ':'.join(metricSource.split(':')[1:]).strip() + ')' + uuid
+
+	def data(self, ts_unit='ms'):
+		istructs = [s['data']._istruct for s in self.__request['series']]
+		for sec in self.__request['secondaries']:
+			try:
+				istruct = eval("%s" %(sec['source']))(*istructs)
+				dArr = []
+				for colname in istruct.columns.values:
+					tags = self.__serieIdTags(colname)
+					md = {
+						'tags': tags,
+						'alias': self._normalizeAlias(sec['alias'], self._flatten_dict({'tags': tags})),
+						'uuid': colname,
+						'metric': self.__secondaryMetricName(sec['source'], colname)
+						}
+					## clean out infinity and nan
+					nonNaSerie = istruct[colname].replace([numpy.inf, -numpy.inf], numpy.nan).dropna()
+					md['dps'] = zip(self._getConvertedTimestamps(nonNaSerie, ts_unit), nonNaSerie.values)
+					dArr.append(md)
+				sec['data'] = dArr
+			except Exception,e:
+				logger.error(str(e))
+
+		return self.__request
+
+
 

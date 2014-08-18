@@ -232,7 +232,7 @@ angular.module('graphing', [])
 					//annoEvents: ngModel.$modelValue.annoEvents,
 					multiPane: ngModel.$modelValue.multiPane,
 					panes: ngModel.$modelValue.panes,
-					operations: ngModel.$modelValue.operations
+					secondaries: ngModel.$modelValue.secondaries
 				};
 			}
 

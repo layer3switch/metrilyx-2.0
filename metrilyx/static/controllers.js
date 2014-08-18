@@ -543,7 +543,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				//annoEvents: graphObj.annoEvents,
 				multiPane: graphObj.multiPane,
 				panes: graphObj.panes,
-				operations: graphObj.operations
+				secondaries: graphObj.secondaries
 			};
 			//console.log('series', graphObj.series.length);
 			return $.extend(true, q, $scope.getTimeWindow());
@@ -945,7 +945,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				tags: {},
 				thresholds: graphObj.thresholds,
 				annoEvents: graphObj.annoEvents,
-				operations: graphObj.operations
+				secondaries: graphObj.secondaries
 			};
 			$.extend(q, $scope.getTimeWindow(),true);
 			return q;

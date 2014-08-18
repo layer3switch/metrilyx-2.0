@@ -143,29 +143,29 @@ function onAnnotationClick(event) {
 function MetrilyxGraph(graphObj, timeWin) {
     this.timeWindow = timeWin;
     this.graphdata = graphObj;
-    this._chartElem = $("[data-graph-id='"+this.graphdata._id+"']");
+    this._domNode = $("[data-graph-id='"+this.graphdata._id+"']");
+    this._chart = $(this._domNode).highcharts()
 }
 MetrilyxGraph.prototype.newChart = function() {
     var copts = new ChartOptions(this.graphdata);
     if(dataHasErrors(this.graphdata)) {
-        $(this._chartElem).html("");
+        $(this._domNode).html("");
         return;
     }
     
     if(this.graphdata.graphType == "pie") {
-        $(this._chartElem).highcharts(copts.chartDefaultsForType());
+        $(this._domNode).highcharts(copts.chartDefaultsForType());
     } else {
-        //render_lineBasedNewGraph("[data-graph-id='"+this.graphdata._id+"']", copts.chartDefaultsForType());
-        render_lineBasedNewGraph(this._chartElem, copts.chartDefaultsForType());
+        render_lineBasedNewGraph(this._domNode, copts.chartDefaultsForType());
     }
 }
 MetrilyxGraph.prototype.applyData = function() {
-    if($(this._chartElem).highcharts() === undefined) {
+    if(this._chart === undefined) {
         this.newChart();
     } else {
         dhe = dataHasErrors(this.graphdata);
         if(dhe) return;
-        $("[data-graph-status='"+this.graphdata._id+"']").html("");
+        $(this._domNode).html("");
         graphing_upsertSeries(this.graphdata, this.timeWindow);
     }
 }

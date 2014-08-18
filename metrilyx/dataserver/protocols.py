@@ -9,7 +9,7 @@ from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.websocket.compress import PerMessageDeflateOffer, \
 										PerMessageDeflateOfferAccept
 
-from ..httpclients import AsyncHttpJsonClient
+from ..httpclients import AsyncHttpJsonClient, SomeShit
 from transforms import MetrilyxSerie, EventSerie, MetrilyxAnalyticsSerie
 from ..dataserver import GraphRequest, GraphEventRequest
 from dataproviders import re_504
@@ -84,6 +84,7 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 
 class GraphServerProtocol(BaseGraphServerProtocol):
 
+	"""
 	def graphResponseErrback(self, error, graphMeta):
 		# call dataprovider errback (diff for diff backends)
 		logger.error("%s" %(str(error)))
@@ -110,29 +111,50 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 
 	def graphResponseCallback(self, respBodyStr, response, url, graphMeta):
 		responseData = self._checkResponse(respBodyStr, response, url)
+		
 		if responseData.has_key('error'):
 			graphMeta['series'][0]['data'] = responseData
 		else:
 			graphMeta['series'][0]['data'] = self.dataprovider.responseCallback(
 											responseData['data'], url, graphMeta)
-			
-			#mserie = MetrilyxSerie(graphMeta['series'][0])
+
 			mserie = MetrilyxAnalyticsSerie(graphMeta['series'][0])
 			graphMeta['series'][0]['data'] = mserie.data()
 
 		self.sendMessage(json.dumps(graphMeta))
 		logger.info("Response (graph) %s '%s' start: %s" %(graphMeta['_id'], 
 			graphMeta['name'], datetime.fromtimestamp(float(graphMeta['start']))))
+	"""
 
 	def processRequest(self, graphRequest):
 		self.submitPerfQueries(graphRequest)
 
 	def submitPerfQueries(self, graphRequest):
-		for serieReq in graphRequest.split():
-			(url, method, query) = self.dataprovider.getQuery(serieReq)
-		 	a = AsyncHttpJsonClient(uri=url, method=method, body=query)
-			a.addResponseCallback(self.graphResponseCallback, url, serieReq)
-			a.addResponseErrback(self.graphResponseErrback, serieReq)
+		
+		ss = SomeShit(self.dataprovider, graphRequest)
+		ss.addCompleteCallback(self.completeCallback)
+		ss.addCompleteErrback(self.completeErrback, graphRequest.request)
+		ss.addPartialResponseCallback(self.partialResponseCallback)
+		ss.addPartialResponseErrback(self.partialResponseErrback, graphRequest.request)
+
+	def completeCallback(self, graph):
+		#print "My CB. Ship data", data
+		logger.info("Reponse (secondaries graph) %s '%s' start: %s" %(graph['_id'], 
+					graph['name'], datetime.fromtimestamp(float(graph['start']))))
+
+	def completeErrback(self, error, *cbargs):
+		logger.error("%s" %(str(error)))
+
+	def partialResponseCallback(self, graph):
+		self.sendMessage(json.dumps(graph))
+		logger.info("Response (graph) %s '%s' start: %s" %(graph['_id'], 
+			graph['name'], datetime.fromtimestamp(float(graph['start']))))
+
+	def partialResponseErrback(self, error, *cbargs):
+		(graphMeta,) = cbargs
+		logger.error("%s" %(str(error)))
+		errResponse = self.dataprovider.responseErrback(error, graphMeta)
+		self.sendMessage(json.dumps(errResponse))
 
 	"""
 	def onClose(self, wasClean, code, reason):

@@ -2,15 +2,49 @@
 	<div class="text-left pad10 interactive graph-control-item" data-toggle="collapse" data-target="[data-graph-operations='{{graph._id}}']" style="font-weight:bold">
 		<span class="padl5 small">
 			<span class="glyphicon glyphicon-th"></span>
-			<span class="padl5">Metric Operations</span>
+			<span class="padl5">Secondary Metrics</span>
 		</span>
 		<span class="padlr5 pull-right">
 			<i class="glyphicon glyphicon-chevron-down" style="position:relative;top:3px;"></i>
 		</span>
 	</div>
 	<div data-graph-operations="{{graph._id}}" class="collapse graph-control-item-body" style="border-bottom:1px solid #454545;">
-		<div class="padr10 padtb10 padl30">
-			<textarea ng-model="graph.operations" placeholder="e.g. lambda a, b, c: ( a + b ) / c" class="animated"></textarea>
+		<div style="padding:10px;padding-left:15px;">
+			<div>
+				<table style="width:100%">
+					<tr ng-repeat="secondary in graph.secondaries">
+						<td style="border-top:1px solid #666;border-bottom:1px solid #666;padding-left:5px;">
+							<div>
+								<div class="input-group input-group-sm padb5 padt10">
+									<span class="input-group-addon nobg metric-control-label">Operation </span>
+									<input ng-model="secondary.source" placeholder="e.g. lambda a, b, c: ( a + b ) / c" type="text" class="form-control dark codeline">
+								</div>
+								<div class="input-group input-group-sm padt5 padb10">
+							    	<span class="input-group-addon nobg metric-control-label">Alias </span>
+							    	<input type="text" class="form-control dark codeline" ng-model="secondary.alias">
+							    </div>
+							    <div ng-if="graph.multiPane" class="text-left padb10">
+							    	<span class="padlr10 metric-control-label">Pane</span>
+							    	<select ng-model="secondary.paneIndex" class="dark">
+							    		<option ng-repeat="pane in graph.panes track by $index">{{$index}}</option>
+							    	</select>
+							    </div>
+						    </div>
+					    </td>
+					    <td style="border-top:1px solid #666;border-bottom:1px solid #666;">
+					    	<div class="padl5">
+					    		<span class="glyphicon glyphicon-remove interactive" ng-click="graph.secondaries.splice($index,1);"></span>
+					    	</div>
+					    </td>
+				    </tr>
+			    </table>
+			</div>
+			<div class="text-right small padtb5">
+				<span ng-click="graph.secondaries.push({source:'',alias:'',paneIndex:0})" class="pad5 interactive" style="color:#777">
+					<span class="glyphicon glyphicon-plus"></span>
+					<span>Add</span>
+				</span>
+			</div>
 		</div>
 	</div>
 </div>

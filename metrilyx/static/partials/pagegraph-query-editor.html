@@ -8,7 +8,7 @@
 			</div>
 			<div class="col-md-3" style="padding:0">
 				<div class="padr10 padt10">
-					<span class="interactive"  title="Remove metric" ng-click="graph.series.splice(graph.series.indexOf(serie),1);" style="color:#bbb">
+					<span class="interactive"  title="Remove metric" ng-click="graph.series.splice(graph.series.indexOf(serie),1);$event.stopPropagation();" style="color:#bbb">
 						<i class="glyphicon glyphicon-trash" style="font-size:14px;"></i>
 					</span>
 				</div>
@@ -56,11 +56,11 @@
 	    <div class="padlr5">
 		    <div class="input-group input-group-sm padt10">
 		    	<span class="input-group-addon nobg metric-control-label">Alias </span>
-		    	<input type="text" class="form-control dark" ng-model="serie.alias">
+		    	<input type="text" class="form-control dark codeline" ng-model="serie.alias">
 		    </div>
 		    <div class="input-group input-group-sm padt5 padb10">
 		    	<span class="input-group-addon nobg metric-control-label">Y-Transform </span>
-		    	<input type="text" class="form-control dark" ng-model="serie.yTransform">
+		    	<input type="text" class="form-control dark codeline" ng-model="serie.yTransform">
 		    </div>
 		</div>
 	    <div ng-if="graph.multiPane" class="text-left padtb10 padlr5" style="border-top:1px solid #636363">
