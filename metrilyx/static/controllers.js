@@ -425,7 +425,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				clearTimeout(timerSearchForMetric);
 
 			var myThis = this;
-			$scope.metricQueryResult = [];//clear result
 			timerSearchForMetric = setTimeout(function(){
 				var qstr;
 				if(args && args !== "") qstr = args;
@@ -1105,7 +1104,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				clearTimeout(timerSearchForMetric);
 
 			var myThis = this;
-			$scope.metricQueryResult = [];//clear result
 			timerSearchForMetric = setTimeout(function(){
 				var qstr;
 				if(args && args !== "") qstr = args;
