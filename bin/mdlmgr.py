@@ -93,6 +93,11 @@ def updateMultiPaneOptions(graph):
 			s['paneIndex'] = 0
 			printStatus(graph, "ADDED", "paneIndex")
 
+def udpateSecondaries(graph):
+	if not graph.has_key("secondaries"):
+		printStatus(graph, "ADDED", "secondaries")
+		graph["secondaries"] = []
+
 def processGraphLayout(model):
 	for row in model.layout:
 		for col in row:
@@ -101,6 +106,7 @@ def processGraphLayout(model):
 					updateThresholds(graph)
 					addEventAnnoDef(graph)
 					updateMultiPaneOptions(graph)
+					udpateSecondaries(graph)
 
 def processHeatLayout(model):
 	for row in model.layout:
@@ -108,6 +114,10 @@ def processHeatLayout(model):
 			for pod in col:
 				for graph in pod['graphs']:
 					updateThresholds(graph)
+
+
+
+
 
 parser = OptionParser()
 parser.add_option("--commit", "-c", dest="commit", default=False, action="store_true")
