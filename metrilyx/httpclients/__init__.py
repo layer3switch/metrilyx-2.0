@@ -19,6 +19,7 @@ from twisted.internet.protocol import Protocol
 from metrilyx.metrilyxconfig import config
 
 from ..dataserver.transforms import MetrilyxAnalyticsSerie, SecondariesGraph
+from ..dataserver.dataproviders import re_504
 
 from pprint import pprint
 
@@ -164,8 +165,27 @@ class OpenTSDBClient(object):
             return OpenTSDBResponse(hjc.GET(q_str))
         else:
             return OpenTSDBResponse(hjc.GET(self.query_endpoint+"?"+q))
-   
+
 ## ASYNC ##     
+def checkHttpResponse(respBodyStr, response, url):
+    if response.code < 200 or response.code > 304:
+        logger.warning("Request failed %d %s %s" %(response.code, respBodyStr, url))
+        m = re_504.search(respBodyStr)
+        if  m != None:
+            return {"error": "code=%d,response=%s" %(response.code, m.group(1))}
+        return {"error": "code=%s,response=%s" %(response.code, respBodyStr)}
+
+    try:
+        d = json.loads(respBodyStr)
+        if isinstance(d, dict) and d.has_key('error'):
+            logger.warning(str(d))
+            return d
+        return {'data': d}
+    except Exception, e:
+        logger.warning("%s %s" %(str(e), url))
+        return {"error": str(e)}
+
+
 class JsonBodyProducer(object):
     implements(IBodyProducer)
 
@@ -286,29 +306,11 @@ class SomeShit(object):
 
         self.__fetch()
 
-    def __checkResponse(self, respBodyStr, response, url):
-        if response.code < 200 or response.code > 304:
-            logger.warning("Request failed %d %s %s" %(response.code, respBodyStr, url))
-            m = re_504.search(respBodyStr)
-            if  m != None:
-                return {"error": "code=%d,response=%s" %(response.code, m.group(1))}
-            return {"error": "code=%s,response=%s" %(response.code, respBodyStr)}
-
-        try:
-            d = json.loads(respBodyStr)
-            if isinstance(d, dict) and d.has_key('error'):
-                logger.warning(str(d))
-                return d
-            return {'data': d}
-        except Exception, e:
-            logger.warning("%s %s" %(str(e), url))
-            return {"error": str(e)}
-
     def __partialResponseCallback(self, respBodyStr, response, *cbargs):
         self.completed += 1
         (url, gmeta, idx) = cbargs
         
-        respData = self.__checkResponse(respBodyStr, response, url)
+        respData = checkHttpResponse(respBodyStr, response, url)
         if respData.has_key('error'):
             gmeta['series'][0]['data'] = respData
         else:
@@ -357,3 +359,5 @@ class SomeShit(object):
     def addPartialResponseErrback(self, callback, *cbargs):
         for d in self.__partialDeferreds:
             d.addErrback(callback, *cbargs)
+
+

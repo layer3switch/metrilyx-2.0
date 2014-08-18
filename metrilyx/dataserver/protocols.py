@@ -9,10 +9,10 @@ from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.websocket.compress import PerMessageDeflateOffer, \
 										PerMessageDeflateOfferAccept
 
-from ..httpclients import AsyncHttpJsonClient, SomeShit
+from ..httpclients import AsyncHttpJsonClient, checkHttpResponse, SomeShit
 from transforms import MetrilyxSerie, EventSerie, MetrilyxAnalyticsSerie
 from ..dataserver import GraphRequest, GraphEventRequest
-from dataproviders import re_504
+
 
 logger = logging.getLogger(__name__)
 from pprint import pprint
@@ -91,24 +91,6 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		errResponse = self.dataprovider.responseErrback(error, graphMeta)
 		self.sendMessage(json.dumps(errResponse))
 
-	def _checkResponse(self, respBodyStr, response, url):
-		if response.code < 200 or response.code > 304:
-			logger.warning("Request failed %d %s %s" %(response.code, respBodyStr, url))
-			m = re_504.search(respBodyStr)
-			if  m != None:
-				return {"error": "code=%d,response=%s" %(response.code, m.group(1))}
-			return {"error": "code=%s,response=%s" %(response.code, respBodyStr)}
-
-		try:
-			d = json.loads(respBodyStr)
-			if isinstance(d, dict) and d.has_key('error'):
-				logger.warning(str(d))
-				return d
-			return {'data': d}
-		except Exception, e:
-			logger.warning("%s %s" %(str(e), url))
-			return {"error": str(e)}
-
 	def graphResponseCallback(self, respBodyStr, response, url, graphMeta):
 		responseData = self._checkResponse(respBodyStr, response, url)
 		
@@ -175,7 +157,7 @@ class EventGraphServerProtocol(GraphServerProtocol):
 			self.submitEventQueries(graphOrAnnoRequest)
 		
 	def eventResponseCallback(self, data, response, url, eventType, request):
-		dct = self._checkResponse(data, response, url)
+		dct = checkHttpResponse(data, response, url)
 		if dct.has_key('error'):
 			logger.error(str(dct))
 			return
@@ -199,7 +181,7 @@ class EventGraphServerProtocol(GraphServerProtocol):
 			return
 
 		graphEvtReq = GraphEventRequest(request)
-		
+
 		for graphEvent in graphEvtReq.split():
 			for (url, method, query) in self.eventDataprovider.getQuery(graphEvent):
 				a = AsyncHttpJsonClient(uri=url, method=method, body=query)
@@ -207,3 +189,4 @@ class EventGraphServerProtocol(GraphServerProtocol):
 						url, graphEvent['eventTypes'][0], request)
 				a.addResponseErrback(self.eventReponseErrback,
 						url, graphEvent['eventTypes'][0], request)
+
