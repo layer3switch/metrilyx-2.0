@@ -9,7 +9,7 @@ from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.websocket.compress import PerMessageDeflateOffer, \
 										PerMessageDeflateOfferAccept
 
-from ..httpclients import AsyncHttpJsonClient, checkHttpResponse, SomeShit
+from ..httpclients import AsyncHttpJsonClient, checkHttpResponse, MetrilyxGraphFetcher
 from transforms import MetrilyxSerie, EventSerie, MetrilyxAnalyticsSerie
 from ..dataserver import GraphRequest, GraphEventRequest
 
@@ -90,12 +90,11 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		self.submitPerfQueries(graphRequest)
 
 	def submitPerfQueries(self, graphRequest):
-		
-		ss = SomeShit(self.dataprovider, graphRequest)
-		ss.addCompleteCallback(self.completeCallback)
-		ss.addCompleteErrback(self.completeErrback, graphRequest.request)
-		ss.addPartialResponseCallback(self.partialResponseCallback)
-		ss.addPartialResponseErrback(self.partialResponseErrback, graphRequest.request)
+		mgf = MetrilyxGraphFetcher(self.dataprovider, graphRequest)
+		mgf.addCompleteCallback(self.completeCallback)
+		mgf.addCompleteErrback(self.completeErrback, graphRequest.request)
+		mgf.addPartialResponseCallback(self.partialResponseCallback)
+		mgf.addPartialResponseErrback(self.partialResponseErrback, graphRequest.request)
 
 	def completeCallback(self, graph):
 		self.sendMessage(json.dumps(graph))

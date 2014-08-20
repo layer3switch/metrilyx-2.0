@@ -277,7 +277,7 @@ class AsyncHttpJsonClient(object):
         self.__d_agent.addErrback(self.__readErrorCallback, callback, *cbargs)
 
 
-class SomeShit(object):
+class MetrilyxGraphFetcher(object):
     '''
     Handles how each graph query should be broken up.
     This depends on if it contains 'secondaries'

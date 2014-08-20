@@ -5,7 +5,7 @@ import numpy
 from pandas import Series, DataFrame
 from pandas.tseries.tools import to_datetime
 
-from metrilyx.dataserver import QueryUUID, TagsUUID
+from metrilyx.dataserver import QueryUUID, SerieUUID, TagsUUID
 
 logger = logging.getLogger(__name__)
 
@@ -161,6 +161,7 @@ class MetrilyxSerie(BasicSerie):
 			## assign uuid id's to result dataset
 			for d in self._serie['data']:
 				d['uuid'] = TagsUUID(d['tags']).uuid
+				#d['uuid'] = SerieUUID(d).uuid
 			
 			self.__normalizeAliases()
 
@@ -294,6 +295,7 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 			nonNaSerie = self._istruct[s['uuid']].replace([numpy.inf, -numpy.inf], numpy.nan).dropna()
 			md['dps'] = zip(self._getConvertedTimestamps(nonNaSerie, ts_unit), 
 															nonNaSerie.values)
+			md['uuid'] = SerieUUID(s).uuid
 			out.append(md)
 
 		return out
@@ -319,8 +321,6 @@ class SecondariesGraph(BasicSerie):
 			raise NameError("Serie not found in request: %s" %(str(metrilyxAnalyticsSerie._serie['query'])))
 		
 		self.__analyticsSeriess[idx] = metrilyxAnalyticsSerie
-		#self.__request['series'][idx]['dataobject'] = metrilyxAnalyticsSerie
-		#self.__request['series'][idx]['data'] = metrilyxAnalyticsSerie
 
 	def __findSerieIdxInRequest(self, metrilyxAnalyticsSerie):
 		if not isinstance(metrilyxAnalyticsSerie, MetrilyxAnalyticsSerie):
