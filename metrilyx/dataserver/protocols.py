@@ -13,9 +13,11 @@ from ..httpclients import AsyncHttpJsonClient, checkHttpResponse, SomeShit
 from transforms import MetrilyxSerie, EventSerie, MetrilyxAnalyticsSerie
 from ..dataserver import GraphRequest, GraphEventRequest
 
+from pprint import pprint
 
 logger = logging.getLogger(__name__)
-from pprint import pprint
+
+
 ## Enable WebSocket extension "permessage-deflate".
 ## Function to accept offers from the client ..
 def acceptedCompression(offers):
@@ -84,30 +86,6 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 
 class GraphServerProtocol(BaseGraphServerProtocol):
 
-	"""
-	def graphResponseErrback(self, error, graphMeta):
-		# call dataprovider errback (diff for diff backends)
-		logger.error("%s" %(str(error)))
-		errResponse = self.dataprovider.responseErrback(error, graphMeta)
-		self.sendMessage(json.dumps(errResponse))
-
-	def graphResponseCallback(self, respBodyStr, response, url, graphMeta):
-		responseData = self._checkResponse(respBodyStr, response, url)
-		
-		if responseData.has_key('error'):
-			graphMeta['series'][0]['data'] = responseData
-		else:
-			graphMeta['series'][0]['data'] = self.dataprovider.responseCallback(
-											responseData['data'], url, graphMeta)
-
-			mserie = MetrilyxAnalyticsSerie(graphMeta['series'][0])
-			graphMeta['series'][0]['data'] = mserie.data()
-
-		self.sendMessage(json.dumps(graphMeta))
-		logger.info("Response (graph) %s '%s' start: %s" %(graphMeta['_id'], 
-			graphMeta['name'], datetime.fromtimestamp(float(graphMeta['start']))))
-	"""
-
 	def processRequest(self, graphRequest):
 		self.submitPerfQueries(graphRequest)
 
@@ -120,7 +98,7 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		ss.addPartialResponseErrback(self.partialResponseErrback, graphRequest.request)
 
 	def completeCallback(self, graph):
-		#print "My CB. Ship data", data
+		self.sendMessage(json.dumps(graph))
 		logger.info("Reponse (secondaries graph) %s '%s' start: %s" %(graph['_id'], 
 					graph['name'], datetime.fromtimestamp(float(graph['start']))))
 

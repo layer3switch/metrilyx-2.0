@@ -155,7 +155,6 @@ MetrilyxGraph.prototype.newChart = function() {
     if(this.graphdata.graphType == "pie") {
         $(this._chartElem).highcharts(copts.chartDefaultsForType());
     } else {
-        //render_lineBasedNewGraph("[data-graph-id='"+this.graphdata._id+"']", copts.chartDefaultsForType());
         render_lineBasedNewGraph(this._chartElem, copts.chartDefaultsForType());
     }
 }
@@ -256,7 +255,11 @@ function ChartOptions(metGraphObj, flagSeries) {
         this._sfmt = new SeriesFormatter(this._graph.annoEvents.data);
     } else {
         this.flagSeries = false;
-        this._sfmt = new SeriesFormatter(this._graph.series);
+        if(this._graph.secondaries !== undefined && this._graph.secondaries.length > 0) {
+            this._sfmt = new SeriesFormatter(this._graph.secondaries);
+        } else {
+            this._sfmt = new SeriesFormatter(this._graph.series);
+        }
     }
 }
 ChartOptions.prototype.chartDefaults = function() {
@@ -461,11 +464,12 @@ SeriesFormatter.prototype.lineSeries = function(isMultiPane) {
         for(var i in this.metSeries) {
             for(var d in this.metSeries[i].data) {
                 out.push({
-                    yAxis: parseInt(this.metSeries[i].paneIndex),
+                    uuid: this.metSeries[i].data[d].uuid,
                     query: this.metSeries[i].query,
                     tags: this.metSeries[i].data[d].tags,
                     name: this.metSeries[i].data[d].alias,
                     data: this.metSeries[i].data[d].dps,
+                    yAxis: parseInt(this.metSeries[i].paneIndex),
                     lineWidth: 1
                 });
             }
@@ -474,6 +478,7 @@ SeriesFormatter.prototype.lineSeries = function(isMultiPane) {
         for(var i in this.metSeries) {
             for(var d in this.metSeries[i].data) {
                 out.push({
+                    uuid: this.metSeries[i].data[d].uuid,
                     query: this.metSeries[i].query,
                     tags: this.metSeries[i].data[d].tags,
                     name: this.metSeries[i].data[d].alias,

@@ -221,19 +221,11 @@ angular.module('graphing', [])
 			}
 
 			function getUpdateQuery() {
-				return {
-					start: Math.floor(((new Date()).getTime() - METRIC_FETCH_TIME_WIN) / 1000),
-					size: ngModel.$modelValue.size,
-					_id: ngModel.$modelValue._id,
-					name: ngModel.$modelValue.name,
-					series: ngModel.$modelValue.series,
-					graphType: ngModel.$modelValue.graphType,
-					tags: scope.globalTags,
-					//annoEvents: ngModel.$modelValue.annoEvents,
-					multiPane: ngModel.$modelValue.multiPane,
-					panes: ngModel.$modelValue.panes,
-					secondaries: ngModel.$modelValue.secondaries
-				};
+				bq = scope.baseQuery(ngModel.$modelValue);
+				bq.start = Math.floor(((new Date()).getTime() - METRIC_FETCH_TIME_WIN) / 1000);
+				delete bq['end'];
+				bq.series = ngModel.$modelValue.series;
+				return bq;
 			}
 
 			function getUpdates() {

@@ -7,7 +7,7 @@ from pandas.tseries.tools import to_datetime
 
 from metrilyx.dataserver import QueryUUID, TagsUUID
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 def absoluteTime(relTime, convertTo='micro'):
 	'''
@@ -109,7 +109,7 @@ class BasicSerie(object):
 				return eval(alias_str[1:])(flat_obj)
 			except Exception,e:
 				#TODO: assign calculated default
-				log.warn("could not transform alias: %s %s" %(obj['metric'], str(e)))
+				logger.warn("could not transform alias: %s %s" %(obj['metric'], str(e)))
 				normalizedAlias = obj['metric']
 		else:
 			try:
@@ -117,7 +117,7 @@ class BasicSerie(object):
 			except KeyError:
 				normalizedAlias =  obj['metric']
 			except Exception, e:
-				log.error("could not normalize alias: %s %s" %(obj['metric'], str(e)))
+				logger.error("could not normalize alias: %s %s" %(obj['metric'], str(e)))
 		return normalizedAlias
 
 	def _getConvertedTimestamps(self, pSerie, unit='s'):
@@ -183,7 +183,7 @@ class MetrilyxSerie(BasicSerie):
 		try:
 			dataset['dps'] = self.__normalizeTimestamp(dataset['dps'])
 		except Exception,e:
-			log.error("Coudn't normalize timestamp: %s %s" %(dataset['metric'], str(e)))
+			logger.error("Coudn't normalize timestamp: %s %s" %(dataset['metric'], str(e)))
 
 		### todo: add tsdb performance header
 		#dataset['perf'] = self._serie['perf']
@@ -206,7 +206,7 @@ class MetrilyxSerie(BasicSerie):
 			## eval may cause a hang.
 			return [ ( ts, eval(yTransform)(val) ) for ts, val in dataset ]
 		except Exception,e:
-			log.warn("could not apply yTransform: %s", str(e))
+			logger.warn("could not apply yTransform: %s", str(e))
 			return dataset
 
 	def __uniqueTagsStr(self):
@@ -248,7 +248,7 @@ class MetrilyxSerie(BasicSerie):
 				return [ (int(ts), data[ts]) for ts in sorted(data) ]
 		else:
 			# assume it's a list
-			log.warn("Data not a dict. Processing as list: %s" %(str(type(data))))
+			logger.warn("Data not a dict. Processing as list: %s" %(str(type(data))))
 			if toMillisecs:
 				return [ (int(tsval[0])*1000, tsval[1]) for tsval in sorted(data) ]
 			else:
@@ -295,6 +295,7 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 			md['dps'] = zip(self._getConvertedTimestamps(nonNaSerie, ts_unit), 
 															nonNaSerie.values)
 			out.append(md)
+
 		return out
 
 	def __applyTransform(self):
@@ -310,13 +311,16 @@ class SecondariesGraph(BasicSerie):
 	def __init__(self, metrilyxGraphRequest):
 		super(SecondariesGraph, self).__init__()
 		self.__request = metrilyxGraphRequest
+		self.__analyticsSeriess = [ None for i in self.__request['series'] ]
 
 	def add(self, metrilyxAnalyticsSerie):
-		## TODO: check type
 		idx = self.__findSerieIdxInRequest(metrilyxAnalyticsSerie)
 		if idx < 0:
 			raise NameError("Serie not found in request: %s" %(str(metrilyxAnalyticsSerie._serie['query'])))
-		self.__request['series'][idx]['data'] = metrilyxAnalyticsSerie
+		
+		self.__analyticsSeriess[idx] = metrilyxAnalyticsSerie
+		#self.__request['series'][idx]['dataobject'] = metrilyxAnalyticsSerie
+		#self.__request['series'][idx]['data'] = metrilyxAnalyticsSerie
 
 	def __findSerieIdxInRequest(self, metrilyxAnalyticsSerie):
 		if not isinstance(metrilyxAnalyticsSerie, MetrilyxAnalyticsSerie):
@@ -333,11 +337,22 @@ class SecondariesGraph(BasicSerie):
 	def __secondaryMetricName(self, metricSource, uuid):
 		return '(' + ':'.join(metricSource.split(':')[1:]).strip() + ')' + uuid
 
+
+	def __normalizeSeriesData(self):
+		for i in range(len(self.__request['series'])):
+			self.__request['series'][i]['data'] = self.__analyticsSeriess[i].data()
+
+
 	def data(self, ts_unit='ms'):
-		istructs = [s['data']._istruct for s in self.__request['series']]
+		self.__makeSecondaryGraphs(ts_unit)
+		self.__normalizeSeriesData()
+		return self.__request
+
+	def __makeSecondaryGraphs(self, ts_unit):
+		istructs = [s._istruct for s in self.__analyticsSeriess]
 		for sec in self.__request['secondaries']:
 			try:
-				istruct = eval("%s" %(sec['source']))(*istructs)
+				istruct = eval("%s" %(sec['query']))(*istructs)
 				dArr = []
 				for colname in istruct.columns.values:
 					tags = self.__serieIdTags(colname)
@@ -345,7 +360,7 @@ class SecondariesGraph(BasicSerie):
 						'tags': tags,
 						'alias': self._normalizeAlias(sec['alias'], self._flatten_dict({'tags': tags})),
 						'uuid': colname,
-						'metric': self.__secondaryMetricName(sec['source'], colname)
+						'metric': self.__secondaryMetricName(sec['query'], colname)
 						}
 					## clean out infinity and nan
 					nonNaSerie = istruct[colname].replace([numpy.inf, -numpy.inf], numpy.nan).dropna()
@@ -354,8 +369,7 @@ class SecondariesGraph(BasicSerie):
 				sec['data'] = dArr
 			except Exception,e:
 				logger.error(str(e))
-
-		return self.__request
+				sec['data'] = {"error": str(e)}
 
 
 
