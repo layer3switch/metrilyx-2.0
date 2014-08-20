@@ -229,8 +229,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			if((!$routeParams.pageId && !$routeParams.heatmapId) || $routeParams.pageId == "new" || $routeParams.heatmapId == "new") {
 				Schema.get({modelType: 'page'}, function(pageModel) {
 					$scope.model = pageModel;
-					// make a copy of podModel //
-					$scope.model.layout[0][0].push(JSON.parse(JSON.stringify(podModel)));
+					if($scope.model.layout[0][0].length === 0)
+						$scope.model.layout[0][0].push(JSON.parse(JSON.stringify(podModel)));
 					$scope.enableDragDrop();
 				});
 			} else {
