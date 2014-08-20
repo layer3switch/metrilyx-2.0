@@ -216,6 +216,13 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		/* active model */
 		$scope.model = {};
 
+		$scope.enableDragDrop = function() {
+			$('[ui-sortable]').each(function() {
+				$(this).sortable({disabled: false});
+			});
+		}
+
+
 		Schema.get({modelType: 'pod'},function(podModel){
 			/* used for dropped pod */
 			$scope.droppablePodSchema = [ podModel ];
@@ -548,11 +555,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.disableDragDrop = function() {
 			$('[ui-sortable]').each(function() {
 				$(this).sortable({disabled: true});
-			});
-		}
-		$scope.enableDragDrop = function() {
-			$('[ui-sortable]').each(function() {
-				$(this).sortable({disabled: false});
 			});
 		}
 		$scope.enableEditMode = function() {
