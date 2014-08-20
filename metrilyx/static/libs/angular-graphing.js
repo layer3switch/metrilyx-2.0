@@ -376,8 +376,8 @@ angular.module('graphing', [])
 				}, true);
 
 				scope.$on("$destroy", function( event ) {
-            		if(scope.wssock != null)
-            			scope.wssock.removeEventListener("graphdata", processRecievedData);
+            		if(scope.wssock !== null)
+            			scope.wssock.removeEventListener("graphdata", wsHelper.processRecievedData);
                 });
 			}
 		};
