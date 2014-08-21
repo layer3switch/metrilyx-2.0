@@ -726,7 +726,28 @@ function setPlotBands(graph) {
     $(renderTo).highcharts("StockChart",hc.options);  
 }
 
-// params: name , currData, newData, timeWindow //
+function printAlignmentDebug(args) {
+    console.warn(args.name);
+    console.warn("curr data:",new Date(args.currStartTime),new Date(args.currEndTime), "dps", args.currDataLength);
+    console.warn("new  data:", new Date(args.newStartTime),new Date(args.newEndTime), "dps", args.newDataLength);
+    console.warn("window",new Date(args.timeWindow.start), new Date(args.timeWindow.end));
+}
+/**
+ * Get aligned data eliminating duplicates
+ *
+ * |----- curr data -----|
+ *                   |----- new data -----|
+ *
+ * @param: name         name
+ * @param: currData     data in currently display chart
+ * @param: newData      data received from backend
+ * @param: timeWindow   object current with start and end time window
+ *
+ * @return: Dataset with current and new data aligned
+ *
+ * |----- current & new data -----|
+ *
+ */
 function getDataAlignedSeriesForTimeWindow(args) {
     if(args.newData.length <= 0) return false;
 
@@ -741,25 +762,30 @@ function getDataAlignedSeriesForTimeWindow(args) {
     /* check time window */
     if((newStartTime >= args.timeWindow.start) && (newStartTime < args.timeWindow.end)) {
         if((newStartTime<currStartTime) && (newEndTime>currStartTime)) {
-            console.log(args.name, "TBI");
-            console.log("curr data:",new Date(currStartTime),new Date(currEndTime), "dps", args.currData.length);
-            console.log("new  data:", new Date(newStartTime),new Date(newEndTime), "dps", args.newData.length);
-            console.log("window",new Date(args.timeWindow.start), new Date(args.timeWindow.end));
+            printAlignmentDebug({
+                'name': args.name,'timeWindow': args.timeWindow,
+                'currStartTime': currStartTime,'currEndTime': currEndTime,'currDataLength': args.currData.length,
+                'newStartTime': newStartTime, 'newEndTime': newEndTime, 'newDataLength': args.newData.length
+            });
             return false;
         } else if((newStartTime>=currStartTime) &&(newEndTime>currEndTime)) {
-            while(args.currData[args.currData.length-1][0] >= newStartTime) c = args.currData.pop();
-            while(args.currData.length > 0 && args.currData[0][0] < args.timeWindow.start) c = args.currData.shift();
+            
+            while(args.currData[args.currData.length-1][0] >= newStartTime) 
+                c = args.currData.pop();
+            while(args.currData.length > 0 && args.currData[0][0] < args.timeWindow.start) 
+                c = args.currData.shift();
+           
             return args.currData.concat(args.newData);
         } else {
-            console.log(args.name, "Unhandled");
-            console.log("window",new Date(args.timeWindow.start), new Date(args.timeWindow.end));
-            console.log("curr data:",new Date(currStartTime),new Date(currEndTime), "dps", args.currData.length);
-            console.log("new  data:", new Date(newStartTime),new Date(newEndTime), "dps", args.newData.length);
+            printAlignmentDebug({
+                'name': args.name,'timeWindow': args.timeWindow,
+                'currStartTime': currStartTime,'currEndTime': currEndTime,'currDataLength': args.currData.length,
+                'newStartTime': newStartTime,'newEndTime': newEndTime,'newDataLength': args.newData.length
+            });
             return false;
         }
     } else {
-        console.log(args.name, "data out of range");
-        console.log("range:", new Date(args.timeWindow.start), new Date(args.timeWindow.end));
+        console.warn("Data out of range: ", new Date(args.timeWindow.start), new Date(args.timeWindow.end));
         return false;
     }
 }

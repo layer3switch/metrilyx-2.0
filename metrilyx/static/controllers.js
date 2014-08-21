@@ -630,31 +630,44 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				}
 			}
 		}
+		function modelManagerErrback(error) {
+			if(error.data && Object.prototype.toString.call(error.data) === '[object Object]')
+				setGlobalAlerts({
+					'error': error.status,
+					'message': error.status+" "+JSON.stringify(error.data)
+				});
+			else
+				setGlobalAlerts({
+					'error': error.status,
+					'message': error.status+" "+error.data
+				});
+			flashAlertsBar();
+		}
 		$scope.saveModel = function(args) {
 			//console.log($scope.model);
 			if($scope.modelType == "") {
 				if($routeParams.pageId == 'new') {
-					Model.saveModel($scope.model, function(result) {
-						_saveModelCallback(result);
-					});
+					Model.saveModel($scope.model, 
+						function(result) {
+							_saveModelCallback(result);
+						}, modelManagerErrback);
 				} else {
-					Model.editModel({'pageId': $scope.model._id}, $scope.model, function(result) {
-						_saveModelCallback(result);
-					});
+					Model.editModel({'pageId': $scope.model._id}, $scope.model, 
+						function(result) {
+							_saveModelCallback(result);
+						}, modelManagerErrback);
 				}
 			} else {
 				if($routeParams.heatmapId == 'new') {
 					Heatmap.saveModel($scope.model,
 						function(result) {
 							_saveModelCallback(result);
-						}
-					);
+						}, modelManagerErrback);
 				} else {
 					Heatmap.editModel({'pageId': $scope.model._id}, $scope.model,
 						function(result) {
 							_saveModelCallback(result);
-						}
-					);
+						}, modelManagerErrback);
 				}
 			}
 		}
