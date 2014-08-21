@@ -1,8 +1,14 @@
 Roadmap
 =======
 
-##### v2.3.3 - v2.4.0
+##### v2.3.4 - v2.4.0
 - Metric operatorations i.e. perform math against different series.
+
+##### v2.3.3
+- Code optimizations for rendering and graphing.
+- Several basic code optimizations.
+- Various bug UI bug fixes.
+- Large amounts of code refactoring.
 
 ##### v2.3.2
 - Complex annotation tag queries in particular the OR operator.
