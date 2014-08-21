@@ -118,13 +118,6 @@ class MetrilyxSerie(object):
 		dataset['alias'] = self.__normalizeAlias(self._serie['alias'], {
 											'tags': dataset['tags'],
 											'metric': dataset['metric']})
-		### scan tags to make unique series alias (looks for * and | operators)
-		### apply the unique tag and re-normalize
-		#if self.uniqueTagsString and not self._serie['alias'].startswith("!"):
-		#	dataset['alias'] = self.__normalizeAlias(self._serie['alias']+self.uniqueTagsString, {
-		#		'tags': dataset['tags'],
-		#		'metric': dataset['metric']
-		#		})
 
 		## any custom callback for resulting data set 
 		## e.g. scrape metadata
