@@ -254,7 +254,7 @@ class OpenTSDBMetaSearch(object):
     """
     def __init__(self, config):
     	self.suggest_limit = config["suggest_limit"]
-        self.tsdb_suggest_url = "%(uri)s%(search_endpoint)s" %(config)
+        self.tsdb_suggest_url = "%(uri)s:%(port)s%(search_endpoint)s" %(config)
 
     def search(self, obj, limit=None):
         if obj["type"] == "metric":
