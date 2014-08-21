@@ -36,6 +36,11 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 		logger.info("WebSocket connection opened. extensions: %s" %(
 										self.websocket_extensions_in_use))
 
+	def onClose(self, wasClean, code, reason):
+		logger.info("WebSocket closed wasClean=%s code=%s reason=%s" %(
+								str(wasClean), str(code), str(reason)))
+
+
 	def checkMessage(self, payload, isBinary):
 		if not isBinary:
 			try:
