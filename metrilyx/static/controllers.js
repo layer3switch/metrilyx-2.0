@@ -229,8 +229,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			if((!$routeParams.pageId && !$routeParams.heatmapId) || $routeParams.pageId == "new" || $routeParams.heatmapId == "new") {
 				Schema.get({modelType: 'page'}, function(pageModel) {
 					$scope.model = pageModel;
-					if($scope.model.layout[0][0].length === 0)
-						$scope.model.layout[0][0].push(JSON.parse(JSON.stringify(podModel)));
+					$scope.model.layout[0][0][0] = JSON.parse(JSON.stringify(podModel));
 					$scope.enableDragDrop();
 				});
 			} else {
@@ -782,7 +781,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 						}
 					});
 				}
-				//console.log(graphModel);
+				//
 				$scope.graph = graphModel;
 				$scope.reloadGraph();
 				/*
@@ -880,25 +879,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		}
 		$scope.removeTag = function(tags, tagkey) {
 			delete tags[tagkey];
-		}/*
-		$scope.getTimeWindow = function() {
-			if($scope.timeType == "absolute"){
-				if($scope.endTime)
-					return {
-						start: parseFloat($scope.startTime),
-						end: parseFloat($scope.endTime)
-					};
-				return {
-					start: parseFloat($scope.startTime),
-					end: Math.ceil((new Date()).getTime()/1000)
-				};
-			} else {
-				return {
-					start: Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime($scope.timeType)),
-					end: Math.ceil((new Date()).getTime()/1000)
-				};
-			}
-		}*/
+		}
 		$scope.getTimeWindow = function(inMilli) {
 			if($scope.timeType == "absolute"){
 				if($scope.endTime) {

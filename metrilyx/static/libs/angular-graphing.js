@@ -229,14 +229,12 @@ angular.module('graphing', [])
 					series: ngModel.$modelValue.series,
 					graphType: ngModel.$modelValue.graphType,
 					tags: scope.globalTags,
-					//annoEvents: ngModel.$modelValue.annoEvents,
 					multiPane: ngModel.$modelValue.multiPane,
 					panes: ngModel.$modelValue.panes
 				};
 			}
 
 			function getUpdates() {
-				//console.log('requesting metrics updates...', scope.updatesEnabled);
 				if (ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
 					q = getUpdateQuery();
 					scope.requestData(q);
@@ -261,19 +259,22 @@ angular.module('graphing', [])
 
 			function processRecievedData(event) {
 				var data = event.detail;
+				
 				checkDataErrors(data);
 				if (data.series) {
+					
 					var mg = new MetrilyxGraph(data, scope.getTimeWindow(true));
 					mg.applyData();
+					
+					var sTags = (new SeriesFormatter(data.series)).seriesTags();
+					scope.$apply(function() { scope.updateTagsOnPage(sTags) });
 				}
-				if (data.annoEvents && data.annoEvents.data && data.annoEvents.data.length > 0) {
+				if(data.annoEvents && data.annoEvents.data && data.annoEvents.data.length > 0 && ngModel.$modelValue.graphType !== 'pie') {
+					
 					anno = new MetrilyxAnnotation(data);
 					anno.applyData();
 				}
-				var sTags = (new SeriesFormatter(data.series)).seriesTags();
-				scope.$apply(function() {
-					scope.updateTagsOnPage(sTags)
-				});
+
 				setSerieStatus(data, 'loaded');
 			}
 
@@ -370,7 +371,8 @@ angular.module('graphing', [])
 						if(scope.modelType == 'adhoc') scope.setURL(graph);
 					} else {
 						//console.log("removing series");
-						graphing_removeSeries(graph);
+						mg = new MetrilyxGraph(graph, scope.getTimeWindow(true));
+						mg.removeSeries(graph);
 						if(scope.modelType == 'adhoc') scope.setURL(graph);
 					}
 				}, true);
