@@ -630,19 +630,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				}
 			}
 		}
-		function modelManagerErrback(error) {
-			if(error.data && Object.prototype.toString.call(error.data) === '[object Object]')
-				setGlobalAlerts({
-					'error': error.status,
-					'message': error.status+" "+JSON.stringify(error.data)
-				});
-			else
-				setGlobalAlerts({
-					'error': error.status,
-					'message': error.status+" "+error.data
-				});
-			flashAlertsBar();
-		}
 		$scope.saveModel = function(args) {
 			//console.log($scope.model);
 			if($scope.modelType == "") {
