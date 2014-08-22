@@ -32,7 +32,9 @@ def check_config(default, curr):
 			check_config(v, curr[k])
 		elif isinstance(v, list):
 			if len(v) != len(curr[k]):
-				print "- List length mismatch:", v, curr[k]
+				print "- WARNING: List length mismatch"
+				print v, curr[k]
+				print "--"
 				continue
 			for i in range(len(v)):
 				if isinstance(v[i], dict):
