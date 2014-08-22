@@ -97,12 +97,12 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 
 	def _checkResponse(self, respBodyStr, response, url):
 		if response.code < 200 or response.code > 304:
-			logger.warning("Request failed %s code=%s response=%s" %(url, response.code, 
+			logger.warning("Request failed %s response=%s code=%s " %(url, response.code, 
 														"".join(respBodyStr.split("\n"))))
 			m = re_504.search(respBodyStr)
 			if  m != None:
-				return {"error": "response=%s,code=%s" %(response.code, m.group(1))}
-			return {"error": "response=%s,code=%s" %(response.code, respBodyStr)}
+				return {"error": "response=%s,code=%s" %(m.group(1), response.code)}
+			return {"error": "response=%s,code=%s" %(respBodyStr, response.code)}
 
 		try:
 			d = json.loads(respBodyStr)
