@@ -173,10 +173,10 @@ metrilyxServices.factory('Schema', ['$http', 'Auth',
 					Auth.clearCredentials();
 					$http.get(connectionPool.nextConnection()+'/api/schemas/' + params.modelType).success(function(res){
 						cache[params.modelType] = res;
-						dfd.resolve(JSON.parse(JSON.stringify(res)));
+						dfd.resolve($.extend(true, {}, res));
 					});
 				} else {
-					dfd.resolve(JSON.parse(JSON.stringify(cache[params.modelType])));
+					dfd.resolve($.extend(true, {}, cache[params.modelType]));
 				}
 
 				dfd.done(cb);
