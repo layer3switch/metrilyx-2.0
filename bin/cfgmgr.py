@@ -31,6 +31,9 @@ def check_config(default, curr):
 		if isinstance(v, dict):
 			check_config(v, curr[k])
 		elif isinstance(v, list):
+			if len(v) != len(curr[k]):
+				print "- List length mismatch:", v, curr[k]
+				continue
 			for i in range(len(v)):
 				if isinstance(v[i], dict):
 					check_config(v[i], curr[k][i])
