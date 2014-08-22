@@ -770,7 +770,7 @@ function getDataAlignedSeriesForTimeWindow(args) {
             return false;
         } else if((newStartTime>=currStartTime) &&(newEndTime>currEndTime)) {
             
-            while(args.currData[args.currData.length-1][0] >= newStartTime) 
+            while(args.currData.length > 0 && args.currData[args.currData.length-1][0] >= newStartTime) 
                 c = args.currData.pop();
             while(args.currData.length > 0 && args.currData[0][0] < args.timeWindow.start) 
                 c = args.currData.shift();
