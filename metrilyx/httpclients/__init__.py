@@ -254,6 +254,7 @@ class AsyncHttpJsonClient(object):
     def addResponseErrback(self, callback, *cbargs):
         self.__d_agent.addErrback(self.__readErrorCallback, callback, *cbargs)
 
-
+    def cancelRequest(self):
+        self.__deferredResponse.cancel()
 
 
