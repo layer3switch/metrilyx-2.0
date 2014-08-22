@@ -240,8 +240,8 @@ MetrilyxGraph.prototype.upsertLineBasedSeries = function() {
             }
             
             if(!found) {
-                var paneIndex = this._graphData.multiPane ? firstSerie.paneIndex : false;
-                this._chart.addSeries(this.getHighchartsFormattedSerie(firstSerie.data[j], firstSerie.query, paneIndex), false);
+                var paneIndex = this._graphData.multiPane ? currentSerie.paneIndex : false;
+                this._chart.addSeries(this.getHighchartsFormattedSerie(currentGraphData, currentSerie.query, paneIndex), false);
             }
         }
     }
