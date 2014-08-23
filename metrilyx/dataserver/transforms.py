@@ -95,13 +95,16 @@ class BasicSerie(object):
 		return dict((key, value) for (key, value) in list(flatten_dict_gen(d)))
 
 		
-	def _normalizeAlias(self, alias_str, obj):
+	def _normalizeAlias(self, alias_str, obj, unique_tags_str):
 		"""
 		@args:
 			alias_str 	string to format
 			obj 		dict containing atleast 'tags' and 'metric' keys
 		"""
 		flat_obj = self._flatten_dict(obj)
+		if unique_tags_str:
+			uniqueTagsString = unique_tags_str %(flat_obj)
+
 		normalizedAlias = alias_str
 		# When alias_str starts with ! we will do an eval for lambda processing
 		if alias_str.startswith("!"):
@@ -110,15 +113,19 @@ class BasicSerie(object):
 			except Exception,e:
 				#TODO: assign calculated default
 				logger.warn("could not transform alias: %s %s" %(obj['metric'], str(e)))
-				normalizedAlias = obj['metric']
+				normalizedAlias = obj['metric']+ " " + uniqueTagsString
 		else:
 			try:
 				normalizedAlias = alias_str %(flat_obj)
 			except KeyError:
-				normalizedAlias =  obj['metric']
+				normalizedAlias =  obj['metric'] + " " + uniqueTagsString
 			except Exception, e:
 				logger.error("could not normalize alias: %s %s" %(obj['metric'], str(e)))
-		return normalizedAlias
+
+		if unique_tags_str and normalizedAlias == obj['metric']:
+			normalizedAlias += " " + uniqueTagsString
+
+		return normalizedAlias.strip()
 
 	def _getConvertedTimestamps(self, pSerie, unit='s'):
 		'''
@@ -162,15 +169,15 @@ class MetrilyxSerie(BasicSerie):
 			for d in self._serie['data']:
 				d['uuid'] = TagsUUID(d['tags']).uuid
 				#d['uuid'] = SerieUUID(d).uuid
-			
 			self.__normalizeAliases()
 
 	def __normalizeAliases(self):
 		for s in self._serie['data']:
 			if isinstance(s, dict) and s.get('error'):
 				continue
-			s['alias'] = self._normalizeAlias(self._serie['alias'], 
-								{'tags': s['tags'],'metric': s['metric']})
+			s['alias'] = self._normalizeAlias(self._serie['alias'],
+								{'tags': s['tags'],'metric': s['metric']},
+								self.uniqueTagsString)
 
 	@property
 	def data(self):
@@ -192,6 +199,11 @@ class MetrilyxSerie(BasicSerie):
 		## May remove this as it can be achieved using a yTransform which would be controlled by the user.
 		if self._serie['query']['rate']:
 			dataset['dps'] = self.__rmNegativeRates(dataset['dps'])
+
+		### normalize alias (i.e. either lambda function or string formatting and append unique tags string) 
+		#dataset['alias'] = self.__normalizeAlias(self._serie['alias'], {
+		#									'tags': dataset['tags'],
+		#									'metric': dataset['metric']})
 
 		## any custom callback for resulting data set 
 		## e.g. scrape metadata
@@ -221,7 +233,7 @@ class MetrilyxSerie(BasicSerie):
 			if talias not in self._serie['alias']:
 				nstr += " " + talias
 		return nstr
-
+	'''
 	def _normalizeAlias(self, alias_str, obj):
 		"""
 		@args:
@@ -235,7 +247,7 @@ class MetrilyxSerie(BasicSerie):
 			normalizedAlias = normalizedAlias + self.uniqueTagsString %(flat_obj)
 		
 		return normalizedAlias
-
+	'''
 	def __normalizeTimestamp(self, data, toMillisecs=True):
 		"""
 		@params
@@ -358,7 +370,7 @@ class SecondariesGraph(BasicSerie):
 					tags = self.__serieIdTags(colname)
 					md = {
 						'tags': tags,
-						'alias': self._normalizeAlias(sec['alias'], self._flatten_dict({'tags': tags})),
+						'alias': self._normalizeAlias(sec['alias'], self._flatten_dict({'tags': tags}), False),
 						'uuid': colname,
 						'metric': self.__secondaryMetricName(sec['query'], colname)
 						}
@@ -370,6 +382,3 @@ class SecondariesGraph(BasicSerie):
 			except Exception,e:
 				logger.error(str(e))
 				sec['data'] = {"error": str(e)}
-
-
-

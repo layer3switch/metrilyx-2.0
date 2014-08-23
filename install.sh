@@ -91,7 +91,7 @@ init_configs() {
 }
 configure_webserver() {
 	echo "- Installing web components..."
-	cp etc/nginx/conf.d/metrilyx.conf /etc/nginx/conf.d/;
+	cp -fv etc/nginx/conf.d/metrilyx.conf /etc/nginx/conf.d/;
 	chown -R $HTTP_USER ${APP_HOME};
 }
 ## BEGIN cli args

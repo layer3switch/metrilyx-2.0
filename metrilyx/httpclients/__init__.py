@@ -259,8 +259,6 @@ class AsyncHttpJsonClient(object):
 
         self.__deferredResponse = Deferred()
         
-
-
     def __readResponseCallback(self, response, userCb, *cbargs):
         response.deliverBody(AsyncHttpResponseProtocol(self.__deferredResponse, response.headers))
         self.__deferredResponse.addCallback(userCb, *([response]+list(cbargs)))
@@ -276,6 +274,8 @@ class AsyncHttpJsonClient(object):
     def addResponseErrback(self, callback, *cbargs):
         self.__d_agent.addErrback(self.__readErrorCallback, callback, *cbargs)
 
+    def cancelRequest(self):
+        self.__deferredResponse.cancel()
 
 class MetrilyxGraphFetcher(object):
     '''
@@ -359,5 +359,7 @@ class MetrilyxGraphFetcher(object):
     def addPartialResponseErrback(self, callback, *cbargs):
         for d in self.__partialDeferreds:
             d.addErrback(callback, *cbargs)
+
+
 
 

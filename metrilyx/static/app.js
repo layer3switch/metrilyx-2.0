@@ -568,6 +568,19 @@ function clearAllTimeouts() {
 		window.clearTimeout(id); 
 	}
 }
+function modelManagerErrback(error) {
+	if(error.data && Object.prototype.toString.call(error.data) === '[object Object]')
+		setGlobalAlerts({
+			'error': error.status,
+			'message': "code: "+error.status+" "+JSON.stringify(error.data)
+		});
+	else
+		setGlobalAlerts({
+			'error': error.status,
+			'message': "code: "+error.status+" "+error.data
+		});
+	flashAlertsBar();
+}
 function setGlobalAlerts(rslt) {
 	if(rslt.error) {
 		$('#global-alerts').removeClass('alert-success')

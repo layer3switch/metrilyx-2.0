@@ -86,27 +86,6 @@ var DEFAULT_CHART_OPTS = {
 $.extend(DEFAULT_CHART_OPTS.BASIC, {xAxis: DEFAULT_CHART_OPTS.AXIS}, true);
 $.extend(DEFAULT_CHART_OPTS.BASIC.xAxis, {opposite:true}, true);
 
-function highchartsFormattedSerie(dataObj, dataQuery, graphType, paneIndex) {
-    //console.log(dataObj.uuid);
-    var out = {
-        uuid: dataObj.uuid,
-        name: dataObj.alias,
-        tags: dataObj.tags,
-        query: dataQuery
-    };
-    if(graphType === 'pie') {
-        out['y'] = dataObj.dps[0][1];
-    } else {
-        $.extend(out, {
-            lineWidth: 1,
-            data: dataObj.dps
-        }, true);
-        if(paneIndex) {
-            out['yAxis'] = parseInt(paneIndex);    
-        }
-    }
-    return out;
-}
 function onAnnotationClick(event) {
     var ead = $('#event-anno-details');
     var newAnno = {
@@ -133,57 +112,239 @@ function onAnnotationClick(event) {
 }
 
 function MetrilyxGraph(graphObj, timeWin) {
+    this._graphId   = graphObj._id;
+    this._graphData = graphObj;
+    this._domNode   = $("[data-graph-id='" + this._graphId + "']");
+    this._statusNode = $("[data-graph-status='"+this._graphId+"']");
+    this._chart     = this._domNode.highcharts();
     this.timeWindow = timeWin;
+
+    /*
     this.graphdata = graphObj;
     this._chartElem = $("[data-graph-id='"+this.graphdata._id+"']");
-    this._chart = $(this._chartElem).highcharts();
+    */
 
-
-    if(this.graphdata.secondaries && this.graphdata.secondaries.length > 0) {
+    if(this._graphData.secondaries && this._graphData.secondaries.length > 0) {
         this.hasSecondaries = true;
     } else {
         this.hasSecondaries = false;
     }
 }
-MetrilyxGraph.prototype.newChart = function() {
-    var copts = new ChartOptions(this.graphdata);
-    if(dataHasErrors(this.graphdata)) {
-        $(this._chartElem).html("");
-        return;
+MetrilyxGraph.prototype.isPieChart = function() {
+    return this._graphData.graphType === "pie";
+}
+MetrilyxGraph.prototype.dataHasErrors = function() {
+    var series = this._graphData.series;
+    for(var s=0; s < series.length; s++) {
+        
+        var currentSerie = series[s];
+        if(currentSerie.data.error !== undefined) {
+            
+            var error = currentSerie.data.error;
+            var msg   = error.message ? error.message.substring(0, 150) + "..." : error.substring(0, 100) + "...";
+            
+            this._statusNode.html("<span class='graph-error'>"+currentSerie.query.metric+": "+msg+"</span>");
+            return { "error": { 
+                "message": msg, 
+                "metric": currentSerie.query.metric 
+            }};
+        }
     }
-    if(this.graphdata.graphType == "pie") {
-        $(this._chartElem).highcharts(copts.chartDefaultsForType());
+    this._statusNode.html("");
+    return false;
+}
+/**
+ * Create Highchart.
+ *
+ * @param options Options for Highchart.
+ * @param type    Highchart type.
+ *
+ * @return void
+ */
+MetrilyxGraph.prototype.createHighChart = function(options, type) {
+    if(type !== undefined) {
+
+        this._domNode.highcharts(type, options);
     } else {
-        render_lineBasedNewGraph(this._chartElem, copts.chartDefaultsForType());
+
+        this._domNode.highcharts(options);
+    }
+    /* get ref to chart obj */
+    this._chart = this._domNode.highcharts();
+}
+MetrilyxGraph.prototype.newChart = function() {
+    
+    if(!this.dataHasErrors(this._graphData)) {
+        var copts = new ChartOptions(this._graphData);
+        if(this.isPieChart()) {
+            this.createHighChart(copts.chartDefaultsForType());
+        } else {
+            Highcharts.setOptions({ global: { useUTC: false } });
+            Highcharts.seriesTypes.line.prototype.drawPoints = function() {};
+            this.createHighChart(copts.chartDefaultsForType(), "StockChart");
+        }
+    } 
+}
+MetrilyxGraph.prototype.upsertPieSeries = function() {
+    
+    var series          = this.hasSecondaries ? this._graphData.secondaries: this._graphData.series;
+    var firstChartSerie = this._chart.series[0];
+    //var series = this._graphData.series;
+    for(var j=0; j < series.length; j++) {
+        var found = false;
+        var currentSerie = series[j];
+
+        for(var d=0; d < firstChartSerie.options.data.length; d++) {
+            var currentSerieData    = currentSerie.data[0];
+            var firstChartSerieData = firstChartSerie.options.data[d];
+            if(equalObjects(currentSerieData.tags, firstChartSerieData.tags) 
+                            && currentSerieData.alias==firstChartSerieData.name) {
+                found = true;
+                firstChartSerie.options.data.splice(d, 1, this.getHighchartsFormattedPieSerie(currentSerieData, firstChartSerieData.query));
+                firstChartSerie.setData(firstChartSerie.options.data, false);
+                break;
+            }
+        }
+        if(!found) 
+            firstChartSerie.addPoint(this.getHighchartsFormattedPieSerie(currentSerieData, currentSerie.query), false);
     }
 }
-MetrilyxGraph.prototype.applyData = function() {
-    if(this._chart === undefined) {
-        this.newChart();
-    } else {
-        if(!dataHasErrors(this.graphdata)) {
-            $(this._chartElem).html("");
-            this.upsertSeries();
+
+MetrilyxGraph.prototype.upsertLineBasedSeries = function() {
+    
+    var series      = this.hasSecondaries ? this._graphData.secondaries: this._graphData.series;
+    //var series      = this._graphData.series;
+    var chartSeries = this._chart.series;
+    var firstSerie  = series[0];
+    for(var j=0; j < series.length; j++) {
+        
+        var currentSerie = series[j];
+        for(var d=0; d < currentSerie.data.length; d++) {
+
+            var found = false;
+            var currentGraphData = currentSerie.data[d];
+            for(var i=0; i < chartSeries.length; i++) {
+
+                var currentChartData = chartSeries[i];
+                try {
+                    if(equalObjects(currentSerie.query, currentChartData.options.query) && 
+                            equalObjects(currentGraphData.tags, currentChartData.options.tags)) {                  
+                        
+                        found = true;
+                        var newData = false;
+                        if(currentChartData.options.data.length <= 0) {
+                            newData = currentGraphData.dps;
+                        } else {
+                            newData = getDataAlignedSeriesForTimeWindow({
+                                name:  currentChartData.options.name,
+                                currData: currentChartData.options.data,
+                                newData:  currentGraphData.dps,
+                                timeWindow: this.timeWindow
+                            });
+                        }
+                        if(newData != false) currentChartData.setData(newData, false, null, false);
+                        break;
+                    }
+                } catch(e) {
+                    console.log("upsertLineBasedSeries", currentSerie.query, e);
+                    console.log(currentChartData.options);
+                    console.log(currentGraphData);
+                }
+            }
+            
+            if(!found) {
+                var paneIndex = this._graphData.multiPane ? currentSerie.paneIndex : false;
+                this._chart.addSeries(this.getHighchartsFormattedSerie(currentGraphData, currentSerie.query, paneIndex), false);
+            }
         }
     }
 }
+/*
+ * Add or update series with new data
+ *  args:   Graph data
+ *
+ *
+ * @return bool Should redraw graph
+ */
 MetrilyxGraph.prototype.upsertSeries = function() {
     if(this._chart === undefined) {
-        console.log("graph uninitialized: not upserting. name", data.name, "type", data.graphType,"_id", data._id);
-        return;
+        console.log("graph uninitialized: not upserting. name", 
+            this._graphData.name, "type", this._graphData.graphType,"_id", this._graphId);
+        return false;
     }
-    if(this.graphdata.graphType === 'pie') {
-        upsertPieSeries(this.graphdata.series, this._chart);
+    if(this.isPieChart()) {
+        this.upsertPieSeries();
     } else {
-        if(this.hasSecondaries) {
-            upsertLineBasedSeries(this.graphdata.secondaries, this.graphdata.graphType, 
-                            this.graphdata.multiPane, this._chart, this.timeWindow);
-        } else {
-            upsertLineBasedSeries(this.graphdata.series, this.graphdata.graphType, 
-                            this.graphdata.multiPane, this._chart, this.timeWindow);
-        }
+        this.upsertLineBasedSeries();
     }
-    this._chart.redraw();
+    return true;
+}
+
+MetrilyxGraph.prototype.applyData = function() {
+    if(!this.dataHasErrors()) {
+        var redraw = false;
+        if(this._chart === undefined) {
+            this.newChart();
+        } else {   
+            redraw = this.upsertSeries();
+        } 
+        if(redraw) this._chart.redraw();
+    }   
+}
+/**
+ * Get highchart formatted series for pie chart.
+ *
+ * @param data  Serie data.
+ * @param query Query
+ *
+ * @return void
+ */
+MetrilyxGraph.prototype.getHighchartsFormattedPieSerie = function (data,  query) {
+
+    return { name: data.alias, y: data.dps[0][1], tags: data.tags, query: query };
+};
+
+/**
+ * Get highchart formatted series for other charts than pie one.
+ *
+ * @param data  Serie data.
+ * @param query Query.
+ * @param index Pane index.
+ *
+ * @return void
+ */
+MetrilyxGraph.prototype.getHighchartsFormattedSerie = function (data, query, index) {
+
+    var params = { lineWidth: 1, name: data.alias, data: data.dps, query: query, tags: data.tags };
+    if(index) {
+
+        params.yAxis = parseInt(index);
+    }
+    return params;
+};
+/**
+ * Remove series from highcharts
+ *
+ * @param graph Graph model object
+ *
+ * @return void
+ */
+MetrilyxGraph.prototype.removeSeries = function(graph) {
+             
+    for(var h=0; h < this._chart.series.length; h++) {
+        
+        var remove = true;
+        var currentChartSerie = this._chart.series[h];
+        var graphSeries = graph.series;
+        for(var d=0; d < graphSeries.length; d++) {
+
+            if(equalObjects(graphSeries[d].query, currentChartSerie.options.query)) {
+                remove = false;
+                break;
+            }
+        } 
+        if(remove) currentChartSerie.remove(true);
+    }
 }
 
 function MetrilyxAnnotation(obj) {
@@ -198,7 +359,7 @@ MetrilyxAnnotation.prototype.sortAnno = function(a,b) {
 }
 MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
     var ndata = [];
-    for(var i in chrt.series[serieIdx].data) {
+    for(var i=0; i < chrt.series[serieIdx].data.length; i++) {
         try {
             if(chrt.series[serieIdx].data[i].x < this._data.annoEvents.data[0].x) {
                 ndata.push({
@@ -220,7 +381,7 @@ MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
             console.log(chrt.series[serieIdx].data, this._data.annoEvents.data);
         }
     }
-    for(var i in this._data.annoEvents.data) {
+    for(var i=0; i < this._data.annoEvents.data.length; i++) {
         ndata.push(this._data.annoEvents.data[i]);
     }
     chrt.series[serieIdx].setData(ndata.sort(this.sortAnno));
@@ -238,7 +399,7 @@ MetrilyxAnnotation.prototype.queueDataForRendering = function() {
         } else {
             wsf = new SeriesFormatter(ma._data.annoEvents.data);
             var idx = -1;
-            for(var i in wchrt.series) {
+            for(var i=0; i < wchrt.series.length; i++) {
                 if(wchrt.series[i].type === 'flags') {
                     if(wchrt.series[i].name === ma._data.annoEvents.eventType) {
                         idx = i;
@@ -372,7 +533,6 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
         }
     }, extraOpts);
     if(this._graph.multiPane) {
-        //console.log(this._graph);
         h = 100/this._graph.panes.length;
         hstr = h.toString();
         opts.yAxis = [];
@@ -388,7 +548,6 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
                 }));
             currTop += h;
         }
-        //console.log(opts.yAxis);
     } else {
         opts.yAxis = this.__plotBands();
     }
@@ -441,8 +600,8 @@ function SeriesFormatter(metSeries) {
 }
 SeriesFormatter.prototype.seriesTags = function() {
     var tags = {};
-    for(var i in this.metSeries) {
-        for(var d in this.metSeries[i].data) {
+    for(var i=0; i < this.metSeries.length; i++) {
+        for(var d=0; d < this.metSeries[i].data.length; d++) {
             for(var j in this.metSeries[i].data[d].tags) {
                 if(tags[j]) {
                     if(tags[j].indexOf(this.metSeries[i].data[d].tags[j]) < 0) {
@@ -479,9 +638,10 @@ SeriesFormatter.prototype.flagsSeries = function(eventType) {
 SeriesFormatter.prototype.lineSeries = function(isMultiPane) {
     out = [];
     if(isMultiPane) {
-        for(var i in this.metSeries) {
-            for(var d in this.metSeries[i].data) {
-                //console.log(this.metSeries[i].data[d].uuid);
+
+        for(var i=0; i < this.metSeries.length; i++) {
+            for(var d=0; d < this.metSeries[i].data.length; d++) {
+
                 out.push({
                     uuid: this.metSeries[i].data[d].uuid,
                     query: this.metSeries[i].query,
@@ -494,9 +654,10 @@ SeriesFormatter.prototype.lineSeries = function(isMultiPane) {
             }
         }
     } else {
-        for(var i in this.metSeries) {
-            for(var d in this.metSeries[i].data) {
-                //console.log(this.metSeries[i].data[d].uuid);
+
+        for(var i=0; i < this.metSeries.length; i++) {
+            for(var d=0; d < this.metSeries[i].data.length; d++) {
+
                 out.push({
                     uuid: this.metSeries[i].data[d].uuid,
                     query: this.metSeries[i].query,
@@ -512,59 +673,20 @@ SeriesFormatter.prototype.lineSeries = function(isMultiPane) {
 }
 SeriesFormatter.prototype.pieSeries = function() {
     var pieData = [];
-    for(var i in this.metSeries) {
-        for(var d in this.metSeries[i].data){
-            dps = this.metSeries[i].data[d].dps;
+    for(var i=0; i < this.metSeries.length; i++) {
+        for(var d=0; d < this.metSeries[i].data.length; d++){
+            //dps = this.metSeries[i].data[d].dps;
             if(this.metSeries[i].data[d].dps.length <=0) {
                 console.warn("(pie) No data for:", this.metSeries[i].alias);
             } else {
-                pieData.push(highchartsFormattedSerie(
-                    this.metSeries[i].data[d], this.metSeries[i].query, "pie"));
+                pieData.push(MetrilyxGraph.prototype.getHighchartsFormattedPieSerie(
+                                        this.metSeries[i].data[d], this.metSeries[i].query));
             }
         }
     }
     return [{ data: pieData, type: 'pie' }];
 }
 /* helper functions */
-function graphing_removeSeries(gobj) {
-    var hcg = $("[data-graph-id='"+gobj._id+"']").highcharts();               
-    //var found = false;
-    for(var h in hcg.series) {
-        var remove = true;
-        for(var d in gobj.series) {
-            //console.log(hcg.series[h].options);
-            if(equalObjects(gobj.series[d].query, hcg.series[h].options.query)) {
-                remove = false;
-                break;
-            }
-        } 
-        if(remove) hcg.series[h].remove(true);
-    }
-}
-function graphing_replaceSeries(result, redraw) {
-    var hcg = $("[data-graph-id='"+result._id+"']").highcharts(); 
-    for(var r in result.series[0].data) {
-        tr = result.series[0].data[r];
-        var found = false;
-        for(var hs in hcg.series) {
-            if(tr.alias == hcg.series[hs].name && equalObjects(hcg.series[hs].options.tags, tr.tags)) {
-                found = true;
-                hcg.series[hs].setData(tr.dps,true,null, false);
-                break;
-            }
-        }
-        // if tags change more series can be return upsert if this is the case
-        if(!found) {
-            if(result.multiPane) {
-                hcg.addSeries(highchartsFormattedSerie(tr,result.series[0].query, null, result.series[0].paneIndex), false);
-            } else {
-                hcg.addSeries(highchartsFormattedSerie(tr,result.series[0].query), false);
-            }
-        }
-    }
-    if(redraw) hcg.redraw();
-}
-
 /*
  * - Compare single level object
  * - Special case for tags
@@ -620,24 +742,7 @@ function getPlotBands(thresholds) {
     }, true);
     return out;
 }
-function dataHasErrors(gObj) {
-    for(var s in gObj.series) {
-        if(gObj.series[s].data.error !== undefined) {
-            if(gObj.series[s].data.error.message) msg = gObj.series[s].data.error.message.substring(0,80)+"...";
-            else msg = gObj.series[s].data.error.substring(0,50)+"...";
-            console.warn(gObj.series[s].query.metric, msg);
-            $("[data-graph-status='"+gObj._id+"']").html(
-                "<span class='graph-error'>"+gObj.series[s].query.metric+": "+msg+"</span>");
-            return { 
-                "error": {
-                    "message": msg,
-                    "metric": gObj.series[s].query.metric
-                }
-            };
-        }
-    }
-    return false;
-}
+
 function setPlotBands(graph) {
     renderTo = "[data-graph-id='"+graph._id+"']";
     hc = $(renderTo).highcharts();
@@ -648,93 +753,29 @@ function setPlotBands(graph) {
     hc.options.yAxis = getPlotBands(graph.thresholds);
     $(renderTo).highcharts("StockChart",hc.options);  
 }
-function render_lineBasedNewGraph(selector, options) {
-    Highcharts.setOptions({ global: { useUTC:false } });
-    Highcharts.seriesTypes.line.prototype.drawPoints = (function 
-    (func) {
-        return function () {
-            return false;
-        };
-    } (Highcharts.seriesTypes.line.prototype.drawPoints));
-    $(selector).highcharts("StockChart", options);
-}
-function upsertPieSeries(series, hcg) {
-    for(var j in series) {
-        var found = false;
-        for(var d in hcg.series[0].options.data) {
-            if(equalObjects(series[j].data[0].tags, hcg.series[0].options.data[d].tags)&&series[j].data[0].alias==hcg.series[0].options.data[d].name) {
-                found = true;        
-                if(Object.prototype.toString.call(series[j].data) === '[object Object]') {
-                    if(series[j].data.error) {
-                        consol.warn("upsertPieSeries tsdb error:", (JSON.stringify(series[j].data.error)).substring(0,100));
-                        break;
-                    }
-                }
-                hcg.series[0].options.data.splice(d, 1, highchartsFormattedSerie(
-                    series[j].data[0], hcg.series[0].options.data[d].query, "pie"));
-                hcg.series[0].setData(hcg.series[0].options.data);
-                break;
-            }
-        }
-        if(!found) {
-            hcg.series[0].addPoint(highchartsFormattedSerie(
-                series[j].data[0], series[j].query, "pie"));
-        }
-    }
-}
-function upsertLineBasedSeries(series, graphType, multiPane, hcg, timeWindow) {
-//function upsertLineBasedSeries(args, hcg, timeWindow) {
-    for(var j in series) {
-        for(var d in series[j].data) {
-            // find series in highcharts //
-            var found = false;
-            for(var i in hcg.series) {
-                // may need to add globalTags as part of check //
-                try {
-                    if(equalObjects(series[j].query, hcg.series[i].options.query) && 
-                            equalObjects(series[j].data[d].tags, hcg.series[i].options.tags)) {
-                        found = true;
 
-                        if(Object.prototype.toString.call(series[j].data) === '[object Object]') {
-                            if(series[j].data.error) {
-                                console.warn("graphing_upsertSeries tsdb error:", 
-                                    (JSON.stringify(series[j].data.error)).substring(0,100));
-                                break;
-                            }
-                        }
-                        var newData = false;
-                        if(hcg.series[i].options.data.length <= 0) {
-                            newData = series[j].data[d].dps;
-                        } else {
-                            newData = getDataAlignedSeriesForTimeWindow({
-                                name: hcg.series[i].options.name,
-                                currData: hcg.series[i].options.data,
-                                newData:  series[j].data[d].dps,
-                                timeWindow: timeWindow
-                            });
-                        }
-                        if(newData != false) hcg.series[i].setData(newData, false, null, false);
-                        break;
-                    }
-                } catch(e) {
-                    console.log("upsertLineBasedSeries", series[j].query, e);
-                    console.log(hcg.series[i].options);
-                }
-            } // END hcg.series //
-            
-            if(!found) {
-                if(multiPane) {
-                    hcg.addSeries(highchartsFormattedSerie(series[0].data[d], 
-                        series[0].query, graphType, series[0].paneIndex), false);
-                } else {
-                    hcg.addSeries(highchartsFormattedSerie(series[0].data[d], 
-                                        series[0].query, graphType), false);
-                }
-            }
-        }
-    }
+function printAlignmentDebug(args) {
+    console.warn(args.name);
+    console.warn("curr data:",new Date(args.currStartTime),new Date(args.currEndTime), "dps", args.currDataLength);
+    console.warn("new  data:", new Date(args.newStartTime),new Date(args.newEndTime), "dps", args.newDataLength);
+    console.warn("window",new Date(args.timeWindow.start), new Date(args.timeWindow.end));
 }
-// params: name , currData, newData, timeWindow //
+/**
+ * Get aligned data eliminating duplicates
+ *
+ * |----- curr data -----|
+ *                   |----- new data -----|
+ *
+ * @param: name         name
+ * @param: currData     data in currently display chart
+ * @param: newData      data received from backend
+ * @param: timeWindow   object current with start and end time window
+ *
+ * @return: Dataset with current and new data aligned
+ *
+ * |----- current & new data -----|
+ *
+ */
 function getDataAlignedSeriesForTimeWindow(args) {
     if(args.newData.length <= 0) return false;
 
@@ -744,71 +785,35 @@ function getDataAlignedSeriesForTimeWindow(args) {
     currStartTime = args.currData[0][0];
     currEndTime = args.currData[args.currData.length-1][0];
 
-    // no new data //
+    /* no new data */
     if(newEndTime <= currEndTime) return false;
-    // check time window //
+    /* check time window */
     if((newStartTime >= args.timeWindow.start) && (newStartTime < args.timeWindow.end)) {
         if((newStartTime<currStartTime) && (newEndTime>currStartTime)) {
-            console.log(args.name, "TBI");
-            console.log("curr data:",new Date(currStartTime),new Date(currEndTime), "dps", args.currData.length);
-            console.log("new  data:", new Date(newStartTime),new Date(newEndTime), "dps", args.newData.length);
-            console.log("window",new Date(args.timeWindow.start), new Date(args.timeWindow.end));
+            printAlignmentDebug({
+                'name': args.name,'timeWindow': args.timeWindow,
+                'currStartTime': currStartTime,'currEndTime': currEndTime,'currDataLength': args.currData.length,
+                'newStartTime': newStartTime, 'newEndTime': newEndTime, 'newDataLength': args.newData.length
+            });
             return false;
         } else if((newStartTime>=currStartTime) &&(newEndTime>currEndTime)) {
-            while(args.currData[args.currData.length-1][0] >= newStartTime) {
+            
+            while(args.currData.length > 0 && args.currData[args.currData.length-1][0] >= newStartTime) 
                 c = args.currData.pop();
-            }
-            while(args.currData.length > 0 && args.currData[0][0] < args.timeWindow.start) {
+            while(args.currData.length > 0 && args.currData[0][0] < args.timeWindow.start) 
                 c = args.currData.shift();
-            }
+           
             return args.currData.concat(args.newData);
         } else {
-            console.log(args.name, "unhandled");
-            console.log("window",new Date(args.timeWindow.start), new Date(args.timeWindow.end));
-            console.log("curr data:",new Date(currStartTime),new Date(currEndTime), "dps", args.currData.length);
-            console.log("new  data:", new Date(newStartTime),new Date(newEndTime), "dps", args.newData.length);
+            printAlignmentDebug({
+                'name': args.name,'timeWindow': args.timeWindow,
+                'currStartTime': currStartTime,'currEndTime': currEndTime,'currDataLength': args.currData.length,
+                'newStartTime': newStartTime,'newEndTime': newEndTime,'newDataLength': args.newData.length
+            });
             return false;
         }
     } else {
-        console.log(args.name, "data out of range",new Date(args.timeWindow.start), new Date(args.timeWindow.end));
+        console.warn("Data out of range: ", new Date(args.timeWindow.start), new Date(args.timeWindow.end));
         return false;
     }
 }
-/*
-function getNewDataAlignedSeries(args) {
-//function getNewDataAlignedSeries(dataName, currData, newData) {
-    if(args.newData.length <= 0) return false;
-    //if(!currData) return newData;
-    newStartTime = args.newData[0][0];
-    newEndTime = args.newData[args.newData.length-1][0];
-    //newStartTime = args.timeWindow['start'];
-    //newEndTime = args.timeWindow.end;
-
-
-    currStartTime = args.currData[0][0];
-    currEndTime = args.currData[args.currData.length-1][0];
-
-    if(newEndTime < currEndTime) return false;
-    if((newStartTime > currStartTime) && (newStartTime < currEndTime)) {
-        var timeAdded = newEndTime - currEndTime;
-        //console.log("Time added:", timeAdded)
-        var shiftedStartTime = currStartTime + timeAdded;
-        // remove overlapping old data //
-        while(args.currData[args.currData.length-1][0] >= newStartTime) {
-            c = args.currData.pop();
-        }
-        // shift data from front per window //
-        // removes same amount of old data as is new data added //
-        while(args.currData.length > 0 && args.currData[0][0] < shiftedStartTime) {
-            c = args.currData.shift();
-        }
-        return args.currData.concat(args.newData);
-    } else {
-        console.log(args.name, "out of range");
-        console.log("curr data:",new Date(currStartTime),new Date(currEndTime), "dps", args.currData.length);
-        console.log("new  data:", new Date(newStartTime),new Date(newEndTime), "dps", args.newData.length);
-        console.log("window",new Date(args.timeWindow.start), new Date(args.timeWindow.end));
-        return false;
-    }
-}
-*/
