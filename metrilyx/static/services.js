@@ -168,12 +168,15 @@ metrilyxServices.factory('Schema', ['$http', 'Auth',
 		return {
 			get : function(params, cb){
 				var dfd = $.Deferred();
-
-				if (cache[params.modelType] === undefined){
+				if (params.modelType === 'graph' || cache[params.modelType] === undefined){
 					Auth.clearCredentials();
 					$http.get(connectionPool.nextConnection()+'/api/schemas/' + params.modelType).success(function(res){
-						cache[params.modelType] = res;
-						dfd.resolve($.extend(true, {}, res));
+						if(params.modelType !== 'graph') {
+							dfd.resolve(res)
+						} else {						
+							cache[params.modelType] = res;
+							dfd.resolve($.extend(true, {}, res));
+						}
 					});
 				} else {
 					dfd.resolve($.extend(true, {}, cache[params.modelType]));
