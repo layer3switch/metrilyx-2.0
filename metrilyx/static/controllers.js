@@ -623,11 +623,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 					currpath = "#/" + $scope.modelType + $scope.model._id;
 				}
 				document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
-				if(location.hash === currpath) {
-					location.reload(true);
-				} else {
-					location.hash = currpath;
-				}
+				$route.reload();
 			}
 		}
 		$scope.saveModel = function(args) {

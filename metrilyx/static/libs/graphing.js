@@ -130,7 +130,7 @@ MetrilyxGraph.prototype.dataHasErrors = function() {
         if(currentSerie.data.error !== undefined) {
             
             var error = currentSerie.data.error;
-            var msg   = error.message ? error.message.substring(0, 80) + "..." : error.substring(0, 50) + "...";
+            var msg   = error.message ? error.message.substring(0, 150) + "..." : error.substring(0, 100) + "...";
             
             this._statusNode.html("<span class='graph-error'>"+currentSerie.query.metric+": "+msg+"</span>");
             return { "error": { 
