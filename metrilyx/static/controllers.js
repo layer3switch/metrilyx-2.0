@@ -259,10 +259,10 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		// index graph id's for the model //
 		function getModelGraphIds() {
 			out = [];
-   			for(var r in $scope.model.layout) {
-   				for(var c in $scope.model.layout[r]) {
-   					for(var p in $scope.model.layout[r][c]) {
-   						for(var g in $scope.model.layout[r][c][p].graphs) {
+   			for(var r=0; r < $scope.model.layout.length; r++) {
+   				for(var c=0; c < $scope.model.layout[r].length; c++) {
+   					for(var p=0; p < $scope.model.layout[r][c].length; p++) {
+   						for(var g=0; g < $scope.model.layout[r][c][p].graphs.length; g++) {
    							out.push($scope.model.layout[r][c][p].graphs[g]._id);
    						}
    					}
@@ -350,7 +350,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.addNewTags = function(elemSelector) {
 			tagstr = $(elemSelector).val();
 			var tagsArr = tagstr.split(",");
-			for(var t in tagsArr) {
+			for(var t=0; t < tagsArr.length; t++) {
 				ctag = tagsArr[t].replace(/\s+$/,'');
 				ctag = ctag.replace(/^\s+/,'');
 				if($scope.model.tags.indexOf(ctag) < 0)
@@ -443,7 +443,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 					$scope.metricQuery = qstr;
 					Schema.get({modelType:'metric'}, function(graphModel) {
 						var arr = [];
-						for(var i in result) {
+						for(var i=0; i < result.length; i++) {
 							obj = JSON.parse(JSON.stringify(graphModel));
 							obj.alias = result[i];
 							obj.query.metric = result[i];
@@ -679,10 +679,10 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$scope.requestData(q);
 
 			// destroy current graph //
-			try{$('[data-graph-id='+gobj._id+']').highcharts().destroy();}catch(e){}
-			$('[data-graph-id='+gobj._id+']').html(
-				"<table class='gif-loader-table'><tr><td> \
-				<img src='/imgs/loader.gif'></td></tr></table>");
+			var domNode = $('[data-graph-id='+gobj._id+']');
+			try { domNode.highcharts().destroy(); } catch(e) {}
+			domNode.html("<table class='gif-loader-table'><tr><td> \
+					<img src='/imgs/loader.gif'></td></tr></table>");
 		}
 		$scope.$on('$destroy', function() {
 			try {$scope.wssock.close();} catch(e){};
@@ -1036,8 +1036,9 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			q.series = gobj.series;
 			
 			// destroy current graph //
-			try { $("[data-graph-id='"+gobj._id+"']").highcharts().destroy(); } catch(e) {};
-			$("[data-graph-id='"+gobj._id+"']").html(
+			var domNode = $("[data-graph-id='"+gobj._id+"']"); 
+			try { domNode.highcharts().destroy(); } catch(e) {};
+			domNode.html(
 				"<table class='gif-loader-table'><tr><td> \
 				<img src='/imgs/loader.gif'></td></tr></table>");
 			$scope.requestData(q);
