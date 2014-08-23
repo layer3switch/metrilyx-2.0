@@ -7,7 +7,6 @@ Roadmap
 
 ##### v2.3.3
 - Major code optimizations for rendering and graphing.
-- Several basic code optimizations.
 - Various UI bug fixes.
 - Major code refactoring.
 
