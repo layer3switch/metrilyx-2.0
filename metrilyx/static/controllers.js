@@ -722,13 +722,13 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			$scope.editMode = " edit-mode";
 		}
 		if($routeParams.start) {
-			if($routeParams.end) {
-				$scope.endTime = $routeParams.end;
+			if($routeParams.end) { 
+				$scope.endTime = parseInt($routeParams.end);
 				$scope.timeType = "absolute";
 			} else {
-				$scope.timeType = $routeParams.start;
+				$scope.timeType = parseInt($routeParams.start);
 			}
-			$scope.startTime = $routeParams.start;
+			$scope.startTime = parseInt($routeParams.start);
 		}
 		Schema.get({modelType: 'graph'}, function(graphModel) {
 			if($routeParams.size){

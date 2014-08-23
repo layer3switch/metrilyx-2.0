@@ -391,7 +391,7 @@ angular.module('timeframe', [])
 			require: '?ngModel',
 			link: function(scope, elem, attrs, ctrl) {
 				if(!ctrl) return;
-				// initialize datetimepicker //
+				/* initialize datetimepicker */
 				$(elem).datetimepicker({
 					useStrict: true
 				});
@@ -407,18 +407,22 @@ angular.module('timeframe', [])
 					if(e.date != undefined) {
 						try {
 							d = new Date(e.date.valueOf());
-							if(attrs.ngModel == "startTime") {
+							if(attrs.ngModel === "startTime") {
 								stime = Math.floor(d.getTime()/1000);
-								if(stime == scope.startTime) return;
-								scope.setStartTime(stime);
-								$('[ng-model=endTime]').data("DateTimePicker").setStartDate(e.date);
-							} else {
+								if(stime != scope.startTime) {
+									scope.setStartTime(stime);
+									elem.data("DateTimePicker").setStartDate(e.date);
+									scope.$apply();
+								}
+							} else if(attrs.ngModel === "endTime") {
 								etime = Math.ceil(d.getTime()/1000);
-								if(etime == scope.endTime) return;
-								scope.setEndTime(etime);
-								$('[ng-model=startTime]').data("DateTimePicker").setEndDate(e.date);
+								if(etime != scope.endTime) {
+									scope.setEndTime(etime);
+									elem.data("DateTimePicker").setEndDate(e.date);
+									scope.$apply();
+								}
 							}
-							scope.$apply();
+							
 						} catch(e) {
 							console.log(e);
 						}
@@ -447,7 +451,7 @@ angular.module('timeframe', [])
 						scope.setStartTime(startTime);
 						$('[ng-model=startTime]').data("DateTimePicker").setDate(new Date(startTime*1000));
 						scope.setEndTime(endTime);
-						$('[ng-model=startTime]').data("DateTimePicker").setDate(new Date(endTime*1000));
+						$('[ng-model=endTime]').data("DateTimePicker").setDate(new Date(endTime*1000));
 					} else {
 						if(scope.modelType === 'adhoc') {
 							scope.setTimeType(newValue);
