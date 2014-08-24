@@ -304,29 +304,39 @@ MetrilyxGraph.prototype.getHighchartsFormattedSerie = function (data, query, ind
     }
     return params;
 };
+MetrilyxGraph.prototype.findSerieIndexInChart = function(serie) {
+    var chartSeries = this._chart.series;
+    for(var c=0; c < chartSeries.length; c++) {
+        if (equalObjects(chartSeries[c].options.query, serie.query)) return c;
+    }
+    return -1;
+}
+
 /**
- * Remove series from highcharts
+ * Removes series from highcharts that are not part of the current graph.
  *
- * @param graph Graph model object
+ * @param graph Current graph model object after removal.
  *
  * @return void
  */
-MetrilyxGraph.prototype.removeSeries = function(graph) {
-             
-    for(var h=0; h < this._chart.series.length; h++) {
-        
-        var remove = true;
-        var currentChartSerie = this._chart.series[h];
-        var graphSeries = graph.series;
-        for(var d=0; d < graphSeries.length; d++) {
+MetrilyxGraph.prototype.removeSeries = function(series) {
 
-            if(equalObjects(graphSeries[d].query, currentChartSerie.options.query)) {
-                remove = false;
-                break;
-            }
-        } 
-        if(remove) currentChartSerie.remove(true);
+    if(series.length === 0) return;
+
+    var chartSeries = this._chart.series;
+    var redraw = false;
+    for(var s=0; s < series.length; s++) {
+        
+        var cs = this.findSerieIndexInChart(series[s]);
+        if(cs != -1) redraw = true;
+        
+        while(cs != -1) {
+            
+            chartSeries[cs].remove(false);
+            cs = this.findSerieIndexInChart(series[s]);
+        }      
     }
+    if(redraw) this._chart.redraw();
 }
 
 function MetrilyxAnnotation(obj) {
@@ -657,6 +667,21 @@ SeriesFormatter.prototype.pieSeries = function() {
         }
     }
     return [{ data: pieData, type: 'pie' }];
+}
+/*
+ * Get difference in two series based on the query.
+ * This is used in particular when serie/s is removed.
+ *
+ */
+function getSeriesDeltaByQuery(subset, fullset) {
+    if(subset.length < 1) return fullset;
+    var deltas = [];
+    for(var i=0; i < fullset.length; i++) {
+        for(var j=0; j < subset.length; j++) {
+            if(!equalObjects(subset[j].query, fullset[i].query)) deltas.push(fullset[i]);
+        }
+    }
+    return deltas;
 }
 /* helper functions */
 /*

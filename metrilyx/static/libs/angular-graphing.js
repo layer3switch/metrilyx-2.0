@@ -292,7 +292,6 @@ angular.module('graphing', [])
 			scope.$on("$destroy", function( event ) { clearTimeout(currTimer); });
 		}
 	})
-	//helper factory
 	.directive('wsHighstockGraph', ['WsHighstockGraphHelper', function(WsHighstockGraphHelper) {
 		return {
 			restrict: 'A',
@@ -334,9 +333,9 @@ angular.module('graphing', [])
 					}
 					// initial populate //
 					ehc = $("[data-graph-id='"+graph._id+"']");
-					hc = $(ehc).highcharts();
+					hc = ehc.highcharts();
 					if(hc == undefined) {
-						$(ehc).html("<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
+						ehc.html("<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
 						gseries = wsHelper.getSeriesInNonQueryState(graph.series);
 						if(gseries.length > 0) {
 							var q = scope.baseQuery(graph);
@@ -370,9 +369,11 @@ angular.module('graphing', [])
 						wsHelper.setSerieStatus(q,'querying');
 						if(scope.modelType == 'adhoc') scope.setURL(graph);
 					} else {
-						//console.log("removing series");
+						
+						var deltas = getSeriesDeltaByQuery(graph.series, oldValue.series);
 						mg = new MetrilyxGraph(graph, scope.getTimeWindow(true));
-						mg.removeSeries(graph);
+						mg.removeSeries(deltas);
+
 						if(scope.modelType == 'adhoc') scope.setURL(graph);
 					}
 				}, true);

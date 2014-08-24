@@ -722,13 +722,15 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			$scope.editMode = " edit-mode";
 		}
 		if($routeParams.start) {
+			if($routeParams.start.match(/\-ago$/) === null) {
+				$scope.startTime = parseInt($routeParams.start);
+			} else {
+				$scope.timeType = $routeParams.start;
+			}
 			if($routeParams.end) { 
 				$scope.endTime = parseInt($routeParams.end);
 				$scope.timeType = "absolute";
-			} else {
-				$scope.timeType = parseInt($routeParams.start);
 			}
-			$scope.startTime = parseInt($routeParams.start);
 		}
 		Schema.get({modelType: 'graph'}, function(graphModel) {
 			if($routeParams.size){
@@ -1035,12 +1037,11 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			q = $scope.baseQuery(gobj)
 			q.series = gobj.series;
 			
-			// destroy current graph //
 			var domNode = $("[data-graph-id='"+gobj._id+"']"); 
+			/* destroy current graph */
 			try { domNode.highcharts().destroy(); } catch(e) {};
-			domNode.html(
-				"<table class='gif-loader-table'><tr><td> \
-				<img src='/imgs/loader.gif'></td></tr></table>");
+			domNode.html("<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
+			
 			$scope.requestData(q);
 		}
 
