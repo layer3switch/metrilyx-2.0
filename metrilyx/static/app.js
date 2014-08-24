@@ -483,6 +483,39 @@ app.directive('keyValuePairs', function() {
 	};
 });
 
+app.factory("ComponentTemplates", function() {
+	var ComponentTemplates = function(ctrlType) {
+		this.templates = {
+			pageMastHtml	: connectionPool.nextConnection()+"/partials/page-mast.html",
+		};
+		if(ctrlType == "adhocGraph" || ctrlType == "page") {
+			
+			$.extend(this.templates, {
+				editPanelHtml			: connectionPool.nextConnection()+"/partials/edit-panel.html",
+				thresholdsHtml 			: connectionPool.nextConnection()+"/partials/thresholds.html",
+				pageHeaderHtml 			: connectionPool.nextConnection()+"/partials/page-header.html",
+				annoControlsHtml		: connectionPool.nextConnection()+"/partials/global-anno-controls.html",
+				eventAnnoDetailsHtml 	: connectionPool.nextConnection()+"/partials/event-anno-details.html",
+			}, true);
+
+			if(ctrlType == "adhocGraph") {
+				
+				this.templates['queryEditorHtml'] = connectionPool.nextConnection()+"/partials/adhocgraph-query-editor.html";
+			} else {
+				
+				$.extend(this.templates, {
+					queryEditorHtml		: connectionPool.nextConnection()+"/partials/pagegraph-query-editor.html",
+					graphControlsHtml	: connectionPool.nextConnection()+"/partials/graph-controls.html",
+					graphHtml 			: connectionPool.nextConnection()+"/partials/graph.html",
+					podHtml 			: connectionPool.nextConnection()+"/partials/pod.html",
+					heatGraphHtml 		: connectionPool.nextConnection()+"/partials/heat-graph.html"
+				}, true);
+			}
+		}
+	}
+	return (ComponentTemplates);
+});
+
 app.factory("WebSocketDataProvider", function() {
 	
 	var WebSocketDataProvider = function(scope) {

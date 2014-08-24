@@ -1,11 +1,13 @@
 /* controllers.js */
 
 var metrilyxControllers = angular.module('metrilyxControllers', []);
-metrilyxControllers.controller('staticsController', ['$scope', '$route', '$routeParams', '$location',
-	function($scope, $route, $routeParams, $location) {
+metrilyxControllers.controller('staticsController', ['$scope', '$route', '$routeParams', '$location', 'ComponentTemplates',
+	function($scope, $route, $routeParams, $location, ComponentTemplates) {
+		
 		clearAllTimeouts();
-		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
-		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit-panel.html";
+		
+		var compTemplates = new ComponentTemplates();
+		$.extend($scope, compTemplates.templates, true);
 
 		$scope.loadHome = function() {
 			$location.path('/graph').search({});
@@ -116,9 +118,12 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 		document.getElementById('side-panel').addEventListener('refresh-model-list', function(evt){$scope.loadList();});
 	}
 ]);
-metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap', 'EventTypes', 'WebSocketDataProvider',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap, EventTypes, WebSocketDataProvider) {
-		var QUEUED_REQS = [];
+metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap', 'EventTypes', 'ComponentTemplates', 'WebSocketDataProvider',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap, EventTypes, ComponentTemplates, WebSocketDataProvider) {
+
+		var compTemplates = new ComponentTemplates("page");
+		$.extend($scope, compTemplates.templates, true);
+
 		$scope.modelGraphIds = [];
 
 		if($routeParams.heatmapId) {
@@ -139,18 +144,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$('#confirm-delete').modal('hide');
 		$('.modal-backdrop').remove();
 		$('#side-panel').addClass('offstage');
-
-		$scope.pageMastHtml			= connectionPool.nextConnection()+"/partials/page-mast.html";
-		$scope.editPanelHtml		= connectionPool.nextConnection()+"/partials/edit-panel.html";
-		$scope.thresholdsHtml		= connectionPool.nextConnection()+"/partials/thresholds.html";
-		$scope.queryEditorHtml		= connectionPool.nextConnection()+"/partials/pagegraph-query-editor.html";
-		$scope.graphHtml 			= connectionPool.nextConnection()+"/partials/graph.html";
-		$scope.heatGraphHtml 		= connectionPool.nextConnection()+"/partials/heat-graph.html"
-		$scope.podHtml 				= connectionPool.nextConnection()+"/partials/pod.html";
-		$scope.pageHeaderHtml 		= connectionPool.nextConnection()+"/partials/page-header.html";
-		$scope.graphControlsHtml	= connectionPool.nextConnection()+"/partials/graph-controls.html";
-		$scope.annoControlsHtml		= connectionPool.nextConnection()+"/partials/global-anno-controls.html";
-		$scope.eventAnnoDetailsHtml = connectionPool.nextConnection()+"/partials/event-anno-details.html";
 
 		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
 		$scope.graphSortOpts 		= DNDCONFIG.graph;
@@ -639,25 +632,19 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		submitAnalytics({page: "/"+$routeParams.pageId, title: $routeParams.pageId});
 }]);
 
-metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'EventTypes', 'WebSocketDataProvider',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, EventTypes, WebSocketDataProvider) {
+metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'EventTypes', 'ComponentTemplates', 'WebSocketDataProvider',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, EventTypes, ComponentTemplates, WebSocketDataProvider) {
 		
 		var wsdp = new WebSocketDataProvider($scope);
-		var QUEUED_REQS = [];
+		
+		var compTemplates = new ComponentTemplates("adhocGraph");
+		$.extend($scope, compTemplates.templates, true);
 
 		$scope.modelGraphIds 	= [];
 		$scope.modelType 		= "adhoc";
 		$scope.timeType 		= "1h-ago";
 		$scope.editMode 		= " edit-mode";
 		$scope.updatesEnabled 	= false;
-
-		$scope.pageMastHtml			= connectionPool.nextConnection()+"/partials/page-mast.html";
-		$scope.editPanelHtml		= connectionPool.nextConnection()+"/partials/edit-panel.html";
-		$scope.pageHeaderHtml 		= connectionPool.nextConnection()+"/partials/page-header.html";
-		$scope.thresholdsHtml		= connectionPool.nextConnection()+"/partials/thresholds.html";
-		$scope.queryEditorHtml		= connectionPool.nextConnection()+"/partials/adhocgraph-query-editor.html";
-		$scope.annoControlsHtml		= connectionPool.nextConnection()+"/partials/global-anno-controls.html";
-		$scope.eventAnnoDetailsHtml = connectionPool.nextConnection()+"/partials/event-anno-details.html";
 
 		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
 
