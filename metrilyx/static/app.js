@@ -1,3 +1,4 @@
+
 var app = angular.module('app', [
 	'filters',
 	'ngRoute',
@@ -9,6 +10,7 @@ var app = angular.module('app', [
 	'metrilyxControllers',
 	'metrilyxServices'
 ]);
+
 app.config(['$sceProvider', function($sceProvider) {
     $sceProvider.enabled(false);
 }]);
@@ -43,6 +45,7 @@ app.config(['$routeProvider',
 			});
 	}
 ]);
+
 angular.module('filters',[]).
 	filter('invert', function() { /* returns boostrap specific col-md-X */
 		return function(input) {
@@ -129,7 +132,6 @@ angular.module('filters',[]).
 		}
 	});
 
-
 app.directive('eventTypes', function() {
 	return {
 		restrict: 'A',
@@ -181,6 +183,7 @@ app.directive('eventTypes', function() {
 		}
 	};
 });
+
 app.directive('tagkeyvalue', function() {
 	return {
 		restrict: 'A',
@@ -259,9 +262,7 @@ app.directive('tagkeyvalue', function() {
 				}
 			});
 			// model --> view
-			ctrl.$formatters.push(function(modelValue) {
-				return "";
-			});
+			ctrl.$formatters.push(function(modelValue) { return ""; });
 			// view --> model
 			ctrl.$parsers.unshift(function(viewValue) {
 				var kv = viewValue.split("=");
@@ -320,9 +321,12 @@ app.directive('globalAnnotations', function() {
 		restrict: 'A',
 		require: '?ngModel',
 		link: function(scope, elem, attrs, ctrl) {
+			
 			if(!ctrl) return;
 			var currTimer;
+			
 			function getAnnoQuery(sVal, timeWindow) {
+				
 				annoq = {
 					'annoEvents': {
 						'eventTypes': sVal.eventTypes,
@@ -330,19 +334,29 @@ app.directive('globalAnnotations', function() {
 					},
 					'_id': 'annotations'
 				};
-				if(timeWindow && timeWindow.start) {
-					return $.extend(timeWindow, annoq);
-				} else {
-					return $.extend(scope.getTimeWindow(), annoq);
-				}
+
+				if(timeWindow && timeWindow.start) return $.extend(timeWindow, annoq);
+				else return $.extend(scope.getTimeWindow(), annoq);
 			}
+			
+			function hasOptions(annoOptions) {
+				return (annoOptions.eventTypes.length > 0) 
+					&& (Object.keys(annoOptions.tags).length > 0);
+			}
+
 			function getUpdates() {
-				if(ctrl.$modelValue && scope.updatesEnabled && (ctrl.$modelValue.eventTypes.length > 0) && (Object.keys(ctrl.$modelValue.tags).length > 0)) {		
-					q = getAnnoQuery(ctrl.$modelValue, {
+
+				if(scope.updatesEnabled) {
+					if(ctrl.$modelValue && hasOptions(ctrl.$modelValue)) {
+
+						q = getAnnoQuery(ctrl.$modelValue, {
 							'start': Math.floor(((new Date()).getTime() - ANNO_FETCH_TIME_WIN)/1000)
 						});
-					scope.requestData(q);
+
+						scope.requestData(q);
+					}
 				}
+
 				if(currTimer) clearTimeout(currTimer);
 				currTimer = setTimeout(function() { 
 					getUpdates();
@@ -352,10 +366,14 @@ app.directive('globalAnnotations', function() {
 			scope.$watch(function() {
 				return ctrl.$modelValue;
 			}, function(newVal, oldVal) {
+				
 				if(!newVal) return;
-				if((newVal.eventTypes.length < 1) || (Object.keys(newVal.tags).length < 1)) return;
+				
+				if(!hasOptions(newVal)) return;
+				
 				// load, reload, dispatched, dispatching //
 				if(newVal.status === 'load' || newVal.status === 'reload') {
+					
 					scope.requestData(getAnnoQuery(newVal));
 					setTimeout(function() {getUpdates();}, ANNO_FETCH_TIME_WIN);
 				}
@@ -368,11 +386,13 @@ app.directive('tooltipArrow', function() {
 		restrict: 'A',
 		require: '?ngModel',
 		link: function(scope, elem, attrs, ctrl) {
+			
 			if(!ctrl) return;
-			//console.log(elem);
+
 			var canvas = document.createElement('canvas');
 			canvas.width = attrs.width;
 			canvas.height = attrs.height;
+			
 			$(elem).append(canvas);
 			drawTriOnCanvas(canvas, attrs.color, attrs.direction);
 		}
@@ -487,31 +507,54 @@ app.directive('keyValuePairs', function() {
 
 app.factory("AnnotationOptions", function() {
 
-	var AnnotationOptions = function(scope, routeParams, location) {
+	var AnnotationOptions = function(scope, routeParams, location, EventTypesSvc) {
 		
 		var options = { 
 			'globalAnno': {'eventTypes':[], 'tags':{}, 'status': null },
-			'selectedAnno': {}
+			'selectedAnno': {},
 		};
-		if(routeParams.annotationTypes && routeParams.annotationTags) {
-			
-			try {
 
-				$.extend(true, options['globalAnno'], {
-					'eventTypes': routeParams.annotationTypes.split(/\|/),
-					'tags': commaSepStrToDict(routeParams.annotationTags),
-				}, true);
-			} catch(e) {console.warning("failed to parse annotation data", e);}
+		function initialize() {
+			
+			if(routeParams.annotationTypes && routeParams.annotationTags) {
+				
+				try {
+
+					$.extend(true, options['globalAnno'], {
+						'eventTypes': routeParams.annotationTypes.split(/\|/),
+						'tags': commaSepStrToDict(routeParams.annotationTags),
+					}, true);
+				} catch(e) { console.warning("failed to parse annotation data", e); }
+			}
+
+			if(options.globalAnno.eventTypes.length > 0 && Object.keys(options.globalAnno.tags).length > 0)
+				options.globalAnno['status'] = 'load';
+			
+			// apply this first as the next call will take some time
+			$.extend(scope, options, true);
+
+			// get all available event types
+			EventTypesSvc.listTypes(function(rslt) {
+				
+				var evtTypeList = [];
+				for(var i in rslt) {
+					
+					if(rslt[i].name === undefined || options.globalAnno.eventTypes.indexOf(rslt[i].name) >= 0) continue;
+					evtTypeList.push(rslt[i].name);
+				}
+
+				options['annoEventTypes'] = evtTypeList;
+				
+				$.extend(scope, {annoEventTypes: evtTypeList}, true);
+			});
 		}
 
-		if(options.globalAnno.eventTypes.length > 0 && Object.keys(options.globalAnno.tags).length > 0)
-			options.globalAnno['status'] = 'load';
-		
+
 		this.applyAnnotationOptions = function() {
+			
 			if(scope.modelType == "adhoc") {
 				
 				scope.reloadGraph();
-				
 				scope.globalAnno.status = 'reload';
 				
 				$('.graph-control-details.global-anno').hide();
@@ -523,7 +566,7 @@ app.factory("AnnotationOptions", function() {
 			location.search(tmp);
 		}
 
-		$.extend(scope, options, true);
+		initialize();
 	}
 	return (AnnotationOptions);
 });
@@ -599,6 +642,29 @@ app.factory("TimeWindow", function() {
 						end: Math.ceil((new Date()).getTime()/1000)
 					};
 				}
+			}
+		}
+
+		this.setAttribute = function(attr, value) {
+			
+			switch(attr) {
+				
+				case "timeType":
+					scope.timeType = value;
+					break;
+
+				case "startTime":
+					if(scope.endTime && (value >= scope.endTime)) return;
+					scope.startTime = value;
+					break;
+
+				case "endTime":
+					if(scope.startTime && (value <= scope.startTime)) return;
+					scope.endTime = value;
+					break;
+
+				default:
+					break;
 			}
 		}
 
