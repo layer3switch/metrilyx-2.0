@@ -128,6 +128,8 @@ angular.module('filters',[]).
 			return l;
 		}
 	});
+
+
 app.directive('eventTypes', function() {
 	return {
 		restrict: 'A',
@@ -480,16 +482,100 @@ app.directive('keyValuePairs', function() {
 		}
 	};
 });
-function getWebSocket() {
-    if ("WebSocket" in window) {
-       return new WebSocket(WS_URI);
-    } else if ("MozWebSocket" in window) {
-       return new MozWebSocket(WS_URI);
-    } else {
-       console.error("Browser does not support WebSockets!");
-       return null;
-    }
-}
+
+app.factory("WebSocketDataProvider", function() {
+	
+	var WebSocketDataProvider = function(scope) {
+		
+		var queuedReqs = [];
+		var wssock = null;
+		var modelGraphIdIdx = {};
+
+
+		function getWebSocket() {
+			if ("WebSocket" in window) return new WebSocket(WS_URI);
+		    else if ("MozWebSocket" in window) return new MozWebSocket(WS_URI);
+		    else return null;	
+		}
+
+		function onOpenWssock() {
+			console.log("Connected. Extensions: [" + wssock.extensions + "]");
+			console.log("Submitting queued requests:", queuedReqs.length);
+			while(queuedReqs.length > 0) wssock.send(queuedReqs.shift());
+		}
+
+		function onCloseWssock(e) {
+	     	console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
+	    	wssock = null;
+	   	}
+	   	function onMessageWssock(e) {
+       		var data = JSON.parse(e.data);
+       		if(data.error) {
+
+       			setGlobalAlerts(data);
+       			flashAlertsBar();
+       		} else if(data.annoEvents) {
+       			// annotations //
+   				scope.$apply(function(){scope.globalAnno.status = 'dispatching'});
+   				if(scope.modelType === 'adhoc') {
+   					data._id = scope.graph._id;
+   					var ce = new CustomEvent(data._id, {'detail': data });
+   					wssock.dispatchEvent(ce);
+   				} else {
+   					for(var i in modelGraphIdIdx) {
+	       				data._id = i;
+	       				var ce = new CustomEvent(data._id, {'detail': data });
+	       				wssock.dispatchEvent(ce);
+       				}
+   				}
+       			scope.$apply(function(){scope.globalAnno.status = 'dispatched'});
+       		} else {
+       			// graph data //
+	       		var ce = new CustomEvent(data._id, {'detail': data });
+	       		wssock.dispatchEvent(ce);
+       		}
+		}
+		function initializeWebSocket() {
+			wssock = getWebSocket();
+			if(wssock !== null) {
+	    		wssock.onopen 		= onOpenWssock;
+	   			wssock.onclose 		= onCloseWssock;
+	   			wssock.onmessage 	= onMessageWssock;
+	   		}
+		}
+		this.addGraphIdEventListener = function(graphId, funct) {
+			wssock.addEventListener(graphId, funct);
+			modelGraphIdIdx[graphId] = true;
+			if(Object.keys(modelGraphIdIdx).length === scope.modelGraphIds.length) {
+				// trigger annotation request as all graph elems are loaded //
+				scope.globalAnno.status = 'load';
+			}
+		}
+		this.removeGraphIdEventListener = function(graphId, funct) {
+			if(wssock !== null) wssock.removeEventListener(graphId, funct);
+		}
+		this.requestData = function(query) {
+	    	try {
+				wssock.send(JSON.stringify(query));
+	    	} catch(e) {
+	    		
+	    		if(e.code === 11) {
+	    			queuedReqs.push(JSON.stringify(query));
+	    		} else {
+	    			//reconnect
+	    			queuedReqs.push(JSON.stringify(query));
+	    			initializeWebSocket();
+	    		}
+	    	}
+	    }
+	    this.closeConnection = function() {
+	    	wssock.close();
+	    }
+	    initializeWebSocket();
+	}
+	return (WebSocketDataProvider);
+});
+
 function getLoadedSeries(graph, inPercent) {
 	hcg = $("[data-graph-id='"+graph._id+"']").highcharts();
 	if(hcg === undefined) return 0;

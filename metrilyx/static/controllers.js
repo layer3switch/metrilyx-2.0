@@ -116,10 +116,10 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 		document.getElementById('side-panel').addEventListener('refresh-model-list', function(evt){$scope.loadList();});
 	}
 ]);
-metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap', 'EventTypes',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap, EventTypes) {
+metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap', 'EventTypes', 'WebSocketDataProvider',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap, EventTypes, WebSocketDataProvider) {
 		var QUEUED_REQS = [];
-		var modelGraphIds = [];
+		$scope.modelGraphIds = [];
 
 		if($routeParams.heatmapId) {
 			$scope.modelType = "heatmap/";
@@ -161,8 +161,9 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 
 		$scope.selectedAnno = {};
 		$scope.globalAnno = {'eventTypes':[], 'tags':{}, 'status': null};
-		$scope.modelGraphIdIdx = {};
+		//$scope.modelGraphIdIdx = {};
 
+		var wsdp = new WebSocketDataProvider($scope);
 		// set default to relative time //
 		$scope.timeType = "1h-ago";
 		// relative time or 'absolute' //
@@ -240,7 +241,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 							console.log(result);
 						} else {
 							$scope.model = result;
-							modelGraphIds = getModelGraphIds();
+							$scope.modelGraphIds = getModelGraphIds();
 						}
 					});
 				} else if($routeParams.heatmapId) {
@@ -270,58 +271,15 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
    			}
        		return out;
 		}
-		function onOpenWssock() {
-          console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
-          console.log("Queued requests:",QUEUED_REQS.length);
-          while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());
-       	}
-       	function onCloseWssock(e) {
-          console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
-          $scope.wssock = null;
-       	}
-       	function onMessageWssock(e) {
-       		var data = JSON.parse(e.data);
-       		if(data.error) {
-       			console.warn(data);
-       			setGlobalAlerts(data);
-       			flashAlertsBar();
-       		} else if(data.annoEvents) {
-       			// annotations //
-       			$scope.globalAnno.status = 'dispatching';
-       			for(var i in $scope.modelGraphIdIdx) {
-       				data._id = i;
-       				var ce = new CustomEvent(data._id, {'detail': data });
-       				$scope.wssock.dispatchEvent(ce);
-       			}
-       			$scope.globalAnno.status = 'dispatched';
-       		} else {
-       			// graph data //
-	       		var ce = new CustomEvent(data._id, {'detail': data });
-	       		$scope.wssock.dispatchEvent(ce);
-       		}
-       	}
-       	function setupWebSocket() {
-			$scope.wssock = getWebSocket();
-        	$scope.wssock.onopen = onOpenWssock;
-       		$scope.wssock.onclose = onCloseWssock;
-       		$scope.wssock.onmessage = onMessageWssock;
+		$scope.requestData = function(query) {
+			wsdp.requestData(query);
 		}
-		setupWebSocket();
-        $scope.requestData = function(query) {
-        	try {
-				$scope.wssock.send(JSON.stringify(query));
-        	} catch(e) {
-        		// in CONNECTING state. //
-        		if(e.code === 11) {
-        			QUEUED_REQS.push(JSON.stringify(query));
-        		} else {
-        			//QUEUED_REQS.push(JSON.stringify(query));
-        			//console.log('Reconnecting...')
-        			//setupWebSocket();
-        			// TODO: display alert
-        		}
-        	}
-        }
+		$scope.addGraphIdEventListener = function(graphId, funct) {
+			wsdp.addGraphIdEventListener(graphId, funct);
+       	}
+       	$scope.removeGraphIdEventListener = function(graphId, funct) {
+       		wsdp.removeGraphIdEventListener(graphId, funct);
+       	}
 		$scope.onPageHeaderLoad = function() {
 			// setTimeout is to account for processing time //
 			setTimeout(function() {
@@ -331,14 +289,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 					$('input.edit-comp').attr('disabled', true);
 				}
 			}, 150);
-		}
-		// called when a graph adds a ws evt listener //
-		$scope.addEvtListenerGraphId = function(graphId) {
-			$scope.modelGraphIdIdx[graphId] = true;
-			if(Object.keys($scope.modelGraphIdIdx).length === modelGraphIds.length) {
-				// trigger annotation request as all graph elems are loaded //
-				$scope.globalAnno.status = 'load';
-			}
 		}
 		$scope.onEditPanelLoad = function() {
 			document.getElementById('edit-panel').addEventListener('refresh-metric-list',
@@ -685,16 +635,18 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 					<img src='/imgs/loader.gif'></td></tr></table>");
 		}
 		$scope.$on('$destroy', function() {
-			try {$scope.wssock.close();} catch(e){};
-			$scope.wssock = null;
+			try { wsdp.closeConnection(); } catch(e){};
 		});
 		submitAnalytics({page: "/"+$routeParams.pageId, title: $routeParams.pageId});
 }]);
 
-metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'EventTypes',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, EventTypes) {
+metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'EventTypes', 'WebSocketDataProvider',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, EventTypes, WebSocketDataProvider) {
+		
+		var wsdp = new WebSocketDataProvider($scope);
 		var QUEUED_REQS = [];
 
+		$scope.modelGraphIds 	= [];
 		$scope.modelType 		= "adhoc";
 		$scope.timeType 		= "1h-ago";
 		$scope.editMode 		= " edit-mode";
@@ -781,14 +733,8 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				}
 				//
 				$scope.graph = graphModel;
+				$scope.modelGraphIds = [ $scope.graph._id ];
 				$scope.reloadGraph();
-				/*
-				setTimeout(function() {
-					$("[data-graph-id='"+$scope.graph._id+"']").html(
-						"<table class='gif-loader-table'><tr><td> \
-						<img src='/imgs/loader.gif'></td></tr></table>");
-				},400);
-				*/
 			} else {
 				// initial empty page
 				graphModel.thresholds.danger.max = '';
@@ -823,48 +769,16 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		} else {
 			$scope.metricListSortOpts.disabled = false;
 		}
-		function onOpenWssock() {
-			console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
-          	console.log("Queued requests:",QUEUED_REQS.length);
-          	setTimeout(function() {
-          		while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());
-          	}, 750);
-		}
-		function onCloseWssock(e) {
-			console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
-			$scope.wssock = null;
-			/*
-			setGlobalAlerts({'error': 'Disconnected', 'message': "Disconnected (clean=" + e.wasClean + ", code=" +
-					e.code + ", reason='" + e.reason + "')"});
-			flashAlertsBar();*/
-		}
-		function onMessageWssock(e) {
-       		var data = JSON.parse(e.data);
-       		if(data.error) {
-       			console.warn(data);
-       			setGlobalAlerts(data);
-       			flashAlertsBar();
-       		} else if(data.annoEvents) {
-       			// annotations //
-       			$scope.globalAnno.status = 'dispatching';
-   				data._id = $scope.graph._id;
-   				var ce = new CustomEvent(data._id, {'detail': data });
-   				$scope.wssock.dispatchEvent(ce);
-       			$scope.globalAnno.status = 'dispatched';
-       		} else {
-       			// graph data //
-	       		var ce = new CustomEvent(data._id, {'detail': data });
-	       		$scope.wssock.dispatchEvent(ce);
-       		}
-		}
-		function setupWebSocket() {
-			$scope.wssock = getWebSocket();
-        	$scope.wssock.onopen = onOpenWssock;
-       		$scope.wssock.onclose = onCloseWssock;
-       		$scope.wssock.onmessage = onMessageWssock;
-		}
-        setupWebSocket();
 
+		$scope.addGraphIdEventListener = function(graphId, funct) {
+			wsdp.addGraphIdEventListener(graphId, funct);
+       	}
+       	$scope.removeGraphIdEventListener = function(graphId, funct) {
+       		wsdp.removeGraphIdEventListener(graphId, funct);
+       	}
+       	$scope.requestData = function(query) {
+        	wsdp.requestData(query);
+        }
         $scope.setUpdatesEnabled = function(value) {
 			$scope.updatesEnabled = value;
 		}
@@ -928,23 +842,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			return q;
 		}
 
-        $scope.requestData = function(query) {
-        	jsonQuery = JSON.stringify(query);
-        	try {
-				$scope.wssock.send(jsonQuery);
-        	} catch(e) {
-        		// in CONNECTING state. //
-        		if(e.code === 11) {
-        			QUEUED_REQS.push(jsonQuery);
-        		} else {
-        			//console.warn(e);
-        			console.log("Queueing request...");
-        			QUEUED_REQS.push(jsonQuery);
-        			console.log('Reconnecting...')
-        			setupWebSocket();
-        		}
-        	}
-        }
 		$scope.setURL = function(obj) {
 			var outarr = [];
 			for(var s in obj.series) {
@@ -997,11 +894,6 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			tmp.annotationTags = dictToCommaSepStr($scope.globalAnno.tags, ":");
 			$location.search(tmp);
 			$('.graph-control-details.global-anno').hide();
-		}
-		// called when a graph adds a ws evt listener //
-		$scope.addEvtListenerGraphId = function(graphId) {
-			// in adhoc mode there is only 1 graph //
-			//$scope.globalAnno.status = 'load';
 		}
 		$scope.updateTagsOnPage = function(obj) {
 			var top = $scope.tagsOnPage;
@@ -1149,8 +1041,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			$route.reload();
 		}
 		$scope.$on('$destroy', function() {
-			try {$scope.wssock.close();} catch(e){};
-			$scope.wssock = null;
+			try { wsdp.closeConnection(); } catch(e){};
 		});
 		submitAnalytics({title:'adhoc',page:'/graph'});
 }]);

@@ -317,9 +317,12 @@ angular.module('graphing', [])
 					return ngModel.$modelValue;
 				}, function(graph, oldValue) {
 					if(!evtListenerAdded && graph._id) {
-						scope.wssock.addEventListener(graph._id, wsHelper.processRecievedData);
-						evtListenerAdded = true;
-						if(scope.modelType === "") scope.addEvtListenerGraphId(graph._id);
+						try {
+							scope.addGraphIdEventListener(graph._id, wsHelper.processRecievedData);
+							evtListenerAdded = true;
+						} catch(e) {
+							console.error(e);
+						}
 					}
 					if(!graph.series) return;
 					if(graph.series.length <= 0 && oldValue.series && oldValue.series.length <= 0) return;
@@ -379,8 +382,7 @@ angular.module('graphing', [])
 				}, true);
 
 				scope.$on("$destroy", function( event ) {
-            		if(scope.wssock !== null)
-            			scope.wssock.removeEventListener("graphdata", wsHelper.processRecievedData);
+            		scope.removeGraphIdEventListener(ngModel.$modelValue._id, wsHelper.processRecievedData);	
                 });
 			}
 		};
