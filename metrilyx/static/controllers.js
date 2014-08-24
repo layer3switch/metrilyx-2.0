@@ -812,6 +812,7 @@ metrilyxControllers.controller('adhocGraphController', [
 		$scope.reloadGraph = function(gobj) {
 			
 			if(!gobj) gobj = $scope.graph;
+
 			$('.adhoc-metric-editor').hide();
 			if(gobj.series.length < 1) return;
 
