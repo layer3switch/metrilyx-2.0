@@ -7,6 +7,8 @@ Roadmap
 
 ##### v2.3.3
 - Major code optimizations for rendering and graphing.
+- Date time selector inconsistent behaviour fix.
+- Code optimizations in controller.
 - Various UI bug fixes.
 - Major code refactoring.
 

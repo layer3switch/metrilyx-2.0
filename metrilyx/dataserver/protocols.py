@@ -30,14 +30,14 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 		If needed, 'GraphServerProtocol' should be subclassed instead.
 	'''
 	def onConnect(self, request):
-		logger.info("WebSocket connection request by %s" %(str(request.peer)))
+		logger.info("Connection request by %s" %(str(request.peer)))
 
 	def onOpen(self):
-		logger.info("WebSocket connection opened. extensions: %s" %(
+		logger.info("Connection opened. extensions: %s" %(
 										self.websocket_extensions_in_use))
 
 	def onClose(self, wasClean, code, reason):
-		logger.info("WebSocket closed wasClean=%s code=%s reason=%s" %(
+		logger.info("Connection closed: wasClean=%s code=%s reason=%s" %(
 								str(wasClean), str(code), str(reason)))
 
 
@@ -89,9 +89,10 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 
 class GraphServerProtocol(BaseGraphServerProtocol):
 
-	def graphResponseErrback(self, error, graphMeta):
+	def graphResponseErrback(self, error, url, graphMeta):
 		# call dataprovider errback (diff for diff backends)
 		logger.error("%s" %(str(error)))
+
 		errResponse = self.dataprovider.responseErrback(error, graphMeta)
 		self.sendMessage(json.dumps(errResponse))
 
@@ -134,16 +135,12 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 	def submitPerfQueries(self, graphRequest):
 		for serieReq in graphRequest.split():
 			(url, method, query) = self.dataprovider.getQuery(serieReq)
+			
+			logger.info("Partial query (%s): %s" %(serieReq['_id'], url.split("?")[-1]))
 		 	a = AsyncHttpJsonClient(uri=url, method=method, body=query)
 			a.addResponseCallback(self.graphResponseCallback, url, serieReq)
-			a.addResponseErrback(self.graphResponseErrback, serieReq)
+			a.addResponseErrback(self.graphResponseErrback, url, serieReq)
 
-	"""
-	def onClose(self, wasClean, code, reason):
-		for k in self.active_queries.keys():
-			self.active_queries[k].cancel()
-			del self.active_queries[k]
-	"""
 
 class EventGraphServerProtocol(GraphServerProtocol):
 	eventDataprovider = None

@@ -1,3 +1,4 @@
+
 var app = angular.module('app', [
 	'filters',
 	'ngRoute',
@@ -9,6 +10,7 @@ var app = angular.module('app', [
 	'metrilyxControllers',
 	'metrilyxServices'
 ]);
+
 app.config(['$sceProvider', function($sceProvider) {
     $sceProvider.enabled(false);
 }]);
@@ -43,6 +45,7 @@ app.config(['$routeProvider',
 			});
 	}
 ]);
+
 angular.module('filters',[]).
 	filter('invert', function() { /* returns boostrap specific col-md-X */
 		return function(input) {
@@ -128,14 +131,18 @@ angular.module('filters',[]).
 			return l;
 		}
 	});
+
 app.directive('eventTypes', function() {
 	return {
 		restrict: 'A',
 		require: '?ngModel',
 		link: function(scope, elem, attrs, ctrl) {
+			
 			if(!ctrl) return;
+			
 			ctrl.$formatters.push(function(modelValue){return "";});
 			ctrl.$parsers.unshift(function(viewValue){return ctrl.$modelValue;});
+			
 			$(elem).autocomplete({
 				/*source: ANNO_EVENT_TYPES,*/
 				source: function(request, response) {
@@ -176,6 +183,7 @@ app.directive('eventTypes', function() {
 		}
 	};
 });
+
 app.directive('tagkeyvalue', function() {
 	return {
 		restrict: 'A',
@@ -254,9 +262,7 @@ app.directive('tagkeyvalue', function() {
 				}
 			});
 			// model --> view
-			ctrl.$formatters.push(function(modelValue) {
-				return "";
-			});
+			ctrl.$formatters.push(function(modelValue) { return ""; });
 			// view --> model
 			ctrl.$parsers.unshift(function(viewValue) {
 				var kv = viewValue.split("=");
@@ -315,9 +321,12 @@ app.directive('globalAnnotations', function() {
 		restrict: 'A',
 		require: '?ngModel',
 		link: function(scope, elem, attrs, ctrl) {
+			
 			if(!ctrl) return;
 			var currTimer;
+			
 			function getAnnoQuery(sVal, timeWindow) {
+				
 				annoq = {
 					'annoEvents': {
 						'eventTypes': sVal.eventTypes,
@@ -325,19 +334,29 @@ app.directive('globalAnnotations', function() {
 					},
 					'_id': 'annotations'
 				};
-				if(timeWindow && timeWindow.start) {
-					return $.extend(timeWindow, annoq);
-				} else {
-					return $.extend(scope.getTimeWindow(), annoq);
-				}
+
+				if(timeWindow && timeWindow.start) return $.extend(timeWindow, annoq);
+				else return $.extend(scope.getTimeWindow(), annoq);
 			}
+			
+			function hasOptions(annoOptions) {
+				return (annoOptions.eventTypes.length > 0) 
+					&& (Object.keys(annoOptions.tags).length > 0);
+			}
+
 			function getUpdates() {
-				if(ctrl.$modelValue && scope.updatesEnabled && (ctrl.$modelValue.eventTypes.length > 0) && (Object.keys(ctrl.$modelValue.tags).length > 0)) {		
-					q = getAnnoQuery(ctrl.$modelValue, {
+
+				if(scope.updatesEnabled) {
+					if(ctrl.$modelValue && hasOptions(ctrl.$modelValue)) {
+
+						q = getAnnoQuery(ctrl.$modelValue, {
 							'start': Math.floor(((new Date()).getTime() - ANNO_FETCH_TIME_WIN)/1000)
 						});
-					scope.requestData(q);
+
+						scope.requestData(q);
+					}
 				}
+
 				if(currTimer) clearTimeout(currTimer);
 				currTimer = setTimeout(function() { 
 					getUpdates();
@@ -347,10 +366,14 @@ app.directive('globalAnnotations', function() {
 			scope.$watch(function() {
 				return ctrl.$modelValue;
 			}, function(newVal, oldVal) {
+				
 				if(!newVal) return;
-				if((newVal.eventTypes.length < 1) || (Object.keys(newVal.tags).length < 1)) return;
+				
+				if(!hasOptions(newVal)) return;
+				
 				// load, reload, dispatched, dispatching //
 				if(newVal.status === 'load' || newVal.status === 'reload') {
+					
 					scope.requestData(getAnnoQuery(newVal));
 					setTimeout(function() {getUpdates();}, ANNO_FETCH_TIME_WIN);
 				}
@@ -363,11 +386,13 @@ app.directive('tooltipArrow', function() {
 		restrict: 'A',
 		require: '?ngModel',
 		link: function(scope, elem, attrs, ctrl) {
+			
 			if(!ctrl) return;
-			//console.log(elem);
+
 			var canvas = document.createElement('canvas');
 			canvas.width = attrs.width;
 			canvas.height = attrs.height;
+			
 			$(elem).append(canvas);
 			drawTriOnCanvas(canvas, attrs.color, attrs.direction);
 		}
@@ -474,22 +499,313 @@ app.directive('keyValuePairs', function() {
 					}
 				}
         		ngModel.$setValidity('keyValuePairs', true);
-        		//console.log(mVal);
         		return mVal;
       		});	 
 		}
 	};
 });
-function getWebSocket() {
-    if ("WebSocket" in window) {
-       return new WebSocket(WS_URI);
-    } else if ("MozWebSocket" in window) {
-       return new MozWebSocket(WS_URI);
-    } else {
-       console.error("Browser does not support WebSockets!");
-       return null;
-    }
-}
+
+app.factory("AnnotationOptions", function() {
+
+	var AnnotationOptions = function(scope, routeParams, location, EventTypesSvc) {
+		
+		var options = { 
+			'globalAnno': {'eventTypes':[], 'tags':{}, 'status': null },
+			'selectedAnno': {},
+		};
+
+		function initialize() {
+			
+			if(routeParams.annotationTypes && routeParams.annotationTags) {
+				
+				try {
+
+					$.extend(true, options['globalAnno'], {
+						'eventTypes': routeParams.annotationTypes.split(/\|/),
+						'tags': commaSepStrToDict(routeParams.annotationTags),
+					}, true);
+				} catch(e) { console.warning("failed to parse annotation data", e); }
+			}
+
+			if(options.globalAnno.eventTypes.length > 0 && Object.keys(options.globalAnno.tags).length > 0)
+				options.globalAnno['status'] = 'load';
+			
+			// apply this first as the next call will take some time
+			$.extend(scope, options, true);
+
+			// get all available event types
+			EventTypesSvc.listTypes(function(rslt) {
+				
+				var evtTypeList = [];
+				for(var i in rslt) {
+					
+					if(rslt[i].name === undefined || options.globalAnno.eventTypes.indexOf(rslt[i].name) >= 0) continue;
+					evtTypeList.push(rslt[i].name);
+				}
+
+				options['annoEventTypes'] = evtTypeList;
+				
+				$.extend(scope, {annoEventTypes: evtTypeList}, true);
+			});
+		}
+
+
+		this.applyAnnotationOptions = function() {
+			
+			if(scope.modelType == "adhoc") {
+				
+				scope.reloadGraph();
+				scope.globalAnno.status = 'reload';
+				
+				$('.graph-control-details.global-anno').hide();
+			}
+
+			var tmp = location.search();
+			tmp.annotationTypes = scope.globalAnno.eventTypes.join("|");
+			tmp.annotationTags = dictToCommaSepStr(scope.globalAnno.tags, ":");
+			location.search(tmp);
+		}
+
+		initialize();
+	}
+	return (AnnotationOptions);
+});
+
+app.factory("TimeWindow", function() {
+	
+	var TimeWindow = function(scope, routeParams) {
+		
+		var attributes = {
+			'timeType': '1h-ago',
+			'startTime': '1h-ago',
+			'updatesEnabled': true
+		};
+		function initialize() {
+			
+			if(scope.modelType === "adhoc") attributes['updatesEnabled'] = false;
+			
+			if(routeParams.start) {
+
+				if(routeParams.end) {
+					
+					$.extend(true, attributes, {
+						'endTime': parseInt(routeParams.end),
+						'timeType': "absolute",
+						'updatesEnabled': false
+					}, true);
+				} else {
+					
+					attributes['timeType'] = routeParams.start;
+				}
+				if(Object.prototype.toString.call(routeParams.start) === '[object String]' 
+													&& routeParams.start.match(/-ago$/)) {
+					attributes['startTime'] = routeParams.start;
+				} else {
+					attributes['startTime'] = parseInt(routeParams.start);
+				}
+			}
+			$.extend(scope, attributes, true);
+		}
+
+		this.getTimeFrame = function(inMilli) {
+			if(scope.timeType == "absolute"){
+				if(scope.endTime) {
+					if(inMilli) {
+						return {
+							end: scope.endTime*1000,
+							start: scope.startTime*1000};
+					}
+					return {
+						end: scope.endTime,
+						start: scope.startTime
+					};
+				}
+				if(inMilli) {
+					return {
+						start: scope.startTime*1000,
+						end: Math.ceil((new Date()).getTime())
+					};
+				}
+				return {
+					start: scope.startTime,
+					end: Math.ceil((new Date()).getTime()/1000)
+				};
+			} else {
+				if(inMilli) {
+					return {
+						start: (Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime(scope.timeType)))*1000,
+						end: Math.ceil((new Date()).getTime())
+					};
+				} else {
+					return {
+						start: Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime(scope.timeType)),
+						end: Math.ceil((new Date()).getTime()/1000)
+					};
+				}
+			}
+		}
+
+		this.setAttribute = function(attr, value) {
+			
+			switch(attr) {
+				
+				case "timeType":
+					scope.timeType = value;
+					break;
+
+				case "startTime":
+					if(scope.endTime && (value >= scope.endTime)) return;
+					scope.startTime = value;
+					break;
+
+				case "endTime":
+					if(scope.startTime && (value <= scope.startTime)) return;
+					scope.endTime = value;
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		initialize();
+	};
+	return (TimeWindow);
+});
+app.factory("ComponentTemplates", function() {
+	
+	var ComponentTemplates = function(scope) {
+		
+		var templates = {
+			pageMastHtml	: connectionPool.nextConnection()+"/partials/page-mast.html",
+		};
+
+		function initialize() {
+			if(scope.modelType == "adhoc" || scope.modelType == "") {
+				
+				$.extend(templates, {
+					editPanelHtml			: connectionPool.nextConnection()+"/partials/edit-panel.html",
+					thresholdsHtml 			: connectionPool.nextConnection()+"/partials/thresholds.html",
+					pageHeaderHtml 			: connectionPool.nextConnection()+"/partials/page-header.html",
+					annoControlsHtml		: connectionPool.nextConnection()+"/partials/global-anno-controls.html",
+					eventAnnoDetailsHtml 	: connectionPool.nextConnection()+"/partials/event-anno-details.html",
+				}, true);
+
+				if(scope.modelType == "adhoc") {
+					
+					templates['queryEditorHtml'] = connectionPool.nextConnection()+"/partials/adhocgraph-query-editor.html";
+				} else {
+					
+					$.extend(templates, {
+						queryEditorHtml		: connectionPool.nextConnection()+"/partials/pagegraph-query-editor.html",
+						graphControlsHtml	: connectionPool.nextConnection()+"/partials/graph-controls.html",
+						graphHtml 			: connectionPool.nextConnection()+"/partials/graph.html",
+						podHtml 			: connectionPool.nextConnection()+"/partials/pod.html",
+						heatGraphHtml 		: connectionPool.nextConnection()+"/partials/heat-graph.html"
+					}, true);
+				}
+			}
+			$.extend(scope, templates, true);
+		}
+
+		initialize();
+	}
+	return (ComponentTemplates);
+});
+
+app.factory("WebSocketDataProvider", function() {
+	
+	var WebSocketDataProvider = function(scope) {
+		
+		var queuedReqs = [];
+		var wssock = null;
+		var modelGraphIdIdx = {};
+
+
+		function getWebSocket() {
+			if ("WebSocket" in window) return new WebSocket(WS_URI);
+		    else if ("MozWebSocket" in window) return new MozWebSocket(WS_URI);
+		    else return null;	
+		}
+
+		function onOpenWssock() {
+			console.log("Connected. Extensions: [" + wssock.extensions + "]");
+			console.log("Submitting queued requests:", queuedReqs.length);
+			while(queuedReqs.length > 0) wssock.send(queuedReqs.shift());
+		}
+
+		function onCloseWssock(e) {
+	     	console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
+	    	wssock = null;
+	   	}
+	   	function onMessageWssock(e) {
+       		var data = JSON.parse(e.data);
+       		if(data.error) {
+
+       			setGlobalAlerts(data);
+       			flashAlertsBar();
+       		} else if(data.annoEvents) {
+       			// annotations //
+   				scope.$apply(function(){scope.globalAnno.status = 'dispatching'});
+   				if(scope.modelType === 'adhoc') {
+   					data._id = scope.graph._id;
+   					var ce = new CustomEvent(data._id, {'detail': data });
+   					wssock.dispatchEvent(ce);
+   				} else {
+   					for(var i in modelGraphIdIdx) {
+	       				data._id = i;
+	       				var ce = new CustomEvent(data._id, {'detail': data });
+	       				wssock.dispatchEvent(ce);
+       				}
+   				}
+       			scope.$apply(function(){scope.globalAnno.status = 'dispatched'});
+       		} else {
+       			// graph data //
+	       		var ce = new CustomEvent(data._id, {'detail': data });
+	       		wssock.dispatchEvent(ce);
+       		}
+		}
+		function initializeWebSocket() {
+			wssock = getWebSocket();
+			if(wssock !== null) {
+	    		wssock.onopen 		= onOpenWssock;
+	   			wssock.onclose 		= onCloseWssock;
+	   			wssock.onmessage 	= onMessageWssock;
+	   		}
+		}
+		this.addGraphIdEventListener = function(graphId, funct) {
+			wssock.addEventListener(graphId, funct);
+			modelGraphIdIdx[graphId] = true;
+			if(Object.keys(modelGraphIdIdx).length === scope.modelGraphIds.length) {
+				// trigger annotation request as all graph elems are loaded //
+				scope.globalAnno.status = 'load';
+			}
+		}
+		this.removeGraphIdEventListener = function(graphId, funct) {
+			if(wssock !== null) wssock.removeEventListener(graphId, funct);
+		}
+		this.requestData = function(query) {
+	    	try {
+				wssock.send(JSON.stringify(query));
+	    	} catch(e) {
+	    		
+	    		if(e.code === 11) {
+	    			queuedReqs.push(JSON.stringify(query));
+	    		} else {
+	    			//reconnect
+	    			queuedReqs.push(JSON.stringify(query));
+	    			initializeWebSocket();
+	    		}
+	    	}
+	    }
+	    this.closeConnection = function() {
+	    	wssock.close();
+	    }
+	    initializeWebSocket();
+	}
+	return (WebSocketDataProvider);
+});
+
 function getLoadedSeries(graph, inPercent) {
 	hcg = $("[data-graph-id='"+graph._id+"']").highcharts();
 	if(hcg === undefined) return 0;

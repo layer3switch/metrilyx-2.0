@@ -1,11 +1,16 @@
 /* controllers.js */
 
 var metrilyxControllers = angular.module('metrilyxControllers', []);
-metrilyxControllers.controller('staticsController', ['$scope', '$route', '$routeParams', '$location',
-	function($scope, $route, $routeParams, $location) {
+
+metrilyxControllers.controller('staticsController', [
+	'$scope', '$route', '$routeParams', '$location', 'ComponentTemplates',
+	function($scope, $route, $routeParams, $location, ComponentTemplates) {
+		
+		$scope.modelType = "static";
+
 		clearAllTimeouts();
-		$scope.pageMastHtml		= connectionPool.nextConnection()+"/partials/page-mast.html";
-		$scope.editPanelHtml	= connectionPool.nextConnection()+"/partials/edit-panel.html";
+		
+		var compTemplates = new ComponentTemplates($scope);
 
 		$scope.loadHome = function() {
 			$location.path('/graph').search({});
@@ -13,10 +18,13 @@ metrilyxControllers.controller('staticsController', ['$scope', '$route', '$route
 		}
 	}
 ]);
-metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Heatmap','Tags',
+metrilyxControllers.controller('sidePanelController', [
+	'$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Heatmap','Tags',
 	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap, Tags) {
-		$scope.modelsList = [];
+		
 		$scope.modelType = "";
+		
+		$scope.modelsList = [];
 		$scope.modelQuery = "";
 		$scope.browseBy = "name"; // name, tags //
 		$scope.selectedTag = "";
@@ -116,41 +124,39 @@ metrilyxControllers.controller('sidePanelController', ['$scope', '$route', '$rou
 		document.getElementById('side-panel').addEventListener('refresh-model-list', function(evt){$scope.loadList();});
 	}
 ]);
-metrilyxControllers.controller('pageController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap', 'EventTypes',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap, EventTypes) {
-		var QUEUED_REQS = [];
-		var modelGraphIds = [];
+metrilyxControllers.controller('pageController', [
+	'$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap', 'EventTypes', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap, EventTypes, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions) {
 
-		if($routeParams.heatmapId) {
-			$scope.modelType = "heatmap/";
-		} else {
-			$scope.modelType = "";
-			$scope.tagsOnPage = {};
-		}
+		$scope.modelType = "";
+		$scope.modelGraphIds = [];
+
+		if($routeParams.heatmapId) $scope.modelType = "heatmap/";
+		else $scope.tagsOnPage = {};
+
+		var annoOptions = new AnnotationOptions($scope, $routeParams, $location, EventTypes);
+
+		var compTemplates = new ComponentTemplates($scope);
+
+		var timeWindow = new TimeWindow($scope, $routeParams);
+
+		var wsdp = new WebSocketDataProvider($scope);
+
 		if($routeParams.pageId == "new" || $routeParams.heatmapId == 'new') {
+			
 			$scope.editMode = " edit-mode";
 			$scope.updatesEnabled = false;
 		} else {
+			
 			$scope.editMode = "";
-			$scope.updatesEnabled = true;
+			//$scope.updatesEnabled = true;
 		}
+
 		clearAllTimeouts();
 		// make sure modal window is not lingering around //
 		$('#confirm-delete').modal('hide');
 		$('.modal-backdrop').remove();
 		$('#side-panel').addClass('offstage');
-
-		$scope.pageMastHtml			= connectionPool.nextConnection()+"/partials/page-mast.html";
-		$scope.editPanelHtml		= connectionPool.nextConnection()+"/partials/edit-panel.html";
-		$scope.thresholdsHtml		= connectionPool.nextConnection()+"/partials/thresholds.html";
-		$scope.queryEditorHtml		= connectionPool.nextConnection()+"/partials/pagegraph-query-editor.html";
-		$scope.graphHtml 			= connectionPool.nextConnection()+"/partials/graph.html";
-		$scope.heatGraphHtml 		= connectionPool.nextConnection()+"/partials/heat-graph.html"
-		$scope.podHtml 				= connectionPool.nextConnection()+"/partials/pod.html";
-		$scope.pageHeaderHtml 		= connectionPool.nextConnection()+"/partials/page-header.html";
-		$scope.graphControlsHtml	= connectionPool.nextConnection()+"/partials/graph-controls.html";
-		$scope.annoControlsHtml		= connectionPool.nextConnection()+"/partials/global-anno-controls.html";
-		$scope.eventAnnoDetailsHtml = connectionPool.nextConnection()+"/partials/event-anno-details.html";
 
 		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
 		$scope.graphSortOpts 		= DNDCONFIG.graph;
@@ -159,41 +165,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 		$scope.rowSortOpts 			= DNDCONFIG.row;
 		$scope.layoutSortOpts 		= DNDCONFIG.layout;
 
-		$scope.selectedAnno = {};
-		$scope.globalAnno = {'eventTypes':[], 'tags':{}, 'status': null};
-		$scope.modelGraphIdIdx = {};
-
-		// set default to relative time //
-		$scope.timeType = "1h-ago";
-		// relative time or 'absolute' //
 		var urlParams = $location.search();
-		if(urlParams.start) {
-			if(urlParams.end) {
-				$scope.endTime = parseInt(urlParams.end);
-				$scope.timeType = "absolute";
-				$scope.updatesEnabled = false;
-			} else {
-				$scope.timeType = urlParams.start;
-			}
-			$scope.startTime = urlParams.start;
-		}
-		if(urlParams.annotationTypes && urlParams.annotationTags) {
-			try {
-				$scope.globalAnno = {
-					'eventTypes': urlParams.annotationTypes.split(/\|/),
-					'tags': commaSepStrToDict(urlParams.annotationTags),
-					'status': $scope.globalAnno.status,
-				}
-			} catch(e) {console.warning("failed to parse annotation data", e);}
-		}
-		EventTypes.listTypes(function(rslt) {
-			out = [];
-			for(var i in rslt) {
-				if(rslt[i].name === undefined || $scope.globalAnno.eventTypes.indexOf(rslt[i].name) >= 0) continue;
-				out.push(rslt[i].name);
-			}
-			$scope.annoEventTypes = out;
-		});
+
 		if(urlParams.tags) {
 			try {
 				//$scope.$parent
@@ -222,7 +195,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			});
 		}
 
-
 		Schema.get({modelType: 'pod'},function(podModel){
 			/* used for dropped pod */
 			$scope.droppablePodSchema = [ podModel ];
@@ -240,7 +212,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 							console.log(result);
 						} else {
 							$scope.model = result;
-							modelGraphIds = getModelGraphIds();
+							$scope.modelGraphIds = getModelGraphIds();
 						}
 					});
 				} else if($routeParams.heatmapId) {
@@ -270,58 +242,15 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
    			}
        		return out;
 		}
-		function onOpenWssock() {
-          console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
-          console.log("Queued requests:",QUEUED_REQS.length);
-          while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());
-       	}
-       	function onCloseWssock(e) {
-          console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
-          $scope.wssock = null;
-       	}
-       	function onMessageWssock(e) {
-       		var data = JSON.parse(e.data);
-       		if(data.error) {
-       			console.warn(data);
-       			setGlobalAlerts(data);
-       			flashAlertsBar();
-       		} else if(data.annoEvents) {
-       			// annotations //
-       			$scope.globalAnno.status = 'dispatching';
-       			for(var i in $scope.modelGraphIdIdx) {
-       				data._id = i;
-       				var ce = new CustomEvent(data._id, {'detail': data });
-       				$scope.wssock.dispatchEvent(ce);
-       			}
-       			$scope.globalAnno.status = 'dispatched';
-       		} else {
-       			// graph data //
-	       		var ce = new CustomEvent(data._id, {'detail': data });
-	       		$scope.wssock.dispatchEvent(ce);
-       		}
-       	}
-       	function setupWebSocket() {
-			$scope.wssock = getWebSocket();
-        	$scope.wssock.onopen = onOpenWssock;
-       		$scope.wssock.onclose = onCloseWssock;
-       		$scope.wssock.onmessage = onMessageWssock;
+		$scope.requestData = function(query) {
+			wsdp.requestData(query);
 		}
-		setupWebSocket();
-        $scope.requestData = function(query) {
-        	try {
-				$scope.wssock.send(JSON.stringify(query));
-        	} catch(e) {
-        		// in CONNECTING state. //
-        		if(e.code === 11) {
-        			QUEUED_REQS.push(JSON.stringify(query));
-        		} else {
-        			//QUEUED_REQS.push(JSON.stringify(query));
-        			//console.log('Reconnecting...')
-        			//setupWebSocket();
-        			// TODO: display alert
-        		}
-        	}
-        }
+		$scope.addGraphIdEventListener = function(graphId, funct) {
+			wsdp.addGraphIdEventListener(graphId, funct);
+       	}
+       	$scope.removeGraphIdEventListener = function(graphId, funct) {
+       		wsdp.removeGraphIdEventListener(graphId, funct);
+       	}
 		$scope.onPageHeaderLoad = function() {
 			// setTimeout is to account for processing time //
 			setTimeout(function() {
@@ -331,14 +260,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 					$('input.edit-comp').attr('disabled', true);
 				}
 			}, 150);
-		}
-		// called when a graph adds a ws evt listener //
-		$scope.addEvtListenerGraphId = function(graphId) {
-			$scope.modelGraphIdIdx[graphId] = true;
-			if(Object.keys($scope.modelGraphIdIdx).length === modelGraphIds.length) {
-				// trigger annotation request as all graph elems are loaded //
-				$scope.globalAnno.status = 'load';
-			}
 		}
 		$scope.onEditPanelLoad = function() {
 			document.getElementById('edit-panel').addEventListener('refresh-metric-list',
@@ -415,11 +336,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$scope.tagsOnPage = top;
 			//console.log($scope.tagsOnPage);
 		}
-		$scope.setTimeType = function(newRelativeTime, reloadPage) {
-			$scope.timeType = newRelativeTime;
-			if(reloadPage !== undefined && reloadPage)
-				$scope.delayLoadPageModel($routeParams.pageId);
-		}
 
 		var timerSearchForMetric;
 		$scope.searchForMetric = function(args) {
@@ -458,27 +374,35 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			$scope.updatesEnabled = value;
 		}
 		$scope.setStartTime = function(sTime) {
-			if($scope.endTime && ($scope.sTime > $scope.endTime)) return;
-			$scope.startTime = sTime;
+			
+			timeWindow.setAttribute('startTime', sTime);
 		}
 		$scope.setEndTime = function(eTime) {
-			if($scope.startTime) {
-				if($scope.eTime < $scope.startTime) return
-			}
-			$scope.endTime = eTime;
+			
+			timeWindow.setAttribute('endTime', eTime);
 		}
 		$scope.setAbsoluteTime = function() {
-			tmp = $location.search();
+			
+			var tmp = $location.search();
 			tmp.start = $scope.startTime;
 			tmp.end = $scope.endTime;
 			$location.search(tmp);
 		}
-		$scope.setAnnotations = function() {
-			tmp = $location.search();
-			tmp.annotationTypes = $scope.globalAnno.eventTypes.join("|");
-			tmp.annotationTags = dictToCommaSepStr($scope.globalAnno.tags, ":");
-			$location.search(tmp);
+		$scope.setTimeType = function(newRelativeTime, reloadPage) {
+			
+			timeWindow.setAttribute('timeType', newRelativeTime);
+			if(reloadPage !== undefined && reloadPage) $scope.delayLoadPageModel($routeParams.pageId);
 		}
+		$scope.getTimeWindow = function(inMilli) {
+
+			return timeWindow.getTimeFrame(inMilli);
+		}
+
+		$scope.setAnnotations = function() {
+
+			annoOptions.applyAnnotationOptions();
+		}
+		
 		$scope.addGraph = function(toPod) {
 			Schema.get({modelType:'graph'}, function(result) {
 				toPod.graphs.push(result);
@@ -500,43 +424,7 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				});
 			}, 600);
 		}
-		$scope.getTimeWindow = function(inMilli) {
-			if($scope.timeType == "absolute"){
-				if($scope.endTime) {
-					if(inMilli) {
-						return {
-							end: $scope.endTime*1000,
-							start: $scope.startTime*1000};
-					}
-					return {
-						end: $scope.endTime,
-						start: $scope.startTime
-					};
-				}
-				if(inMilli) {
-					return {
-						start: $scope.startTime*1000,
-						end: Math.ceil((new Date()).getTime())
-					};
-				}
-				return {
-					start: $scope.startTime,
-					end: Math.ceil((new Date()).getTime()/1000)
-				};
-			} else {
-				if(inMilli) {
-					return {
-						start: (Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime($scope.timeType)))*1000,
-						end: Math.ceil((new Date()).getTime())
-					};
-				} else {
-					return {
-						start: Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime($scope.timeType)),
-						end: Math.ceil((new Date()).getTime()/1000)
-					};
-				}
-			}
-		}
+		
 		$scope.baseQuery = function(graphObj) {
 			var q = {
 				_id: graphObj._id,
@@ -544,11 +432,10 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				graphType: graphObj.graphType,
 				tags: $scope.globalTags,
 				thresholds: graphObj.thresholds,
-				//annoEvents: graphObj.annoEvents,
 				multiPane: graphObj.multiPane,
 				panes: graphObj.panes,
 			};
-			//console.log('series', graphObj.series.length);
+
 			return $.extend(true, q, $scope.getTimeWindow());
 		}
 		$scope.disableDragDrop = function() {
@@ -596,7 +483,8 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 				} else {
 					location.hash = "#/heatmap/new";
 				}
-				document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
+				document.getElementById('side-panel').dispatchEvent(
+					new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
 			}
 		}
 		$scope.removeModel = function(callback) {
@@ -678,60 +566,42 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 			q.series = gobj.series;
 			$scope.requestData(q);
 
-			// destroy current graph //
 			var domNode = $('[data-graph-id='+gobj._id+']');
 			try { domNode.highcharts().destroy(); } catch(e) {}
-			domNode.html("<table class='gif-loader-table'><tr><td> \
-					<img src='/imgs/loader.gif'></td></tr></table>");
+			domNode.html("<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
 		}
+
 		$scope.$on('$destroy', function() {
-			try {$scope.wssock.close();} catch(e){};
-			$scope.wssock = null;
+			try { wsdp.closeConnection(); } catch(e){};
 		});
+		
 		submitAnalytics({page: "/"+$routeParams.pageId, title: $routeParams.pageId});
 }]);
-
-metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'EventTypes',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, EventTypes) {
-		var QUEUED_REQS = [];
-
+metrilyxControllers.controller('adhocGraphController', [
+	'$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'EventTypes', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, EventTypes, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions) {
+		
 		$scope.modelType 		= "adhoc";
-		$scope.timeType 		= "1h-ago";
-		$scope.editMode 		= " edit-mode";
-		$scope.updatesEnabled 	= false;
+		$scope.modelGraphIds 	= [];
 
-		$scope.pageMastHtml			= connectionPool.nextConnection()+"/partials/page-mast.html";
-		$scope.editPanelHtml		= connectionPool.nextConnection()+"/partials/edit-panel.html";
-		$scope.pageHeaderHtml 		= connectionPool.nextConnection()+"/partials/page-header.html";
-		$scope.thresholdsHtml		= connectionPool.nextConnection()+"/partials/thresholds.html";
-		$scope.queryEditorHtml		= connectionPool.nextConnection()+"/partials/adhocgraph-query-editor.html";
-		$scope.annoControlsHtml		= connectionPool.nextConnection()+"/partials/global-anno-controls.html";
-		$scope.eventAnnoDetailsHtml = connectionPool.nextConnection()+"/partials/event-anno-details.html";
+		var annoOptions = new AnnotationOptions($scope, $routeParams, $location, EventTypes);
+
+		var wsdp = new WebSocketDataProvider($scope);
+		
+		var compTemplates = new ComponentTemplates($scope);
+
+		var timeWindow = new TimeWindow($scope, $routeParams);
+
+		if($routeParams.editMode === "false") $scope.editMode = "";
+		else $scope.editMode = " edit-mode";
 
 		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
 
 		$scope.metricQueryResult = [];
 		$scope.tagsOnPage = {};
 		$scope.graph = {};
-		$scope.globalAnno = {'eventTypes':[], 'tags':{}, 'status': null};
 		$scope.globalTags = {};
 
-		if($routeParams.editMode==="false") {
-			$scope.editMode = "";
-		} else {
-			$scope.editMode = " edit-mode";
-		}
-		if($routeParams.start) {
-			if($routeParams.start.match(/\-ago$/) === null) {
-				$scope.startTime = parseInt($routeParams.start);
-			} else {
-				$scope.timeType = $routeParams.start;
-			}
-			if($routeParams.end) { 
-				$scope.endTime = parseInt($routeParams.end);
-				$scope.timeType = "absolute";
-			}
-		}
 		Schema.get({modelType: 'graph'}, function(graphModel) {
 			if($routeParams.size){
 				graphModel.size = $routeParams.size;
@@ -781,14 +651,8 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				}
 				//
 				$scope.graph = graphModel;
+				$scope.modelGraphIds = [ $scope.graph._id ];
 				$scope.reloadGraph();
-				/*
-				setTimeout(function() {
-					$("[data-graph-id='"+$scope.graph._id+"']").html(
-						"<table class='gif-loader-table'><tr><td> \
-						<img src='/imgs/loader.gif'></td></tr></table>");
-				},400);
-				*/
 			} else {
 				// initial empty page
 				graphModel.thresholds.danger.max = '';
@@ -800,74 +664,28 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				$scope.graph = graphModel;
 			}
 		});
-		if($routeParams.annotationTypes && $routeParams.annotationTags) {
-			try {
-				$scope.globalAnno = {
-					'eventTypes': $routeParams.annotationTypes.split(/\|/),
-					'tags': commaSepStrToDict($routeParams.annotationTags),
-					'status': 'load',
-				}
-			} catch(e) {console.warning("failed to parse annotation data", e);}
-		}
-		EventTypes.listTypes(function(rslt) {
-			out = [];
-			for(var i in rslt) {
-				if(rslt[i].name === undefined || $scope.globalAnno.eventTypes.indexOf(rslt[i].name) >= 0) continue;
-				out.push(rslt[i].name);
-			}
-			$scope.annoEventTypes = out;
-		});
+
 		$('#side-panel').addClass('offstage');
+		
 		if($scope.editMode === "") {
 			$scope.metricListSortOpts.disabled = true;
 		} else {
 			$scope.metricListSortOpts.disabled = false;
 		}
-		function onOpenWssock() {
-			console.log("Connected. Extensions: [" + $scope.wssock.extensions + "]");
-          	console.log("Queued requests:",QUEUED_REQS.length);
-          	setTimeout(function() {
-          		while(QUEUED_REQS.length > 0) $scope.wssock.send(QUEUED_REQS.shift());
-          	}, 750);
-		}
-		function onCloseWssock(e) {
-			console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
-			$scope.wssock = null;
-			/*
-			setGlobalAlerts({'error': 'Disconnected', 'message': "Disconnected (clean=" + e.wasClean + ", code=" +
-					e.code + ", reason='" + e.reason + "')"});
-			flashAlertsBar();*/
-		}
-		function onMessageWssock(e) {
-       		var data = JSON.parse(e.data);
-       		if(data.error) {
-       			console.warn(data);
-       			setGlobalAlerts(data);
-       			flashAlertsBar();
-       		} else if(data.annoEvents) {
-       			// annotations //
-       			$scope.globalAnno.status = 'dispatching';
-   				data._id = $scope.graph._id;
-   				var ce = new CustomEvent(data._id, {'detail': data });
-   				$scope.wssock.dispatchEvent(ce);
-       			$scope.globalAnno.status = 'dispatched';
-       		} else {
-       			// graph data //
-	       		var ce = new CustomEvent(data._id, {'detail': data });
-	       		$scope.wssock.dispatchEvent(ce);
-       		}
-		}
-		function setupWebSocket() {
-			$scope.wssock = getWebSocket();
-        	$scope.wssock.onopen = onOpenWssock;
-       		$scope.wssock.onclose = onCloseWssock;
-       		$scope.wssock.onmessage = onMessageWssock;
-		}
-        setupWebSocket();
 
+		$scope.addGraphIdEventListener = function(graphId, funct) {
+			wsdp.addGraphIdEventListener(graphId, funct);
+       	}
+       	$scope.removeGraphIdEventListener = function(graphId, funct) {
+       		wsdp.removeGraphIdEventListener(graphId, funct);
+       	}
+       	$scope.requestData = function(query) {
+        	wsdp.requestData(query);
+        }
         $scope.setUpdatesEnabled = function(value) {
 			$scope.updatesEnabled = value;
 		}
+
 		$scope.onEditPanelLoad = function() {
 			document.getElementById('edit-panel').addEventListener('refresh-metric-list',
 				function() {
@@ -878,74 +696,43 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 		$scope.removeTag = function(tags, tagkey) {
 			delete tags[tagkey];
 		}
-		$scope.getTimeWindow = function(inMilli) {
-			if($scope.timeType == "absolute"){
-				if($scope.endTime) {
-					if(inMilli) {
-						return {
-							end: $scope.endTime*1000,
-							start: $scope.startTime*1000};
-					}
-					return {
-						end: $scope.endTime,
-						start: $scope.startTime
-					};
-				}
-				if(inMilli) {
-					return {
-						start: $scope.startTime*1000,
-						end: Math.ceil((new Date()).getTime())
-					};
-				}
-				return {
-					start: $scope.startTime,
-					end: Math.ceil((new Date()).getTime()/1000)
-				};
-			} else {
-				if(inMilli) {
-					return {
-						start: (Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime($scope.timeType)))*1000,
-						end: Math.ceil((new Date()).getTime())
-					};
-				} else {
-					return {
-						start: Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime($scope.timeType)),
-						end: Math.ceil((new Date()).getTime()/1000)
-					};
-				}
-			}
+
+		$scope.setStartTime = function(sTime) {
+
+			timeWindow.setAttribute('startTime', sTime);
 		}
+		$scope.setEndTime = function(eTime) {
+			
+			timeWindow.setAttribute('endTime', eTime);
+		}
+		$scope.setTimeType = function(newRelativeTime, reloadPage) {
+			
+			timeWindow.setAttribute('timeType', newRelativeTime);
+		}
+		$scope.setAbsoluteTime = function() {
+		
+			$scope.reloadGraph();
+			$scope.globalAnno.status = 'reload';
+		}
+		$scope.getTimeWindow = function(inMilli) {
+			return timeWindow.getTimeFrame(inMilli);
+		}
+
 		$scope.baseQuery = function(graphObj) {
 			var q = {
 				_id: graphObj._id,
 				name: graphObj.name,
 				graphType: graphObj.graphType,
 				tags: {},
-				thresholds: graphObj.thresholds,
-				annoEvents: graphObj.annoEvents
+				thresholds: graphObj.thresholds
 			};
+
 			$.extend(q, $scope.getTimeWindow(),true);
 			return q;
 		}
 
-        $scope.requestData = function(query) {
-        	jsonQuery = JSON.stringify(query);
-        	try {
-				$scope.wssock.send(jsonQuery);
-        	} catch(e) {
-        		// in CONNECTING state. //
-        		if(e.code === 11) {
-        			QUEUED_REQS.push(jsonQuery);
-        		} else {
-        			//console.warn(e);
-        			console.log("Queueing request...");
-        			QUEUED_REQS.push(jsonQuery);
-        			console.log('Reconnecting...')
-        			setupWebSocket();
-        		}
-        	}
-        }
 		$scope.setURL = function(obj) {
+
 			var outarr = [];
 			for(var s in obj.series) {
 				serie = obj.series[s];
@@ -984,24 +771,18 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			} else {
 				srch.start = $scope.timeType;
 			}
-			srch.annotationTypes = $scope.globalAnno.eventTypes.join("|");
-			srch.annotationTags = dictToCommaSepStr($scope.globalAnno.tags, ":");
-			$location.search(srch);
+
+			var uAnnoTagsStr = dictToCommaSepStr($scope.globalAnno.tags, ":");
+
+			if($scope.globalAnno.eventTypes.length > 0 && uAnnoTagsStr != "") {
+				srch.annotationTypes = $scope.globalAnno.eventTypes.join("|");
+				srch.annotationTags = uAnnoTagsStr;
+			}
+
+			$location.search($.extend(true, $location.search(), srch));
 		}
 		$scope.setAnnotations = function() {
-			// re-initialize graph //
-			$scope.reloadGraph();
-			$scope.globalAnno.status = 'reload';
-			tmp = $location.search();
-			tmp.annotationTypes = $scope.globalAnno.eventTypes.join("|");
-			tmp.annotationTags = dictToCommaSepStr($scope.globalAnno.tags, ":");
-			$location.search(tmp);
-			$('.graph-control-details.global-anno').hide();
-		}
-		// called when a graph adds a ws evt listener //
-		$scope.addEvtListenerGraphId = function(graphId) {
-			// in adhoc mode there is only 1 graph //
-			//$scope.globalAnno.status = 'load';
+			annoOptions.applyAnnotationOptions();
 		}
 		$scope.updateTagsOnPage = function(obj) {
 			var top = $scope.tagsOnPage;
@@ -1029,14 +810,16 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			$scope.tagsOnPage = top;
 		}
 		$scope.reloadGraph = function(gobj) {
+			
 			if(!gobj) gobj = $scope.graph;
 			$('.adhoc-metric-editor').hide();
 			if(gobj.series.length < 1) return;
+
 			$scope.setURL(gobj);
 
 			q = $scope.baseQuery(gobj)
 			q.series = gobj.series;
-			
+
 			var domNode = $("[data-graph-id='"+gobj._id+"']"); 
 			/* destroy current graph */
 			try { domNode.highcharts().destroy(); } catch(e) {};
@@ -1122,24 +905,7 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 				});
 			}, 500);
 		}
-		$scope.setStartTime = function(sTime) {
-			if($scope.endTime) {
-				if($scope.sTime > $scope.endTime) return;
-			}
-			$scope.startTime = sTime;
-		}
-		$scope.setEndTime = function(eTime) {
-			if($scope.startTime) {
-				if($scope.eTime < $scope.startTime) return
-			}
-			$scope.endTime = eTime;
-		}
-		$scope.setTimeType = function(newRelativeTime, reloadPage) {
-			$scope.timeType = newRelativeTime;
-		}
-		$scope.setAbsoluteTime = function() {
-			$scope.reloadGraph();
-		}
+		
 		$scope.updateGlobalTag = function(tagkey, tagval) {
 			if(tagkey == undefined || tagkey == "") return;
 			for(var s in $scope.graph.series) {
@@ -1148,9 +914,10 @@ metrilyxControllers.controller('adhocGraphController', ['$scope', '$route', '$ro
 			$scope.setURL($scope.graph);
 			$route.reload();
 		}
+
 		$scope.$on('$destroy', function() {
-			try {$scope.wssock.close();} catch(e){};
-			$scope.wssock = null;
+			try { wsdp.closeConnection(); } catch(e){};
 		});
-		submitAnalytics({title:'adhoc',page:'/graph'});
+
+		submitAnalytics({title:'adhoc', page:'/graph'});
 }]);
