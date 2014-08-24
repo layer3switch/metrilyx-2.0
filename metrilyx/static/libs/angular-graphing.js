@@ -356,10 +356,12 @@ angular.module('graphing', [])
 						wsHelper.setSerieStatus(graph, 'querying');
 						return;
 					};
-					// check length //
+
 					if(graph.series.length == oldValue.series.length) {
+						
 						return;
 					} else if(graph.series.length > oldValue.series.length) {
+						
 						var q = scope.baseQuery(graph);
 						q.series = [];
 						// find the new series that was added //
@@ -370,6 +372,7 @@ angular.module('graphing', [])
 						}
 						scope.requestData(q);
 						wsHelper.setSerieStatus(q,'querying');
+						
 						if(scope.modelType == 'adhoc') scope.setURL(graph);
 					} else {
 						

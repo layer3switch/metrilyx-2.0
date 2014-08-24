@@ -135,9 +135,12 @@ app.directive('eventTypes', function() {
 		restrict: 'A',
 		require: '?ngModel',
 		link: function(scope, elem, attrs, ctrl) {
+			
 			if(!ctrl) return;
+			
 			ctrl.$formatters.push(function(modelValue){return "";});
 			ctrl.$parsers.unshift(function(viewValue){return ctrl.$modelValue;});
+			
 			$(elem).autocomplete({
 				/*source: ANNO_EVENT_TYPES,*/
 				source: function(request, response) {
@@ -476,42 +479,170 @@ app.directive('keyValuePairs', function() {
 					}
 				}
         		ngModel.$setValidity('keyValuePairs', true);
-        		//console.log(mVal);
         		return mVal;
       		});	 
 		}
 	};
 });
 
-app.factory("ComponentTemplates", function() {
-	var ComponentTemplates = function(ctrlType) {
-		this.templates = {
-			pageMastHtml	: connectionPool.nextConnection()+"/partials/page-mast.html",
-		};
-		if(ctrlType == "adhocGraph" || ctrlType == "page") {
-			
-			$.extend(this.templates, {
-				editPanelHtml			: connectionPool.nextConnection()+"/partials/edit-panel.html",
-				thresholdsHtml 			: connectionPool.nextConnection()+"/partials/thresholds.html",
-				pageHeaderHtml 			: connectionPool.nextConnection()+"/partials/page-header.html",
-				annoControlsHtml		: connectionPool.nextConnection()+"/partials/global-anno-controls.html",
-				eventAnnoDetailsHtml 	: connectionPool.nextConnection()+"/partials/event-anno-details.html",
-			}, true);
+app.factory("AnnotationOptions", function() {
 
-			if(ctrlType == "adhocGraph") {
-				
-				this.templates['queryEditorHtml'] = connectionPool.nextConnection()+"/partials/adhocgraph-query-editor.html";
-			} else {
-				
-				$.extend(this.templates, {
-					queryEditorHtml		: connectionPool.nextConnection()+"/partials/pagegraph-query-editor.html",
-					graphControlsHtml	: connectionPool.nextConnection()+"/partials/graph-controls.html",
-					graphHtml 			: connectionPool.nextConnection()+"/partials/graph.html",
-					podHtml 			: connectionPool.nextConnection()+"/partials/pod.html",
-					heatGraphHtml 		: connectionPool.nextConnection()+"/partials/heat-graph.html"
+	var AnnotationOptions = function(scope, routeParams, location) {
+		
+		var options = { 
+			'globalAnno': {'eventTypes':[], 'tags':{}, 'status': null },
+			'selectedAnno': {}
+		};
+		if(routeParams.annotationTypes && routeParams.annotationTags) {
+			
+			try {
+
+				$.extend(true, options['globalAnno'], {
+					'eventTypes': routeParams.annotationTypes.split(/\|/),
+					'tags': commaSepStrToDict(routeParams.annotationTags),
 				}, true);
+			} catch(e) {console.warning("failed to parse annotation data", e);}
+		}
+
+		if(options.globalAnno.eventTypes.length > 0 && Object.keys(options.globalAnno.tags).length > 0)
+			options.globalAnno['status'] = 'load';
+		
+		this.applyAnnotationOptions = function() {
+			if(scope.modelType == "adhoc") {
+				
+				scope.reloadGraph();
+				
+				scope.globalAnno.status = 'reload';
+				
+				$('.graph-control-details.global-anno').hide();
+			}
+
+			var tmp = location.search();
+			tmp.annotationTypes = scope.globalAnno.eventTypes.join("|");
+			tmp.annotationTags = dictToCommaSepStr(scope.globalAnno.tags, ":");
+			location.search(tmp);
+		}
+
+		$.extend(scope, options, true);
+	}
+	return (AnnotationOptions);
+});
+
+app.factory("TimeWindow", function() {
+	
+	var TimeWindow = function(scope, routeParams) {
+		
+		var attributes = {
+			'timeType': '1h-ago',
+			'startTime': '1h-ago',
+			'updatesEnabled': true
+		};
+		function initialize() {
+			
+			if(scope.modelType === "adhoc") attributes['updatesEnabled'] = false;
+			
+			if(routeParams.start) {
+
+				if(routeParams.end) {
+					
+					$.extend(true, attributes, {
+						'endTime': parseInt(routeParams.end),
+						'timeType': "absolute",
+						'updatesEnabled': false
+					}, true);
+				} else {
+					
+					attributes['timeType'] = routeParams.start;
+				}
+				if(Object.prototype.toString.call(routeParams.start) === '[object String]' 
+													&& routeParams.start.match(/-ago$/)) {
+					attributes['startTime'] = routeParams.start;
+				} else {
+					attributes['startTime'] = parseInt(routeParams.start);
+				}
+			}
+			$.extend(scope, attributes, true);
+		}
+
+		this.getTimeFrame = function(inMilli) {
+			if(scope.timeType == "absolute"){
+				if(scope.endTime) {
+					if(inMilli) {
+						return {
+							end: scope.endTime*1000,
+							start: scope.startTime*1000};
+					}
+					return {
+						end: scope.endTime,
+						start: scope.startTime
+					};
+				}
+				if(inMilli) {
+					return {
+						start: scope.startTime*1000,
+						end: Math.ceil((new Date()).getTime())
+					};
+				}
+				return {
+					start: scope.startTime,
+					end: Math.ceil((new Date()).getTime()/1000)
+				};
+			} else {
+				if(inMilli) {
+					return {
+						start: (Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime(scope.timeType)))*1000,
+						end: Math.ceil((new Date()).getTime())
+					};
+				} else {
+					return {
+						start: Math.floor(((new Date()).getTime()/1000)-relativeToAbsoluteTime(scope.timeType)),
+						end: Math.ceil((new Date()).getTime()/1000)
+					};
+				}
 			}
 		}
+
+		initialize();
+	};
+	return (TimeWindow);
+});
+app.factory("ComponentTemplates", function() {
+	
+	var ComponentTemplates = function(scope) {
+		
+		var templates = {
+			pageMastHtml	: connectionPool.nextConnection()+"/partials/page-mast.html",
+		};
+
+		function initialize() {
+			if(scope.modelType == "adhoc" || scope.modelType == "") {
+				
+				$.extend(templates, {
+					editPanelHtml			: connectionPool.nextConnection()+"/partials/edit-panel.html",
+					thresholdsHtml 			: connectionPool.nextConnection()+"/partials/thresholds.html",
+					pageHeaderHtml 			: connectionPool.nextConnection()+"/partials/page-header.html",
+					annoControlsHtml		: connectionPool.nextConnection()+"/partials/global-anno-controls.html",
+					eventAnnoDetailsHtml 	: connectionPool.nextConnection()+"/partials/event-anno-details.html",
+				}, true);
+
+				if(scope.modelType == "adhoc") {
+					
+					templates['queryEditorHtml'] = connectionPool.nextConnection()+"/partials/adhocgraph-query-editor.html";
+				} else {
+					
+					$.extend(templates, {
+						queryEditorHtml		: connectionPool.nextConnection()+"/partials/pagegraph-query-editor.html",
+						graphControlsHtml	: connectionPool.nextConnection()+"/partials/graph-controls.html",
+						graphHtml 			: connectionPool.nextConnection()+"/partials/graph.html",
+						podHtml 			: connectionPool.nextConnection()+"/partials/pod.html",
+						heatGraphHtml 		: connectionPool.nextConnection()+"/partials/heat-graph.html"
+					}, true);
+				}
+			}
+			$.extend(scope, templates, true);
+		}
+
+		initialize();
 	}
 	return (ComponentTemplates);
 });
