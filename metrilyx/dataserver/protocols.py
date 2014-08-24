@@ -71,8 +71,10 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 					self.processRequest(request_obj)
 				else:
 					## graph request	
-					logger.info("Request %s '%s' start: %s" %(request_obj['_id'], 
-						request_obj['name'], datetime.fromtimestamp(float(request_obj['start']))))
+					logger.info("Request %s '%s' sub-queries: %d start: %s" %(request_obj['_id'], 
+							request_obj['name'], len(request_obj['series']),
+							datetime.fromtimestamp(float(request_obj['start']))))
+					
 					graphReq = GraphRequest(request_obj)
 					self.processRequest(graphReq)
 			except Exception,e:
@@ -89,12 +91,25 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 
 class GraphServerProtocol(BaseGraphServerProtocol):
 
-	def graphResponseErrback(self, error, url, graphMeta):
-		# call dataprovider errback (diff for diff backends)
-		logger.error("%s" %(str(error)))
+	activePartials = {}
 
-		errResponse = self.dataprovider.responseErrback(error, graphMeta)
-		self.sendMessage(json.dumps(errResponse))
+
+	def __removeActivePartial(self, url):
+		if self.activePartials.has_key(url):
+			del self.activePartials[url]
+
+	def __queryComplete(self, url):
+		self.__removeActivePartial(url)
+		logger.info("Active partials: %d" %(len(self.activePartials.keys())))
+
+	def graphResponseErrback(self, error, url, graphMeta):
+		
+		self.__queryComplete(url)
+
+		if "CancelledError" not in str(error):
+			logger.error("%s" %(str(error)))
+			errResponse = self.dataprovider.responseErrback(error, graphMeta)
+			self.sendMessage(json.dumps(errResponse))
 
 	def _checkResponse(self, respBodyStr, response, url):
 		if response.code < 200 or response.code > 304:
@@ -116,6 +131,9 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 			return {"error": str(e)}
 
 	def graphResponseCallback(self, respBodyStr, response, url, graphMeta):
+		
+		self.__queryComplete(url)
+		
 		responseData = self._checkResponse(respBodyStr, response, url)
 		if responseData.has_key('error'):
 			graphMeta['series'][0]['data'] = responseData
@@ -132,15 +150,27 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 	def processRequest(self, graphRequest):
 		self.submitPerfQueries(graphRequest)
 
+	def __fetchPartial(self, url, method, query, serieReq):
+		a = AsyncHttpJsonClient(uri=url, method=method, body=query)
+		a.addResponseCallback(self.graphResponseCallback, url, serieReq)
+		a.addResponseErrback(self.graphResponseErrback, url, serieReq)
+		self.activePartials[url] = a
+
+
 	def submitPerfQueries(self, graphRequest):
 		for serieReq in graphRequest.split():
 			(url, method, query) = self.dataprovider.getQuery(serieReq)
 			
 			logger.info("Partial query (%s): %s" %(serieReq['_id'], url.split("?")[-1]))
-		 	a = AsyncHttpJsonClient(uri=url, method=method, body=query)
-			a.addResponseCallback(self.graphResponseCallback, url, serieReq)
-			a.addResponseErrback(self.graphResponseErrback, url, serieReq)
+			self.__fetchPartial(url, method, query, serieReq)
 
+	def onClose(self, wasClean, code, reason):
+		logger.info("Connection closed: wasClean=%s code=%s reason=%s" %(
+								str(wasClean), str(code), str(reason)))
+
+		for url, dfd in self.activePartials.items():
+			self.activePartials[url].cancelRequest()
+			self.__removeActivePartial(url)
 
 class EventGraphServerProtocol(GraphServerProtocol):
 	eventDataprovider = None

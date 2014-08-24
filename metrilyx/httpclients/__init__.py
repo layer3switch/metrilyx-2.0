@@ -236,8 +236,6 @@ class AsyncHttpJsonClient(object):
                 self.body)
 
         self.__deferredResponse = Deferred()
-        
-
 
     def __readResponseCallback(self, response, userCb, *cbargs):
         response.deliverBody(AsyncHttpResponseProtocol(self.__deferredResponse, response.headers))
@@ -245,8 +243,8 @@ class AsyncHttpJsonClient(object):
         return self.__deferredResponse
 
     def __readErrorCallback(self, error, userCb, *cbargs):
-        logger.warning(error.getErrorMessage())
-        self.__deferredResponse.addCallback(userCb, *cbargs)
+        #logger.warning(str(error.getErrorMessage()))
+        self.__deferredResponse.addErrback(userCb, *cbargs)
 
     def addResponseCallback(self, callback, *cbargs):
         self.__d_agent.addCallback(self.__readResponseCallback, callback, *cbargs)
@@ -255,6 +253,8 @@ class AsyncHttpJsonClient(object):
         self.__d_agent.addErrback(self.__readErrorCallback, callback, *cbargs)
 
     def cancelRequest(self):
-        self.__deferredResponse.cancel()
-
-
+        try:
+            self.__deferredResponse.cancel()
+            self.__d_agent.cancel()
+        except Exception,e:
+            logger.debug(str(e))
