@@ -134,6 +134,7 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 	def submitPerfQueries(self, graphRequest):
 		for serieReq in graphRequest.split():
 			(url, method, query) = self.dataprovider.getQuery(serieReq)
+			logger.info("Partial query (%s): %s" %(serieReq['_id'], url.split("?")[-1]))
 		 	a = AsyncHttpJsonClient(uri=url, method=method, body=query)
 			a.addResponseCallback(self.graphResponseCallback, url, serieReq)
 			a.addResponseErrback(self.graphResponseErrback, serieReq)
