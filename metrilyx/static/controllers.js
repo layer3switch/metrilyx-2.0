@@ -161,7 +161,6 @@ metrilyxControllers.controller('pageController', ['$scope', '$route', '$routePar
 
 		$scope.selectedAnno = {};
 		$scope.globalAnno = {'eventTypes':[], 'tags':{}, 'status': null};
-		//$scope.modelGraphIdIdx = {};
 
 		var wsdp = new WebSocketDataProvider($scope);
 		// set default to relative time //
