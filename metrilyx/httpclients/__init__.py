@@ -242,8 +242,7 @@ class AsyncHttpJsonClient(object):
         self.__deferredResponse.addCallback(userCb, *([response]+list(cbargs)))
         return self.__deferredResponse
 
-    def __readErrorCallback(self, error, userCb, *cbargs):
-        #logger.warning(str(error.getErrorMessage()))
+    def __readErrorCallback(self, error, userCb, *cbargs):    
         self.__deferredResponse.addErrback(userCb, *cbargs)
 
     def addResponseCallback(self, callback, *cbargs):
