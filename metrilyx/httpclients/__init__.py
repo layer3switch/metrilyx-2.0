@@ -17,6 +17,7 @@ from twisted.internet.defer import Deferred, succeed
 from twisted.internet.protocol import Protocol
 
 from metrilyx.metrilyxconfig import config
+from ..dataserver.transforms import MetrilyxSerie
 
 from pprint import pprint
 
@@ -257,3 +258,125 @@ class AsyncHttpJsonClient(object):
             self.__d_agent.cancel()
         except Exception,e:
             logger.debug(str(e))
+
+
+def checkHttpResponse(respBodyStr, response, url):
+    if response.code < 200 or response.code > 304:
+        logger.warning("Request failed %d %s %s" %(response.code, respBodyStr, url))
+        m = re_504.search(respBodyStr)
+        if  m != None:
+            return {"error": "code=%d,response=%s" %(response.code, m.group(1))}
+        return {"error": "code=%s,response=%s" %(response.code, respBodyStr)}
+
+    try:
+        d = json.loads(respBodyStr)
+        if isinstance(d, dict) and d.has_key('error'):
+            logger.warning(str(d))
+            return d
+        return {'data': d}
+    except Exception, e:
+        logger.warning("%s %s" %(str(e), url))
+        return {"error": str(e)}
+
+
+class MetrilyxGraphFetcher(object):
+    '''
+    Handles how each graph query should be broken up.
+    This depends on if it contains 'secondaries'
+    '''
+    def __init__(self, dataprovider, metrilyxGraphReq):
+        self.__graphReq = metrilyxGraphReq
+        self.__dataprovider = dataprovider
+
+        self.total = len([o for o in self.__graphReq.split()])
+        self.completed = 0
+
+        self.__graphResponse = self.__initGraphResponse()
+
+        self.__completedDeferred = Deferred()
+        self.__partialDeferreds = [ Deferred() for i in range(self.total) ]
+
+        self.__activePartials = {}
+
+        self.__fetch()
+
+    def __initGraphResponse(self):
+        graphResponse = { "series": [] }
+        for k,v in self.__graphReq.request.items():
+            if k != "series":
+                graphResponse[k] = v
+        return graphResponse
+
+
+    def __rmActivePartial(self, urlIdx):
+        if self.__activePartials.has_key(urlIdx):
+            del self.__activePartials[urlIdx]
+
+    def __partialResponseCallback(self, respBodyStr, response, *cbargs):
+        self.completed += 1
+        (url, gmeta, idx) = cbargs
+        self.__rmActivePartial(url)
+        
+        respData = checkHttpResponse(respBodyStr, response, url)
+        logger.info("Partial response: %s" %(url))
+        if respData.has_key('error'):
+            gmeta['series'][0]['data'] = respData
+        else:
+            gmeta['series'][0]['data'] = self.__dataprovider.responseCallback(
+                                            respData['data'], url, gmeta)
+
+        mas = MetrilyxSerie(gmeta['series'][0])
+        gmeta['series'][0]['data'] = mas.data()
+
+        self.__partialDeferreds[idx].callback(gmeta)
+
+        if self.total == self.completed:
+            self.__completedDeferred.callback()
+
+    def __partialResponseErrback(self, error, *cbargs): 
+        self.completed += 1
+        (url, gmeta, idx) = cbargs
+        self.__rmActivePartial(url)
+
+        if self.total == self.completed:
+            self.__completedDeferred.errback(error)
+        
+        self.__partialDeferreds[idx].errback(error)
+
+    
+    def __fetch(self):
+        
+        counter = 0
+        for gr in self.__graphReq.split():
+            
+            (url, method, query) = self.__dataprovider.getQuery(gr)
+            
+            a = AsyncHttpJsonClient(uri=url, method=method, body=query)
+            a.addResponseCallback(self.__partialResponseCallback, url, gr, counter)
+            a.addResponseErrback(self.__partialResponseErrback, url, gr, counter)
+            
+            self.__activePartials[url] = a
+            counter += 1
+
+            logger.info("Partial query (%s): %s" %(gr['_id'], url))
+            
+
+    def addCompleteCallback(self, callback, *cbargs):
+        self.__completedDeferred.addCallback(callback, *cbargs)
+
+    def addCompleteErrback(self, callback, *cbargs):
+        self.__completedDeferred.addErrback(callback, *cbargs)
+
+    def addPartialResponseCallback(self, callback, *cbargs):
+        for d in self.__partialDeferreds:
+            d.addCallback(callback, *cbargs)
+
+    def addPartialResponseErrback(self, callback, *cbargs):
+        for d in self.__partialDeferreds:
+            d.addErrback(callback, *cbargs)
+
+    def cancelRequests(self):
+        for k,d in self.__activePartials.items():
+            d.cancelRequest()
+        
+        self.__activePartials = {}  
