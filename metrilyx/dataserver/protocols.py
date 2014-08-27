@@ -57,10 +57,7 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 			return {'error': 'Binary data not support!'}
 
 	def onMessage(self, payload, isBinary):
-		'''
-		Check the payload validity
-		Submit query.
-		'''
+
 		request_obj = self.checkMessage(payload, isBinary)
 		if not request_obj.get("error"):
 			## all checks passed - proceed
@@ -84,7 +81,7 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 
 	def processRequest(self, graphOrAnnoRequest):
 		'''
-			This is a stub that is overwritten in 'GraphServerProtocol'
+			Implemented by subclasser
 		'''
 		pass
 
@@ -96,7 +93,6 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 	def __rmActiveFetcher(self, key):
 		if self.__activeFetchers.has_key(key):
 			del self.__activeFetchers[key]
-
 		logger.info("Active fetchers: %d" %(len(self.__activeFetchers.keys())))
 
 	def processRequest(self, graphRequest):
