@@ -8,7 +8,6 @@ Roadmap
 - Server side code optimization.
 - Cleanup of pending calls upon client disconnection.
 - Behavioural changes in UI.
-- Added futures for v2.4.0
 - Various bug fixes.
 
 ##### v2.3.3
