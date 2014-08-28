@@ -212,7 +212,6 @@ MetrilyxGraph.prototype.upsertPieSeries = function() {
 MetrilyxGraph.prototype.upsertLineBasedSeries = function() {
     
     var series      = this.hasSecondaries ? this._graphData.secondaries: this._graphData.series;
-    //var series      = this._graphData.series;
     var chartSeries = this._chart.series;
     var firstSerie  = series[0];
     for(var j=0; j < series.length; j++) {
