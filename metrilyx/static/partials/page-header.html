@@ -88,7 +88,7 @@
 		<div class="row" style="padding:0;margin:0;border-top:1px solid #fff;padding-bottom:5px;border-bottom:1px solid #bbb">
 			<div class="col-md-4 text-left" style="padding:0;padding-top:10px;">
 				<div class="row" style="margin:0">
-					<div ng-attr-class="{{modelType==='' && 'col-md-2'}}" style="padding:0" ng-if="modelType===''">
+					<div class="col-md-2" style="padding:0">
 						<div class="dropdown">
 							<span class="pointer interactive dropdown-toggle marginl10" style="font-size:18px;position:relative;top:-1px;color:#777" data-toggle="dropdown">
 								<i class="glyphicon glyphicon-cog"></i>
@@ -96,14 +96,26 @@
 							<ul class="dropdown-menu page-controls bottom-shadow" role="menu">
 								<li ng-if="editMode === ''" title="Edit">
 									<a href="javascript:void(0)" ng-click="toggleEditMode()">
-										<span class="padr5"><i class="glyphicon glyphicon-edit"></i></span>
-										<span>Edit</span>
+										<span ng-if="modelType===''">
+											<span class="padr5"><i class="glyphicon glyphicon-edit"></i></span>
+											<span>Edit</span>
+										</span>
+										<span ng-if="modelType==='adhoc'">
+											<span class="padr5"><i class="glyphicon glyphicon-chevron-right"></i></span>
+											<span>Show</span>
+										</span>
 									</a>
 								</li>
 								<li ng-if="editMode === ' edit-mode'" title="Edit">
 									<a href="javascript:void(0)" ng-click="toggleEditMode()">
-										<span class="padr5"><i class="glyphicon glyphicon-ban-circle"></i></span>
-										<span>Cancel</span>
+										<span ng-if="modelType===''">
+											<span class="padr5"><i class="glyphicon glyphicon-ban-circle"></i></span>
+											<span>Cancel</span>
+										</span>
+										<span ng-if="modelType==='adhoc'">
+											<span class="padr5"><i class="glyphicon glyphicon-chevron-left"></i></span>
+											<span>Hide</span>
+										</span>
 									</a>
 								</li>
 								<li title="Export">
@@ -119,8 +131,8 @@
 							</ul>
 						</div>
 					</div>
-					<div ng-attr-class="{{modelType==='adhoc' && 'col-md-12' || 'col-md-10'}}" style="padding:0">
-						<div ng-attr-class="{{modelType==='adhoc' && 'marginl15'}}">
+					<div class="col-md-10" style="padding:0">
+						<div>
 							<span style="font-size:13px;font-weight:bold;color:#777" class="pointer interactive" onclick="$(this).next().children().toggle()">
 								<span>Annotations</span>
 								<span class="caret"></span>
@@ -141,8 +153,8 @@
 			<div ng-attr-class="{{modelType==='adhoc' && 'col-md-8' || 'col-md-4'}}" style="padding:0;text-align:right;">
 				<div ng-if="(modelType==='adhoc')||(modelType!=='heatmap/')" style="padding-top:5px;">
 					<span class="animated select-container left-caret">
-						<span class="caret"></span>
-						<select ng-model="timeType" relative-time="true" class="time interactive">
+						<span class="caret" style="position:relative;left:15px!important;pointer-events:none"></span>
+						<select ng-model="timeType" relative-time="true" class="time interactive" style="padding-left:20px!important;">
 			            	<option value="24h-ago">24 hours</option>
 			            	<option value="12h-ago">12 hours</option>
 			            	<option value="6h-ago">6 hours</option>

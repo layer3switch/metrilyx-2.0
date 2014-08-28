@@ -113,14 +113,14 @@ class BasicSerie(object):
 			except Exception,e:
 				#TODO: assign calculated default
 				logger.warn("could not transform alias: %s %s" %(obj['metric'], str(e)))
-				normalizedAlias = obj['metric']+ " " + uniqueTagsString
+				#normalizedAlias = obj['metric']+ " " + uniqueTagsString
+				normalizedAlias = obj['metric']
 		else:
 			try:
 				normalizedAlias = alias_str %(flat_obj)
-			except KeyError:
-				normalizedAlias =  obj['metric'] + " " + uniqueTagsString
 			except Exception, e:
 				logger.error("could not normalize alias: %s %s" %(obj['metric'], str(e)))
+				normalizedAlias =  obj['metric']
 
 		if unique_tags_str and normalizedAlias == obj['metric']:
 			normalizedAlias += " " + uniqueTagsString
@@ -179,7 +179,6 @@ class MetrilyxSerie(BasicSerie):
 								{'tags': s['tags'],'metric': s['metric']},
 								self.uniqueTagsString)
 
-	@property
 	def data(self):
 		if self.error: return { "error": self.error }
 		return [ self.__processSerieData(r) for r in self._serie['data'] ]
@@ -199,11 +198,6 @@ class MetrilyxSerie(BasicSerie):
 		## May remove this as it can be achieved using a yTransform which would be controlled by the user.
 		if self._serie['query']['rate']:
 			dataset['dps'] = self.__rmNegativeRates(dataset['dps'])
-
-		### normalize alias (i.e. either lambda function or string formatting and append unique tags string) 
-		#dataset['alias'] = self.__normalizeAlias(self._serie['alias'], {
-		#									'tags': dataset['tags'],
-		#									'metric': dataset['metric']})
 
 		## any custom callback for resulting data set 
 		## e.g. scrape metadata

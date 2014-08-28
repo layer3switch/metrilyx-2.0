@@ -131,6 +131,7 @@ init_django() {
 	[[ -f "./metrilyx.sqlite3" ]] && chown ${HTTP_USER}:${HTTP_USER} ./metrilyx.sqlite3;
 	# apache restart
 }
+
 ## END cli args
 ##### Main ####
 

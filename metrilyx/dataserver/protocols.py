@@ -1,6 +1,7 @@
 
 import logging
 import json
+import time
 from datetime import datetime
 
 from twisted.internet import reactor
@@ -9,14 +10,14 @@ from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.websocket.compress import PerMessageDeflateOffer, \
 										PerMessageDeflateOfferAccept
 
-from ..httpclients import AsyncHttpJsonClient, checkHttpResponse, MetrilyxGraphFetcher
+from ..httpclients import AsyncHttpJsonClient, MetrilyxGraphFetcher, checkHttpResponse
 from transforms import MetrilyxSerie, EventSerie, MetrilyxAnalyticsSerie
+
 from ..dataserver import GraphRequest, GraphEventRequest
 
 from pprint import pprint
 
 logger = logging.getLogger(__name__)
-
 
 ## Enable WebSocket extension "permessage-deflate".
 ## Function to accept offers from the client ..
@@ -32,14 +33,14 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 		If needed, 'GraphServerProtocol' should be subclassed instead.
 	'''
 	def onConnect(self, request):
-		logger.info("WebSocket connection request by %s" %(str(request.peer)))
+		logger.info("Connection request by %s" %(str(request.peer)))
 
 	def onOpen(self):
-		logger.info("WebSocket connection opened. extensions: %s" %(
+		logger.info("Connection opened. extensions: %s" %(
 										self.websocket_extensions_in_use))
 
 	def onClose(self, wasClean, code, reason):
-		logger.info("WebSocket closed wasClean=%s code=%s reason=%s" %(
+		logger.info("Connection closed: wasClean=%s code=%s reason=%s" %(
 								str(wasClean), str(code), str(reason)))
 
 
@@ -57,12 +58,7 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 			return {'error': 'Binary data not support!'}
 
 	def onMessage(self, payload, isBinary):
-		'''
-			Check the payload validity
-			Split the request into 1 request per metric.
-			Call dataprovider to get query.
-			Submit query.
-		'''
+
 		request_obj = self.checkMessage(payload, isBinary)
 		if not request_obj.get("error"):
 			## all checks passed - proceed
@@ -73,8 +69,10 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 					self.processRequest(request_obj)
 				else:
 					## graph request	
-					logger.info("Request %s '%s' start: %s" %(request_obj['_id'], 
-						request_obj['name'], datetime.fromtimestamp(float(request_obj['start']))))
+					logger.info("Request %s '%s' sub-queries: %d start: %s" %(request_obj['_id'], 
+							request_obj['name'], len(request_obj['series']),
+							datetime.fromtimestamp(float(request_obj['start']))))
+					
 					graphReq = GraphRequest(request_obj)
 					self.processRequest(graphReq)
 			except Exception,e:
@@ -84,30 +82,50 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 
 	def processRequest(self, graphOrAnnoRequest):
 		'''
-			This is a stub that is overwritten in 'GraphServerProtocol'
+			Implemented by subclasser
 		'''
 		pass
 
 
 class GraphServerProtocol(BaseGraphServerProtocol):
 
+	__activeFetchers = {}
+
+	def __rmActiveFetcher(self, key):
+		if self.__activeFetchers.has_key(key):
+			del self.__activeFetchers[key]
+		logger.info("Active fetchers: %d" %(len(self.__activeFetchers.keys())))
+
 	def processRequest(self, graphRequest):
 		self.submitPerfQueries(graphRequest)
 
 	def submitPerfQueries(self, graphRequest):
 		mgf = MetrilyxGraphFetcher(self.dataprovider, graphRequest)
-		mgf.addCompleteCallback(self.completeCallback)
-		mgf.addCompleteErrback(self.completeErrback, graphRequest.request)
+
+		stamp = "%s-%f" %(graphRequest.request['_id'], time.time())
+		
+		mgf.addCompleteCallback(self.completeCallback, stamp)
+		mgf.addCompleteErrback(self.completeErrback, graphRequest.request, stamp)
 		mgf.addPartialResponseCallback(self.partialResponseCallback)
 		mgf.addPartialResponseErrback(self.partialResponseErrback, graphRequest.request)
 
-	def completeCallback(self, graph):
-		self.sendMessage(json.dumps(graph))
-		logger.info("Reponse (secondaries graph) %s '%s' start: %s" %(graph['_id'], 
-					graph['name'], datetime.fromtimestamp(float(graph['start']))))
+		self.__activeFetchers[graphRequest.request['_id']] = mgf
 
 	def completeErrback(self, error, *cbargs):
-		logger.error("%s" %(str(error)))
+		(request, key) = cbargs
+		self.__rmActiveFetcher(key)
+
+		if "CancelledError" not in str(error):
+			logger.error("%s" %(str(error)))
+
+	def completeCallback(self, *cbargs):
+		(graph, key) = cbargs
+		self.__rmActiveFetcher(key)
+		
+		if graph != None:
+			self.sendMessage(json.dumps(graph))
+			logger.info("Reponse (secondaries graph) %s '%s' start: %s" %(graph['_id'], 
+					graph['name'], datetime.fromtimestamp(float(graph['start']))))
 
 	def partialResponseCallback(self, graph):
 		self.sendMessage(json.dumps(graph))
@@ -116,16 +134,19 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 
 	def partialResponseErrback(self, error, *cbargs):
 		(graphMeta,) = cbargs
-		logger.error("%s" %(str(error)))
-		errResponse = self.dataprovider.responseErrback(error, graphMeta)
-		self.sendMessage(json.dumps(errResponse))
+		if "CancelledError" not in str(error):
+			logger.error("%s" %(str(error)))
+			errResponse = self.dataprovider.responseErrback(error, graphMeta)
+			self.sendMessage(json.dumps(errResponse))
 
-	"""
 	def onClose(self, wasClean, code, reason):
-		for k in self.active_queries.keys():
-			self.active_queries[k].cancel()
-			del self.active_queries[k]
-	"""
+		logger.info("Connection closed: wasClean=%s code=%s reason=%s" %(
+								str(wasClean), str(code), str(reason)))
+
+		for k,d in self.__activeFetchers.items():
+			d.cancelRequests()
+		self.__activeFetchers = {}  
+		
 
 class EventGraphServerProtocol(GraphServerProtocol):
 	eventDataprovider = None

@@ -37,7 +37,7 @@ start() {
 	fi
 }
 status() {
-	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+	PIDS=`${PGREP} "${BIN}" | xargs`;
 	if [ "$PIDS" = "" ]; then
 		echo "${NAME} not running";
 	else
@@ -45,12 +45,13 @@ status() {
 	fi
 }
 stop() {
-	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | sort -r`;
+	PIDS=`${PGREP} "${BIN}" | sort -r`;
 	for pid in $PIDS; do
 		kill $pid;
 	done
-	${PGREP} "${BIN} ${DEFAULT_OPTS}" || echo "${NAME} stopped";
+	${PGREP} "${BIN}" || echo "${NAME} stopped";
 }
+
 
 case "$1" in
 	start)
