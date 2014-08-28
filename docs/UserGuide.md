@@ -93,6 +93,41 @@ Each lambda variable (**x** in the examples below) refers to a complete DataFram
 
 		lambda x: x[ x > 1000 ]
 
+#### Secondary Metrics
+----------------------
+Secondary metrics allow the user to create metrics by performing math on the selected metrics.
+
+##### Operation
+This defines the operation to perform to create the secondary metric.  This also uses lambda functions.  Each serie is represented by a letter i.e. if you have 3 series in the graph, an example operation would look like this:
+
+	lambda a, b, c: ( a + b ) / c
+
+- You must have 1 letter per serie in the graph regardless of whether you use them.
+- The first letter in the lambda definition refers to the first serie in the graph definition and so on.
+
+##### Example
+If you have 3 metrics in you graph definition in this order
+
+- mem.active
+- mem.inactive
+- mem.total
+
+and you want you to graph the amount of free memory, you can perform the operation like so:
+
+	lambda a, b, c: c - ( a + b )
+
+This essentially evaluates out to:
+
+	mem.total - ( mem.active + mem.inactive )
+
+As mem.total is the last in the list it maps to the last letter in the lambda function.
+
+##### alias
+This is used to name your secondary serie.  Each serie in a graph must be unique.  This works exactly the same as the metric alias option described above.
+
+##### Pane
+When using multi-pane graphs, this refers to the pane which this serie/s belongs to.
+
 
 ## Importing and Exporting Models
 Models can be imported and exported if needed through the UI as well as through the api for automation.
