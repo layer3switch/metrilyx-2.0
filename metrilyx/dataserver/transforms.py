@@ -94,7 +94,6 @@ class MetrilyxSerie(object):
 			self.error = False
 			self.uniqueTagsString = self.__uniqueTagsStr()
 
-	@property
 	def data(self):
 		if self.error: return { "error": self.error }
 		return [ self.__processSerieData(r) for r in self._serie['data'] ]

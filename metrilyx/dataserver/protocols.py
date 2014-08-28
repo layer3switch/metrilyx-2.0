@@ -1,6 +1,7 @@
 
 import logging
 import json
+import time
 from datetime import datetime
 
 from twisted.internet import reactor
@@ -9,13 +10,14 @@ from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.websocket.compress import PerMessageDeflateOffer, \
 										PerMessageDeflateOfferAccept
 
-from ..httpclients import AsyncHttpJsonClient
+from ..httpclients import AsyncHttpJsonClient, MetrilyxGraphFetcher, checkHttpResponse
 from transforms import MetrilyxSerie, EventSerie
 from ..dataserver import GraphRequest, GraphEventRequest
 from dataproviders import re_504
 
 logger = logging.getLogger(__name__)
 from pprint import pprint
+
 ## Enable WebSocket extension "permessage-deflate".
 ## Function to accept offers from the client ..
 def acceptedCompression(offers):
@@ -55,12 +57,7 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 			return {'error': 'Binary data not support!'}
 
 	def onMessage(self, payload, isBinary):
-		'''
-			Check the payload validity
-			Split the request into 1 request per metric.
-			Call dataprovider to get query.
-			Submit query.
-		'''
+
 		request_obj = self.checkMessage(payload, isBinary)
 		if not request_obj.get("error"):
 			## all checks passed - proceed
@@ -71,8 +68,10 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 					self.processRequest(request_obj)
 				else:
 					## graph request	
-					logger.info("Request %s '%s' start: %s" %(request_obj['_id'], 
-						request_obj['name'], datetime.fromtimestamp(float(request_obj['start']))))
+					logger.info("Request %s '%s' sub-queries: %d start: %s" %(request_obj['_id'], 
+							request_obj['name'], len(request_obj['series']),
+							datetime.fromtimestamp(float(request_obj['start']))))
+					
 					graphReq = GraphRequest(request_obj)
 					self.processRequest(graphReq)
 			except Exception,e:
@@ -82,65 +81,67 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 
 	def processRequest(self, graphOrAnnoRequest):
 		'''
-			This is a stub that is overwritten in 'GraphServerProtocol'
+			Implemented by subclasser
 		'''
 		pass
 
 
 class GraphServerProtocol(BaseGraphServerProtocol):
 
-	def graphResponseErrback(self, error, url, graphMeta):
-		# call dataprovider errback (diff for diff backends)
-		logger.error("%s" %(str(error)))
+	__activeFetchers = {}
 
-		errResponse = self.dataprovider.responseErrback(error, graphMeta)
-		self.sendMessage(json.dumps(errResponse))
-
-	def _checkResponse(self, respBodyStr, response, url):
-		if response.code < 200 or response.code > 304:
-			logger.warning("Request failed %s response=%s code=%s " %(url, response.code, 
-														"".join(respBodyStr.split("\n"))))
-			m = re_504.search(respBodyStr)
-			if  m != None:
-				return {"error": "response=%s,code=%s" %(m.group(1), response.code)}
-			return {"error": "response=%s,code=%s" %(respBodyStr, response.code)}
-
-		try:
-			d = json.loads(respBodyStr)
-			if isinstance(d, dict) and d.has_key('error'):
-				logger.warning(str(d))
-				return d
-			return {'data': d}
-		except Exception, e:
-			logger.warning("%s %s" %(url, str(e)))
-			return {"error": str(e)}
-
-	def graphResponseCallback(self, respBodyStr, response, url, graphMeta):
-		responseData = self._checkResponse(respBodyStr, response, url)
-		if responseData.has_key('error'):
-			graphMeta['series'][0]['data'] = responseData
-		else:
-			graphMeta['series'][0]['data'] = self.dataprovider.responseCallback(
-											responseData['data'], url, graphMeta)
-			mserie = MetrilyxSerie(graphMeta['series'][0])
-			graphMeta['series'][0]['data'] = mserie.data
-
-		self.sendMessage(json.dumps(graphMeta))
-		logger.info("Response (graph) %s '%s' start: %s" %(graphMeta['_id'], 
-			graphMeta['name'], datetime.fromtimestamp(float(graphMeta['start']))))
+	def __rmActiveFetcher(self, key):
+		if self.__activeFetchers.has_key(key):
+			del self.__activeFetchers[key]
+		logger.info("Active fetchers: %d" %(len(self.__activeFetchers.keys())))
 
 	def processRequest(self, graphRequest):
 		self.submitPerfQueries(graphRequest)
 
 	def submitPerfQueries(self, graphRequest):
-		for serieReq in graphRequest.split():
-			(url, method, query) = self.dataprovider.getQuery(serieReq)
-			
-			logger.info("Partial query (%s): %s" %(serieReq['_id'], url.split("?")[-1]))
-		 	a = AsyncHttpJsonClient(uri=url, method=method, body=query)
-			a.addResponseCallback(self.graphResponseCallback, url, serieReq)
-			a.addResponseErrback(self.graphResponseErrback, url, serieReq)
+		mgf = MetrilyxGraphFetcher(self.dataprovider, graphRequest)
+		self.__activeFetchers[graphRequest.request['_id']] = mgf
 
+		stamp = "%s-%f" %(graphRequest.request['_id'], time.time())
+		
+		mgf.addCompleteCallback(self.completeCallback, stamp)
+		mgf.addCompleteErrback(self.completeErrback, graphRequest.request, stamp)
+		mgf.addPartialResponseCallback(self.partialResponseCallback)
+		mgf.addPartialResponseErrback(self.partialResponseErrback, graphRequest.request)
+
+	def completeCallback(self, *cbargs):
+		(key,) = cbargs
+		self.__rmActiveFetcher(key)
+
+	def completeErrback(self, error, *cbargs):
+		(request, key) = cbargs
+		self.__rmActiveFetcher(key)
+
+		if "CancelledError" not in str(error):
+			logger.error("%s" %(str(error)))
+
+	def partialResponseCallback(self, graph):
+		self.sendMessage(json.dumps(graph))
+		logger.info("Response (graph) %s '%s' start: %s" %(graph['_id'], 
+			graph['name'], datetime.fromtimestamp(float(graph['start']))))
+
+	def partialResponseErrback(self, error, *cbargs):
+		(graphMeta,) = cbargs
+		
+		if "CancelledError" not in str(error):
+			logger.error("%s" %(str(error)))
+			errResponse = self.dataprovider.responseErrback(error, graphMeta)
+			self.sendMessage(json.dumps(errResponse))
+
+
+	def onClose(self, wasClean, code, reason):
+		logger.info("Connection closed: wasClean=%s code=%s reason=%s" %(
+								str(wasClean), str(code), str(reason)))
+
+		for k,d in self.__activeFetchers.items():
+			d.cancelRequests()
+		self.__activeFetchers = {}  
+		
 
 class EventGraphServerProtocol(GraphServerProtocol):
 	eventDataprovider = None
@@ -154,7 +155,7 @@ class EventGraphServerProtocol(GraphServerProtocol):
 			self.submitEventQueries(graphOrAnnoRequest)
 		
 	def eventResponseCallback(self, data, response, url, eventType, request):
-		dct = self._checkResponse(data, response, url)
+		dct = checkHttpResponse(data, response, url)
 		if dct.has_key('error'):
 			logger.error(str(dct))
 			return
