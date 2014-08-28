@@ -5,8 +5,7 @@ var DEFAULT_CHART_OPTS = {
         gridLineWidth: 1,
         gridLineColor: "#ddd",
         minorGridLineColor: '#f8f8f8',
-        minorTickInterval: 'auto',
-        startOnTick: true,
+        startOnTick: false,
     },
     BASIC: {
         colors: [
@@ -85,7 +84,6 @@ var DEFAULT_CHART_OPTS = {
 };
 $.extend(DEFAULT_CHART_OPTS.BASIC, {xAxis: DEFAULT_CHART_OPTS.AXIS}, true);
 $.extend(DEFAULT_CHART_OPTS.BASIC.xAxis, {opposite:true}, true);
-delete DEFAULT_CHART_OPTS.BASIC.xAxis['minorTickInterval'];
 
 function onAnnotationClick(event) {
     var ead = $('#event-anno-details');
