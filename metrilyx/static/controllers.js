@@ -734,27 +734,34 @@ metrilyxControllers.controller('adhocGraphController', [
 		$scope.setURL = function(obj) {
 
 			var outarr = [];
-			for(var s in obj.series) {
+			for(var s=0; s < obj.series.length; s++) {
+				
 				serie = obj.series[s];
 				q = serie.query;
+				
 				var params = q.aggregator+":";
 				if(q.rate) params += "rate:";
+				
 				params += q.metric+"{"
 				tagstr = "";
 				for(var tk in q.tags) {
+
 					if(tk == "") continue;
 					tagstr += tk+":"+q.tags[tk]+","
 				}
+
 				tagstr.replace(/\,$/,'');
 				if(tagstr !== "") {
+
 					params += tagstr;
 				}
-				params += "}";
-				params += "{alias:"+serie.alias;
+
+				params += "}{alias:"+serie.alias;
 				params += ",yTransform:"+serie.yTransform+"}";
 				outarr.push(params);
 			}
-			srch = {
+
+			var srch = {
 				'm': outarr,
 				'thresholds': $scope.graph.thresholds.danger.max + "-" + $scope.graph.thresholds.danger.min +
 					":"+$scope.graph.thresholds.warning.max + "-" + $scope.graph.thresholds.warning.min +
@@ -766,20 +773,23 @@ metrilyxControllers.controller('adhocGraphController', [
 				srch.editMode = "false";
 			}
 			if($scope.timeType === "absolute") {
+				
 				srch.start = $scope.startTime;
 				if($scope.endTime) srch.end = $scope.endTime;
 			} else {
+				
 				srch.start = $scope.timeType;
 			}
 
 			var uAnnoTagsStr = dictToCommaSepStr($scope.globalAnno.tags, ":");
 
 			if($scope.globalAnno.eventTypes.length > 0 && uAnnoTagsStr != "") {
+				
 				srch.annotationTypes = $scope.globalAnno.eventTypes.join("|");
 				srch.annotationTags = uAnnoTagsStr;
 			}
-
-			$location.search($.extend(true, $location.search(), srch));
+			
+			$location.search(srch);
 		}
 		$scope.setAnnotations = function() {
 			annoOptions.applyAnnotationOptions();
