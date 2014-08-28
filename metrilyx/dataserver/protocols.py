@@ -38,11 +38,11 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 	def onOpen(self):
 		logger.info("Connection opened. extensions: %s" %(
 										self.websocket_extensions_in_use))
+		self.factory.addClient(self)
 
 	def onClose(self, wasClean, code, reason):
 		logger.info("Connection closed: wasClean=%s code=%s reason=%s" %(
 								str(wasClean), str(code), str(reason)))
-
 
 	def checkMessage(self, payload, isBinary):
 		if not isBinary:
@@ -61,20 +61,19 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 
 		request_obj = self.checkMessage(payload, isBinary)
 		if not request_obj.get("error"):
-			## all checks passed - proceed
 			try:
 				if request_obj['_id'] == 'annotations':
-					## annotation request
 					logger.info("Annotation Request: %s" %(str(request_obj)))
 					self.processRequest(request_obj)
 				else:
-					## graph request	
+
 					logger.info("Request %s '%s' sub-queries: %d start: %s" %(request_obj['_id'], 
 							request_obj['name'], len(request_obj['series']),
 							datetime.fromtimestamp(float(request_obj['start']))))
 					
 					graphReq = GraphRequest(request_obj)
 					self.processRequest(graphReq)
+			
 			except Exception,e:
 				logger.error(str(e) + " " + str(request_obj))
 		else:
@@ -91,10 +90,16 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 
 	__activeFetchers = {}
 
-	def __rmActiveFetcher(self, key):
+	def __removeFetcher(self, key):
 		if self.__activeFetchers.has_key(key):
 			del self.__activeFetchers[key]
 		logger.info("Active fetchers: %d" %(len(self.__activeFetchers.keys())))
+
+	def __addFetcher(self, key, fetcher):
+		if self.__activeFetchers.has_key(key):
+			logger.warning("Fetcher inprogress: %s" %(key))
+
+		self.__activeFetchers[key] = fetcher
 
 	def processRequest(self, graphRequest):
 		self.submitPerfQueries(graphRequest)
@@ -109,18 +114,18 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		mgf.addPartialResponseCallback(self.partialResponseCallback)
 		mgf.addPartialResponseErrback(self.partialResponseErrback, graphRequest.request)
 
-		self.__activeFetchers[graphRequest.request['_id']] = mgf
+		self.__addFetcher(graphRequest.request['_id'], mgf)
 
 	def completeErrback(self, error, *cbargs):
 		(request, key) = cbargs
-		self.__rmActiveFetcher(key)
+		self.__removeFetcher(key)
 
 		if "CancelledError" not in str(error):
 			logger.error("%s" %(str(error)))
 
 	def completeCallback(self, *cbargs):
 		(graph, key) = cbargs
-		self.__rmActiveFetcher(key)
+		self.__removeFetcher(key)
 		
 		if graph != None:
 			self.sendMessage(json.dumps(graph))
@@ -145,7 +150,9 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 
 		for k,d in self.__activeFetchers.items():
 			d.cancelRequests()
-		self.__activeFetchers = {}  
+			self.__removeFetcher(k)
+
+		self.factory.removeClient(self)
 		
 
 class EventGraphServerProtocol(GraphServerProtocol):

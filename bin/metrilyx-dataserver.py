@@ -25,13 +25,28 @@ from metrilyx.dataserver.dataproviders import getEventDataProvider, \
 
 LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s %(lineno)d] %(message)s"
 
+
+class MetrilyxWebSocketServerFactory(WebSocketServerFactory):
+
+	clients = []
+
+	def addClient(self, client):
+		self.clients.append(client)
+		logger.info("WebSocket clients: %d" %(len(self.clients)))
+
+	def removeClient(self, client):
+		self.clients.remove(client)
+		logger.info("WebSocket clients: %d" %(len(self.clients)))
+
+
 def spawnWebsocketServer(uri, logLevel, protocol, externalPort=None):
 	if logLevel == "DEBUG":
 		isDebug = True
 	else:
 		isDebug = False
 
-	factory = WebSocketServerFactory(uri, debug=isDebug, externalPort=externalPort)
+	#factory = WebSocketServerFactory(uri, debug=isDebug, externalPort=externalPort)
+	factory = MetrilyxWebSocketServerFactory(uri, debug=isDebug, externalPort=externalPort)
 	factory.protocol = protocol
 	factory.setProtocolOptions(perMessageCompressionAccept=acceptedCompression)
 	
