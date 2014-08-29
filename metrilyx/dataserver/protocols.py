@@ -114,7 +114,7 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		mgf.addPartialResponseCallback(self.partialResponseCallback)
 		mgf.addPartialResponseErrback(self.partialResponseErrback, graphRequest.request)
 
-		self.__addFetcher(graphRequest.request['_id'], mgf)
+		self.__addFetcher(stamp, mgf)
 
 	def completeErrback(self, error, *cbargs):
 		(request, key) = cbargs

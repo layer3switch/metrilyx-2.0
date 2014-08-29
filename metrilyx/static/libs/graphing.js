@@ -98,11 +98,13 @@ function onAnnotationClick(event) {
     scope = angular.element($(ead)).scope();
     if(scope) {
         scope.$apply(function(){
-            if(equalObjects(scope.selectedAnno, newAnno) && $(ead).hasClass('open')) {
-                $(ead).removeClass('open');
+            if(equalObjects(scope.selectedAnno, newAnno) && ead.hasClass('open')) {
+                //$(ead).removeClass('open');
+                ead.removeClass('open');
             } else {
                 scope.selectedAnno = newAnno;
-                $(ead).addClass('open');
+                //$(ead).addClass('open');
+                ead.addClass('open');
             }
         });
     } else {
