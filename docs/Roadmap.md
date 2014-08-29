@@ -4,10 +4,11 @@ Roadmap
 ##### v2.3.5 - v2.4.0
 - Metric operatorations i.e. perform math against different series.
 
-##### v2.3.4
+##### v2.3.4 (current)
 - Server side code optimization.
 - Cleanup of pending calls upon client disconnection.
 - Behavioural changes in UI.
+- WebSocket auto re-connect.
 - Various bug fixes.
 
 ##### v2.3.3
