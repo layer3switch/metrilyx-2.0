@@ -5,7 +5,7 @@ import numpy
 from pandas import Series, DataFrame
 from pandas.tseries.tools import to_datetime
 
-from metrilyx.dataserver import QueryUUID, SerieUUID, TagsUUID
+from metrilyx.dataserver.uuids import QueryUUID, SerieUUID, TagsUUID
 
 logger = logging.getLogger(__name__)
 
@@ -145,6 +145,12 @@ class BasicSerie(object):
 			# nanoseconds
 			return pSerie.index.astype(numpy.int64)
 
+	def _dataHasErrors(self, data):
+		if isinstance(data, dict) and data.has_key('error'):
+			return data['error']
+		return False
+
+
 class MetrilyxSerie(BasicSerie):
 	"""
 	This makes an object containing the original series data (request) with the tsdb
@@ -160,15 +166,13 @@ class MetrilyxSerie(BasicSerie):
 		self._dataCallback = dataCallback
 		self.uuid = QueryUUID(self._serie['query'])
 
-		if isinstance(self._serie['data'], dict) and self._serie['data'].get('error'):
-			self.error = self._serie['data'].get('error')
-		else:
-			self.error = False
+		self.error = self._dataHasErrors(self._serie['data'])
+		if not self.error:
 			self.uniqueTagsString = self.__uniqueTagsStr()
 			## assign uuid id's to result dataset
 			for d in self._serie['data']:
 				d['uuid'] = TagsUUID(d['tags']).uuid
-				#d['uuid'] = SerieUUID(d).uuid
+
 			self.__normalizeAliases()
 
 	def __normalizeAliases(self):
@@ -273,8 +277,12 @@ class MetrilyxSerie(BasicSerie):
 
 ### TODO: add error handling on per serie basis
 class MetrilyxAnalyticsSerie(MetrilyxSerie):
-	def __init__(self, serie, dataCallback=None):
-		super(MetrilyxAnalyticsSerie,self).__init__(serie, dataCallback)
+	
+	def __init__(self, serie, graphType="line", dataCallback=None):
+		super(MetrilyxAnalyticsSerie, self).__init__(serie, dataCallback)
+		
+		self.graphType = graphType
+
 		if not self.error:
 			self._istruct = self.__getInternalStruct()
 			self.__applyTransform()
@@ -292,16 +300,59 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 	def __getSerieMetadata(self, serie):
 		return dict([(k,v) for k,v in serie.items() if k != 'dps'])
 
+	def _convertPandasTimestamp(self, timestampObj, unit="ms"):
+		
+		timestamp = timestampObj.value
+		if unit == 's':
+			# seconds
+			return timestamp/1000000000
+		elif unit == 'ms':
+			# milliseconds
+			return timestamp/1000000
+		elif unit == 'us':
+			# microseconds
+			return timestamp/1000
+		else:
+			# nanoseconds
+			return timestamp
+
+
+	def __getDataSerieDps(self, column, ts_unit='ms'):
+		try:
+			if self.graphType == "pie":
+				
+				aggr = self._serie['query']['aggregator']
+				if aggr == "avg":
+					return [[eval("self._convertPandasTimestamp(column.idxmean(), ts_unit)"), eval("column.mean()")]]
+				elif aggr == "sum":
+					return [[ eval("self._convertPandasTimestamp(column.index[-1])"), eval("column.%s()" %(aggr))]]
+				else:
+					return [[eval("self._convertPandasTimestamp(column.idx%s(), ts_unit)" %(aggr)), 
+																	eval("column.%s()" %(aggr))]]
+
+			else:
+				nonNaSerie = column.replace([numpy.inf, -numpy.inf], numpy.nan).dropna()
+				return zip(self._getConvertedTimestamps(nonNaSerie, ts_unit), nonNaSerie.values)
+
+		except Exception,e:
+			logger.warning(str(e))
+			return {"error": str(e)}
+
 	def data(self, ts_unit='ms'):
-		if self.error: return { "error": self.error }
+		if self.error: return { 'error': self.error }
+		
 		out = []
 		for s in self._serie['data']:
 			md = self.__getSerieMetadata(s)
-			## clean out infinity and nan
-			nonNaSerie = self._istruct[s['uuid']].replace([numpy.inf, -numpy.inf], numpy.nan).dropna()
-			md['dps'] = zip(self._getConvertedTimestamps(nonNaSerie, ts_unit), 
-															nonNaSerie.values)
-			md['uuid'] = SerieUUID(s).uuid
+
+			datapoints = self.__getDataSerieDps(self._istruct[s['uuid']], ts_unit) 
+			error = self._dataHasErrors(datapoints)
+			if not error:
+				md['dps'] = datapoints
+				md['uuid'] = SerieUUID(s).uuid
+			else:
+				#s = {'error': error}
+				logger.warning("Error assembling data: %s" %(str(e)))
 			out.append(md)
 
 		return out
@@ -356,6 +407,7 @@ class SecondariesGraph(BasicSerie):
 
 	def __makeSecondaryGraphs(self, ts_unit):
 		istructs = [s._istruct for s in self.__analyticsSeriess]
+
 		for sec in self.__request['secondaries']:
 			try:
 				istruct = eval("%s" %(sec['query']))(*istructs)

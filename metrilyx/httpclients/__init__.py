@@ -355,7 +355,7 @@ class MetrilyxGraphFetcher(object):
             gmeta['series'][0]['data'] = self.__dataprovider.responseCallback(
                                             respData['data'], url, gmeta)
 
-        mas = MetrilyxAnalyticsSerie(gmeta['series'][0])
+        mas = MetrilyxAnalyticsSerie(gmeta['series'][0], graphType=gmeta['graphType'])
         
         if self.containsSecondaries:
             self.__secondariesGraph.add(mas)
