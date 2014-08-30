@@ -5,6 +5,8 @@ INSTALL_TIME=$(date '+%d%b%Y_%H%M%S');
 APP_HOME="${INSTALL_ROOT}/metrilyx";
 LOGDIR="/var/log/metrilyx"
 
+NGX_CFG_DIR="/etc/nginx/conf.d"
+
 if [[ -f "/etc/redhat-release" ]]; then
 	HTTPD="nginx"
 	HTTP_USER="nginx"
@@ -90,8 +92,13 @@ init_configs() {
 	${EDITOR:-vi} ${APP_HOME}/metrilyx/static/config.js;
 }
 configure_webserver() {
+
 	echo "- Installing web components..."
-	cp -fv etc/nginx/conf.d/metrilyx.conf /etc/nginx/conf.d/;
+	cp -fv etc/nginx/conf.d/metrilyx.conf $NGX_CFG_DIR;
+	if [ -f "${NGX_CFG_DIR}/default.conf" ]; then 
+		echo "  - Disabling default nginx conf: ${NGX_CFG_DIR}/default.conf"
+		mv $NGX_CFG_DIR/default.conf ${NGX_CFG_DIR}/default.conf.disabled
+	fi
 	chown -R $HTTP_USER ${APP_HOME};
 }
 ## BEGIN cli args
