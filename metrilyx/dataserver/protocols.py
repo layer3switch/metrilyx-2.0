@@ -19,12 +19,27 @@ from pprint import pprint
 
 logger = logging.getLogger(__name__)
 
+
+
+def writeRequestLogLine(request_obj):
+	logger.info("Request type=%s, name='%s', sub-queries=%d, id=%s, start='%s'" %(
+		request_obj['graphType'], request_obj['name'], len(request_obj['series']), 
+		request_obj['_id'], datetime.fromtimestamp(float(request_obj['start']))))
+
+
+def writeResponseLogLine(graph):
+	logger.info("Response type=%s, id=%s, name='%s', start='%s'" %(
+						graph['graphType'], graph['_id'],  graph['name'], 
+					datetime.fromtimestamp(float(graph['start']))))
+
+
 ## Enable WebSocket extension "permessage-deflate".
 ## Function to accept offers from the client ..
 def acceptedCompression(offers):
 	for offer in offers:
 		if isinstance(offer, PerMessageDeflateOffer):
 			return PerMessageDeflateOfferAccept(offer)
+
 
 class BaseGraphServerProtocol(WebSocketServerProtocol):
 	'''
@@ -66,10 +81,7 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 					logger.info("Annotation Request: %s" %(str(request_obj)))
 					self.processRequest(request_obj)
 				else:
-
-					logger.info("Request %s '%s' sub-queries: %d start: %s" %(request_obj['_id'], 
-							request_obj['name'], len(request_obj['series']),
-							datetime.fromtimestamp(float(request_obj['start']))))
+					writeRequestLogLine(request_obj)
 					
 					graphReq = GraphRequest(request_obj)
 					self.processRequest(graphReq)
@@ -132,10 +144,10 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 			logger.info("Reponse (secondaries graph) %s '%s' start: %s" %(graph['_id'], 
 					graph['name'], datetime.fromtimestamp(float(graph['start']))))
 
+
 	def partialResponseCallback(self, graph):
 		self.sendMessage(json.dumps(graph))
-		logger.info("Response (graph) %s '%s' start: %s" %(graph['_id'], 
-			graph['name'], datetime.fromtimestamp(float(graph['start']))))
+		writeResponseLogLine(graph)
 
 	def partialResponseErrback(self, error, *cbargs):
 		(graphMeta,) = cbargs
