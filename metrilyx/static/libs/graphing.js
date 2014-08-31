@@ -50,9 +50,15 @@ var DEFAULT_CHART_OPTS = {
                 marker:{
                     radius:0
                 }
+            },
+            column : {
+                pointPadding: 0.1,
+                borderWidth: 0,
+                groupPadding: 0,
+                shadow: false
             }
         },      
-        title: {text: ''},
+        title: {text: null},
         legend: {
             enabled: true,
             align: 'center',
@@ -131,9 +137,19 @@ function MetrilyxGraph(graphObj, timeWin) {
         this.hasSecondaries = false;
     }
 }
+
 MetrilyxGraph.prototype.isPieChart = function() {
     return this._graphData.graphType === "pie";
 }
+
+MetrilyxGraph.prototype.isColumnChart = function() {
+    return this._graphData.graphType === "column";
+}
+
+MetrilyxGraph.prototype.isBarChart = function() {
+    return this._graphData.graphType === "bar";
+}
+
 MetrilyxGraph.prototype.dataHasErrors = function() {
     var series = this._graphData.series;
     for(var s=0; s < series.length; s++) {
@@ -165,6 +181,7 @@ MetrilyxGraph.prototype.dataHasErrors = function() {
 MetrilyxGraph.prototype.createHighChart = function(options, type) {
     if(type !== undefined) {
 
+        /* StockChart */
         this._domNode.highcharts(type, options);
     } else {
 
@@ -177,7 +194,7 @@ MetrilyxGraph.prototype.newChart = function() {
     
     if(!this.dataHasErrors(this._graphData)) {
         var copts = new ChartOptions(this._graphData);
-        if(this.isPieChart()) {
+        if(this.isPieChart() || this.isColumnChart() || this.isBarChart()) {
             this.createHighChart(copts.chartDefaultsForType());
         } else {
             Highcharts.setOptions({ global: { useUTC: false } });
@@ -322,6 +339,7 @@ MetrilyxGraph.prototype.getHighchartsFormattedSerie = function (data, query, ind
     }
     return params;
 };
+
 MetrilyxGraph.prototype.findSerieIndexInChart = function(serie) {
     var chartSeries = this._chart.series;
     for(var c=0; c < chartSeries.length; c++) {
@@ -454,6 +472,7 @@ function ChartOptions(metGraphObj, flagSeries) {
 ChartOptions.prototype.chartDefaults = function() {
     return $.extend({},DEFAULT_CHART_OPTS.BASIC);
 }
+
 ChartOptions.prototype.pieChartDefaults = function(extraOpts) {
     return $.extend(true, {}, this.chartDefaults(), {
         chart: {
@@ -481,6 +500,28 @@ ChartOptions.prototype.pieChartDefaults = function(extraOpts) {
         },
         series: this._sfmt.pieSeries()
     }, extraOpts);
+}
+ChartOptions.prototype.columnChartDefaults = function(extraOpts) {
+    return $.extend(true, {}, this.chartDefaults(extraOpts), 
+        { 
+            chart: { type: 'column' },
+            legend: { enabled: false },
+            yAxis: {
+                title: { text: null}
+            }
+        },
+        this._sfmt.columnSeries());
+}
+ChartOptions.prototype.barChartDefaults = function(extraOpts) {
+    return $.extend(true, {}, this.chartDefaults(extraOpts), 
+        { 
+            chart: { type: 'bar' },
+            legend: { enabled: false },
+            yAxis: {
+                title: { text: null}
+            }
+        },
+        this._sfmt.barSeries());
 }
 /*
     Determine if plot bands are applicable.
@@ -600,6 +641,12 @@ ChartOptions.prototype.chartDefaultsForType = function(extraOpts) {
         case "spline":
             return this.splineChartDefaults(extraOpts);
             break;
+        case "column":
+            return this.columnChartDefaults(extraOpts);
+            break;
+        case "bar":
+            return this.barChartDefaults(extraOpts);
+            break;
         default:
             return this.lineChartDefaults(extraOpts);
             break;
@@ -681,16 +728,68 @@ SeriesFormatter.prototype.lineSeries = function(isMultiPane) {
     }
     return out;
 }
+
+SeriesFormatter.prototype.columnSeries = function() {
+
+    var columnMap = {};
+
+    for(var i=0; i < this.metSeries.length; i++) {
+        
+        var currSerie = this.metSeries[i];
+        for(var j=0; j < currSerie.data.length; j++) {
+            
+            var dataSerie = currSerie.data[j];
+            var selData;
+            if(dataSerie.dps.length < 1) {
+                
+                console.log("(bar) No data for:", dataSerie.alias);
+                selData = 0;
+            } else {
+
+                selData = dataSerie.dps[0][1];
+            }
+            if(columnMap[dataSerie.alias] !== undefined) {
+                columnMap[dataSerie.alias].push(selData)
+            } else { 
+                columnMap[dataSerie.alias] = [selData];
+            }
+        }
+    }
+
+    var xAxisCats = [];
+    var d1 = [];
+    for(var k in columnMap) {
+        xAxisCats.push(k);
+        d1.push(columnMap[k][0]);
+    }
+
+    return { 
+        xAxis: { 
+            categories: xAxisCats,
+        }, 
+        series: [{data: d1}]
+    }
+}
+
+SeriesFormatter.prototype.barSeries = function() {
+    return this.columnSeries();
+}
 SeriesFormatter.prototype.pieSeries = function() {
+    
     var pieData = [];
     for(var i=0; i < this.metSeries.length; i++) {
-        for(var d=0; d < this.metSeries[i].data.length; d++){
-            //dps = this.metSeries[i].data[d].dps;
-            if(this.metSeries[i].data[d].dps.length <=0) {
-                console.warn("(pie) No data for:", this.metSeries[i].alias);
+        
+        var currSerie = this.metSeries[i];
+        for(var d=0; d < currSerie.data.length; d++){
+            
+            var dataSerie = currSerie.data[d];
+            if(dataSerie.dps.length <=0) {
+                
+                console.warn("(pie) No data for:", currSerie.alias);
             } else {
+                
                 pieData.push(MetrilyxGraph.prototype.getHighchartsFormattedPieSerie(
-                                        this.metSeries[i].data[d], this.metSeries[i].query));
+                                        dataSerie, currSerie.query));
             }
         }
     }

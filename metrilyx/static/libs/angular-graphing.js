@@ -203,7 +203,6 @@ angular.module('graphing', [])
 				}
 			}
 
-
 			// only get series data that is not in 'querying' state //
 			function getSeriesInNonQueryState(series) {
 				out = [];
@@ -271,7 +270,6 @@ angular.module('graphing', [])
 
 				setSerieStatus(data, 'loaded');
 			}
-
 
 			//exposed public method
 			t.setSerieStatus =  setSerieStatus;
