@@ -319,13 +319,13 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 
 	def __getDataSerieDps(self, column, ts_unit='ms'):
 		try:
-			if self.graphType == "pie":
+			if self.graphType in ("pie", "column"):
 				
 				aggr = self._serie['query']['aggregator']
 				if aggr == "avg":
-					return [[eval("self._convertPandasTimestamp(column.idxmean(), ts_unit)"), eval("column.mean()")]]
+					return [[eval("self._convertPandasTimestamp(column.index[-1], ts_unit)"), eval("column.mean()")]]
 				elif aggr == "sum":
-					return [[ eval("self._convertPandasTimestamp(column.index[-1])"), eval("column.%s()" %(aggr))]]
+					return [[ eval("self._convertPandasTimestamp(column.index[-1], ts_unit)"), eval("column.%s()" %(aggr))]]
 				else:
 					return [[eval("self._convertPandasTimestamp(column.idx%s(), ts_unit)" %(aggr)), 
 																	eval("column.%s()" %(aggr))]]
