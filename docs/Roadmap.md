@@ -2,7 +2,10 @@ Roadmap
 =======
 
 ##### v2.4.0 (current)
-- Metric operatorations i.e. perform math against different series.
+- Cross metric operations i.e. perform math against metrics to create secondary metrics.
+- Perform complex operations on time series data for statistical analysis.
+- Additional graph types: bar and column.
+- Correctly apply aggregator for bar, column and pie graphs.
 
 ##### v2.3.4
 - Server side code optimization.
