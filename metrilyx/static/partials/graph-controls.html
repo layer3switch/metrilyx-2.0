@@ -6,29 +6,6 @@
 	</div>-->
 	<div ng-model="graph._id" tooltip-arrow width="30" height="12" color="rgba(95,95,95,0.92)" direction="up" style="position:relative;left:2px;"></div>
 	<div style="background:rgba(95,95,95,0.92);border-radius:2px;padding:5px">
-		<div class="padlr5 padtb6" style="border-bottom:1px solid #505050;">
-			<span class="padr5">
-				<span class="small"><b>Size :</b></span>
-				<select ng-model="graph.size" ng-change="reflow()" class="dark">
-					<option value="small">small</option>
-					<option value="medium">medium</option>
-					<option value="large">large</option>
-				</select>
-			</span>
-			<span class="padl5">
-				<span class="small"><b>Type :</b></span>
-				<select ng-model="graph.graphType" class="dark"> 
-					<option value="area">area</option>
-					<option value="bar">bar</option>
-					<option value="column">column</option>
-					<option value="line">line</option>
-					<option value="pie">pie</option>
-					<option value="spline">spline</option>
-					<option value="stacked">stacked</option>
-						
-				</select>
-			</span>
-		</div>
 		<div ng-if="1===0" style="border-top:1px solid #777">
 			<div class="padlr10 padtb6 pointer interactive" onclick="$('.graph-control-details').hide();$(this).next().toggle()">
 				<span>Annotations</span>

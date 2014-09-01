@@ -6,13 +6,15 @@
 			</div>
 		</div>
 		<div class="input-group input-group-sm text-center padtb5" style="width:100%">
-			<a href="javascript:void(0)" class="input-group-addon nobg interactive" onclick="$(this).next().toggle()">
-				<i class="glyphicon glyphicon-cog" style="font-size:14px;"></i>
-			</a>
-			<div ng-include="graphControlsHtml" data-graph-controls="{{graph._id}}"></div>
+			<div ng-if="isTimeSeriesGraph(graph.graphType)">
+				<a href="javascript:void(0)" class="input-group-addon nobg interactive" onclick="$(this).next().toggle()">
+					<i class="glyphicon glyphicon-cog" style="font-size:14px;color:#888"></i>
+				</a>
+				<div ng-include="graphControlsHtml" data-graph-controls="{{graph._id}}"></div>
+			</div>
 			<span class="form-control" style="border:none;box-shadow:none"><strong>{{graph.name}}</strong></span>
 			<span class="input-group-addon nobg interactive" ng-click="reloadGraph(graph);" title="Refresh">
-				<i class="glyphicon glyphicon-refresh interactive" style="font-size:12px;color:#666;font-weight:bold"></i>
+				<i class="glyphicon glyphicon-refresh interactive" style="font-size:12px;color:#888;font-weight:bold"></i>
 			</span>
 		</div>
 		<div class="graph {{graph.size}} text-center animated"  style="width:99.9%" data-graph-id="{{graph._id}}" ui-sortable ng-model="graph.series">
@@ -23,7 +25,7 @@
 		<!-- graph footer -->
 		<div class="row" style="margin:0;padding-bottom:5px;">
 			<div class="col-md-2">
-				<span class="btn-group metrics-loaded-list dropup">
+				<span class="btn-group metrics-loaded-list dropup padt5 padl4">
 					<span class="metric-loaded-btn interactive" data-toggle="dropdown" title="Metrics successfully loaded">{{graph|loadedSeries}} / {{graph.series.length}}</span>
 					<ul class="dropdown-menu bottom-shadow metric-status">
 						<li ng-repeat="serie in graph.series" class="padlr10 padtb3">
@@ -32,8 +34,26 @@
 			        </ul>
 		        </span>
 			</div>
-			<div class="col-md-10">
+			<div class="col-md-7">
 				<span data-graph-status="{{graph._id}}"></span>
+			</div>
+			<div class="col-md-3 text-right">
+				<span class="padr8">
+					<select ng-model="graph.size" ng-change="reflow()" dir="rtl" style="border:none;color:#888;font-weight:bold" class="interactive">
+						<option value="small">Small</option>
+						<option value="medium">Medium</option>
+						<option value="large">Large</option>
+					</select>
+					<select ng-model="graph.graphType" dir="rtl" style="border:none;color:#888;font-weight:bold" class="interactive"> 
+						<option value="area">Area</option>
+						<option value="bar">Bar</option>
+						<option value="column">Column</option>
+						<option value="line">Line</option>
+						<option value="pie">Pie</option>
+						<option value="spline">Spline</option>
+						<option value="stacked">Stacked</option>
+					</select>
+				</span>
 			</div>
 		</div>
 		<!-- graph controls overlayed on top of graph -->

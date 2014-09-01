@@ -241,6 +241,10 @@ metrilyxControllers.controller('pageController', [
    			}
        		return out;
 		}
+		$scope.isTimeSeriesGraph = function(graphType) {
+			return !(graphType === 'pie' ||graphType === 'column' || graphType === 'bar');
+		}
+
 		$scope.requestData = function(query) {
 			wsdp.requestData(query);
 		}
