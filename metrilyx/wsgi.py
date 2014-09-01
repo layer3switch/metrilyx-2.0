@@ -25,10 +25,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 # Temp directory for matplotlib
-if not os.path.exists(config['tmpdir']):
-	os.mdkir(tmpdir, 0777)
+if not config['debug'] and not os.path.exists(config['tmpdir']):
+	os.mkdir(config['tmpdir'], 0777)
 
-os.environ["MPLCONFIGDIR"] = tmpdir
+os.environ["MPLCONFIGDIR"] = config['tmpdir']
 
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks
 # if running multiple sites in the same mod_wsgi process. To fix this, use
