@@ -806,7 +806,7 @@ div.graphs [class*='col-md-'] {
 	height: 500px;
 }
 .graph-error {
-	color: #ff0000;
+	color: #E82C0C;
 	font-size: 12px !important;
 }
 .gif-loader-table {
@@ -1324,7 +1324,11 @@ input.threshold-input.wide {
 }
 .metrics-loaded-list.dropup:hover .dropdown-menu {
     display: block;  
- }
+}
+span[data-graph-status].errors-list:hover .dropdown-menu {
+ 	display: block;
+}
+
 .dropdown-menu.noshadow {
 	box-shadow: none !important;
 }
@@ -1383,6 +1387,7 @@ li[ng-repeat="tagvalue in tagvalues|orderBy:'toString()'"]:last-child > a {
 }
 .dropdown-menu.sp-page-controls,
 .dropdown-menu.page-controls,
+[data-graph-error].dropdown-menu,
 .dropdown-menu.metric-status {
 	margin-bottom:5px;
 	margin-top:5px;

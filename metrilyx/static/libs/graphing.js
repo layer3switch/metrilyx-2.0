@@ -154,7 +154,11 @@ function MetrilyxGraph(graphObj, timeWin) {
     this._graphId   = graphObj._id;
     this._graphData = graphObj;
     this._domNode   = $("[data-graph-id='" + this._graphId + "']");
+    
     this._statusNode = $("[data-graph-status='"+this._graphId+"']");
+    this._errMsgNode = this._statusNode.find("[data-graph-error='"+this._graphId+"']");
+    this._errIconNode = this._statusNode.find("[data-toggle='dropdown']");
+
     this._chart     = this._domNode.highcharts();
     this.timeWindow = timeWin;
 
@@ -192,14 +196,16 @@ MetrilyxGraph.prototype.dataHasErrors = function() {
             var error = currentSerie.data.error;
             var msg   = error.message ? error.message.substring(0, 150) + "..." : error.substring(0, 100) + "...";
             
-            this._statusNode.html("<span class='graph-error'>"+currentSerie.query.metric+": "+msg+"</span>");
+            this._errIconNode.css("color", "#FF9240");
+            this._errMsgNode.html("<li class='pad5'><span>"+msg+"</span></li>");
+
             return { "error": { 
                 "message": msg, 
                 "metric": currentSerie.query.metric 
             }};
         }
     }
-    this._statusNode.html("");
+    //this._statusNode.html("");
     return false;
 }
 /**
