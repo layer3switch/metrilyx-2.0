@@ -32,10 +32,9 @@ var DEFAULT_CHART_OPTS = {
             pie: {
                 innerSize: '50%',
                 allowPointSelect: true,
-                cursor: 'pointer',
                 dataLabels: {
                     enabled: true,
-                    format: '<b>{point.name}</b>: {point.y:.2f}<br/>{point.percentage:.2f}%'
+                    format: '<b>{point.name}</b><br/>{point.y:.2f} ( {point.percentage:.2f}% )'
                 }
             },
             area: {
@@ -114,7 +113,7 @@ var NON_TS_TOOLTIP_OPTS = {
         shadow: false,
         borderColor: '#666',
         backgroundColor: 'rgba(90,90,90,0.9)',
-        pointFormat: '<div class="text-right"><span style="color:{series.color}">{series.name}: </span><b>{point.y}</b></div>',
+        pointFormat: '<div class="text-right"><span style="color:{series.color}">{series.name}:  </span><b>{point.y}</b></div>',
         style: {
             color: '#ddd',
             fontSize: '11px'
@@ -632,6 +631,7 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
             enabled: false
         }
     }, extraOpts);
+
     if(this._graph.multiPane) {
         h = 100/this._graph.panes.length;
         hstr = h.toString();
