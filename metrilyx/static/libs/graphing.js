@@ -88,6 +88,39 @@ var DEFAULT_CHART_OPTS = {
         credits: {enabled: false}
     }
 };
+
+var PIE_TOOLTIP_OPTS = {
+    tooltip: {
+        useHTML: true,
+        shared: true,
+        shadow: false,
+        borderColor: '#666',
+        backgroundColor: 'rgba(90,90,90,0.9)',
+        formatter: function() {
+            var s = '<span style="color:'+this.point.color+'">'+this.point.name+'</span><br/>';
+            s += '<table style="margin-top:5px;font-weight:bold;font-size:11px;color:#ddd"><tr><td>'+this.point.y+'</td></tr></table>';
+            return s;
+        },
+        style: {
+            color: '#ddd',
+            fontSize: '11px'
+        }
+    }
+};
+var NON_TS_TOOLTIP_OPTS = {
+    tooltip: {
+        useHTML: true,
+        shared: true,
+        shadow: false,
+        borderColor: '#666',
+        backgroundColor: 'rgba(90,90,90,0.9)',
+        pointFormat: '<div class="text-right"><span style="color:{series.color}">{series.name}: </span><b>{point.y}</b></div>',
+        style: {
+            color: '#ddd',
+            fontSize: '11px'
+        }
+    }
+};
 $.extend(DEFAULT_CHART_OPTS.BASIC, {xAxis: DEFAULT_CHART_OPTS.AXIS}, true);
 $.extend(DEFAULT_CHART_OPTS.BASIC.xAxis, {opposite:true}, true);
 
@@ -193,12 +226,16 @@ MetrilyxGraph.prototype.createHighChart = function(options, type) {
 MetrilyxGraph.prototype.newChart = function() {
     
     if(!this.dataHasErrors(this._graphData)) {
+        
         var copts = new ChartOptions(this._graphData);
         if(this.isPieChart() || this.isColumnChart() || this.isBarChart()) {
+            
             this.createHighChart(copts.chartDefaultsForType());
         } else {
+            
             Highcharts.setOptions({ global: { useUTC: false } });
             Highcharts.seriesTypes.line.prototype.drawPoints = function() {};
+            
             this.createHighChart(copts.chartDefaultsForType(), "StockChart");
         }
     } 
@@ -276,6 +313,26 @@ MetrilyxGraph.prototype.upsertLineBasedSeries = function() {
         }
     }
 }
+MetrilyxGraph.prototype.upsertBarBasedSeries = function() {
+
+    var sf = new SeriesFormatter(this._graphData.series);  
+    var newSeriesData = sf.barSeries();
+    for(var i=0; i < newSeriesData.series.length; i++) {
+
+        var currSerie  = newSeriesData.series[i];
+        var chartSerie = this._chart.get(currSerie.id);
+
+        if(chartSerie === null) {
+            
+            this._chart.addSeries(currSerie, false);
+        } else {
+            
+            chartSerie.setData(currSerie.data, false);
+        }
+
+    }
+  
+}
 /*
  * Add or update series with new data
  *  args:   Graph data
@@ -284,14 +341,20 @@ MetrilyxGraph.prototype.upsertLineBasedSeries = function() {
  * @return bool Should redraw graph
  */
 MetrilyxGraph.prototype.upsertSeries = function() {
+    
     if(this._chart === undefined) {
-        console.log("graph uninitialized: not upserting. name", 
-            this._graphData.name, "type", this._graphData.graphType,"_id", this._graphId);
+        
+        console.log("Graph uninitialized: Not upserting: name=", this._graphData.name, 
+                                "type=", this._graphData.graphType,"_id", this._graphId);
         return false;
-    }
-    if(this.isPieChart()) {
+    } else if(this.isPieChart()) {
+        
         this.upsertPieSeries();
+    } else if(this.isBarChart() || this.isColumnChart()) {
+        
+        this.upsertBarBasedSeries();
     } else {
+        
         this.upsertLineBasedSeries();
     }
     return true;
@@ -318,7 +381,7 @@ MetrilyxGraph.prototype.applyData = function() {
  */
 MetrilyxGraph.prototype.getHighchartsFormattedPieSerie = function (data,  query) {
 
-    return { name: data.alias, y: data.dps[0][1], tags: data.tags, query: query };
+    return { name: data.alias, y: data.dps[0][1], tags: data.tags, query: query, id: data.uuid };
 };
 
 /**
@@ -332,7 +395,7 @@ MetrilyxGraph.prototype.getHighchartsFormattedPieSerie = function (data,  query)
  */
 MetrilyxGraph.prototype.getHighchartsFormattedSerie = function (data, query, index) {
 
-    var params = { lineWidth: 1, name: data.alias, data: data.dps, query: query, tags: data.tags };
+    var params = { lineWidth: 1, name: data.alias, data: data.dps, query: query, tags: data.tags, id: data.uuid };
     if(index) {
 
         params.yAxis = parseInt(index);
@@ -482,24 +545,8 @@ ChartOptions.prototype.pieChartDefaults = function(extraOpts) {
             spacingTop: 5
         },
         legend: { enabled: false },
-        tooltip: {
-            useHTML: true,
-            shared: true,
-            shadow: false,
-            borderColor: '#666',
-            backgroundColor: 'rgba(90,90,90,0.9)',
-            formatter: function() {
-                var s = '<span style="color:'+this.point.color+'">'+this.point.name+'</span><br/>';
-                s += '<table style="margin-top:5px;font-weight:bold;font-size:11px;color:#ddd"><tr><td>'+this.point.y+'</td></tr></table>';
-                return s;
-            },
-            style: {
-                color: '#ddd',
-                fontSize: '11px'
-            }
-        },
         series: this._sfmt.pieSeries()
-    }, extraOpts);
+    }, PIE_TOOLTIP_OPTS, extraOpts);
 }
 ChartOptions.prototype.columnChartDefaults = function(extraOpts) {
     return $.extend(true, {}, this.chartDefaults(extraOpts), 
@@ -510,6 +557,7 @@ ChartOptions.prototype.columnChartDefaults = function(extraOpts) {
                 title: { text: null}
             }
         },
+        NON_TS_TOOLTIP_OPTS,
         this._sfmt.columnSeries());
 }
 ChartOptions.prototype.barChartDefaults = function(extraOpts) {
@@ -521,6 +569,7 @@ ChartOptions.prototype.barChartDefaults = function(extraOpts) {
                 title: { text: null}
             }
         },
+        NON_TS_TOOLTIP_OPTS,
         this._sfmt.barSeries());
 }
 /*
@@ -700,7 +749,7 @@ SeriesFormatter.prototype.lineSeries = function(isMultiPane) {
             for(var d=0; d < this.metSeries[i].data.length; d++) {
 
                 out.push({
-                    uuid: this.metSeries[i].data[d].uuid,
+                    id: this.metSeries[i].data[d].uuid,
                     query: this.metSeries[i].query,
                     tags: this.metSeries[i].data[d].tags,
                     name: this.metSeries[i].data[d].alias,
@@ -716,7 +765,7 @@ SeriesFormatter.prototype.lineSeries = function(isMultiPane) {
             for(var d=0; d < this.metSeries[i].data.length; d++) {
 
                 out.push({
-                    uuid: this.metSeries[i].data[d].uuid,
+                    id: this.metSeries[i].data[d].uuid,
                     query: this.metSeries[i].query,
                     tags: this.metSeries[i].data[d].tags,
                     name: this.metSeries[i].data[d].alias,
@@ -736,44 +785,56 @@ SeriesFormatter.prototype.columnSeries = function() {
     for(var i=0; i < this.metSeries.length; i++) {
         
         var currSerie = this.metSeries[i];
+
+        if(!columnMap[currSerie.query.metric]) { columnMap[currSerie.query.metric] = {}; }
+            
+        var currColMap = columnMap[currSerie.query.metric];
+
         for(var j=0; j < currSerie.data.length; j++) {
             
-            var dataSerie = currSerie.data[j];
             var selData;
+            var dataSerie = currSerie.data[j];
             if(dataSerie.dps.length < 1) {
                 
                 console.log("(bar) No data for:", dataSerie.alias);
-                selData = 0;
+                currColMap[dataSerie.alias] = 0;
             } else {
 
-                selData = dataSerie.dps[0][1];
-            }
-            if(columnMap[dataSerie.alias] !== undefined) {
-                columnMap[dataSerie.alias].push(selData)
-            } else { 
-                columnMap[dataSerie.alias] = [selData];
+                currColMap[dataSerie.alias] = dataSerie.dps[0][1];
             }
         }
     }
 
-    var xAxisCats = [];
-    var d1 = [];
+    var keys = [];
+    for(var x in columnMap) {
+        for(var ck in columnMap[x]) keys.push(ck); 
+        break;    
+    }   
+    keys.sort();
+
+    var newMap = {};
     for(var k in columnMap) {
-        xAxisCats.push(k);
-        d1.push(columnMap[k][0]);
+
+        var currMap = columnMap[k];
+
+        var vals = []
+        for(var i=0; i< keys.length; i++) vals.push(currMap[keys[i]]);
+        newMap[k] = {data: vals, name: k};
     }
 
+    var seriesData = [];
+    for(var y in newMap) seriesData.push($.extend({}, newMap[y], {id: y}));
     return { 
-        xAxis: { 
-            categories: xAxisCats,
-        }, 
-        series: [{data: d1}]
+        xAxis: { categories: keys }, 
+        series: seriesData
     }
 }
 
 SeriesFormatter.prototype.barSeries = function() {
+    
     return this.columnSeries();
 }
+
 SeriesFormatter.prototype.pieSeries = function() {
     
     var pieData = [];

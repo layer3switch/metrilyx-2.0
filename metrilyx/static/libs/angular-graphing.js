@@ -191,12 +191,16 @@ angular.module('graphing', [])
 
 			function setSerieStatus(newData, status) {
 				/* status order: querying, updating, loading, loaded, error */
-				for (var ns in newData.series) {
-					for (var ms in ngModel.$modelValue.series) {
-						qgt = $.extend(true, {}, ngModel.$modelValue.series[ms].query);
+				for (var ns=0; ns < newData.series.length; ns++) {
+					for (var ms=0; ms < ngModel.$modelValue.series.length; ms++) {
+
+						var mdlSerie = ngModel.$modelValue.series[ms];
+						
+						var qgt = $.extend(true, {}, mdlSerie.query);
 						$.extend(qgt.tags, scope.globalTags, true);
+						
 						if (equalObjects(qgt, newData.series[ns].query)) {
-							ngModel.$modelValue.series[ms].status = status;
+							mdlSerie.status = status;
 							break;
 						}
 					}
@@ -208,8 +212,11 @@ angular.module('graphing', [])
 				out = [];
 				for (var ns in series) {
 					for (var ms in ngModel.$modelValue.series) {
-						if (equalObjects(ngModel.$modelValue.series[ms].query, series[ns].query)) {
-							if (ngModel.$modelValue.series[ms].status === undefined || ngModel.$modelValue.series[ms].status !== 'querying') {
+
+						var mdlSerie = ngModel.$modelValue.series[ms];
+						if (equalObjects(mdlSerie.query, series[ns].query)) {
+							
+							if (mdlSerie.status === undefined || mdlSerie.status !== 'querying') {
 								out.push(series[ns]);
 								break;
 							}
@@ -220,10 +227,20 @@ angular.module('graphing', [])
 			}
 
 			function getUpdateQuery() {
-				bq = scope.baseQuery(ngModel.$modelValue);
-				bq.start = Math.floor(((new Date()).getTime() - METRIC_FETCH_TIME_WIN) / 1000);
-				delete bq['end'];
-				bq.series = ngModel.$modelValue.series;
+				
+				var modelVal = ngModel.$modelValue;
+				
+				var bq = scope.baseQuery(ngModel.$modelValue);
+				bq.series = modelVal.series;
+
+				if(modelVal.graphType === 'pie' || modelVal.graphType === 'bar' || modelVal.graphType === 'column') {
+
+					// Must query the complete window as this is analyzed //
+				} else {
+					bq.start = Math.floor(((new Date()).getTime() - METRIC_FETCH_TIME_WIN) / 1000);
+					delete bq['end'];
+				}
+
 				return bq;
 			}
 
@@ -233,7 +250,9 @@ angular.module('graphing', [])
 					scope.requestData(q);
 					setSerieStatus(q, 'updating');
 				}
+				
 				if (currTimer) clearTimeout(currTimer);
+				
 				currTimer = setTimeout(function() {
 					getUpdates();
 				}, METRIC_POLL_INTERVAL);
