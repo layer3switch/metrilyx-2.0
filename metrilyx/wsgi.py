@@ -16,12 +16,19 @@ framework.
 import os
 import sys
 
+from metrilyxconfig import config
+
 # The 2 paths below need to be added for the .settings module to be recognized.
 # site path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 # app path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
+# Temp directory for matplotlib
+if not os.path.exists(config['tmpdir']):
+	os.mdkir(tmpdir, 0777)
+
+os.environ["MPLCONFIGDIR"] = tmpdir
 
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks
 # if running multiple sites in the same mod_wsgi process. To fix this, use
