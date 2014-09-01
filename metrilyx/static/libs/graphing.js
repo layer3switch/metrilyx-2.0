@@ -157,15 +157,9 @@ function MetrilyxGraph(graphObj, timeWin) {
     
     this._statusNode = $("[data-graph-status='"+this._graphId+"']");
     this._errMsgNode = this._statusNode.find("[data-graph-error='"+this._graphId+"']");
-    this._errIconNode = this._statusNode.find("[data-toggle='dropdown']");
 
     this._chart     = this._domNode.highcharts();
     this.timeWindow = timeWin;
-
-    /*
-    this.graphdata = graphObj;
-    this._chartElem = $("[data-graph-id='"+this.graphdata._id+"']");
-    */
 
     if(this._graphData.secondaries && this._graphData.secondaries.length > 0) {
         this.hasSecondaries = true;
@@ -196,7 +190,7 @@ MetrilyxGraph.prototype.dataHasErrors = function() {
             var error = currentSerie.data.error;
             var msg   = error.message ? error.message.substring(0, 150) + "..." : error.substring(0, 100) + "...";
             
-            this._errIconNode.css("color", "#FF9240");
+            this._statusNode.show();
             this._errMsgNode.html("<li class='pad5'><span>"+msg+"</span></li>");
 
             return { "error": { 
