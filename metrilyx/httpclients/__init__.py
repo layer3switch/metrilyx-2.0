@@ -361,6 +361,7 @@ class MetrilyxGraphFetcher(object):
             self.__secondariesGraph.add(mas)
         else:
             gmeta['series'][0]['data'] = mas.data()
+            gmeta['series'][0]['uuid'] = str(mas.uuid)
             self.__partialDeferreds[idx].callback(gmeta)
 
         if self.total == self.completed:
