@@ -220,18 +220,18 @@ app.directive('tagkeyvalue', function() {
 	        		}
 	        	},
 	        	focus: function( event, ui ) {
-	        		var ival = $(elem).val();
-	        		kv = ival.split("=");
-	        		if(kv.length == 2) {
-	        			var tvals = kv[1].split("|");
-	        			var retstr = "";
-	        			for(var i=0;i<tvals.length-1;i++) {
-	        				retstr += tvals[i]+"|";
-	        			}
-	        			retstr += ui.item.value;
-	        			$(elem).val(kv[0]+"="+retstr);
+	        		//var ival = $(elem).val();
+	        		//kv = ival.split("=");
+	        		//if(kv.length == 2) {
+	        		//	var tvals = kv[1].split("|");
+	        		//	var retstr = "";
+	        		//	for(var i=0;i<tvals.length-1;i++) {
+	        		//		retstr += tvals[i]+"|";
+	        		//	}
+	        		//	retstr += ui.item.value;
+	        		//	$(elem).val(kv[0]+"="+retstr);
 	        			event.preventDefault();
-	        		}
+	        		//}
 	        	}
 			});
 			$(elem).keyup(function(e) {
@@ -447,12 +447,12 @@ app.directive('keyValuePairs', function() {
 	        		}
 	        	},
 	        	focus: function(event, ui) {
-	        		var tagstring = $(elem).val();
-	        		ttagstr = getTagsString(tagstring, ui.item.value, "focus");
-	        		if(ttagstr !== undefined) {
-	        			$(elem).val(ttagstr);
+	        		//var tagstring = $(elem).val();
+	        		//ttagstr = getTagsString(tagstring, ui.item.value, "focus");
+	        		//if(ttagstr !== undefined) {
+	        		//	$(elem).val(ttagstr);
 	        			event.preventDefault();
-	        		}
+	        		//}
 	        	}
 			});
 			// model --> view
