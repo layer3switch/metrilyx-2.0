@@ -318,20 +318,22 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 
 
 	def __getDataSerieDps(self, column, ts_unit='ms'):
+		
 		try:
-			if self.graphType in ("pie", "column"):
+
+			nonNaSerie = column.replace([numpy.inf, -numpy.inf], numpy.nan).dropna()
+			if self.graphType in ("pie", "column", "bar"):
 				
 				aggr = self._serie['query']['aggregator']
 				if aggr == "avg":
-					return [[eval("self._convertPandasTimestamp(column.index[-1], ts_unit)"), eval("column.mean()")]]
+					return [[eval("self._convertPandasTimestamp(column.index[-1], ts_unit)"), eval("nonNaSerie.mean()")]]
 				elif aggr == "sum":
-					return [[ eval("self._convertPandasTimestamp(column.index[-1], ts_unit)"), eval("column.%s()" %(aggr))]]
+					return [[ eval("self._convertPandasTimestamp(column.index[-1], ts_unit)"), eval("nonNaSerie.%s()" %(aggr))]]
 				else:
 					return [[eval("self._convertPandasTimestamp(column.idx%s(), ts_unit)" %(aggr)), 
-																	eval("column.%s()" %(aggr))]]
+																	eval("nonNaSerie.%s()" %(aggr))]]
 
 			else:
-				nonNaSerie = column.replace([numpy.inf, -numpy.inf], numpy.nan).dropna()
 				return zip(self._getConvertedTimestamps(nonNaSerie, ts_unit), nonNaSerie.values)
 
 		except Exception,e:
