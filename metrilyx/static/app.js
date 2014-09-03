@@ -672,7 +672,9 @@ app.factory("ComponentTemplates", function() {
 					pageHeaderHtml 			: connectionPool.nextConnection()+"/partials/page-header.html",
 					annoControlsHtml		: connectionPool.nextConnection()+"/partials/global-anno-controls.html",
 					eventAnnoDetailsHtml 	: connectionPool.nextConnection()+"/partials/event-anno-details.html",
-					metricOperationsHtml	: connectionPool.nextConnection()+"/partials/metric-operations.html"
+					metricOperationsHtml	: connectionPool.nextConnection()+"/partials/metric-operations.html",
+					pageFooterHtml			: connectionPool.nextConnection()+"/partials/page-footer.html",
+					graphFooterHtml			: connectionPool.nextConnection()+"/partials/graph-footer.html"
 				}, true);
 
 				if(scope.modelType == "adhoc") {

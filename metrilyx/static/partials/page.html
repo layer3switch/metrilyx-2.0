@@ -1,28 +1,19 @@
 <div class="shift" id="stage">
 	<ng-include src="pageMastHtml"></ng-include>
+	
 	<ng-include src="editPanelHtml" onload="onEditPanelLoad()"></ng-include>
+	
 	<div class="row edit-comp{{editMode}}" id="main-view">
 		<div class="col-md-12" style="padding:0">
 			<ng-include src="pageHeaderHtml" onload="onPageHeaderLoad()"></ng-include>
 			<div class="row layout edit-comp{{editMode}}" ui-sortable="layoutSortOpts" ng-model="model.layout" layout="true">
-				<!--<div class="dblclick-helper layout-helper edit-comp{{editMode}} text-center">Double-click to add a <b>pod</b> to a <b>new row</b></div>-->
 				<div ng-repeat="row in model.layout" class="row layout-row edit-comp{{editMode}}" ng-include="podHtml" ui-sortable="rowSortOpts" ng-model="row" row="true">
 				</div>
-				<!--
-				<div class="dblclick-helper layout-helper edit-comp{{editMode}} text-center">Double-click to add a <b>pod</b> to a <b>new row</b></div>-->
 			</div>
-			<div class="text-center small padtb10">
-				<a href="https://github.com/Ticketmaster/metrilyx-2.0/tree/master/docs" class="pad5 interactive" style="font-weight:bold;color:#555">
-					documentation
-				</a>
-				<strong class="pad5">|</strong>
-				<a href="#/tutorials" class="pad5 interactive" style="font-weight:bold;color:#555">tutorials</a>
-			</div>
-		</div><!-- END .col-md-9 -->
-	</div><!-- END .row -->
+			<div ng-include="pageFooterHtml"></div>
+		</div>
+	</div>
 
-	<!-- static positioned display components (dialog boxes) -->
-	<!-- these must be on the stage to avoid overflow-x -->	
 	<ng-include src="eventAnnoDetailsHtml"></ng-include>
 	<div class="modal fade" id="confirm-delete">
 		<div class="modal-dialog">
