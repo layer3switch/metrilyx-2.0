@@ -215,7 +215,7 @@ select[ng-model="timeType"] {
 	padding:0;
 	width: 23.5%;
 	color: #ccc;
-	overflow-y: hidden;
+	/*overflow-y: hidden;*/
 	z-index: 1000;
 }
 #side-panel.offstage,
