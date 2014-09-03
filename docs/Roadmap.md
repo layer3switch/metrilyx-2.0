@@ -8,7 +8,7 @@ Roadmap
 - Server side code optimization.
 - Cleanup of pending calls upon client disconnection.
 - Behavioural changes in UI.
-- WebSocket auto re-connect.
+- WebSocket auto re-connect (experimental).
 - Various bug fixes.
 
 ##### v2.3.3
