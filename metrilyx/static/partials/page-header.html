@@ -1,7 +1,7 @@
 <div class="page-model-header edit-comp{{editMode}}">
 	<div class="row padb5" style="margin:0;border-bottom:1px solid #bbb">
 		<div class="col-md-4" style="padding:0;">
-			<span class="page-list-btn pointer interactive" title="Page List" onclick="$('#side-panel').removeClass('offstage');">
+			<span class="page-list-btn pointer interactive" title="Page List" onclick="$('#side-panel').toggleClass('offstage');">
 				<i class="glyphicon glyphicon-list"></i>
 			</span>
 			<div ng-if="modelType!=='adhoc'" class="tags-panel edit-comp{{editMode}}">
