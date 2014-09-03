@@ -101,7 +101,7 @@ Heatmaps are used to view your top 10 consumers for a given metric.  They are cr
 In order to use heatmaps, you will need a mongodb server.  Heatmap computations are performed using celery (a python distributed processing framework) which uses mongodb for its backend.  For scalability more celery worker nodes can be added.
 
 #### Postgresql Install
-If you would like to use postgres for the backend database instead of the default sqlite, you can do so my moving the provided postgres database configuration above the sqlite one in ***metrilyx.conf***.  Fill in the remainder options based on your postgresql instance.
+If you would like to use postgres for the backend database instead of the default sqlite, you can do so by moving the provided postgres database configuration above the sqlite one in ***metrilyx.conf***.  Fill in the remainder options based on your postgresql instance.
 
 ###### ***Before performing the next step please export all of your existing models.***
 
