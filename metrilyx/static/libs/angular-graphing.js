@@ -309,6 +309,7 @@ angular.module('graphing', [])
 			link: function(scope, elem, attrs, ngModel) {
 				if(!ngModel) return;
 
+				var _graphDomNode;
 				var wsHelper = new WsHighstockGraphHelper(scope, ngModel);
 
 				if(scope.editMode == " edit-mode") {
@@ -328,8 +329,9 @@ angular.module('graphing', [])
 				}, function(newVal, oldVal) {
 					if (newVal === undefined) return;	
 					scope.addGraphIdEventListener(newVal, wsHelper.processRecievedData);
-					//new MetrilyxGraph()
+					_graphDomNode = $("[data-graph-id='"+ngModel.$modelValue._id+"']");
 				});
+
 				// Graph type change
 				scope.$watch(function() {
 					return ngModel.$modelValue.graphType;
@@ -342,61 +344,63 @@ angular.module('graphing', [])
 						wsHelper.setSerieStatus(ngModel.$modelValue, 'querying');
 					}
 				});
+
 				// Series change
 				scope.$watch(function() {
-					return ngModel.$modelValue;
-				}, function(graph, oldValue) {
+					return ngModel.$modelValue.series;
+				}, function(newVal, oldVal) {
+					if(newVal === undefined) return;
+					if(newVal.length <= 0 && oldVal && oldVal.length <= 0) return;
 
-					if(!graph.series) return;
-					if(graph.series.length <= 0 && oldValue.series && oldValue.series.length <= 0) return;
-					// ignore threshold changes //
-					if(!equalObjects(graph.thresholds, oldValue.thresholds)) return;
-					// ignore status changes //
-					if(graph.series.length === oldValue.series.length) {
-						for(var sl in graph.series) {
-							if(graph.series[sl].status !== oldValue.series[sl].status) return;
+					// Ignore status changes
+					if(newVal.length === oldVal.length) {
+						for(var sl=0; sl < newVal.length; sl++) {
+							if(newVal[sl].status !== oldVal[sl].status) return;
 						}
 					}
-					// initial populate //
-					ehc = $("[data-graph-id='"+graph._id+"']");
-					hc = ehc.highcharts();
+
+					// Initial populate //
+					hc = _graphDomNode.highcharts();
 					if(hc == undefined) {
-						ehc.html("<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
-						gseries = wsHelper.getSeriesInNonQueryState(graph.series);
+						
+						_graphDomNode.html("<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
+						gseries = wsHelper.getSeriesInNonQueryState(newVal);
 						if(gseries.length > 0) {
-							var q = scope.baseQuery(graph);
+							
+							var q = scope.baseQuery(ngModel.$modelValue);
 							q.series = gseries;
 							wsHelper.setSerieStatus(q, 'querying');
 							scope.requestData(q);
 						}
-						if(scope.modelType == 'adhoc') scope.setURL(graph);
+						
+						if(scope.modelType == 'adhoc') scope.setURL(ngModel.$modelValue);
 						return;
 					}
 
-					if(graph.series.length == oldValue.series.length) {
+					if(newVal.length == newVal.length) {
 						
 						return;
-					} else if(graph.series.length > oldValue.series.length) {
+					} else if(newVal.length > oldVal.length) {
 						
-						var q = scope.baseQuery(graph);
+						var q = scope.baseQuery(ngModel.$modelValue);
 						q.series = [];
 						// find the new series that was added //
-						for(var gi in graph.series) {
-							if(graph.series[gi].status === undefined) {
-								q.series.push(graph.series[gi]);
+						for(var gi=0; gi < newVal.length; gi++) {
+							if(newVal[gi].status === undefined) {
+								q.series.push(newVal[gi]);
 							}
 						}
 						scope.requestData(q);
 						wsHelper.setSerieStatus(q,'querying');
 						
-						if(scope.modelType == 'adhoc') scope.setURL(graph);
+						if(scope.modelType == 'adhoc') scope.setURL(ngModel.$modelValue);
 					} else {
 						
-						var deltas = getSeriesDeltaByQuery(graph.series, oldValue.series);
-						mg = new MetrilyxGraph(graph, scope.getTimeWindow(true));
+						var deltas = getSeriesDeltaByQuery(newVal, oldVal);
+						mg = new MetrilyxGraph(ngModel.$modelValue, scope.getTimeWindow(true));
 						mg.removeSeries(deltas);
 
-						if(scope.modelType == 'adhoc') scope.setURL(graph);
+						if(scope.modelType == 'adhoc') scope.setURL(ngModel.$modelValue);
 					}
 				}, true);
 
@@ -478,8 +482,8 @@ angular.module('timeframe', [])
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
-					//console.log(newValue,oldValue);
 					if(newValue === oldValue) return;
+
 					if(newValue == "absolute") {
 						
 						scope.setTimeType(newValue);
