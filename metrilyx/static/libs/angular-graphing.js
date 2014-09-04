@@ -280,14 +280,14 @@ angular.module('graphing', [])
 					
 					var sTags = (new SeriesFormatter(data.series)).seriesTags();
 					scope.$apply(function() { scope.updateTagsOnPage(sTags) });
+					
+					setSerieStatus(data, 'loaded');
 				}
 				if(data.annoEvents && data.annoEvents.data && data.annoEvents.data.length > 0 && ngModel.$modelValue.graphType !== 'pie') {
 					
 					anno = new MetrilyxAnnotation(data);
 					anno.applyData();
 				}
-
-				setSerieStatus(data, 'loaded');
 			}
 
 			//exposed public method
