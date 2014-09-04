@@ -123,7 +123,7 @@ var NON_TS_TOOLTIP_OPTS = {
 $.extend(DEFAULT_CHART_OPTS.BASIC, {xAxis: DEFAULT_CHART_OPTS.AXIS}, true);
 $.extend(DEFAULT_CHART_OPTS.BASIC.xAxis, {opposite:true}, true);
 
-/* Set tooltip delay globally for highcharts */
+/* Make highcharts tooltip delay option available globally */
 (function (H) {
     H.wrap(H.Tooltip.prototype, 'refresh', function (proceed) {
 
@@ -160,11 +160,9 @@ function onAnnotationClick(event) {
     if(scope) {
         scope.$apply(function(){
             if(equalObjects(scope.selectedAnno, newAnno) && ead.hasClass('open')) {
-                //$(ead).removeClass('open');
                 ead.removeClass('open');
             } else {
                 scope.selectedAnno = newAnno;
-                //$(ead).addClass('open');
                 ead.addClass('open');
             }
         });
@@ -234,15 +232,15 @@ MetrilyxGraph.prototype.dataHasErrors = function() {
  * @return void
  */
 MetrilyxGraph.prototype.createHighChart = function(options, type) {
+    
     if(type !== undefined) {
 
         /* StockChart */
         this._domNode.highcharts(type, options);
     } else {
-
+        /* Highchart */
         this._domNode.highcharts(options);
     }
-    /* get ref to chart obj */
     this._chart = this._domNode.highcharts();
 }
 MetrilyxGraph.prototype.newChart = function() {
@@ -266,7 +264,7 @@ MetrilyxGraph.prototype.upsertPieSeries = function() {
     
     var series          = this.hasSecondaries ? this._graphData.secondaries: this._graphData.series;
     var firstChartSerie = this._chart.series[0];
-    //var series = this._graphData.series;
+
     for(var j=0; j < series.length; j++) {
         var found = false;
         var currentSerie = series[j];
@@ -337,7 +335,9 @@ MetrilyxGraph.prototype.upsertLineBasedSeries = function() {
 }
 MetrilyxGraph.prototype.upsertBarBasedSeries = function() {
 
-    var sf = new SeriesFormatter(this._graphData.series);  
+    var series = this.hasSecondaries ? this._graphData.secondaries: this._graphData.series;
+    var sf = new SeriesFormatter(series);  
+    
     var newSeriesData = sf.barSeries();
     for(var i=0; i < newSeriesData.series.length; i++) {
 
@@ -351,9 +351,7 @@ MetrilyxGraph.prototype.upsertBarBasedSeries = function() {
             
             chartSerie.setData(currSerie.data, false);
         }
-
     }
-  
 }
 /*
  * Add or update series with new data

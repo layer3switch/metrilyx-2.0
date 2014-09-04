@@ -150,7 +150,6 @@ class BasicSerie(object):
 			return data['error']
 		return False
 
-
 class MetrilyxSerie(BasicSerie):
 	"""
 	This makes an object containing the original series data (request) with the tsdb
@@ -275,30 +274,7 @@ class MetrilyxSerie(BasicSerie):
 		return [ (ts,val) for ts,val in data if val >= 0 ]
 
 
-### TODO: add error handling on per serie basis
-class MetrilyxAnalyticsSerie(MetrilyxSerie):
-	
-	def __init__(self, serie, graphType="line", dataCallback=None):
-		super(MetrilyxAnalyticsSerie, self).__init__(serie, dataCallback)
-		
-		self.graphType = graphType
-
-		if not self.error:
-			self._istruct = self.__getInternalStruct()
-			self.__applyTransform()
-		else:
-			self._istruct = None
-
-	def __getInternalStruct(self):
-		out = []
-		for d in self._serie['data']:
-			## TODO: change to use d['uuid']
-			out.append((d['uuid'], Series([d['dps'][k] for k in sorted(d['dps'].keys())], 
-				index=to_datetime([int(ts) for ts in sorted(d['dps'].keys())], unit='s'))))
-		return DataFrame(dict(out))
-	
-	def __getSerieMetadata(self, serie):
-		return dict([(k,v) for k,v in serie.items() if k != 'dps'])
+class BasicAnalyticsSerie(object):
 
 	def _convertPandasTimestamp(self, timestampObj, unit="ms"):
 		
@@ -316,19 +292,17 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 			# nanoseconds
 			return timestamp
 
-
-	def __getDataSerieDps(self, column, ts_unit='ms'):
-		
+	def _getDataSerieDps(self, aggr, column, ts_unit='ms'):
 		try:
-
 			nonNaSerie = column.replace([numpy.inf, -numpy.inf], numpy.nan).dropna()
 			if self.graphType in ("pie", "column", "bar"):
 				
-				aggr = self._serie['query']['aggregator']
 				if aggr == "avg":
-					return [[eval("self._convertPandasTimestamp(column.index[-1], ts_unit)"), eval("nonNaSerie.mean()")]]
+					return [[eval("self._convertPandasTimestamp(column.index[-1], ts_unit)"), 
+																	eval("nonNaSerie.mean()")]]
 				elif aggr == "sum":
-					return [[ eval("self._convertPandasTimestamp(column.index[-1], ts_unit)"), eval("nonNaSerie.%s()" %(aggr))]]
+					return [[ eval("self._convertPandasTimestamp(column.index[-1], ts_unit)"), 
+																eval("nonNaSerie.%s()" %(aggr))]]
 				else:
 					return [[eval("self._convertPandasTimestamp(column.idx%s(), ts_unit)" %(aggr)), 
 																	eval("nonNaSerie.%s()" %(aggr))]]
@@ -340,6 +314,30 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 			logger.warning(str(e))
 			return {"error": str(e)}
 
+### TODO: add error handling on per serie basis
+class MetrilyxAnalyticsSerie(MetrilyxSerie, BasicAnalyticsSerie):
+	
+	def __init__(self, serie, graphType="line", dataCallback=None):
+		super(MetrilyxAnalyticsSerie, self).__init__(serie, dataCallback)
+		
+		self.graphType = graphType
+
+		if not self.error:
+			self._istruct = self.__getInternalStruct()
+			self.__applyTransform()
+		else:
+			self._istruct = None
+
+	def __getInternalStruct(self):
+		out = []
+		for d in self._serie['data']:
+			out.append((d['uuid'], Series([d['dps'][k] for k in sorted(d['dps'].keys())], 
+				index=to_datetime([int(ts) for ts in sorted(d['dps'].keys())], unit='s'))))
+		return DataFrame(dict(out))
+	
+	def __getSerieMetadata(self, serie):
+		return dict([(k,v) for k,v in serie.items() if k != 'dps'])
+
 	def data(self, ts_unit='ms'):
 		if self.error: return { 'error': self.error }
 		
@@ -347,7 +345,8 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 		for s in self._serie['data']:
 			md = self.__getSerieMetadata(s)
 
-			datapoints = self.__getDataSerieDps(self._istruct[s['uuid']], ts_unit) 
+			datapoints = self._getDataSerieDps(self._serie['query']['aggregator'], 
+												self._istruct[s['uuid']], ts_unit) 
 			error = self._dataHasErrors(datapoints)
 			if not error:
 				md['dps'] = datapoints
@@ -367,12 +366,16 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie):
 				logger.warn("Could not apply yTransform: %s" %(str(e)))
 
 
-class SecondariesGraph(BasicSerie):
+class SecondariesGraph(BasicSerie, BasicAnalyticsSerie):
 
 	def __init__(self, metrilyxGraphRequest):
 		super(SecondariesGraph, self).__init__()
 		self.__request = metrilyxGraphRequest
 		self.__analyticsSeriess = [ None for i in self.__request['series'] ]
+
+	@property
+	def graphType(self):
+		return self.__request['graphType']
 
 	def add(self, metrilyxAnalyticsSerie):
 		idx = self.__findSerieIdxInRequest(metrilyxAnalyticsSerie)
@@ -390,45 +393,45 @@ class SecondariesGraph(BasicSerie):
 				return i
 		return -1
 
-	def __serieIdTags(self, val):
+	def __tagsFromSerieId(self, val):
 		return dict([tkv.split('=') for tkv in val[1:-1].split(',')])
 
 	def __secondaryMetricName(self, metricSource, uuid):
 		return '(' + ':'.join(metricSource.split(':')[1:]).strip() + ')' + uuid
 
-
 	def __normalizeSeriesData(self):
 		for i in range(len(self.__request['series'])):
 			self.__request['series'][i]['data'] = self.__analyticsSeriess[i].data()
-
 
 	def data(self, ts_unit='ms'):
 		self.__makeSecondaryGraphs(ts_unit)
 		self.__normalizeSeriesData()
 		return self.__request
 
+	def __getSecondariesMetadata(self, colname, secondary):
+		tags = self.__tagsFromSerieId(colname)
+		metricName = self.__secondaryMetricName(secondary['query']['metric'], colname)
+
+		return {
+			'alias': self._normalizeAlias(secondary['alias'], 
+					{'tags': tags, 'metric': metricName}, 
+					False),
+			'metric': metricName,
+			'tags': tags,
+			'uuid': colname
+			}
+
 	def __makeSecondaryGraphs(self, ts_unit):
 		istructs = [s._istruct for s in self.__analyticsSeriess]
 
 		for sec in self.__request['secondaries']:
 			try:
-				istruct = eval("%s" %(sec['query']))(*istructs)
+				istruct = eval("%s" %(sec['query']['metric']))(*istructs)
 				
 				dArr = []
 				for colname in istruct.columns.values:
-
-					tags = self.__serieIdTags(colname)
-					metricName = self.__secondaryMetricName(sec['query'], colname)
-					md = {
-							'tags': tags,
-							'alias': self._normalizeAlias(sec['alias'], 
-									{'tags': tags, 'metric': metricName}, 
-									False),
-							'uuid': colname,
-							'metric': metricName}
-					## clean out infinity and nan
-					nonNaSerie = istruct[colname].replace([numpy.inf, -numpy.inf], numpy.nan).dropna()
-					md['dps'] = zip(self._getConvertedTimestamps(nonNaSerie, ts_unit), nonNaSerie.values)
+					md = self.__getSecondariesMetadata(colname, sec)
+					md['dps'] = self._getDataSerieDps(sec['query']['aggregator'], istruct[colname], ts_unit)
 					dArr.append(md)
 
 				sec['data'] = dArr

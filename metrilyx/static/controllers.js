@@ -412,6 +412,12 @@ metrilyxControllers.controller('pageController', [
 				$scope.reflow();
 			});
 		}
+
+		$scope.addSecondaryMetric = function(toGraph) {
+			Schema.get({modelType:'metric'}, function(result) {
+				toGraph.secondaries.push(result);
+			});
+		}
 		$scope.graphSizeChanged = function() {
 			$scope.reflow();
 		}

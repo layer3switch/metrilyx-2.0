@@ -111,6 +111,7 @@ select[ng-model="timeType"] {
 #global-tags-btn:hover {
 	border-color: #999 !important;
 }
+[ng-model="secondary.query.aggregator"],
 [ng-model="serie.paneIndex"],
 [ng-model="serie.query.aggregator"],
 [ng-model="metric.query.aggregator"],
