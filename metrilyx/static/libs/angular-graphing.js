@@ -234,7 +234,6 @@ angular.module('graphing', [])
 				bq.series = modelVal.series;
 
 				if(modelVal.graphType === 'pie' || modelVal.graphType === 'bar' || modelVal.graphType === 'column') {
-
 					// Must query the complete window as this is analyzed //
 				} else {
 					bq.start = Math.floor(((new Date()).getTime() - METRIC_FETCH_TIME_WIN) / 1000);
@@ -271,7 +270,7 @@ angular.module('graphing', [])
 
 			function processRecievedData(event) {
 				var data = event.detail;
-				
+
 				checkDataErrors(data);
 				if (data.series) {
 					
@@ -310,7 +309,6 @@ angular.module('graphing', [])
 			link: function(scope, elem, attrs, ngModel) {
 				if(!ngModel) return;
 
-				var evtListenerAdded = false;
 				var wsHelper = new WsHighstockGraphHelper(scope, ngModel);
 
 				if(scope.editMode == " edit-mode") {
@@ -324,17 +322,31 @@ angular.module('graphing', [])
 				// start updates after 50 seconds //
 				setTimeout(function() {wsHelper.getUpdates();},50000);
 
+				// Initialize graph object
+				scope.$watch(function() {
+					return ngModel.$modelValue._id;
+				}, function(newVal, oldVal) {
+					if (newVal === undefined) return;	
+					scope.addGraphIdEventListener(newVal, wsHelper.processRecievedData);
+					//new MetrilyxGraph()
+				});
+				// Graph type change
+				scope.$watch(function() {
+					return ngModel.$modelValue.graphType;
+				}, function(newVal, oldVal) {
+					if (newVal === undefined || oldVal === undefined) return;
+
+					if(newVal !== oldVal) {
+						
+						scope.reloadGraph(ngModel.$modelValue);
+						wsHelper.setSerieStatus(ngModel.$modelValue, 'querying');
+					}
+				});
+				// Series change
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(graph, oldValue) {
-					if(!evtListenerAdded && graph._id) {
-						try {
-							scope.addGraphIdEventListener(graph._id, wsHelper.processRecievedData);
-							evtListenerAdded = true;
-						} catch(e) {
-							console.error(e);
-						}
-					}
+
 					if(!graph.series) return;
 					if(graph.series.length <= 0 && oldValue.series && oldValue.series.length <= 0) return;
 					// ignore threshold changes //
@@ -360,13 +372,6 @@ angular.module('graphing', [])
 						if(scope.modelType == 'adhoc') scope.setURL(graph);
 						return;
 					}
-					// handle graph change //
-					if(graph.graphType != oldValue.graphType) {
-						//console.log("graph type changed. re-rendering");
-						scope.reloadGraph(graph);
-						wsHelper.setSerieStatus(graph, 'querying');
-						return;
-					};
 
 					if(graph.series.length == oldValue.series.length) {
 						
