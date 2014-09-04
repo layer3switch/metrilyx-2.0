@@ -112,7 +112,7 @@ class BasicSerie(object):
 				return eval(alias_str[1:])(flat_obj)
 			except Exception,e:
 				#TODO: assign calculated default
-				logger.warn("could not transform alias: %s %s" %(obj['metric'], str(e)))
+				logger.warn("could not transform alias: %s %s %s" %(alias_str, obj['metric'], str(e)))
 				#normalizedAlias = obj['metric']+ " " + uniqueTagsString
 				normalizedAlias = obj['metric']
 		else:
@@ -413,20 +413,26 @@ class SecondariesGraph(BasicSerie):
 		for sec in self.__request['secondaries']:
 			try:
 				istruct = eval("%s" %(sec['query']))(*istructs)
+				
 				dArr = []
 				for colname in istruct.columns.values:
+
 					tags = self.__serieIdTags(colname)
+					metricName = self.__secondaryMetricName(sec['query'], colname)
 					md = {
-						'tags': tags,
-						'alias': self._normalizeAlias(sec['alias'], self._flatten_dict({'tags': tags}), False),
-						'uuid': colname,
-						'metric': self.__secondaryMetricName(sec['query'], colname)
-						}
+							'tags': tags,
+							'alias': self._normalizeAlias(sec['alias'], 
+									{'tags': tags, 'metric': metricName}, 
+									False),
+							'uuid': colname,
+							'metric': metricName}
 					## clean out infinity and nan
 					nonNaSerie = istruct[colname].replace([numpy.inf, -numpy.inf], numpy.nan).dropna()
 					md['dps'] = zip(self._getConvertedTimestamps(nonNaSerie, ts_unit), nonNaSerie.values)
 					dArr.append(md)
+
 				sec['data'] = dArr
+
 			except Exception,e:
 				logger.error(str(e))
 				sec['data'] = {"error": str(e)}
