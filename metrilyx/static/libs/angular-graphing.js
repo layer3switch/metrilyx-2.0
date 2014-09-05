@@ -289,7 +289,7 @@ angular.module('graphing', [])
 				}
 			}
 
-			//exposed public method
+			//exposed public methods
 			t.setSerieStatus =  setSerieStatus;
 			t.getSeriesInNonQueryState = getSeriesInNonQueryState;
 			t.getUpdates = getUpdates;
@@ -366,7 +366,7 @@ angular.module('graphing', [])
 					hc = _graphDomNode.highcharts();
 					if(hc == undefined) {
 						
-						_graphDomNode.html("<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
+						_graphDomNode.html(GRAPH_LOADING_HTML);
 						gseries = wsHelper.getSeriesInNonQueryState(newVal);
 						if(gseries.length > 0) {
 							

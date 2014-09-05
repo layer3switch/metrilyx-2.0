@@ -49,6 +49,9 @@ var METRIC_POLL_INTERVAL = 50000;
 // amount of data to fetch.  this needs to be a specific proportion to METRIC_POLL_INTERVAL //
 var METRIC_FETCH_TIME_WIN = 900000;
 
+// graph loader html //
+var GRAPH_LOADING_HTML = "<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>";
+
 // configure any js analytics here //
 var SITE_ANALYTICS = {
 	enabled: false,

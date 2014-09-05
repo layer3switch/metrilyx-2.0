@@ -578,7 +578,7 @@ metrilyxControllers.controller('pageController', [
 
 			var domNode = $('[data-graph-id='+gobj._id+']');
 			try { domNode.highcharts().destroy(); } catch(e) {}
-			domNode.html("<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
+			domNode.html(GRAPH_LOADER_HTML);
 		}
 
 		$scope.$on('$destroy', function() {
@@ -843,9 +843,10 @@ metrilyxControllers.controller('adhocGraphController', [
 			q.series = gobj.series;
 
 			var domNode = $("[data-graph-id='"+gobj._id+"']"); 
-			/* destroy current graph */
+			
+			/* Destroy current graph */
 			try { domNode.highcharts().destroy(); } catch(e) {};
-			domNode.html("<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>");
+			domNode.html(GRAPH_LOADER_HTML);
 			
 			$scope.requestData(q);
 		}

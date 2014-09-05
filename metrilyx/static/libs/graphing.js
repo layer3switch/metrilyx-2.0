@@ -298,8 +298,7 @@ MetrilyxGraph.prototype.upsertLineBasedSeries = function() {
                     }
                 } catch(e) {
                     console.log("upsertLineBasedSeries", currentSerie.query, e);
-                    console.log(currentChartData.options);
-                    console.log(currentGraphData);
+                    console.log(currentChartData.options, currentGraphData);
                 }
             }
             

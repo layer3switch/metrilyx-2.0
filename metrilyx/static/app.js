@@ -14,11 +14,13 @@ var app = angular.module('app', [
 app.config(['$sceProvider', function($sceProvider) {
     $sceProvider.enabled(false);
 }]);
+
 /* Django specific */
 app.config(['$httpProvider', function($httpProvider) {
     $httpProvider.defaults.xsrfCookieName = 'csrftoken';
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
 }]);
+
 app.config(['$routeProvider',
 	function($routeProvider) {
 		$routeProvider.
