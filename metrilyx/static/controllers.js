@@ -134,13 +134,12 @@ metrilyxControllers.controller('pageController', [
 		if($routeParams.heatmapId) $scope.modelType = "heatmap/";
 		else $scope.tagsOnPage = {};
 
-		var annoOptions = new AnnotationOptions($scope, $routeParams, $location, EventTypes);
+		var timerSearchForMetric;
 
-		var compTemplates = new ComponentTemplates($scope);
-
-		var timeWindow = new TimeWindow($scope, $routeParams);
-
-		var wsdp = new WebSocketDataProvider($scope);
+		var annoOptions 	= new AnnotationOptions($scope, $routeParams, $location, EventTypes);
+		var compTemplates 	= new ComponentTemplates($scope);
+		var timeWindow 		= new TimeWindow($scope, $routeParams);
+		var wsdp 			= new WebSocketDataProvider($scope);
 
 		if($routeParams.pageId == "new" || $routeParams.heatmapId == 'new') {
 			
@@ -340,7 +339,6 @@ metrilyxControllers.controller('pageController', [
 			//console.log($scope.tagsOnPage);
 		}
 
-		var timerSearchForMetric;
 		$scope.searchForMetric = function(args) {
 			/*
 				'this.metricQuery' must be used rather than '$scope.metricQuery' because
@@ -578,7 +576,7 @@ metrilyxControllers.controller('pageController', [
 
 			var domNode = $('[data-graph-id='+gobj._id+']');
 			try { domNode.highcharts().destroy(); } catch(e) {}
-			domNode.html(GRAPH_LOADER_HTML);
+			domNode.html(GRAPH_LOADING_HTML);
 		}
 
 		$scope.$on('$destroy', function() {
@@ -594,13 +592,12 @@ metrilyxControllers.controller('adhocGraphController', [
 		$scope.modelType 		= "adhoc";
 		$scope.modelGraphIds 	= [];
 
-		var annoOptions = new AnnotationOptions($scope, $routeParams, $location, EventTypes);
+		var timerSearchForMetric;
 
-		var wsdp = new WebSocketDataProvider($scope);
-		
-		var compTemplates = new ComponentTemplates($scope);
-
-		var timeWindow = new TimeWindow($scope, $routeParams);
+		var annoOptions 	= new AnnotationOptions($scope, $routeParams, $location, EventTypes);
+		var wsdp 			= new WebSocketDataProvider($scope);
+		var compTemplates 	= new ComponentTemplates($scope);
+		var timeWindow 		= new TimeWindow($scope, $routeParams);
 
 		if($routeParams.editMode === "false") $scope.editMode = "";
 		else $scope.editMode = " edit-mode";
@@ -884,11 +881,9 @@ metrilyxControllers.controller('adhocGraphController', [
 			}
 		}
 
-
-		var timerSearchForMetric;
 		$scope.searchForMetric = function(args) {
-			if (timerSearchForMetric)
-				clearTimeout(timerSearchForMetric);
+			
+			if (timerSearchForMetric) clearTimeout(timerSearchForMetric);
 
 			var myThis = this;
 			timerSearchForMetric = setTimeout(function(){

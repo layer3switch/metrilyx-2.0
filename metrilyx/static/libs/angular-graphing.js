@@ -62,6 +62,7 @@ angular.module('pageLayout', [])
 			require: '?ngModel',
 			link: function(scope, elem, attrs, ngModel) {
 				if(!ngModel) return;
+				
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
@@ -156,6 +157,7 @@ angular.module('pageLayout', [])
 			require: '?ngModel',
 			link: function(scope, elem, attrs, ngModel) {
 				if(!ngModel) return;
+				
 				$(elem).dblclick(function(evt) {
 					if(scope.editMode == "") return;
 					if(evt.offsetY < $(evt.currentTarget).height()/2) {
@@ -169,6 +171,7 @@ angular.module('pageLayout', [])
 					}
 					scope.$apply();
 				});
+
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
@@ -289,11 +292,22 @@ angular.module('graphing', [])
 				}
 			}
 
+			function getNewlyAddedSeries(val) {
+				var out = [];
+				for(var i=0; i < val.length; i++) {
+					if(val[i].status === undefined) {
+						out.push(val[i]);
+					}
+				}
+				return out;
+			}
+
 			//exposed public methods
 			t.setSerieStatus =  setSerieStatus;
 			t.getSeriesInNonQueryState = getSeriesInNonQueryState;
 			t.getUpdates = getUpdates;
 			t.processRecievedData = processRecievedData;
+			t.getNewlyAddedSeries = getNewlyAddedSeries;
 
 			//not used yet, exposed for testing
 			t.getUpdateQuery = getUpdateQuery;
@@ -362,16 +376,19 @@ angular.module('graphing', [])
 							}
 						}
 					}
+
 					// Initial populate //
 					hc = _graphDomNode.highcharts();
 					if(hc == undefined) {
 						
 						_graphDomNode.html(GRAPH_LOADING_HTML);
-						gseries = wsHelper.getSeriesInNonQueryState(newVal);
+						
+						var gseries = wsHelper.getSeriesInNonQueryState(newVal);
 						if(gseries.length > 0) {
 							
 							var q = scope.baseQuery(ngModel.$modelValue);
 							q.series = gseries;
+							
 							wsHelper.setSerieStatus(q, 'querying');
 							scope.requestData(q);
 						}
@@ -380,19 +397,14 @@ angular.module('graphing', [])
 						return;
 					}
 
-					if(newVal.length == newVal.length) {
+					if(newVal.length == oldVal.length) {
 						
 						return;
 					} else if(newVal.length > oldVal.length) {
 						
 						var q = scope.baseQuery(ngModel.$modelValue);
-						q.series = [];
-						// find the new series that was added //
-						for(var gi=0; gi < newVal.length; gi++) {
-							if(newVal[gi].status === undefined) {
-								q.series.push(newVal[gi]);
-							}
-						}
+						q.series = wsHelper.getNewlyAddedSeries(newVal);
+						
 						scope.requestData(q);
 						wsHelper.setSerieStatus(q,'querying');
 						
