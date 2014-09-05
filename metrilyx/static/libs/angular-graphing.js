@@ -326,8 +326,10 @@ angular.module('graphing', [])
 				// Initialize graph object
 				scope.$watch(function() {
 					return ngModel.$modelValue._id;
+				
 				}, function(newVal, oldVal) {
 					if (newVal === undefined) return;	
+					
 					scope.addGraphIdEventListener(newVal, wsHelper.processRecievedData);
 					_graphDomNode = $("[data-graph-id='"+ngModel.$modelValue._id+"']");
 				});
