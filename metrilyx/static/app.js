@@ -80,7 +80,6 @@ angular.module('filters',[]).
 				return epoch;
 			}
 		}
-
 	}).filter('rateString', function() {
 		return function(rate) {
 			if(rate) return "rate:";
@@ -159,6 +158,7 @@ app.directive('eventTypes', function() {
 	        		event.preventDefault();
 	        	}
 			});
+			
 			$(elem).keyup(function(e) {
 				if(e.keyCode === 13) {
 					// clear input & close autocomplete on 'enter' //
@@ -306,6 +306,7 @@ app.directive('pageId', function() {
 		}
 	};
 });
+
 app.directive('globalAnnotations', function() {
 	return {
 		restrict: 'A',
@@ -371,6 +372,7 @@ app.directive('globalAnnotations', function() {
 		}
 	};
 });
+
 app.directive('tooltipArrow', function() {
 	return {
 		restrict: 'A',
@@ -387,6 +389,7 @@ app.directive('tooltipArrow', function() {
 		}
 	}
 });
+
 /*
  * Parse tags object to 'tag1=val1,tag2=val2;'
  * Error checking and validity setting.
@@ -564,19 +567,22 @@ function dictToCommaSepStr(obj, delim) {
  * return: { key1: val1, key2: val2 }
  */
 function commaSepStrToDict(tagsStr, delim) {
-	//if(delim === undefined) delim = "=";
 	if(tagsStr == "") return {};
+	
 	var d = {};
 	kvpairs = tagsStr.replace(/;$/, '').split(",");
-	for(var i in kvpairs) {
+	for(var i=0; i < kvpairs.length; i++) {
+		
 		kv = kvpairs[i].split(/:|=/);
 		if(kv.length != 2) continue;
 		if(kv[0] == "") continue;
+		
 		d[kv[0]] = kv[1];
 	}
 	if(equalObjects(d,{})) return;
 	return d;
 }
+
 function clearAllTimeouts() {
 	//console.log("Clearing timeouts");
 	var id = window.setTimeout(function() {}, 0);

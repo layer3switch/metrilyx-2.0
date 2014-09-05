@@ -418,20 +418,32 @@ MetrilyxGraph.prototype.removeSeries = function(series) {
 
     if(series.length === 0) return;
 
-    var chartSeries = this._chart.series;
-    var redraw = false;
-    for(var s=0; s < series.length; s++) {
-        
-        var cs = this.findSerieIndexInChart(series[s]);
-        if(cs != -1) redraw = true;
-        
-        while(cs != -1) {
+    if(this._graphData.series.length <= 0) {
+
+        this.destroyGraph();
+    } else {
+
+        var chartSeries = this._chart.series;
+        var redraw = false;
+        for(var s=0; s < series.length; s++) {
             
-            chartSeries[cs].remove(false);
-            cs = this.findSerieIndexInChart(series[s]);
-        }      
+            var cs = this.findSerieIndexInChart(series[s]);
+            if(cs != -1) redraw = true;
+            
+            while(cs != -1) {
+                
+                chartSeries[cs].remove(false);
+                cs = this.findSerieIndexInChart(series[s]);
+            }      
+        }
+        if(redraw) this._chart.redraw();
     }
-    if(redraw) this._chart.redraw();
+}
+
+MetrilyxGraph.prototype.destroyGraph = function() {
+   
+    this._chart.destroy();
+    this._domNode.html("<table class='gif-loader-table' style='color:#ccc'><tr><td>Drag metrics here from search</td></tr></table>");    
 }
 
 function MetrilyxAnnotation(obj) {

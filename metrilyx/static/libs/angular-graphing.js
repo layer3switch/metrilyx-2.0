@@ -366,10 +366,10 @@ angular.module('graphing', [])
 					return ngModel.$modelValue.series;
 				}, function(newVal, oldVal) {
 					if(newVal === undefined) return;
-					if(newVal.length <= 0) return;
+					//if(newVal.length <= 0) return;
 
 					// Ignore status changes
-					if(oldVal !== undefined && oldVal.length > 0) {
+					if(newVal.length > 0 && oldVal !== undefined && oldVal.length > 0) {
 						if(newVal.length === oldVal.length) {
 							for(var sl=0; sl < newVal.length; sl++) {
 								if(newVal[sl].status !== oldVal[sl].status) return;
@@ -381,10 +381,10 @@ angular.module('graphing', [])
 					hc = _graphDomNode.highcharts();
 					if(hc == undefined) {
 						
-						_graphDomNode.html(GRAPH_LOADING_HTML);
-						
 						var gseries = wsHelper.getSeriesInNonQueryState(newVal);
 						if(gseries.length > 0) {
+							
+							_graphDomNode.html(GRAPH_LOADING_HTML);
 							
 							var q = scope.baseQuery(ngModel.$modelValue);
 							q.series = gseries;
@@ -425,6 +425,7 @@ angular.module('graphing', [])
 			}
 		};
 	}]);
+
 angular.module('timeframe', [])
 	.directive('dateTime', ['$location', function($location) {
 		return {

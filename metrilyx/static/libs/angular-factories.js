@@ -1,6 +1,5 @@
-var metrilyxHelperFactories = angular.module("metrilyxHelperFactories", []);
-
-metrilyxHelperFactories.factory("ComponentTemplates", function() {
+angular.module("metrilyxHelperFactories", [])
+.factory("ComponentTemplates", function() {
 	
 	var ComponentTemplates = function(scope) {
 		
@@ -42,10 +41,8 @@ metrilyxHelperFactories.factory("ComponentTemplates", function() {
 		initialize();
 	}
 	return (ComponentTemplates);
-});
-
-
-metrilyxHelperFactories.factory("CtrlCommon", ['Metrics', 'Schema', function(Metrics, Schema) {
+})
+.factory("CtrlCommon", ['Metrics', 'Schema', function(Metrics, Schema) {
 	
 	var CtrlCommon = function(scope, location, route) {
 
@@ -110,11 +107,25 @@ metrilyxHelperFactories.factory("CtrlCommon", ['Metrics', 'Schema', function(Met
 			}, 1000);
 		}
 
+		function disableDragDrop() {
+			$('[ui-sortable]').each(function() {
+				$(this).sortable({disabled: true});
+			});
+		}
+
+		function enableDragDrop() {
+			$('[ui-sortable]').each(function() {
+				$(this).sortable({disabled: false});
+			});
+		}
+
 		function loadHome() {
 			location.path('/graph').search({});
 			route.reload();
 		}
 
+		scope.disableDragDrop 	= disableDragDrop;
+		scope.enableDragDrop	= enableDragDrop;
 		scope.loadHome 			= loadHome;
 		scope.setUpdatesEnabled = setUpdatesEnabled;
 		scope.updateTagsOnPage 	= updateTagsOnPage;
@@ -123,16 +134,15 @@ metrilyxHelperFactories.factory("CtrlCommon", ['Metrics', 'Schema', function(Met
 	}
 
 	return (CtrlCommon);
-}]);
-
-
-metrilyxHelperFactories.factory("AnnotationOptions", function() {
+}])
+.factory("AnnotationOptions", function() {
 
 	var AnnotationOptions = function(scope, routeParams, location, EventTypesSvc) {
 		
-		var options = { 
+		var scopeAttributes = {
 			'globalAnno': {'eventTypes':[], 'tags':{}, 'status': null },
 			'selectedAnno': {},
+			'setAnnotations': applyAnnotationOptions
 		};
 
 		function initialize() {
@@ -141,37 +151,35 @@ metrilyxHelperFactories.factory("AnnotationOptions", function() {
 				
 				try {
 
-					$.extend(true, options['globalAnno'], {
+					$.extend(true, scopeAttributes['globalAnno'], {
 						'eventTypes': routeParams.annotationTypes.split(/\|/),
 						'tags': commaSepStrToDict(routeParams.annotationTags),
 					}, true);
 				} catch(e) { console.warning("failed to parse annotation data", e); }
 			}
 
-			if(options.globalAnno.eventTypes.length > 0 && Object.keys(options.globalAnno.tags).length > 0)
-				options.globalAnno['status'] = 'load';
+			if(scopeAttributes.globalAnno.eventTypes.length > 0 && Object.keys(scopeAttributes.globalAnno.tags).length > 0)
+				scopeAttributes.globalAnno['status'] = 'load';
 			
-			// apply this first as the next call will take some time
-			$.extend(scope, options, true);
+			// Apply this first as the next call will take some time
+			$.extend(scope, scopeAttributes, true);
 
-			// get all available event types
+			// Get all available event types
 			EventTypesSvc.listTypes(function(rslt) {
 				
 				var evtTypeList = [];
 				for(var i in rslt) {
 					
-					if(rslt[i].name === undefined || options.globalAnno.eventTypes.indexOf(rslt[i].name) >= 0) continue;
+					if(rslt[i].name === undefined || scopeAttributes.globalAnno.eventTypes.indexOf(rslt[i].name) >= 0) continue;
 					evtTypeList.push(rslt[i].name);
 				}
 
-				options['annoEventTypes'] = evtTypeList;
-				
 				$.extend(scope, {annoEventTypes: evtTypeList}, true);
 			});
 		}
 
 
-		this.applyAnnotationOptions = function() {
+		function applyAnnotationOptions() {
 			
 			if(scope.modelType == "adhoc") {
 				
@@ -190,46 +198,49 @@ metrilyxHelperFactories.factory("AnnotationOptions", function() {
 		initialize();
 	}
 	return (AnnotationOptions);
-});
-
-
-metrilyxHelperFactories.factory("TimeWindow", function() {
+})
+.factory("TimeWindow", function() {
 	
 	var TimeWindow = function(scope, routeParams) {
-		
-		var attributes = {
+		var t = this;
+
+		var scopeAttributes = {
 			'timeType': '1h-ago',
 			'startTime': '1h-ago',
-			'updatesEnabled': true
+			'updatesEnabled': true,
+			'getTimeWindow': getTimeFrame,
+			'setStartTime': setStartTime,
+			'setEndTime': setEndTime
 		};
+
 		function initialize() {
 			
-			if(scope.modelType === "adhoc") attributes['updatesEnabled'] = false;
+			if(scope.modelType === "adhoc") scopeAttributes['updatesEnabled'] = false;
 			
 			if(routeParams.start) {
 
 				if(routeParams.end) {
 					
-					$.extend(true, attributes, {
+					$.extend(true, scopeAttributes, {
 						'endTime': parseInt(routeParams.end),
 						'timeType': "absolute",
 						'updatesEnabled': false
 					}, true);
 				} else {
 					
-					attributes['timeType'] = routeParams.start;
+					scopeAttributes['timeType'] = routeParams.start;
 				}
 				if(Object.prototype.toString.call(routeParams.start) === '[object String]' 
 													&& routeParams.start.match(/-ago$/)) {
-					attributes['startTime'] = routeParams.start;
+					scopeAttributes['startTime'] = routeParams.start;
 				} else {
-					attributes['startTime'] = parseInt(routeParams.start);
+					scopeAttributes['startTime'] = parseInt(routeParams.start);
 				}
 			}
-			$.extend(scope, attributes, true);
+			$.extend(scope, scopeAttributes, true);
 		}
 
-		this.getTimeFrame = function(inMilli) {
+		function getTimeFrame(inMilli) {
 			if(scope.timeType == "absolute"){
 				if(scope.endTime) {
 					if(inMilli) {
@@ -267,7 +278,7 @@ metrilyxHelperFactories.factory("TimeWindow", function() {
 			}
 		}
 
-		this.setAttribute = function(attr, value) {
+		t.setAttribute = function(attr, value) {
 			
 			switch(attr) {
 				
@@ -290,13 +301,220 @@ metrilyxHelperFactories.factory("TimeWindow", function() {
 			}
 		}
 
+		function setStartTime(sTime) {			
+			t.setAttribute('startTime', sTime);
+		}
+
+		function setEndTime(eTime) {
+			t.setAttribute('endTime', eTime);
+		}
+
 		initialize();
 	};
 	return (TimeWindow);
-});
+})
+.factory("RouteManager", function() {
+/* IN PROGRESS */
+	var RouteManager = function(scope, routeParams) {
 
+		var t = this;
 
-metrilyxHelperFactories.factory("WebSocketDataProvider", function() {
+		function setPageGlobalTags() {
+
+			try { 
+				scope.$parent.globalTags = routeParams.tags ? commaSepStrToDict(routeParams.tags) : {}; 
+			} catch(e) {
+				console.warn("Could not parse global tags!");
+				scope.globalTags = {};
+			}
+		}
+
+		function initialize() {
+			
+			var scopeOpts = {};
+
+			if(scope.modelType === "adhoc") {
+
+				scopeOpts.editMode = routeParams.editMode === "false" ? "" : " edit-mode";
+			} else {
+
+				
+				scopeOpts.editMode = (!routeParams.editMode || routeParams.editMode === "false") ? scope.editMode = "" : " edit-mode";
+				scopeOpts.editMode = routeParams.pageId == "new" ? " edit-mode" : "";
+				// Parent global tags scope get's set so it cannot but coupled with the above logic and has to be separately. //
+				setPageGlobalTags();
+			}
+			
+			scopeOpts.updatesEnabled = scopeOpts.editMode === " edit-mode" ? false : true;
+
+			$.extend(true, scope, scopeOpts, true);
+
+		}
+
+		function parseAdhocMetricParams() {
+
+			var series = [];
+			if(routeParams.m) {
+				var metrics = Object.prototype.toString.call(routeParams.m) === '[object Array]' ? routeParams.m : [ routeParams.m ];
+				for(var i=0; i < metrics.length; i++) {
+
+					var arr = metrics[i].match(/^(.*)\{(.*)\}\{alias:(.*),yTransform:(.*)\}$/);
+					var met = arr[1].split(":");
+
+					var rate = met.length == 3 ? true: false;
+					series.push({
+						'alias': arr[3],
+						'yTransform': arr[4],
+						'query':{
+							'aggregator': met[0],
+							'rate': rate,
+							'metric': met[met.length-1],
+							'tags': commaSepStrToDict(arr[2])
+						}
+					});
+				}
+			}
+			return series;
+		}
+
+		function parseAdhocThresholdParams() {
+			if(routeParams.thresholds) {
+				try {
+					var arr = routeParams.thresholds.split(":");
+					if(arr.length == 3) {
+						var dmm = arr[0].split("-");
+						var wmm = arr[1].split("-");
+						var imm = arr[2].split("-");
+						return {
+							'danger': 	{ max:dmm[0], min:dmm[1] },
+							'warning': 	{ max:wmm[0], min:wmm[1] },
+							'info': 	{ max:imm[0], min:imm[1] }
+						};
+					}
+				} catch(e) {
+					console.warn("cannot set thresholds", e);
+				}
+			}
+			return {
+				danger: {max:'', min:''},
+				warning: {max:'', min:''},
+				info: {max:'', min:''}
+			};
+		}
+
+		function parseAdhocParams() {
+			
+			var gmodel = {};
+			gmodel.size 		= routeParams.size ? routeParams.size : ADHOC_DEFAULT_GRAPH_SIZE;
+			gmodel.thresholds 	= parseAdhocThresholdParams();
+			gmodel.graphType 	= routeParams.type ? routeParams.type: ADHOC_DEFAULT_GRAPH_TYPE;
+			gmodel.series 		= parseAdhocMetricParams();
+
+			return gmodel;
+		}
+
+		function parsePageParams() {
+			
+			var out = {};
+			out.editMode 		= routeParams.pageId == "new" ? " edit-mode" : "";	
+			out.updatesEnabled 	= editMode == " edit-mode" ? false : true;
+
+			
+			return out;
+		}
+
+		function getParams() {
+			
+			switch(scope.modelType) {
+				case "adhoc":
+					return parseAdhocParams();
+					break;
+				default:
+					return parsePageParams();
+					break;
+			}
+		}
+
+		initialize();
+
+		t.getParams = getParams;
+
+	}
+	return (RouteManager);
+})
+.factory("URLSetter", function() {
+	
+	var URLSetter = function(scope, location) {
+		var t = this;
+
+		function parseMetrics(obj) {
+
+			var outarr = [];
+			for(var s=0; s < obj.series.length; s++) {
+				
+				serie = obj.series[s];
+				q = serie.query;
+				
+				var params = q.aggregator+":";
+				if(q.rate) params += "rate:";
+				
+				params += q.metric+"{"
+				tagstr = "";
+				for(var tk in q.tags) {
+
+					if(tk == "") continue;
+					tagstr += tk+":"+q.tags[tk]+","
+				}
+
+				tagstr.replace(/\,$/,'');
+				if(tagstr !== "") params += tagstr;
+
+				params += "}{alias:"+serie.alias;
+				params += ",yTransform:"+serie.yTransform+"}";
+				outarr.push(params);
+			}
+			return outarr;
+		}
+
+		function setURL(obj) {
+
+			var srch = {
+				'm'			: parseMetrics(obj),
+				'thresholds': scope.graph.thresholds.danger.max + "-" + scope.graph.thresholds.danger.min +
+								":"+scope.graph.thresholds.warning.max + "-" + scope.graph.thresholds.warning.min +
+								":"+scope.graph.thresholds.info.max + "-" + scope.graph.thresholds.info.min,
+				'type'		: scope.graph.graphType,
+				'size'		: scope.graph.size,
+			};
+
+			if(scope.editMode === "") srch.editMode = "false";
+
+			if(scope.timeType === "absolute") {
+				
+				srch.start = scope.startTime;
+				if(scope.endTime) srch.end = scope.endTime;
+			} else {
+				
+				srch.start = scope.timeType;
+			}
+
+			var uAnnoTagsStr = dictToCommaSepStr(scope.globalAnno.tags, ":");
+
+			if(scope.globalAnno.eventTypes.length > 0 && uAnnoTagsStr != "") {
+				
+				srch.annotationTypes = scope.globalAnno.eventTypes.join("|");
+				srch.annotationTags = uAnnoTagsStr;
+			}
+
+			location.search(srch);
+		}
+
+		t.setURL = setURL;
+	};
+
+	return (URLSetter);
+})
+.factory("WebSocketDataProvider", function() {
 	
 	var WebSocketDataProvider = function(scope) {
 		
@@ -321,6 +539,7 @@ metrilyxHelperFactories.factory("WebSocketDataProvider", function() {
 	     	console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
 	    	wssock = null;
 	   	}
+
 	   	function onMessageWssock(e) {
        		var data = JSON.parse(e.data);
        		if(data.error) {
@@ -348,6 +567,7 @@ metrilyxHelperFactories.factory("WebSocketDataProvider", function() {
 	       		wssock.dispatchEvent(ce);
        		}
 		}
+
 		function initializeWebSocket() {
 			wssock = getWebSocket();
 			if(wssock !== null) {
@@ -356,6 +576,7 @@ metrilyxHelperFactories.factory("WebSocketDataProvider", function() {
 	   			wssock.onmessage 	= onMessageWssock;
 	   		}
 		}
+
 		this.addGraphIdEventListener = function(graphId, funct) {
 			wssock.addEventListener(graphId, funct);
 			modelGraphIdIdx[graphId] = true;
@@ -384,6 +605,7 @@ metrilyxHelperFactories.factory("WebSocketDataProvider", function() {
 	    this.closeConnection = function() {
 	    	wssock.close();
 	    }
+
 	    initializeWebSocket();
 	}
 	return (WebSocketDataProvider);
