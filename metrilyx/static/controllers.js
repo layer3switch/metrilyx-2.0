@@ -125,8 +125,8 @@ metrilyxControllers.controller('sidePanelController', [
 	}
 ]);
 metrilyxControllers.controller('pageController', [
-	'$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap', 'EventTypes', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap, EventTypes, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions) {
+	'$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap', 'EventTypes', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions', 'CtrlCommon',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap, EventTypes, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions, CtrlCommon) {
 
 		$scope.modelType = "";
 		$scope.modelGraphIds = [];
@@ -140,6 +140,7 @@ metrilyxControllers.controller('pageController', [
 		var compTemplates 	= new ComponentTemplates($scope);
 		var timeWindow 		= new TimeWindow($scope, $routeParams);
 		var wsdp 			= new WebSocketDataProvider($scope);
+		var ctrlCommon		= new CtrlCommon($scope, $location, $route);
 
 		if($routeParams.pageId == "new" || $routeParams.heatmapId == 'new') {
 			
@@ -314,66 +315,7 @@ metrilyxControllers.controller('pageController', [
 				});
 			}, 500);
 		}
-		$scope.updateTagsOnPage = function(obj) {
-			var top = $scope.tagsOnPage;
-			for(var k in obj) {
-				if(Object.prototype.toString.call(obj[k]) === '[object Array]') {
-					if(top[k] == undefined) {
-						top[k] = obj[k];
-						top[k].push("*");
-					} else {
-						for(var i in obj[k]) {
-							if(top[k].indexOf(obj[k][i]) < 0) top[k].push(obj[k][i]);
-						}
-					}
-				} else {
-					if(top[k] == undefined) {
-						top[k] = ["*"];
-						top[k].push(obj[k]);
-					} else if(top[k].indexOf(obj[k]) < 0) {
-						top[k].push(obj[k]);
-					}
-				}
-			}
-			$scope.tagsOnPage = top;
-			//console.log($scope.tagsOnPage);
-		}
 
-		$scope.searchForMetric = function(args) {
-			/*
-				'this.metricQuery' must be used rather than '$scope.metricQuery' because
-				edit-panel is ng-include so a new scope gets created.
-			*/
-			if (timerSearchForMetric)
-				clearTimeout(timerSearchForMetric);
-
-			var myThis = this;
-			timerSearchForMetric = setTimeout(function(){
-				var qstr;
-				if(args && args !== "") qstr = args;
-				if(myThis.metricQuery && myThis.metricQuery !== "") qstr = myThis.metricQuery;
-				if(qstr == "" || qstr == undefined) {
-					$scope.metricQueryResult = [];
-					return;
-				}
-				Metrics.suggest(qstr, function(result) {
-					$scope.metricQuery = qstr;
-					Schema.get({modelType:'metric'}, function(graphModel) {
-						var arr = [];
-						for(var i=0; i < result.length; i++) {
-							obj = JSON.parse(JSON.stringify(graphModel));
-							obj.alias = result[i];
-							obj.query.metric = result[i];
-							arr.push(obj);
-						}
-						$scope.metricQueryResult = arr;
-					});
-				});
-			}, 1000);
-		}
-		$scope.setUpdatesEnabled = function(value) {
-			$scope.updatesEnabled = value;
-		}
 		$scope.setStartTime = function(sTime) {
 			
 			timeWindow.setAttribute('startTime', sTime);
@@ -559,10 +501,7 @@ metrilyxControllers.controller('pageController', [
 		$scope.removeTag = function(tags, tagkey) {
 			delete tags[tagkey];
 		}
-		$scope.loadHome = function() {
-			$location.path('/graph').search({});
-			$route.reload();
-		}
+		
 		$scope.previewGraph = function(graph) {
 			$scope.reloadGraph(graph);
 			$("[data-query-set='"+graph._id+"']").collapse('hide');
@@ -586,8 +525,8 @@ metrilyxControllers.controller('pageController', [
 		submitAnalytics({page: "/"+$routeParams.pageId, title: $routeParams.pageId});
 }]);
 metrilyxControllers.controller('adhocGraphController', [
-	'$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'EventTypes', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, EventTypes, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions) {
+	'$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'EventTypes', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions', 'CtrlCommon',
+	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, EventTypes, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions, CtrlCommon) {
 		
 		$scope.modelType 		= "adhoc";
 		$scope.modelGraphIds 	= [];
@@ -598,6 +537,8 @@ metrilyxControllers.controller('adhocGraphController', [
 		var wsdp 			= new WebSocketDataProvider($scope);
 		var compTemplates 	= new ComponentTemplates($scope);
 		var timeWindow 		= new TimeWindow($scope, $routeParams);
+		var ctrlCommon		= new CtrlCommon($scope, $location, $route);
+
 
 		if($routeParams.editMode === "false") $scope.editMode = "";
 		else $scope.editMode = " edit-mode";
@@ -689,9 +630,6 @@ metrilyxControllers.controller('adhocGraphController', [
        	$scope.requestData = function(query) {
         	wsdp.requestData(query);
         }
-        $scope.setUpdatesEnabled = function(value) {
-			$scope.updatesEnabled = value;
-		}
 
 		$scope.onEditPanelLoad = function() {
 			document.getElementById('edit-panel').addEventListener('refresh-metric-list',
@@ -802,31 +740,7 @@ metrilyxControllers.controller('adhocGraphController', [
 		$scope.setAnnotations = function() {
 			annoOptions.applyAnnotationOptions();
 		}
-		$scope.updateTagsOnPage = function(obj) {
-			var top = $scope.tagsOnPage;
-			for(var k in obj) {
-				if(Object.prototype.toString.call(obj[k]) === '[object Array]') {
-					if(top[k] == undefined) {
-						top[k] = obj[k];
-						top[k].push("*");
-					} else {
-						for(var i in obj[k]) {
-							if(top[k].indexOf(obj[k][i]) < 0) top[k].push(obj[k][i]);
-						}
-					}
-				} else {
-					if(top[k] == undefined) {
-						top[k] = ["*"];
-						top[k].push(obj[k]);
-					} else if(top[k].indexOf(obj[k]) < 0) {
-						top[k].push(obj[k]);
-					}
-				}
-			}
-			// this may be very expensive //
-			for(var k in top) top[k].sort();
-			$scope.tagsOnPage = top;
-		}
+
 		$scope.reloadGraph = function(gobj) {
 			
 			if(!gobj) gobj = $scope.graph;
@@ -843,7 +757,7 @@ metrilyxControllers.controller('adhocGraphController', [
 			
 			/* Destroy current graph */
 			try { domNode.highcharts().destroy(); } catch(e) {};
-			domNode.html(GRAPH_LOADER_HTML);
+			domNode.html(GRAPH_LOADING_HTML);
 			
 			$scope.requestData(q);
 		}
@@ -881,36 +795,6 @@ metrilyxControllers.controller('adhocGraphController', [
 			}
 		}
 
-		$scope.searchForMetric = function(args) {
-			
-			if (timerSearchForMetric) clearTimeout(timerSearchForMetric);
-
-			var myThis = this;
-			timerSearchForMetric = setTimeout(function(){
-				var qstr;
-				if(args && args !== "") qstr = args;
-				if(myThis.metricQuery && myThis.metricQuery !== "") qstr = myThis.metricQuery;
-				if(qstr == "" || qstr == undefined) return;
-				Metrics.suggest(qstr, function(result) {
-					$scope.metricQuery = qstr;
-					Schema.get({modelType:'metric'}, function(graphModel) {
-						var arr = [];
-						for(var i in result) {
-							obj = JSON.parse(JSON.stringify(graphModel));
-							obj.alias = result[i];
-							obj.query.metric = result[i];
-							arr.push(obj);
-						}
-						$scope.metricQueryResult = arr;
-					});
-				});
-			}, 1000);
-		}
-
-		$scope.loadHome = function() {
-			$location.path('/graph').search({});
-			$route.reload();
-		}
 		$scope.graphSizeChanged = function() {
 			$scope.setURL($scope.graph);
 			$scope.reflow();
