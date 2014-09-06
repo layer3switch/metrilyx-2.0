@@ -58,6 +58,8 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 	def onClose(self, wasClean, code, reason):
 		logger.info("Connection closed: wasClean=%s code=%s reason=%s" %(
 								str(wasClean), str(code), str(reason)))
+		self.factory.removeClient(self)
+
 
 	def checkMessage(self, payload, isBinary):
 		if not isBinary:
