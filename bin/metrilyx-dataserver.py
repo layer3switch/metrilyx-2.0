@@ -66,19 +66,6 @@ def spawnServers(protocol):
 		procs.append(proc)
 	return procs
 
-"""
-def getPerfDataProvider():
-	mc = config['dataprovider']['loader_class'].split(".")
-	mod = __import__('metrilyx.dataserver.dataproviders.perf.%s'%(
-									".".join(mc[:-1])), fromlist=['*']) 
-	return eval("mod.%s(config['dataprovider'])" %(mc[-1]))
-
-def getEventDataProvider():
-	mc = config['annotations']['dataprovider']['loader_class'].split(".")
-	mod = __import__('metrilyx.dataserver.dataproviders.events.%s' %(
-									".".join(mc[:-1])), fromlist=['*'])
-	return eval("mod.%s(config['annotations']['dataprovider'])" %(mc[-1]))
-"""
 
 def getLogger(level):
 	try:
