@@ -369,7 +369,7 @@ class MetrilyxGraphFetcher(object):
                 data = self.__secondariesGraph.data()
                 self.__completedDeferred.callback(data)
             else:
-                self.__completedDeferred(None)
+                self.__completedDeferred.callback(None)
 
     def __partialResponseErrback(self, error, *cbargs): 
         self.completed += 1
