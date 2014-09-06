@@ -100,7 +100,6 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 
 	def submitPerfQueries(self, graphRequest):
 		mgf = MetrilyxGraphFetcher(self.dataprovider, graphRequest)
-		self.__activeFetchers[graphRequest.request['_id']] = mgf
 
 		stamp = "%s-%f" %(graphRequest.request['_id'], time.time())
 		
@@ -109,11 +108,14 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 		mgf.addPartialResponseCallback(self.partialResponseCallback)
 		mgf.addPartialResponseErrback(self.partialResponseErrback, graphRequest.request)
 
+		self.__activeFetchers[stamp] = mgf
+
 	def completeCallback(self, *cbargs):
-		(key,) = cbargs
+		(data, key,) = cbargs
 		self.__rmActiveFetcher(key)
 
 	def completeErrback(self, error, *cbargs):
+		print cbargs
 		(request, key) = cbargs
 		self.__rmActiveFetcher(key)
 

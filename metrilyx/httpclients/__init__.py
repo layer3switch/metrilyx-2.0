@@ -331,7 +331,8 @@ class MetrilyxGraphFetcher(object):
         self.__partialDeferreds[idx].callback(gmeta)
 
         if self.total == self.completed:
-            self.__completedDeferred.callback()
+            ## Cannot trigger callback without some data.
+            self.__completedDeferred.callback(None)
 
     def __partialResponseErrback(self, error, *cbargs): 
         self.completed += 1
