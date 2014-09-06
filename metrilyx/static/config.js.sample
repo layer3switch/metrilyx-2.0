@@ -52,6 +52,9 @@ var METRIC_FETCH_TIME_WIN = 900000;
 // graph loader html //
 var GRAPH_LOADING_HTML = "<table class='gif-loader-table'><tr><td><img src='/imgs/loader.gif'></td></tr></table>";
 
+var ADHOC_DEFAULT_GRAPH_SIZE = "large";
+var ADHOC_DEFAULT_GRAPH_TYPE = "line";
+
 // configure any js analytics here //
 var SITE_ANALYTICS = {
 	enabled: false,
