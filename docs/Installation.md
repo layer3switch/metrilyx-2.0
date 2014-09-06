@@ -131,13 +131,8 @@ Finally install the python module i.e. psycopg2
 ## Upgrade
 Upgrades are extactly similar to the install process with a couple of extra steps.  During the install process, the application directory gets copied with the current date and time keeping an existing state of your application.  After the install process has been completed you will need to perform the following steps to bring your existing models into the new installation.
 
-##### sqlite
-You can simply copy the sqlite db file from the previous installation into the current one.
 
-##### Postgresql/MySQL
-No additional steps are required.
-
-#### Upgrading configuration
+#### Upgrading configurations
 As new configuration options may be added and removed a script has been provided to check and update your configuration.  To generate a new configuration file based on your existing one, issue the following command:
 
 	$ cd /opt/metrilyx
@@ -151,15 +146,25 @@ The commands below will backup the existing config and copy in the new one.
 	$ cp etc/metrilyx/metrilyx.conf{,.backup}
 	$ cp metrilyx.conf.new etc/metrilyx/metrilyx.conf
 
+
+#### Upgrading the database
+Follow the steps for the database you are using.
+
+##### sqlite
+You can simply copy the sqlite db file from the previous installation into the current one.
+
+##### Postgresql/MySQL
+No additional steps are required.
+
+
 #### Upgrading models
-Once you have the data in the database you will need to upgrade the model schema of each model.  To do this run the following commands:
+Once the database has been upgraded you will need to upgrade the models.  To do this run the following commands:
 
 	$ cd /opt/metrilyx
 	$ ./bin/mdlmgr.py
 
-The second command won't actually upgrade the model but give you an idea of what will change along with any errors.  If everything checks out run the same command with the --commit options like so:
+The second command won't actually upgrade the model but give you an idea of what will change along with any errors.  If everything checks out run the same command with the --commit option like so:
 
 	$ ./bin/mdlmgr.py --commit
 
-Thats it.
-
+You can now start the metrilyx services.
