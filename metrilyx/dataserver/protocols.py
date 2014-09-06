@@ -103,6 +103,21 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 class GraphServerProtocol(BaseGraphServerProtocol):
 
 	__activeFetchers = {}
+	__activeFetchersTimeout = 1800
+	__expirerDeferred = None
+
+	def __expireActiveFetchers(self):
+		
+		expireTime = time.time() - self.__activeFetchersTimeout
+		
+		for k,v in self.__activeFetchers.items():	
+			if float(k.split("-")[-1]) <= expireTime:
+				
+				v.cancelRequests()
+				del self.__activeFetchers[key]
+				logger.info("Expired fetcher: %s" %(k))	
+
+		self.__expirerDeferred = reactor.callLater(self.__activeFetchersTimeout, self.__expireActiveFetchers)
 
 	def __removeFetcher(self, key):
 		if self.__activeFetchers.has_key(key):
@@ -158,6 +173,15 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 			errResponse = self.dataprovider.responseErrback(error, graphMeta)
 			self.sendMessage(json.dumps(errResponse))
 
+	def onOpen(self):
+		logger.info("Connection opened. extensions: %s" %(
+										self.websocket_extensions_in_use))
+		self.factory.addClient(self)
+		## Expire fetchers
+		logger.info("Scheduling fetcher expiration...")
+		self.__expirerDeferred = reactor.callLater(self.__activeFetchersTimeout, self.__expireActiveFetchers)
+
+
 	def onClose(self, wasClean, code, reason):
 		logger.info("Connection closed: wasClean=%s code=%s reason=%s" %(
 								str(wasClean), str(code), str(reason)))
@@ -167,6 +191,11 @@ class GraphServerProtocol(BaseGraphServerProtocol):
 			self.__removeFetcher(k)
 
 		self.factory.removeClient(self)
+
+		try:
+			self.__expirerDeferred.cancel()
+		except Exception:
+			pass
 		
 
 class EventGraphServerProtocol(GraphServerProtocol):
