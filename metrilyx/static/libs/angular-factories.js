@@ -31,7 +31,6 @@ angular.module("metrilyxHelperFactories", [])
 						graphControlsHtml	: connectionPool.nextConnection()+"/partials/graph-controls.html",
 						graphHtml 			: connectionPool.nextConnection()+"/partials/graph.html",
 						podHtml 			: connectionPool.nextConnection()+"/partials/pod.html",
-						heatGraphHtml 		: connectionPool.nextConnection()+"/partials/heat-graph.html"
 					}, true);
 				}
 			}
@@ -42,9 +41,9 @@ angular.module("metrilyxHelperFactories", [])
 	}
 	return (ComponentTemplates);
 })
-.factory("CtrlCommon", ['Metrics', 'Schema', function(Metrics, Schema) {
+.factory("CtrlCommon", ['Metrics', 'Schema', '$route', '$location', function(Metrics, Schema, $route, $location) {
 	
-	var CtrlCommon = function(scope, location, route) {
+	var CtrlCommon = function(scope) {
 
 		var timerSearchForMetric;
 
@@ -120,8 +119,8 @@ angular.module("metrilyxHelperFactories", [])
 		}
 
 		function loadHome() {
-			location.path('/graph').search({});
-			route.reload();
+			$location.path('/graph').search({});
+			$route.reload();
 		}
 
 		scope.disableDragDrop 	= disableDragDrop;
@@ -135,9 +134,9 @@ angular.module("metrilyxHelperFactories", [])
 
 	return (CtrlCommon);
 }])
-.factory("AnnotationOptions", function() {
+.factory("AnnotationOptions", ['$location', '$routeParams', 'EventTypes', function($location, $routeParams, EventTypes) {
 
-	var AnnotationOptions = function(scope, routeParams, location, EventTypesSvc) {
+	var AnnotationOptions = function(scope) {
 		
 		var scopeAttributes = {
 			'globalAnno': {'eventTypes':[], 'tags':{}, 'status': null },
@@ -147,13 +146,13 @@ angular.module("metrilyxHelperFactories", [])
 
 		function initialize() {
 			
-			if(routeParams.annotationTypes && routeParams.annotationTags) {
+			if($routeParams.annotationTypes && $routeParams.annotationTags) {
 				
 				try {
 
 					$.extend(true, scopeAttributes['globalAnno'], {
-						'eventTypes': routeParams.annotationTypes.split(/\|/),
-						'tags': commaSepStrToDict(routeParams.annotationTags),
+						'eventTypes': $routeParams.annotationTypes.split(/\|/),
+						'tags': commaSepStrToDict($routeParams.annotationTags),
 					}, true);
 				} catch(e) { console.warning("failed to parse annotation data", e); }
 			}
@@ -165,7 +164,7 @@ angular.module("metrilyxHelperFactories", [])
 			$.extend(scope, scopeAttributes, true);
 
 			// Get all available event types
-			EventTypesSvc.listTypes(function(rslt) {
+			EventTypes.listTypes(function(rslt) {
 				
 				var evtTypeList = [];
 				for(var i in rslt) {
@@ -189,19 +188,19 @@ angular.module("metrilyxHelperFactories", [])
 				$('.graph-control-details.global-anno').hide();
 			}
 
-			var tmp = location.search();
+			var tmp = $location.search();
 			tmp.annotationTypes = scope.globalAnno.eventTypes.join("|");
 			tmp.annotationTags = dictToCommaSepStr(scope.globalAnno.tags, ":");
-			location.search(tmp);
+			$location.search(tmp);
 		}
 
 		initialize();
 	}
 	return (AnnotationOptions);
-})
-.factory("TimeWindow", function() {
+}])
+.factory("TimeWindow", ['$routeParams', function($routeParams) {
 	
-	var TimeWindow = function(scope, routeParams) {
+	var TimeWindow = function(scope) {
 		var t = this;
 
 		var scopeAttributes = {
@@ -217,24 +216,24 @@ angular.module("metrilyxHelperFactories", [])
 			
 			if(scope.modelType === "adhoc") scopeAttributes['updatesEnabled'] = false;
 			
-			if(routeParams.start) {
+			if($routeParams.start) {
 
-				if(routeParams.end) {
+				if($routeParams.end) {
 					
 					$.extend(true, scopeAttributes, {
-						'endTime': parseInt(routeParams.end),
+						'endTime': parseInt($routeParams.end),
 						'timeType': "absolute",
 						'updatesEnabled': false
 					}, true);
 				} else {
 					
-					scopeAttributes['timeType'] = routeParams.start;
+					scopeAttributes['timeType'] = $routeParams.start;
 				}
-				if(Object.prototype.toString.call(routeParams.start) === '[object String]' 
-													&& routeParams.start.match(/-ago$/)) {
-					scopeAttributes['startTime'] = routeParams.start;
+				if(Object.prototype.toString.call($routeParams.start) === '[object String]' 
+													&& $routeParams.start.match(/-ago$/)) {
+					scopeAttributes['startTime'] = $routeParams.start;
 				} else {
-					scopeAttributes['startTime'] = parseInt(routeParams.start);
+					scopeAttributes['startTime'] = parseInt($routeParams.start);
 				}
 			}
 			$.extend(scope, scopeAttributes, true);
@@ -312,17 +311,17 @@ angular.module("metrilyxHelperFactories", [])
 		initialize();
 	};
 	return (TimeWindow);
-})
-.factory("RouteManager", function() {
-/* IN PROGRESS */
-	var RouteManager = function(scope, routeParams) {
+}])
+.factory("RouteManager", ['$routeParams', function($routeParams) {
+
+	var RouteManager = function(scope) {
 
 		var t = this;
 
 		function setPageGlobalTags() {
 
 			try { 
-				scope.$parent.globalTags = routeParams.tags ? commaSepStrToDict(routeParams.tags) : {}; 
+				scope.$parent.globalTags = $routeParams.tags ? commaSepStrToDict($routeParams.tags) : {}; 
 			} catch(e) {
 				console.warn("Could not parse global tags!");
 				scope.globalTags = {};
@@ -335,12 +334,12 @@ angular.module("metrilyxHelperFactories", [])
 
 			if(scope.modelType === "adhoc") {
 
-				scopeOpts.editMode = routeParams.editMode === "false" ? "" : " edit-mode";
+				scopeOpts.editMode = $routeParams.editMode === "false" ? "" : " edit-mode";
 			} else {
 
 				
-				scopeOpts.editMode = (!routeParams.editMode || routeParams.editMode === "false") ? scope.editMode = "" : " edit-mode";
-				scopeOpts.editMode = routeParams.pageId == "new" ? " edit-mode" : "";
+				scopeOpts.editMode = (!$routeParams.editMode || $routeParams.editMode === "false") ? scope.editMode = "" : " edit-mode";
+				scopeOpts.editMode = $routeParams.pageId == "new" ? " edit-mode" : "";
 				// Parent global tags scope get's set so it cannot but coupled with the above logic and has to be separately. //
 				setPageGlobalTags();
 			}
@@ -354,8 +353,8 @@ angular.module("metrilyxHelperFactories", [])
 		function parseAdhocMetricParams() {
 
 			var series = [];
-			if(routeParams.m) {
-				var metrics = Object.prototype.toString.call(routeParams.m) === '[object Array]' ? routeParams.m : [ routeParams.m ];
+			if($routeParams.m) {
+				var metrics = Object.prototype.toString.call($routeParams.m) === '[object Array]' ? $routeParams.m : [ $routeParams.m ];
 				for(var i=0; i < metrics.length; i++) {
 
 					var arr = metrics[i].match(/^(.*)\{(.*)\}\{alias:(.*),yTransform:(.*)\}$/);
@@ -378,9 +377,9 @@ angular.module("metrilyxHelperFactories", [])
 		}
 
 		function parseAdhocThresholdParams() {
-			if(routeParams.thresholds) {
+			if($routeParams.thresholds) {
 				try {
-					var arr = routeParams.thresholds.split(":");
+					var arr = $routeParams.thresholds.split(":");
 					if(arr.length == 3) {
 						var dmm = arr[0].split("-");
 						var wmm = arr[1].split("-");
@@ -405,9 +404,9 @@ angular.module("metrilyxHelperFactories", [])
 		function parseAdhocParams() {
 			
 			var gmodel = {};
-			gmodel.size 		= routeParams.size ? routeParams.size : ADHOC_DEFAULT_GRAPH_SIZE;
+			gmodel.size 		= $routeParams.size ? $routeParams.size : ADHOC_DEFAULT_GRAPH_SIZE;
 			gmodel.thresholds 	= parseAdhocThresholdParams();
-			gmodel.graphType 	= routeParams.type ? routeParams.type: ADHOC_DEFAULT_GRAPH_TYPE;
+			gmodel.graphType 	= $routeParams.type ? $routeParams.type: ADHOC_DEFAULT_GRAPH_TYPE;
 			gmodel.series 		= parseAdhocMetricParams();
 
 			return gmodel;
@@ -416,7 +415,7 @@ angular.module("metrilyxHelperFactories", [])
 		function parsePageParams() {
 			
 			var out = {};
-			out.editMode 		= routeParams.pageId == "new" ? " edit-mode" : "";	
+			out.editMode 		= $routeParams.pageId == "new" ? " edit-mode" : "";	
 			out.updatesEnabled 	= editMode == " edit-mode" ? false : true;
 
 			
@@ -441,10 +440,10 @@ angular.module("metrilyxHelperFactories", [])
 
 	}
 	return (RouteManager);
-})
-.factory("URLSetter", function() {
+}])
+.factory("URLSetter", ['$location', function($location) {
 	
-	var URLSetter = function(scope, location) {
+	var URLSetter = function(scope) {
 		var t = this;
 
 		function parseMetrics(obj) {
@@ -506,14 +505,91 @@ angular.module("metrilyxHelperFactories", [])
 				srch.annotationTags = uAnnoTagsStr;
 			}
 
-			location.search(srch);
+			$location.search(srch);
 		}
 
 		t.setURL = setURL;
 	};
 
 	return (URLSetter);
-})
+}])
+.factory("ModelManager", ['Model', '$route', '$routeParams', function(Model, $route, $routeParams) {
+
+	var ModelManager = function(scope) {
+
+		function modelManagerErrback(error) {
+			if(error.data && Object.prototype.toString.call(error.data) === '[object Object]')
+				setGlobalAlerts({
+					'error': error.status,
+					'message': "code: "+error.status+" "+JSON.stringify(error.data)
+				});
+			else
+				setGlobalAlerts({
+					'error': error.status,
+					'message': "code: "+error.status+" "+error.data
+				});
+			flashAlertsBar();
+		}
+
+		function _removeModelCallback(rslt) {
+			
+			setGlobalAlerts(rslt);
+			if(rslt.error) {
+				flashAlertsBar();
+			} else {
+
+				location.hash = "#/new";
+
+				document.getElementById('side-panel').dispatchEvent(
+					new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
+			}
+		}
+
+		function removeModel(callback) {
+
+			Model.removeModel({pageId: scope.model._id}, {}, function(result) {
+				_removeModelCallback(result);
+			});
+		}
+
+		function _saveModelCallback(rslt) {
+			
+			setGlobalAlerts(rslt);
+			if(rslt.error) {
+				flashAlertsBar();
+			} else {
+
+				document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
+				console.log("Save - Load this page on save:", scope.model._id);
+				$route.reload();
+			}
+		}
+
+		function saveModel(args) {
+			if($routeParams.pageId == 'new') {
+				
+				Model.saveModel(scope.model, 
+					function(result) {
+						_saveModelCallback(result);
+					}, modelManagerErrback);
+			} else {
+				
+				Model.editModel({'pageId': scope.model._id}, scope.model, 
+					function(result) {
+						_saveModelCallback(result);
+					}, modelManagerErrback);
+			}
+		}
+
+		$.extend(scope, {
+			'saveModel': saveModel,
+			'removeModel': removeModel
+		}, true);	
+
+	}
+
+	return (ModelManager);
+}])
 .factory("WebSocketDataProvider", function() {
 	
 	var WebSocketDataProvider = function(scope) {

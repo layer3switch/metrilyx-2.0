@@ -3,8 +3,8 @@
 var metrilyxControllers = angular.module('metrilyxControllers', []);
 
 metrilyxControllers.controller('staticsController', [
-	'$scope', '$route', '$routeParams', '$location', 'ComponentTemplates',
-	function($scope, $route, $routeParams, $location, ComponentTemplates) {
+	'$scope', '$route', '$location', 'ComponentTemplates',
+	function($scope, $route, $location, ComponentTemplates) {
 		
 		$scope.modelType = "static";
 
@@ -19,8 +19,8 @@ metrilyxControllers.controller('staticsController', [
 	}
 ]);
 metrilyxControllers.controller('sidePanelController', [
-	'$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'Heatmap','Tags',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap, Tags) {
+	'$scope', 'Schema', 'Model','Tags',
+	function($scope, Schema, Model, Tags) {
 		
 		$scope.modelType = "";
 		
@@ -29,12 +29,6 @@ metrilyxControllers.controller('sidePanelController', [
 		$scope.browseBy = "name"; // name, tags //
 		$scope.selectedTag = "";
 
-		$scope.loadHeatmapList = function(elem) {
-			$('.model-list-btn').removeClass('list-active');
-			$(elem).addClass('list-active');
-			$scope.modelType = 'heatmap/';
-			$scope.loadList();
-		}
 		$scope.loadPagemodelList = function(elem) {
 			$('.model-list-btn').removeClass('list-active');
 			$(elem).addClass('list-active');
@@ -46,15 +40,11 @@ metrilyxControllers.controller('sidePanelController', [
 		}
 		$scope.listItemClicked = function(obj) {
 			if($scope.browseBy == 'tags' && $scope.selectedTag == '') {
-				if($scope.modelType == 'heatmap/') {
-					Tags.listModelsByTag({'model_type': 'heat'}, {'tagname':obj.name}, function(result){
-						$scope.modelsList = result;
-					});
-				} else {
-					Tags.listModelsByTag({'model_type': 'graph'}, {'tagname':obj.name}, function(result){
-						$scope.modelsList = result;
-					});
-				}
+
+				Tags.listModelsByTag({'model_type': 'graph'}, {'tagname':obj.name}, function(result) {
+					$scope.modelsList = result;
+				});
+
 				$('#tag-back-btn').show();
 				$('#selected-tag').show();
 				$('#selected-tag').parent().addClass('padb10');
@@ -66,23 +56,17 @@ metrilyxControllers.controller('sidePanelController', [
 			}
 		}
 		$scope.loadList = function() {
+			
 			$scope.selectedTag = '';
-			if($scope.modelType === 'heatmap/') mtype = 'heat';
-			else mtype = 'graph';
+
 			switch($scope.browseBy) {
 				case "name":
-					if($scope.modelType === 'heatmap/') {
-						Heatmap.listModels(function(result) {
-							$scope.modelsList = result;
-						});
-					} else {
-						Model.listModels(function(result) {
-							$scope.modelsList = result;
-						});
-					}
+					Model.listModels(function(result) {
+						$scope.modelsList = result;
+					});
 					break;
 				case "tags":
-					Tags.listTags({'model_type': mtype}, function(result) {
+					Tags.listTags({'model_type': 'graph'}, function(result) {
 						$scope.modelsList = result;
 					});
 					break;
@@ -94,25 +78,22 @@ metrilyxControllers.controller('sidePanelController', [
 			$('.model-list-container').removeClass('tag-selected');
 			$('#selected-tag').parent().removeClass('padb10');
 		}
+		
 		$scope.importModel = function(fileList) {
+			
 			var freader = new FileReader();
-			//console.log(fileList[0].name);
 			freader.onload = function(evt) {
+				
 				try {
+
 					jobj = JSON.parse(evt.target.result);
-					if($scope.modelType === "heatmap/") {
-						Heatmap.saveModel(jobj, function(rslt) {
-							setGlobalAlerts({message: 'Imported '+rslt._id});
-							flashAlertsBar();
-							document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
-						});
-					} else {
-						Model.saveModel(jobj, function(rslt) {
-							setGlobalAlerts({message: 'Imported '+rslt._id});
-							flashAlertsBar();
-							document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
-						});
-					}
+					Model.saveModel(jobj, function(rslt) {
+						
+						setGlobalAlerts({message: 'Imported '+rslt._id});
+						flashAlertsBar();
+						document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
+					});
+
 				} catch(e) {
 					console.error("Could not import model", fileList[0].name, e);
 				}
@@ -125,21 +106,21 @@ metrilyxControllers.controller('sidePanelController', [
 	}
 ]);
 metrilyxControllers.controller('pageController', [
-	'$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model','Heatmap', 'EventTypes', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions', 'CtrlCommon', 'RouteManager',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, Heatmap, EventTypes, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions, CtrlCommon, RouteManager) {
+	'$scope', '$routeParams', '$location', 'Schema', 'Model', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions', 'CtrlCommon', 'RouteManager', 'ModelManager',
+	function($scope, $routeParams, $location, Schema, Model, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions, CtrlCommon, RouteManager, ModelManager) {
 
 		$scope.modelType = "";
 		$scope.modelGraphIds = [];
+		
+		$scope.tagsOnPage = {};
 
-		if($routeParams.heatmapId) $scope.modelType = "heatmap/";
-		else $scope.tagsOnPage = {};
-
-		var annoOptions 	= new AnnotationOptions($scope, $routeParams, $location, EventTypes);
+		var annoOptions 	= new AnnotationOptions($scope);
 		var compTemplates 	= new ComponentTemplates($scope);
-		var timeWindow 		= new TimeWindow($scope, $routeParams);
+		var timeWindow 		= new TimeWindow($scope);
 		var wsdp 			= new WebSocketDataProvider($scope);
-		var ctrlCommon		= new CtrlCommon($scope, $location, $route);
-		var routeMgr 		= new RouteManager($scope, $routeParams);
+		var ctrlCommon		= new CtrlCommon($scope);
+		var routeMgr 		= new RouteManager($scope);
+		var mdlMgr 			= new ModelManager($scope);
 
 		clearAllTimeouts();
 		
@@ -164,10 +145,10 @@ metrilyxControllers.controller('pageController', [
 		/* active model */
 		$scope.model = {};
 
-		Schema.get({modelType: 'pod'},function(podModel){
+		Schema.get({modelType: 'pod'}, function(podModel) {
 			/* used for dropped pod */
 			$scope.droppablePodSchema = [ podModel ];
-			if((!$routeParams.pageId && !$routeParams.heatmapId) || $routeParams.pageId == "new" || $routeParams.heatmapId == "new") {
+			if( !$routeParams.pageId || $routeParams.pageId == "new" ) {
 				Schema.get({modelType: 'page'}, function(pageModel) {
 					$scope.model = pageModel;
 					$scope.model.layout[0][0][0] = JSON.parse(JSON.stringify(podModel));
@@ -176,6 +157,7 @@ metrilyxControllers.controller('pageController', [
 			} else {
 				// initial page load
 				if($routeParams.pageId) {
+					
 					Model.getModel({pageId: $routeParams.pageId}, function(result) {
 						if(result.error) {
 							console.log(result);
@@ -184,16 +166,11 @@ metrilyxControllers.controller('pageController', [
 							$scope.modelGraphIds = getModelGraphIds();
 						}
 					});
-				} else if($routeParams.heatmapId) {
-					Heatmap.getModel({pageId: $routeParams.heatmapId}, function(result) {
-						if(result.error) {
-							console.log(result);
-						} else {
-							$scope.model = result;
-						}
-					});
 				} else {
-					console.warn("Heatmap or Page id not provided");
+					
+					console.warn("Page id not provided");
+					setGlobalAlerts({"error": "", "message": "Page ID not provided!"});
+					flashAlertsBar();
 				}
 			}
 		});
@@ -211,6 +188,7 @@ metrilyxControllers.controller('pageController', [
    			}
        		return out;
 		}
+
 		$scope.isTimeSeriesGraph = function(graphType) {
 			return !(graphType === 'pie' ||graphType === 'column' || graphType === 'bar');
 		}
@@ -380,75 +358,6 @@ metrilyxControllers.controller('pageController', [
 			$scope.reflow();
 		}
 
-		function _removeModelCallback(rslt) {
-			setGlobalAlerts(rslt);
-			if(rslt.error) {
-				flashAlertsBar();
-			} else {
-				if($scope.modelType == "") {
-					location.hash = "#/new";
-				} else {
-					location.hash = "#/heatmap/new";
-				}
-				document.getElementById('side-panel').dispatchEvent(
-					new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
-			}
-		}
-		$scope.removeModel = function(callback) {
-			if($scope.modelType == "") {
-				Model.removeModel({pageId: $scope.model._id}, {}, function(result) {
-					_removeModelCallback(result);
-				});
-			} else {
-				//console.log($scope.model._id);
-				Heatmap.removeModel({pageId: $scope.model._id}, {}, function(result) {
-					_removeModelCallback(result);
-				});
-			}
-		}
-		function _saveModelCallback(rslt) {
-			setGlobalAlerts(rslt);
-			if(rslt.error) {
-				flashAlertsBar();
-			} else {
-				var currpath;
-				if($scope.modelType === "") {
-					currpath = "#/"+$scope.model._id;
-				} else {
-					currpath = "#/" + $scope.modelType + $scope.model._id;
-				}
-				document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
-				$route.reload();
-			}
-		}
-		$scope.saveModel = function(args) {
-			//console.log($scope.model);
-			if($scope.modelType == "") {
-				if($routeParams.pageId == 'new') {
-					Model.saveModel($scope.model, 
-						function(result) {
-							_saveModelCallback(result);
-						}, modelManagerErrback);
-				} else {
-					Model.editModel({'pageId': $scope.model._id}, $scope.model, 
-						function(result) {
-							_saveModelCallback(result);
-						}, modelManagerErrback);
-				}
-			} else {
-				if($routeParams.heatmapId == 'new') {
-					Heatmap.saveModel($scope.model,
-						function(result) {
-							_saveModelCallback(result);
-						}, modelManagerErrback);
-				} else {
-					Heatmap.editModel({'pageId': $scope.model._id}, $scope.model,
-						function(result) {
-							_saveModelCallback(result);
-						}, modelManagerErrback);
-				}
-			}
-		}
 		$scope.setPlotBands = function(graph) {
 			setPlotBands(graph);
 		}
@@ -488,19 +397,19 @@ metrilyxControllers.controller('pageController', [
 }]);
 
 metrilyxControllers.controller('adhocGraphController', [
-	'$scope', '$route', '$routeParams', '$location', '$http', 'Metrics', 'Schema', 'Model', 'EventTypes', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions', 'CtrlCommon', 'RouteManager', 'URLSetter',
-	function($scope, $route, $routeParams, $location, $http, Metrics, Schema, Model, EventTypes, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions, CtrlCommon, RouteManager, URLSetter) {
+	'$scope', 'Schema', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions', 'CtrlCommon', 'RouteManager', 'URLSetter',
+	function($scope, Schema, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions, CtrlCommon, RouteManager, URLSetter) {
 		
 		$scope.modelType 		= "adhoc";
 		$scope.modelGraphIds 	= [];
 
-		var annoOptions 	= new AnnotationOptions($scope, $routeParams, $location, EventTypes);
+		var annoOptions 	= new AnnotationOptions($scope);
 		var wsdp 			= new WebSocketDataProvider($scope);
 		var compTemplates 	= new ComponentTemplates($scope);
-		var timeWindow 		= new TimeWindow($scope, $routeParams);
-		var ctrlCommon		= new CtrlCommon($scope, $location, $route);
-		var routeMgr 		= new RouteManager($scope, $routeParams);
-		var urlSetter 		= new URLSetter($scope, $location);
+		var timeWindow 		= new TimeWindow($scope);
+		var ctrlCommon		= new CtrlCommon($scope);
+		var routeMgr 		= new RouteManager($scope);
+		var urlSetter 		= new URLSetter($scope);
 
 		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
 

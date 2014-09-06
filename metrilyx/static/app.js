@@ -6,7 +6,6 @@ var app = angular.module('app', [
 	'timeframe',
 	'graphing',
 	'pageLayout',
-	'heatmaps',
 	'metrilyxHelperFactories',
 	'metrilyxControllers',
 	'metrilyxServices'
@@ -33,10 +32,6 @@ app.config(['$routeProvider',
 				templateUrl: 'partials/adhoc-graph.html',
 				controller: 'adhocGraphController',
 				reloadOnSearch: false
-			})
-			.when('/heatmap/:heatmapId', {
-				templateUrl: 'partials/page.html',
-				controller: 'pageController',
 			})
 			.when('/:pageId', {
 				templateUrl: 'partials/page.html',
@@ -591,19 +586,7 @@ function clearAllTimeouts() {
 		window.clearTimeout(id); 
 	}
 }
-function modelManagerErrback(error) {
-	if(error.data && Object.prototype.toString.call(error.data) === '[object Object]')
-		setGlobalAlerts({
-			'error': error.status,
-			'message': "code: "+error.status+" "+JSON.stringify(error.data)
-		});
-	else
-		setGlobalAlerts({
-			'error': error.status,
-			'message': "code: "+error.status+" "+error.data
-		});
-	flashAlertsBar();
-}
+
 function setGlobalAlerts(rslt) {
 	if(rslt.error) {
 		$('#global-alerts').removeClass('alert-success')

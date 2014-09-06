@@ -34,7 +34,6 @@
 		<script src="services.js"></script>
 		<script src="libs/angular-factories.js"></script>
 		<script src="libs/angular-graphing.js"></script>
-		<script src="libs/angular-heatmap.js"></script>
 
 	</head>
 	<body ng-app="app">
@@ -43,9 +42,6 @@
 				<div class="page-selector-header">
 					<span id="model-list-btn" ng-click="loadPagemodelList('#model-list-btn')" class="model-list-btn list-active pointer padl5 padr15 animated" title="Models">
 						<i class="glyphicon glyphicon-stats"></i>
-					</span>
-					<span id="heatmap-list-btn" ng-click="loadHeatmapList('#heatmap-list-btn')" class="model-list-btn pointer padl15 animated" style="position:relative;top:1px;" title="Heatmaps">
-						<i class="glyphicon glyphicon-fire"></i>
 					</span>
 					<span onclick="$('#side-panel').addClass('offstage')" title="Close" class="pull-right animated side-panel-toggle" style="position:relative;top:3px;cursor:w-resize">
 						<i class="glyphicon glyphicon-chevron-left"></i>
@@ -64,12 +60,6 @@
         					<i class="glyphicon glyphicon-chevron-right"></i>
         				</span>
 				        <ul class="dropdown-menu sp-page-controls in-side-panel bottom-shadow" role="menu">
-						    <li ng-if="modelType==='heatmap/'">
-								<a href="#/heatmap/new" class="page-icon" title="New">
-									<span><i class="glyphicon glyphicon-plus"></i></span>
-									<span>New</span>
-								</a>
-							</li>
 							<li ng-if="modelType===''">
 								<a href="#/new" class="page-icon" title="New">
 									<span><i class="glyphicon glyphicon-plus"></i></span>
@@ -97,16 +87,13 @@
 				<div style="height: 100%;overflow-y:scroll;">
 				<a ng-repeat="mdl in modelsList | filter:{name:modelQuery} | orderBy:'name'" ng-click="listItemClicked(mdl)" >
 					<div class="page-list-item">
-						<span ng-if="modelType==='heatmap/'" class="page-icon">
-							<i class="glyphicon glyphicon-fire"></i>
-						</span>
-						<span ng-if="modelType==='' && browseBy === 'name'" class="page-icon">
+						<span ng-if="browseBy === 'name'" class="page-icon">
 							<i class="glyphicon glyphicon-stats"></i>
 						</span>
-						<span ng-if="modelType==='' && browseBy === 'tags' && selectedTag ===''" class="page-icon">
+						<span ng-if="browseBy === 'tags' && selectedTag ===''" class="page-icon">
 							<i class="glyphicon glyphicon-tag"></i>
 						</span>
-						<span ng-if="modelType==='' && browseBy === 'tags' && selectedTag !==''" class="page-icon">
+						<span ng-if="browseBy === 'tags' && selectedTag !==''" class="page-icon">
 							<i class="glyphicon glyphicon-stats"></i>
 						</span>
 						<span class="padl5">{{mdl.name}}</span>

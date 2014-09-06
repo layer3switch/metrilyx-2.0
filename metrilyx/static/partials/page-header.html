@@ -121,11 +121,7 @@
 									</a>
 								</li>
 								<li title="Export">
-									<a ng-if="modelType===''" href="/api/graphmaps/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json">
-										<span class="padr5"><i class="glyphicon glyphicon-cloud-download"></i></span>
-										<span>Export</span>	
-									</a>
-									<a ng-if="modelType==='heatmap/'" href="/api/heatmaps/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json">
+									<a href="/api/graphmaps/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json">
 										<span class="padr5"><i class="glyphicon glyphicon-cloud-download"></i></span>
 										<span>Export</span>	
 									</a>
@@ -153,7 +149,7 @@
 				</div>
 			</div>
 			<div ng-attr-class="{{modelType==='adhoc' && 'col-md-8' || 'col-md-4'}}" style="padding:0;text-align:right;">
-				<div ng-if="(modelType==='adhoc')||(modelType!=='heatmap/')" style="padding-top:5px;">
+				<div style="padding-top:5px;">
 					<span class="animated select-container left-caret">
 						<span class="caret" style="position:relative;left:15px!important;pointer-events:none"></span>
 						<select ng-model="timeType" relative-time="true" class="time interactive" style="padding-left:20px!important;">

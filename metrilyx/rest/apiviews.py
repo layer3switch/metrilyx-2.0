@@ -64,6 +64,7 @@ class EventTypeViewSet(viewsets.ModelViewSet):
 	serializer_class = EventTypeSerializer
 	permission_classes = (IsCreatorOrReadOnly,)
 
+
 class GraphMapViewSet(MapViewSet):
 	
 	queryset = MapModel.objects.filter(model_type="graph")
@@ -86,32 +87,6 @@ class GraphMapViewSet(MapViewSet):
 		else:
 			graphmap = get_object_or_404(MapModel, model_type='graph', _id=pk)
 			serializer = MapModelSerializer(graphmap)
-			request.accepted_media_type = "application/json; indent=4"
-			return Response(serializer.data, headers={
-				'Content-Disposition': 'attachment; filename: %s.json' %(pk),
-				'Content-Type': 'application/json'
-				})
-
-
-class HeatMapViewSet(MapViewSet):
-	
-	queryset = MapModel.objects.filter(model_type="heat")
-
-	def pre_save(self, obj):
-		super(HeatMapViewSet,self).pre_save(obj)
-		obj.model_type = "heat"
-
-	def list(self, request, pk=None):
-		serializer = MapModelListSerializer(self.queryset, many=True)
-		return Response(serializer.data)
-
-	def retrieve(self, request, pk=None):
-		export_model = request.GET.get('export', None)
-		if export_model == None:
-			return super(HeatMapViewSet, self).retrieve(request,pk)
-		else:
-			heatmap = get_object_or_404(MapModel, model_type='heat', _id=pk)
-			serializer = MapModelSerializer(heatmap)
 			request.accepted_media_type = "application/json; indent=4"
 			return Response(serializer.data, headers={
 				'Content-Disposition': 'attachment; filename: %s.json' %(pk),

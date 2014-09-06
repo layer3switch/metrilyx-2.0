@@ -27,6 +27,7 @@ metrilyxServices.factory('Auth', ['$http', function ($http) {
         }
     };
 }]);
+
 metrilyxServices.factory('Metrics', ['$http', 'Auth', function($http, Auth) {
 	var cache = {};
 
@@ -49,6 +50,7 @@ metrilyxServices.factory('Metrics', ['$http', 'Auth', function($http, Auth) {
 		}
     };
 }]);
+
 metrilyxServices.factory('EventTypes', ['$resource',
 	function($resource) {
 		return $resource('/api/event_types/:eventType', {}, {
@@ -64,6 +66,7 @@ metrilyxServices.factory('EventTypes', ['$resource',
 		});
 	}
 ]);
+
 metrilyxServices.factory('Model', ['$resource', 'Auth',
 	function($resource, Auth) {
 		return $resource('/api/graphmaps/:pageId', {}, {
@@ -98,40 +101,7 @@ metrilyxServices.factory('Model', ['$resource', 'Auth',
 		});
 	}
 ]);
-metrilyxServices.factory('Heatmap', ['$resource', 'Auth',
-	function($resource, Auth) {
-		return $resource('/api/heatmaps/:pageId', {}, {
-			getModel: 	{
-				method:'GET',
-				params:{modelId:'@pageId'},
-				isArray:false
-			},
-			editModel: 	{
-				method:'PUT',
-				params:{pageId:'@pageId'},
-				isArray:false,
-				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
-											AUTHCONFIG.modelstore.password)
-			},
-			removeModel:{
-				method:'DELETE',
-				params:{pageId:'@pageId'},
-				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
-											AUTHCONFIG.modelstore.password)
-			},
-			saveModel: 	{
-				method:'POST',
-				isArray:false,
-				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
-											AUTHCONFIG.modelstore.password)
-			},
-			listModels: {
-				method:'GET',
-				isArray:true
-			},
-		});
-	}
-]);
+
 metrilyxServices.factory('Tags', ['$resource', 'Auth',
 	function($resource, Auth) {
 		Auth.clearCredentials();
@@ -187,33 +157,3 @@ metrilyxServices.factory('Schema', ['$http', 'Auth',
 		}
 	}
 ]);
-
-metrilyxServices.factory('Heat', [ '$http', function($http) {
-
-	return {
-		getData: function(query, callback) {
-			var qstr = "";
-			if(query.rate) {
-				qstr += query.aggregator+":rate:"+query.metric;
-			} else {
-				qstr += query.aggregator+":"+query.metric;
-			}
-			qstr += "{";
-			for(var k in query.tags) qstr += k + "=" + query.tags[k] + ",";
-			qstr = qstr.replace(/\,$/,'}');
-
-			$http({
-				method: 'GET',
-				url: connectionPool.nextConnection()+'/api/heat/'+qstr,
-				headers: { 'Content-type': 'application/json' }
-			}).
-			success(function(result) {
-				callback(result);
-			}).
-			error(function(data, status, arg1, arg2) {
-				console.error(status);
-				console.error(arg2);
-			});
-		},
-	};
-}]);
