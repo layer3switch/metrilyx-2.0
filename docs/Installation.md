@@ -137,6 +137,21 @@ You can simply copy the sqlite db file from the previous installation into the c
 ##### Postgresql/MySQL
 No additional steps are required.
 
+#### Upgrading configuration
+As new configuration options may be added and removed a script has been provided to check and update your configuration.  To generate a new configuration file based on your existing one, issue the following command:
+
+	$ cd /opt/metrilyx
+	$ ./bin/cfgmgr.py -i etc/metrilyx/metrilyx.conf -n
+
+This will display the new configuration.  To write it out, exclude the **-n** option.  This will create a file in the current directory called **metrilyx.conf.new**.  Check the file to make sure your options look correct and then replace your current config.
+
+The commands below will backup the existing config and copy in the new one.
+
+	$ cd /opt/metrilyx
+	$ cp etc/metrilyx/metrilyx.conf{,.backup}
+	$ cp metrilyx.conf.new etc/metrilyx/metrilyx.conf
+
+#### Upgrading models
 Once you have the data in the database you will need to upgrade the model schema of each model.  To do this run the following commands:
 
 	$ cd /opt/metrilyx
