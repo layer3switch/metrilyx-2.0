@@ -603,23 +603,9 @@ input.ng-invalid.ng-dirty {
 .graph-controls {
 	width:230px;
 	border-radius:3px;
-	/*
-	border:1px solid #555;
-	border-top: 1px solid #777;
-	border-top: none;
-	background:rgba(95,95,95,0.95);*/
 	position: relative;
 	z-index: 1;
 	margin-bottom:10px;
-}
-.heatmap-query-editor {
-	border:1px solid #555;
-	border-top: 1px solid #777;
-	position:absolute;
-	top:-1px;
-	left:0px;
-	background:rgba(95,95,95,0.95);
-	z-index: 5;
 }
 .pod-controls {
 	display: none;
@@ -991,17 +977,6 @@ input.dark.warning {
 input.trans.info,
 input.dark.info {
 	color:rgba(99,177,211,1) !important;
-}
-.heatgraph-list {
-	border-left:none!important;
-	border-right:none!important;
-	border-radius:0px!important;
-}
-.list-group-item.heatgraph-list:first-child {
-	border-top:none!important;
-}
-.list-group-item.heatgraph-list:last-child {
-	border-bottom:none!important;
 }
 .bg.danger {
 	background:rgba(187,74,71,1);
