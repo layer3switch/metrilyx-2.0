@@ -598,6 +598,10 @@ angular.module("metrilyxHelperFactories", [])
 		var wssock = null;
 		var modelGraphIdIdx = {};
 
+		/*
+		 * Re-add event listeners registered by graphs
+		 *
+		 */
 		function reAddGraphEventListeners() {
 			for(var k in modelGraphIdIdx) {
 				wssock.addEventListener(k, modelGraphIdIdx[k]);
@@ -687,6 +691,7 @@ angular.module("metrilyxHelperFactories", [])
 	    		} else {
 	    			//reconnect
 	    			queuedReqs.push(JSON.stringify(query));
+	    			console.log("Re-connecting...");
 	    			initializeWebSocket();
 	    		}
 	    	}
