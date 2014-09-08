@@ -1,6 +1,6 @@
 uuid
-pymongo
-django
+pymongo>=2.7
+django==1.6.5
 djangorestframework
 django-filter
 django-cors-headers
@@ -8,8 +8,9 @@ django-reversion
 django-jsonfield
 celery
 requests
-twisted
+twisted>=14.0
 uwsgi
-autobahn
-elasticsearch
-pandas
+six>=1.7
+autobahn>=0.8
+elasticsearch>=1.2
+pandas>=0.14

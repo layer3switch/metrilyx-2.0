@@ -54,16 +54,20 @@ configure_uwsgi() {
 		sed -i -e "s/^gid.*=.*/uid = www\-data/g" ${APP_HOME}/etc/metrilyx/uwsgi.conf;
 	fi
 }
+
 pydeps() {
 	echo "-- Installing python dependencies..."
+	
 	which pip || easy_install pip;
-	pip list | grep autobahn || { pip uninstall autobahn six -y; pip install six; }
+	## INPROGRESS ##
+	#pip list | grep autobahn || { pip uninstall autobahn six -y; pip install six; }
 	for pypkg in $(cat PYPACKAGES); do
-		pip list | grep ${pypkg} || pip install ${pypkg};
+		pip install "${pypkg}";
 	done;
-	pip uninstall autobahn;
-	pip install autobahn;
+	#pip uninstall autobahn;
+	#pip install autobahn;
 }
+
 install_ess() {
 	if [ "$(rpm -qa | grep elasticsearch)" == "" ]; then
 		echo -n "- Installing elasticsearch... "
