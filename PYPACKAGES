@@ -13,4 +13,5 @@ uwsgi
 six>=1.7
 autobahn>=0.8
 elasticsearch>=1.2
+numpy>=1.6.1
 pandas>=0.14
