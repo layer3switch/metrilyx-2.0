@@ -598,6 +598,11 @@ angular.module("metrilyxHelperFactories", [])
 		var wssock = null;
 		var modelGraphIdIdx = {};
 
+		function reAddGraphEventListeners() {
+			for(var k in modelGraphIdIdx) {
+				wssock.addEventListener(k, modelGraphIdIdx[k]);
+			}
+		}
 
 		function getWebSocket() {
 			if ("WebSocket" in window) return new WebSocket(WS_URI);
@@ -608,6 +613,9 @@ angular.module("metrilyxHelperFactories", [])
 		function onOpenWssock() {
 			console.log("Connected. Extensions: [" + wssock.extensions + "]");
 			console.log("Submitting queued requests:", queuedReqs.length);
+
+			reAddGraphEventListeners();
+
 			while(queuedReqs.length > 0) wssock.send(queuedReqs.shift());
 		}
 
@@ -623,13 +631,16 @@ angular.module("metrilyxHelperFactories", [])
        			setGlobalAlerts(data);
        			flashAlertsBar();
        		} else if(data.annoEvents) {
-       			// annotations //
+       			// Annotations
    				scope.$apply(function(){scope.globalAnno.status = 'dispatching'});
+   				
    				if(scope.modelType === 'adhoc') {
+   					
    					data._id = scope.graph._id;
    					var ce = new CustomEvent(data._id, {'detail': data });
    					wssock.dispatchEvent(ce);
    				} else {
+   					
    					for(var i in modelGraphIdIdx) {
 	       				data._id = i;
 	       				var ce = new CustomEvent(data._id, {'detail': data });
@@ -655,7 +666,9 @@ angular.module("metrilyxHelperFactories", [])
 
 		this.addGraphIdEventListener = function(graphId, funct) {
 			wssock.addEventListener(graphId, funct);
-			modelGraphIdIdx[graphId] = true;
+			
+			modelGraphIdIdx[graphId] = funct;
+			
 			if(Object.keys(modelGraphIdIdx).length === scope.modelGraphIds.length) {
 				// trigger annotation request as all graph elems are loaded //
 				scope.globalAnno.status = 'load';

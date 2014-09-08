@@ -334,6 +334,10 @@ angular.module('graphing', [])
 					scope.disableDragDrop();
 				}
 
+				function connectTestFunc(event) {
+					console.log("connect", event);
+				}
+
 				// start updates after 50 seconds //
 				setTimeout(function() {wsHelper.getUpdates();},50000);
 
@@ -343,7 +347,7 @@ angular.module('graphing', [])
 				
 				}, function(newVal, oldVal) {
 					if (newVal === undefined) return;	
-					
+
 					scope.addGraphIdEventListener(newVal, wsHelper.processRecievedData);
 					_graphDomNode = $("[data-graph-id='"+ngModel.$modelValue._id+"']");
 				});
