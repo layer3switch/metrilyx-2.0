@@ -559,9 +559,14 @@ angular.module("metrilyxHelperFactories", [])
 				flashAlertsBar();
 			} else {
 
-				document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
-				console.log("Save - Load this page on save:", scope.model._id);
-				$route.reload();
+				document.getElementById('side-panel').dispatchEvent(
+					new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
+				
+				var currModelPath = "#/"+scope.model._id;
+				
+				if(location.hash === currModelPath) location.reload(true);
+				else location.hash = currModelPath;
+
 			}
 		}
 
