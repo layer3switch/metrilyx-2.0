@@ -48,7 +48,7 @@ Altough the package versions should not be a concern, they been provided for con
 
 	uuid 					>= 1.30
 	pymongo 				>= 2.7
-	django 					>= 1.6
+	django 					== 1.6.5
 	djangorestframework		>= 2.3.13
 	django-filter 			>= 0.7
 	django-cors-headers 	>= 0.12
