@@ -24,7 +24,7 @@
 	cd metrilyx-2.0
 	./install app
 
-Edit the configs as prompted.  Change the server name in **/opt/metrilyx/metrilyx/static/config.js** as below with the port forward you using in vagrant to your local box.
+Edit the configs as prompted.  Change the server name in **/opt/metrilyx/metrilyx/static/config.js** as below with the port forward your using in vagrant to your local box.
 
 	var SERVER_NAME = "localhost:8888"
 
