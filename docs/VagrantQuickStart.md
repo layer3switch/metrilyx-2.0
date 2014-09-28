@@ -1,7 +1,12 @@
 
-#### Initialize vagrant
+#### Setup vagrant VM
 
 	vagrant init 'chef/centos-6.5'
+
+Add the following line to your **Vagrantfile** to setup the port forwarding to your localhost on port 8888.
+
+	config.vm.network "forwarded_port", guest: 80, host: 8888
+
 
 #### Update system
 
@@ -24,7 +29,7 @@
 	cd metrilyx-2.0
 	./install app
 
-Edit the configs as prompted.  Change the server name in **/opt/metrilyx/metrilyx/static/config.js** as below with the port forward your using in vagrant to your local box.
+Edit the configs as prompted.  Set the SERVER_NAME variable in **/opt/metrilyx/metrilyx/static/config.js** as below with the port forward we setup earlier for vagrant.
 
 	var SERVER_NAME = "localhost:8888"
 
