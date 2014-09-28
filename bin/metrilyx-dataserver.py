@@ -106,7 +106,8 @@ if __name__ == '__main__':
 	if opts.serverCount == 0:
 		logger.info("Using auto-spawn count.")
 		opts.serverCount = multiprocessing.cpu_count()-1
-	
+		if opts.serverCount == 0:
+			opts.serverCount = 1
 	try:
 		perfDP = getPerfDataProvider()
 		logger.info('Performance dataprovider [loaded]')
