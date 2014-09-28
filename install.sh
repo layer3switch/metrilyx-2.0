@@ -57,9 +57,13 @@ pydeps() {
 	which pip || easy_install pip;
 	pip list | grep autobahn || { pip uninstall autobahn six -y; pip install six; }
 	for pypkg in $(cat PYPACKAGES); do
-		pip list | grep ${pypkg} || pip install ${pypkg};
+		if [ "$pypkg" == "django"]; then
+			pip install django==1.6.5
+		else
+			pip list | grep ${pypkg} || pip install ${pypkg};
+		fi
 	done;
-	pip uninstall autobahn;
+	pip uninstall autobahn -y;
 	pip install autobahn;
 }
 install_ess() {
