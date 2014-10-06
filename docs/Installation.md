@@ -37,18 +37,18 @@ Once the above requirements have been fulfilled, run the following command to in
 
 ##### RHEL:
 
-	$ yum -y install libuuid uuid python-setuptools python-devel gcc git
+	$ yum -y install gcc git gcc-c++ libffi libffi-devel libuuid uuid python-setuptools python-devel
 	
 ##### Debian:
 
-	$ apt-get install libuuid1 uuid-runtime nginx python-setuptools python-dev libpython-dev make git-core
+	$ apt-get install libuuid1 uuid-runtime nginx python-setuptools python-dev libpython-dev make git-core libffi-dev
 
 #### Python Packages:
 Altough the package versions should not be a concern, they been provided for convenience.
 
 	uuid 					>= 1.30
 	pymongo 				>= 2.7
-	django 					>= 1.6
+	django 					== 1.6.5
 	djangorestframework		>= 2.3.13
 	django-filter 			>= 0.7
 	django-cors-headers 	>= 0.12
@@ -57,17 +57,13 @@ Altough the package versions should not be a concern, they been provided for con
 	celery 					>= 3.1.11
 	requests 				>= 2.2.1
 	twisted 				>= 14.0.0
-	uwsgi 					>=2.0.4
+	uwsgi 					>= 2.0.4
+	six						>= 1.7
 	autobahn 				>= 0.8.8
-	elasticsearch 			>= 1.0.0
-	
-###### Troubleshooting
-Installing autobahn throws an error if **six** hasn't been install beforehand or is not the correct version.  To correct this, uninstall six and autobahn and re-install both as follows:
+	elasticsearch 			>= 1.2
+	numpy 					>= 1.6.1
+	pandas 					>= 0.14
 
-	$ pip uninstall autobahn -y
-	$ pip uninstall six -y
-	$ pip install six
-	$ pip install autobahn
 
 ## Installation:
 The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below to install the application after the above mentioned requirements have been satisfied. The default install destination is **/opt/metrilyx**.	
