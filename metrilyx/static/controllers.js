@@ -412,6 +412,7 @@ metrilyxControllers.controller('adhocGraphController', [
 		var urlSetter 		= new URLSetter($scope);
 
 		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
+		$scope.adhocGraphSortOpts 	= DNDCONFIG.adhocGraph;
 
 		$scope.metricQueryResult = [];
 		$scope.tagsOnPage = {};
@@ -512,12 +513,12 @@ metrilyxControllers.controller('adhocGraphController', [
 
 		$scope.enableEditMode = function() {
 			$scope.editMode = " edit-mode";
-			$scope.enableDragDrop();
+			//$scope.enableDragDrop();
 			$scope.reflow();
 		}
 		$scope.disableEditMode = function() {
 			$scope.editMode = "";
-			$scope.disableDragDrop();
+			//$scope.disableDragDrop();
 			$scope.reflow();
 		}
 		$scope.toggleEditMode = function() {
