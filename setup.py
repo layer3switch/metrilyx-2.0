@@ -21,7 +21,7 @@ setup(
                                     "docs/UserGuide.md",
                                 ]),
         ('/opt/metrilyx/etc',   [
-                                    'etc/metrilyx/ess-mapping.conf.sample'
+                                    'etc/metrilyx/ess-mapping.conf.sample',
                                     'etc/metrilyx/metrilyx.conf.sample', 
                                     'etc/metrilyx/uwsgi.conf',
                                     'etc/metrilyx/uwsgi_params.conf']),
