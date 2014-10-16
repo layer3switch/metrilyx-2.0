@@ -5,7 +5,6 @@ Roadmap
 - Cross metric operations i.e. perform math against metrics to create secondary metrics.
 - Perform complex operations on time series data for statistical analysis.
 - Additional graph types: bar and column.
-- Delay in tooltip display for better browser performance.
 - Correctly apply aggregator for bar, column and pie graphs.
 
 ##### v2.3.4

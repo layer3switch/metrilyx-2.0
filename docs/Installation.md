@@ -23,10 +23,6 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 
 	If you've changed the name of the index in the configuration, appropriately change the name in the command above.
 
-*	**mongodb**
-
-	This component is used by heatmaps as well as for the metric metadata caching.  It powers metric, tagkey and tagvalue searchs.  Installer packages are available on their site.
-	
 *	**postgresql >= 9.3** (optional)
 
 	This component is only needed if you plan to store your models in a database other than the default sqlite3.  Based on the number of models and usage a proper database may be needed.  Metrilyx has been tested using postgresql and is currently in use at TicketMaster.  In order to install postgres on a RHEL based system, the OS version must be >= 6.5.  MySQL has not been tried due to the lack of JSON support.  Installer packages for postgres are available on their site.
@@ -85,16 +81,9 @@ After you have completed editing the configuration file, start the modelmanager 
 	$ /etc/init.d/metrilyx-dataserver start
 	$ /etc/init.d/metrilyx-modelmanager start
 	$ /etc/init.d/nginx restart
-	$ /etc/init.d/celeryd start
-	$ /etc/init.d/celerybeat start
 	
 
 **Note**: The default nginx configuration file may conflict with the metrilyx one.  In this case you'll need to disable the default one or edit the configuration file to accomodate for metrilyx's nginx configuration.
-
-### Heat Maps
-Heatmaps are used to view your top 10 consumers for a given metric.  They are created similarly to pages.  The only subtly is the "pivot tag" which is the tag used to calculate the top 10.  This is usually the tag containing a value of '*'.
-
-In order to use heatmaps, you will need a mongodb server.  Heatmap computations are performed using celery (a python distributed processing framework) which uses mongodb for its backend.  For scalability more celery worker nodes can be added.
 
 #### Postgresql Install
 If you would like to use postgres for the backend database instead of the default sqlite, you can do so by moving the provided postgres database configuration above the sqlite one in ***metrilyx.conf***.  Fill in the remainder options based on your postgresql instance.

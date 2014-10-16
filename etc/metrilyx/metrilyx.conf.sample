@@ -9,29 +9,13 @@
 		"loader_class": "opentsdb.OpenTSDBDataProvider",
 		"suggest_limit": 50
 	},
-	"heatmaps": {
-		"enabled": false,
-		"analysis_interval": "1m-ago",
-		"transport": "mongodb",
-		"broker": {
-	    	"host": ["127.0.0.1"],
-	    	"port": 27017,
-	    	"database": "jobs", 
-	    	"taskmeta_collection": "taskmeta_collection"
-		}
-	},
 	"cache": {
 		"enabled": false,
-		"interval": 5,
-		"retention_period": 12,
-		"datastore": {
-			"mongodb": {
-				"host": ["127.0.0.1"],
-		    	"port": 27017,
-		    	"database": "metrilyx_cache", 
-		    	"collection": "tsmeta_cache"
-	    	}
-    	}
+		"interval": 180,
+		"result_size": 50,
+		"datasource": {
+			"url": "http://localhost:8989"
+		}
 	},
 	"databases":[
 		{
@@ -46,11 +30,6 @@
 			"PASSWORD": "metpass"
 		}
 	],
-	"celery": {
-		"tasks": [
-			"metrilyx.celerytasks"
-		]
-	},
 	"annotations": {
 		"enabled": false,
 		"line_re": "([0-9]+) (.+) ([a-zA-Z0-9_]+):(.+) '({.*})'",

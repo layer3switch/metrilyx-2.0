@@ -1,11 +1,11 @@
-
-from setuptools import setup, find_packages
+from distutils.core import setup
+from setuptools import find_packages
 
 setup(
     name='metrilyx',
     version='2.4.0',
     url='https://github.com/TicketMaster/metrilyx-2.0.git',
-    description='....',
+    description='A web based dashboard engine to OpenTSDB that allows for analyzing, cross cutting and viewing of time series data in a simple manner.',
     long_description='...........',
     author='euforia',
     author_email='euforia@gmail.com',

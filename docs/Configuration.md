@@ -21,30 +21,13 @@ A sample configuration file has been provided.  The configuration file is in JSO
 			"loader_class": "opentsdb.OpenTSDBDataProvider",
 			"suggest_limit": 50
 		},
-		"heatmaps": {
-			"enabled": false,
-			"analysis_interval": "1m-ago",
-			"transport": "mongodb",
-			"broker": {
-		    	"host": ["127.0.0.1"],
-		    	"port": 27017,
-		    	"database": "jobs", 
-		    	"taskmeta_collection": "taskmeta_collection"
-			}
-		},
 		"cache": {
 			"interval": 5,
-			"retention_period": 12,
-			"datastore": {
-				"mongodb": {
-					"host": ["127.0.0.1"],
-			    	"port": 27017,
-			    	"database": "metrilyx_cache", 
-			    	"collection": "tsmeta_cache"
-		    	}
-	    	},
 	    	"result_size": 50,
-	    	"enabled": false
+	    	"enabled": false,
+	    	"datasource": {
+	    		"url": "http://localhost:8989"
+	    	}
 		},
 		"databases":[
 			{
@@ -59,11 +42,6 @@ A sample configuration file has been provided.  The configuration file is in JSO
 				"PASSWORD": "metpass"
 			}
 		],
-		"celery": {
-			"tasks": [
-				"metrilyx.celerytasks"
-			]
-		},
 		"annotations": {
 			"enabled": false,
 			"line_re": "([0-9]+) (.+) ([a-zA-Z0-9_]+):(.+) '({.*})'",
@@ -78,7 +56,9 @@ A sample configuration file has been provided.  The configuration file is in JSO
 				"loader_class": "ess.ElasticsearchEventDataProvider"
 			}
 		},
-		"debug": false
+		"tmpdir": "/dev/shm/metrilyx",
+		"debug": false,
+		"schema_path": "/opt/metrilyx/etc/schemas"
 	}
 	
 ##### tsdb.uri
