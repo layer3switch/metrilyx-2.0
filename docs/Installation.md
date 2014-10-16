@@ -33,7 +33,7 @@ Once the above requirements have been fulfilled, run the following command to in
 
 ##### RHEL:
 
-	$ yum -y install gcc git gcc-c++ libffi libffi-devel libuuid uuid python-setuptools python-devel
+	$ yum -y install git gcc gcc-c++ gcc-gfortran libffi libffi-devel libuuid uuid python-setuptools python-devel
 	
 ##### Debian:
 
