@@ -1,12 +1,10 @@
 uuid
-pymongo>=2.7
 django==1.6.5
 djangorestframework
 django-filter
 django-cors-headers
 django-reversion
 django-jsonfield
-celery
 requests
 twisted>=14.0
 uwsgi
