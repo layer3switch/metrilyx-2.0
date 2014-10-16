@@ -17,26 +17,9 @@ class EventType(models.Model):
 		self._id = self.name.lower()
 		super(EventType, self).save(*args, **kwargs)	
 
-class HeatQuery(models.Model):
-	"""
-	Model for storing heat queries.  Queries are extracted from the
-	heatmap and assembled into HeatQuerys.
-	"""
-	_id = models.CharField(max_length=256, primary_key=True)
-	query = models.CharField(max_length=256)
-	name = models.CharField(max_length=128, default="", blank=True)
-
-	def save(self, *args, **kwargs):
-		if self.name == "":
-			self.name = self._id
-		super(HeatQuery, self).save(*args, **kwargs)
-
 
 class MapModel(models.Model):
-	MODELTYPE_CHOICES = (
-		("graph", "graph"),
-		("heat", "heat")
-	)
+	MODELTYPE_CHOICES = (("graph", "graph"),)
 
 	_id = models.CharField(max_length=128,primary_key=True)
 	name = models.CharField(max_length=128, default="", blank=True)

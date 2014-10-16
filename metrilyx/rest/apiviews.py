@@ -20,8 +20,8 @@ import metrilyx
 
 from custompermissions import IsGroupOrReadOnly, IsCreatorOrReadOnly
 from serializers import *
-from ..models import * 
-from ..datastores.mongodb import MetricCacheDatastore
+from ..models import *
+from ..datastores.metrilyxcacher import CacheStore
 
 from ..annotations import Annotator
 
@@ -246,8 +246,8 @@ class SearchViewSet(viewsets.ViewSet):
 
 	def __init__(self, *args, **kwargs):
 		super(SearchViewSet, self).__init__(*args, **kwargs)
-		if config["cache"]["enabled"]:
-			self.metricMetaSearch = MetricCacheDatastore(**config['cache']['datastore']['mongodb'])			
+		if config["cache"]["enabled"]:	
+			self.metricMetaSearch = CacheStore(config['cache']['datasource']['url'])		
 		else:
 			self.metricMetaSearch = OpenTSDBMetaSearch(config["dataprovider"])
 
@@ -264,38 +264,12 @@ class SearchViewSet(viewsets.ViewSet):
 			models_obj = MapModel.objects.filter(name__contains=query, model_type='graph')
 			serializer_obj = MapModelSerializer(models_obj, many=True)
 			response = serializer_obj.data
-		elif pk == 'heatmaps':
-			models_obj = MapModel.objects.filter(name__contains=query, model_type='heat')
-			#print models_obj
-			serializer_obj = MapModelSerializer(models_obj, many=True)
-			response = serializer_obj.data
-		elif pk == 'metrics':
-			response = self.metricMetaSearch.search({'type': 'metric', 'query': query}, limit=limit)
-		elif pk in ('tagk','tagv'):
-			response = self.metricMetaSearch.search({'type': pk, 'query': query}, limit=limit)
 		elif pk == 'event_types':
 			models_obj = EventType.objects.filter(name__contains=query)
 			serializer_obj = EventTypeSerializer(models_obj,many=True)
 			response = serializer_obj.data
+		elif pk in ('tagk','tagv', 'metrics'):
+			response = self.metricMetaSearch.search(type=pk,query=query,limit=limit)
 		else:
 			response = {"error": "Invalid search: %s" %(pk)}
 		return Response(response)
-
-class HeatView(APIView):
-	def get(self, request, heat_id=None):
-		# list heat queries
-		if heat_id == None:
-			objs = HeatQuery.objects.all()
-			serializer  = HeatQuerySerializer(objs, many=True)
-			out = serializer.data
-		else:
-			app = Celery('metrilyx')
-			app.config_from_object('metrilyx.heatmapsconfig')
-			rslt = app.AsyncResult(heat_id)
-
-			hquery = get_object_or_404(HeatQuery, _id=heat_id)
-			serializer = HeatQuerySerializer(hquery)
-			out = serializer.data
-			out['data'] = rslt.get()
-
-		return Response(out)
