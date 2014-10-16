@@ -66,5 +66,6 @@
 		}
 	},
 	"tmpdir": "/dev/shm/metrilyx",
-	"debug": false
+	"debug": false,
+	"schema_path": "/opt/metrilyx/etc/schemas"
 }

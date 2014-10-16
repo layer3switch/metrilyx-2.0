@@ -1,0 +1,85 @@
+#!/bin/sh
+#
+# chkconfig: 234 90 10
+# description: Metrilyx Data Server.  This provides data via websockets.
+#
+
+[ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
+
+NAME="metrilyx-cacher"
+APP_HOME="/opt/metrilyx"
+BIN=${APP_HOME}/bin/${NAME}
+LOGFILE=/var/log/metrilyx/${NAME}.log
+
+DEFAULT_OPTS="-url"
+
+PGREP="/usr/bin/pgrep -f"
+
+[ -f "/etc/sysconfig/${NAME}" ] || { echo "Config file missing: /etc/sysconfig/${NAME}"; exit 1 }
+	
+. /etc/sysconfig/${NAME}
+
+if [ "$OPENTSDB_ENDPOINT" == "" ]; then
+	echo "Must define 'OPENTSDB_ENDPOINT' in /etc/sysconfig/${NAME}"
+	exit 2
+else
+	DEFAULT_OPTS="$DEFAULT_OPTS $OPENTSDB_ENDPOINT"
+fi
+
+RETVAL=0
+
+start() {
+	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+	if [ "$PIDS" = "" ]; then
+		echo -n "${NAME} starting... "
+		${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
+		sleep 2;
+		PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+		if [ "$PIDS" = "" ]; then
+			echo "[failed]";
+			RETVAL=3;
+		else
+			echo "[ok]";
+		fi
+	else
+		echo -n "${NAME} already running... ${PIDS}";
+		RETVAL=1
+	fi
+}
+status() {
+	PIDS=`${PGREP} "${BIN}" | xargs`;
+	if [ "$PIDS" = "" ]; then
+		echo "${NAME} not running";
+	else
+		echo "${NAME} running... ${PIDS}"
+	fi
+}
+stop() {
+	PIDS=`${PGREP} "${BIN}" | sort -r`;
+	for pid in $PIDS; do
+		kill $pid;
+	done
+	${PGREP} "${BIN}" || echo "${NAME} stopped";
+}
+
+
+case "$1" in
+	start)
+		start;
+		;;
+	stop)
+		stop;
+		;;
+	status)
+		status;
+		;;
+	restart)
+		$0 stop
+		sleep 3
+		$0 start
+		;;
+	*)
+		echo "$0 [start|stop|restart|status]"
+		exit 1;
+esac
+exit 0
