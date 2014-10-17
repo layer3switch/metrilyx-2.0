@@ -1,5 +1,14 @@
 
 from setuptools import setup, find_packages
+from setuptools.command.build_ext import build_ext
+
+class BuildExt(build_ext):
+    def finalize_options(self):
+        _build_ext.finalize_options(self)
+        # Prevent numpy from thinking it is still in its setup process:
+        __builtins__.__NUMPY_SETUP__ = False
+        import numpy
+        self.include_dirs.append(numpy.get_include())
 
 setup(
     name='metrilyx',
@@ -10,6 +19,9 @@ setup(
     author='euforia',
     author_email='euforia@gmail.com',
     license='LICENSE',
+    cmdclass={'build_ext': BuildExt}
+    setup_requires=['numpy']
+    install_requires=[ p for p in open('REQUIREMENTS.txt').read().split('\n') if p != '' ],
     packages=find_packages(),
     include_package_data=True,
     data_files=[
@@ -45,6 +57,5 @@ setup(
                                 ]),
         ('/etc/sysconfig',      ['etc/sysconfig/metrilyx-cacher']),
         ('/etc/nginx/conf.d',   ['etc/nginx/conf.d/metrilyx.conf'])
-    ],
-    install_requires=[ p for p in open('REQUIREMENTS.txt').read().split('\n') if p != '' ],
+    ]
 )
