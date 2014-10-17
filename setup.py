@@ -10,7 +10,7 @@ class build_ext_numpy(build_ext):
         import numpy
         self.include_dirs.append(numpy.get_include())
 
- if len(sys.argv) >= 2 and ('--help' not in sys.argv[1:] or
+ if len(sys.argv) >= 2 and ('--help' not in sys.argv[1:] or \
             sys.argv[1] not in ('--help-commands', 'egg_info', '--version', 'clean')):
 
     setup(
