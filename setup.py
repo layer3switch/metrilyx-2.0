@@ -1,4 +1,4 @@
-#from distutils.core import setup
+
 from setuptools import setup, find_packages
 
 setup(
@@ -11,6 +11,7 @@ setup(
     author_email='euforia@gmail.com',
     license='LICENSE',
     packages=find_packages(),
+    include_package_data=True,
     data_files=[
         ('/opt/metrilyx/docs',  [
                                     "docs/Configuration.md",
