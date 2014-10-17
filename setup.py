@@ -24,7 +24,6 @@ if len(sys.argv) >= 2 and ('--help' not in sys.argv[1:] or sys.argv[1] not in ('
         license='LICENSE',
         cmdclass={'build_ext': build_ext_numpy},
         setup_requires=['numpy>=1.8.2'],
-        build_requires=['numpy>=1.8.2'],
         install_requires=[ p for p in open('REQUIREMENTS.txt').read().split('\n') if p != '' ],
         packages=find_packages(),
         include_package_data=True,
