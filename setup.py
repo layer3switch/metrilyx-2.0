@@ -19,8 +19,8 @@ setup(
     author='euforia',
     author_email='euforia@gmail.com',
     license='LICENSE',
-    cmdclass={'build_ext': BuildExt}
-    setup_requires=['numpy']
+    cmdclass={'build_ext': BuildExt},
+    setup_requires=['numpy'],
     install_requires=[ p for p in open('REQUIREMENTS.txt').read().split('\n') if p != '' ],
     packages=find_packages(),
     include_package_data=True,
