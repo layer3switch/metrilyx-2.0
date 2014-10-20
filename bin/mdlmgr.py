@@ -109,13 +109,6 @@ def processGraphLayout(model):
 					updateMultiPaneOptions(graph)
 					udpateSecondaries(graph)
 
-def processHeatLayout(model):
-	for row in model.layout:
-		for col in row:
-			for pod in col:
-				for graph in pod['graphs']:
-					updateThresholds(graph)
-
 
 
 
@@ -132,8 +125,6 @@ if not opts.commit:
 		print "[%s]" %(m._id)
 		if m.model_type == "graph":
 			processGraphLayout(m)
-		elif m.model_type == "heat":
-			processHeatLayout(m)
 		print ""
 	print "--- DRYRUN ---"
 else:
@@ -141,8 +132,5 @@ else:
 		print "[%s]" %(m._id)
 		if m.model_type == "graph":
 			processGraphLayout(m)
-			m.save()
-		elif m.model_type == "heat":
-			processHeatLayout(m)
 			m.save()
 		print ""
