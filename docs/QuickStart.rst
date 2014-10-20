@@ -17,13 +17,16 @@ For RedHat::
 
 For CentOS/Oracle::
 
-	$ yum -y install http://nginx.org/packages/rhel/6/noarch/RPMS/nginx-release-centos-6-0.el6.ngx.noarch.rpm
+	$ yum -y install http://nginx.org/packages/centos/6/noarch/RPMS/nginx-release-centos-6-0.el6.ngx.noarch.rpm
 
 Finally install nginx::
 
 	$ yum -y install nginx
 	$ chkconfig nginx on
 
+Disable the default nginx configuration::
+	
+	$ mv /etc/nginx/conf.d/default.conf{,.disabled}
 
 Metrilyx installation
 ---------------------
@@ -42,8 +45,6 @@ For RHEL, CentOS, Oracle distributions::
 	## Install metrilyx
 	$ pip install git+https://github.com/Ticketmaster/metrilyx-2.0.git
 
-	## Disable the default nginx configuration
-	$ mv /etc/nginx/conf.d/default.conf{,.disabled}
 
 The next step is configure your installation.
 
