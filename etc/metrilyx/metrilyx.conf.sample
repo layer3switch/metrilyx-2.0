@@ -12,7 +12,7 @@
 	"websocket": {
 		"hostname": "localhost",
 		"endpoint": "/api/data"
-	}
+	},
 	"cache": {
 		"enabled": false,
 		"interval": 180,

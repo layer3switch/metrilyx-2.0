@@ -22,7 +22,7 @@ start() {
 	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
 	if [ "$PIDS" = "" ]; then
 		echo -n "${NAME} starting... "
-		${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
+		METRILYX_HOME=${APP_HOME} ${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
 		sleep 2;
 		PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
 		if [ "$PIDS" = "" ]; then

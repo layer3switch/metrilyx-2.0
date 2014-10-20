@@ -37,6 +37,7 @@ case "$1" in
 		stop;
 		sleep 3
 		start;
+		;;
 	status)
 		status;
 		;;
