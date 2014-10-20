@@ -42,7 +42,6 @@ DATA_FILES = [
     ('/opt/metrilyx/docs',                 fileListBuilder('docs')),
     ('/opt/metrilyx/bin',                  fileListBuilder('bin')),
     ('/opt/metrilyx/etc/metrilyx/schemas', fileListBuilder('etc/metrilyx/schemas')),
-    ('/opt/metrilyx/log',                  fileListBuilder('log')),
     ('/opt/metrilyx/data', [
                             'data/metrilyx.sqlite3']),
     ('/opt/metrilyx/etc/metrilyx', [
