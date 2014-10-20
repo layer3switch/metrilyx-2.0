@@ -1,15 +1,18 @@
 
 import os
+import sys
 import fnmatch
 from setuptools import setup, find_packages
 
+from pprint import pprint
 
 DESCRIPTION = '''
 A web based dashboard engine to OpenTSDB that allows for analyzing, 
 cross cutting and viewing of time series data in a simple manner.
 '''
+LICENSE = "LICENSE.txt"
 SETUP_REQUIRES = ["six>=1.7.3"]
-INSTALL_REQUIRES = [ p for p in open('REQUIREMENTS').read().split('\n') if p != '' and not p.startswith('#') ]
+INSTALL_REQUIRES = [ p for p in open('REQUIREMENTS.txt').read().split('\n') if p != '' and not p.startswith('#') ]
 
 
 def fileListBuilder(dirPath, regexp='*'):
@@ -29,17 +32,19 @@ def recursiveFileListBuilder(dirPath, prefix):
             mine[root].append(filename)
 
     out = []
-    for k,v in mine.items():
-        out.append((prefix+k, v))
+    for k, values in mine.items():
+        out.append((prefix+k, [ k+'/'+val for val in values ]))
     return out
 
 
 DATA_FILES = [
+    ('/etc/init.d',                        fileListBuilder('etc/init.d')),
     ('/opt/metrilyx/docs',                 fileListBuilder('docs')),
     ('/opt/metrilyx/bin',                  fileListBuilder('bin')),
-    ('/etc/init.d',                        fileListBuilder('etc/init.d')),
     ('/opt/metrilyx/etc/metrilyx/schemas', fileListBuilder('etc/metrilyx/schemas')),
     ('/opt/metrilyx/log',                  fileListBuilder('log')),
+    ('/opt/metrilyx/data', [
+                            'metrilyx.sqlite3']),
     ('/opt/metrilyx/etc/metrilyx', [
                             'etc/metrilyx/ess-mapping.conf.sample',
                             'etc/metrilyx/metrilyx.conf.sample', 
@@ -49,6 +54,7 @@ DATA_FILES = [
     ('/etc/nginx/conf.d',   ['etc/nginx/conf.d/metrilyx.conf'])
 ]
 
+## Re-create webroot directory structure 
 DATA_FILES += recursiveFileListBuilder('www', prefix='/opt/metrilyx/')
 
 setup(
@@ -59,7 +65,7 @@ setup(
     long_description=DESCRIPTION,
     author='euforia',
     author_email='euforia@gmail.com',
-    license='LICENSE',
+    license=LICENSE,
     setup_requires=SETUP_REQUIRES,
     install_requires=INSTALL_REQUIRES,
     data_files=DATA_FILES,

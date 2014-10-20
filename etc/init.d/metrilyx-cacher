@@ -6,7 +6,7 @@
 
 [ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
 
-[-f "/etc/sysconfig/${NAME}" ] && . /etc/sysconfig/${NAME}
+[ -f "/etc/sysconfig/${NAME}" ] && . /etc/sysconfig/${NAME}
 
 PGREP="/usr/bin/pgrep -f"
 OS=$(uname | tr '[:upper:]' '[:lower:]')
@@ -16,13 +16,13 @@ ARCH="amd64"
 
 NAME="metrilyx-cacher"
 APP_HOME="/opt/metrilyx"
-BIN=${APP_HOME}/bin/${NAME}.${OS}.${ARCH}
-LOGFILE=${APP_HOME}/log/${NAME}.log
+BIN="${APP_HOME}/bin/${NAME}.${OS}.${ARCH}"
+LOGFILE="${APP_HOME}/log/${NAME}.log"
 
 CACHER_CONFIG=${CACHER_CONFIG:-${APP_HOME}/etc/metrilyx/metrilyx.conf}
 DEFAULT_OPTS="-config $CACHER_CONFIG"
 
-[ -f "$CACHER_CONFIG" ] || { echo "Config not found: %s $CACHER_CONFIG!"; exit 3; }
+[ -f "$CACHER_CONFIG" ] || { echo "Config not found: $CACHER_CONFIG!"; exit 3; }
 
 RETVAL=0
 
@@ -72,12 +72,12 @@ case "$1" in
 		status;
 		;;
 	restart)
-		$0 stop
-		sleep 3
-		$0 start
+		$0 stop;
+		sleep 3;
+		$0 start;
 		;;
 	*)
-		echo "$0 [start|stop|restart|status]"
+		echo "$0 [start|stop|restart|status]";
 		exit 1;
 esac
 exit 0
