@@ -8,13 +8,12 @@ import json
 from optparse import OptionParser
 from pprint import pprint
 
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "metrilyx.settings")
 
 from metrilyx.models import *
-#from metrilyx.metrilyxconfig import config
-#config['schema_path']
-graphSchema = json.load(open("etc/metrilyx/schemas/graph.json", "rb"))
+from metrilyx.metrilyxconfig import config
+
+graphSchema = json.load(open(config['schema_path']+"/graph.json", "rb"))
 
 def printStatus(graph, status, msg):
 	if status in ('ADDED', 'UPDATED'):
@@ -108,9 +107,6 @@ def processGraphLayout(model):
 					addEventAnnoDef(graph)
 					updateMultiPaneOptions(graph)
 					udpateSecondaries(graph)
-
-
-
 
 
 parser = OptionParser()

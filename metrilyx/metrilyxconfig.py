@@ -1,10 +1,12 @@
-import os 
+
+import os
 from datastores import jsonFromFile
 
 _abspath = os.path.abspath(__file__)
 
 _apphome = os.environ.get('METRILYX_HOME')
 if _apphome == None:
+	print " * Warning: METRILYX_HOME environment variable not set!"
 	_apphome = os.path.dirname(os.path.dirname(_abspath))
 
 CONFIG_FILE = os.path.join(_apphome, "etc/metrilyx/metrilyx.conf")
