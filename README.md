@@ -13,11 +13,11 @@ Metrilyx is a web based dashboard engine to OpenTSDB, a time series database use
 
 #### Screenshots
 ##### Adhoc Graphs
-![Alt text](metrilyx/static/imgs/readme/screenshot_1.png)
+![Alt text](www/imgs/readme/screenshot_1.png)
 ##### Dashboards
-![Alt text](metrilyx/static/imgs/readme/screenshot_2.png)
+![Alt text](www/imgs/readme/screenshot_2.png)
 ##### Edit Mode
-![Alt text](metrilyx/static/imgs/readme/screenshot_3.png)
+![Alt text](www/imgs/readme/screenshot_3.png)
 
 **Notes**
 
