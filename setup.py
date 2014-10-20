@@ -44,7 +44,7 @@ DATA_FILES = [
     ('/opt/metrilyx/etc/metrilyx/schemas', fileListBuilder('etc/metrilyx/schemas')),
     ('/opt/metrilyx/log',                  fileListBuilder('log')),
     ('/opt/metrilyx/data', [
-                            'metrilyx.sqlite3']),
+                            'data/metrilyx.sqlite3']),
     ('/opt/metrilyx/etc/metrilyx', [
                             'etc/metrilyx/ess-mapping.conf.sample',
                             'etc/metrilyx/metrilyx.conf.sample', 
