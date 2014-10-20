@@ -14,7 +14,7 @@ SERVICE_STOP_ORDER="metrilyx-cacher metrilyx-dataserver metrilyx-modelmanager"
 
 check_paths() {
 	[ -d "${APP_HOME}/log" ] || { mkdir -m 0775 "${APP_HOME}/log"; chgrp nginx "${APP_HOME}/log"; }
-	[ -d "${APP_HOME}/run" ] || mkdir -m 0775 "${APP_HOME}/run"; chgrp nginx "${APP_HOME}/run"; }
+	[ -d "${APP_HOME}/run" ] || { mkdir -m 0775 "${APP_HOME}/run"; chgrp nginx "${APP_HOME}/run"; }
 }
 
 
