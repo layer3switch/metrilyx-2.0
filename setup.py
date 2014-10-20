@@ -22,11 +22,11 @@ def fileListBuilder(dirPath, regexp='*'):
 def recursiveFileListBuilder(dirPath, prefix):
     mine = {}
     for root, dirnames, filenames in os.walk('www'):
-    if not mine.has_key(root):
-        mine[root] = []
+        if not mine.has_key(root):
+            mine[root] = []
 
-    for filename in fnmatch.filter(filenames, '[!.]*'):
-        mine[root].append(filename)
+        for filename in fnmatch.filter(filenames, '[!.]*'):
+            mine[root].append(filename)
 
     out = []
     for k,v in mine.items():
