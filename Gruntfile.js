@@ -13,11 +13,9 @@ module.exports = function(grunt) {
     options[key] = option;
   });
 
-
   // Project configuration
   require('jit-grunt')(grunt);
   grunt.initConfig(options);
-
 
   // Default task
   grunt.registerTask('test', ['clean:debug', 'concat_sourcemap', 'karma:ci']);
