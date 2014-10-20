@@ -19,13 +19,26 @@ def fileListBuilder(dirPath, regexp='*'):
             matches.append(os.path.join(root, filename))
     return matches
 
+def recursiveFileListBuilder(dirPath, prefix):
+    mine = {}
+    for root, dirnames, filenames in os.walk('www'):
+    if not mine.has_key(root):
+        mine[root] = []
+
+    for filename in fnmatch.filter(filenames, '[!.]*'):
+        mine[root].append(filename)
+
+    out = []
+    for k,v in mine.items():
+        out.append((prefix+k, v))
+    return out
+
 
 DATA_FILES = [
     ('/opt/metrilyx/docs',                 fileListBuilder('docs')),
     ('/opt/metrilyx/bin',                  fileListBuilder('bin')),
     ('/etc/init.d',                        fileListBuilder('etc/init.d')),
     ('/opt/metrilyx/etc/metrilyx/schemas', fileListBuilder('etc/metrilyx/schemas')),
-    ('/opt/metrilyx/www',                  fileListBuilder('www')),
     ('/opt/metrilyx/log',                  fileListBuilder('log')),
     ('/opt/metrilyx/etc/metrilyx', [
                             'etc/metrilyx/ess-mapping.conf.sample',
@@ -35,6 +48,8 @@ DATA_FILES = [
     ('/etc/sysconfig',      ['etc/sysconfig/metrilyx-cacher']),
     ('/etc/nginx/conf.d',   ['etc/nginx/conf.d/metrilyx.conf'])
 ]
+
+DATA_FILES += recursiveFileListBuilder('www', prefix='/opt/metrilyx/')
 
 setup(
     name='metrilyx',
