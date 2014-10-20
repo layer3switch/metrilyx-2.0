@@ -28,9 +28,10 @@ urlpatterns = patterns('',
 	# as well as from a webserver
 	url(r'', include(router.urls)),
 	url(r'^(api/)?annotations', apiviews.EventsViewSet.as_view()),
+	url(r'^(api/)?config', apiviews.ConfigurationView.as_view()),
 	url(r'^(api/)?api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 	url(r'^(api/)?admin/?', include(admin.site.urls)),
 )
 if config['debug']:
 	urlpatterns += static('/', 
-			document_root=os.path.join(os.path.dirname(__file__), 'static'))   
+			document_root=os.path.join(os.path.dirname(__file__), 'www'))   

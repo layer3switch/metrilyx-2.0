@@ -1,70 +1,52 @@
 
-import sys
+import os
+import fnmatch
 from setuptools import setup, find_packages
-from setuptools.command.build_ext import build_ext
 
-class build_ext_numpy(build_ext):
-    def finalize_options(self):
-        _build_ext.finalize_options(self)
-        # Prevent numpy from thinking it is still in its setup process:
-        __builtins__.__NUMPY_SETUP__ = False
-        import numpy
-        self.include_dirs.append(numpy.get_include())
 
 DESCRIPTION = '''
 A web based dashboard engine to OpenTSDB that allows for analyzing, 
 cross cutting and viewing of time series data in a simple manner.
 '''
-INSTALL_REQUIRES = [ p for p in open('REQUIREMENTS.txt').read().split('\n') if p != '' ]
+SETUP_REQUIRES = ["six>=1.7.3"]
+INSTALL_REQUIRES = [ p for p in open('REQUIREMENTS').read().split('\n') if p != '' and not p.startswith('#') ]
+
+
+def fileListBuilder(dirPath, regexp='*'):
+    matches = []
+    for root, dirnames, filenames in os.walk(dirPath):
+        for filename in fnmatch.filter(filenames, regexp):
+            matches.append(os.path.join(root, filename))
+    return matches
+
+
 DATA_FILES = [
-    ('/opt/metrilyx/docs', [
-                            "docs/Configuration.md",
-                            "docs/Installation.md",
-                            "docs/Roadmap.md",
-                            "docs/UnitTesting.md",
-                            "docs/UserGuide.md"]),
-    ('/opt/metrilyx/etc', [
+    ('/opt/metrilyx/docs',                 fileListBuilder('docs')),
+    ('/opt/metrilyx/bin',                  fileListBuilder('bin')),
+    ('/etc/init.d',                        fileListBuilder('etc/init.d')),
+    ('/opt/metrilyx/etc/metrilyx/schemas', fileListBuilder('etc/metrilyx/schemas')),
+    ('/opt/metrilyx/www',                  fileListBuilder('www')),
+    ('/opt/metrilyx/log',                  fileListBuilder('log')),
+    ('/opt/metrilyx/etc/metrilyx', [
                             'etc/metrilyx/ess-mapping.conf.sample',
                             'etc/metrilyx/metrilyx.conf.sample', 
                             'etc/metrilyx/uwsgi.conf',
                             'etc/metrilyx/uwsgi_params.conf']),
-    ('/opt/metrilyx/etc/schemas', [
-                                'etc/metrilyx/schemas/graph.json',
-                                'etc/metrilyx/schemas/metric.json',
-                                'etc/metrilyx/schemas/page.json',
-                                'etc/metrilyx/schemas/pod.json'
-                                ]),
-    ('/opt/metrilyx/bin', [
-                        'bin/fire-event.py',
-                        'bin/metrilyx-cacher',
-                        'bin/mdlmgr.py',
-                        'bin/cfgmgr.py',
-                        'bin/metrilyx-dataserver.py']),
-    ('/etc/init.d', [
-                    'etc/init.d/metrilyx', 
-                    'etc/init.d/metrilyx-cacher', 
-                    'etc/init.d/metrilyx-dataserver', 
-                    'etc/init.d/metrilyx-modelmanager']),
     ('/etc/sysconfig',      ['etc/sysconfig/metrilyx-cacher']),
     ('/etc/nginx/conf.d',   ['etc/nginx/conf.d/metrilyx.conf'])
 ]
 
-
-if len(sys.argv) >= 2 and ('--help' not in sys.argv[1:] or sys.argv[1] not in ('--help-commands', 'egg_info', '--version', 'clean')):
-
-    setup(
-        name='metrilyx',
-        version='2.4.0',
-        url='https://github.com/TicketMaster/metrilyx-2.0.git',
-        description=DESCRIPTION,
-        long_description=DESCRIPTION,
-        author='euforia',
-        author_email='euforia@gmail.com',
-        license='LICENSE',
-        cmdclass={'build_ext': build_ext_numpy},
-        setup_requires=['numpy>=1.8.2'],
-        install_requires=INSTALL_REQUIRES,
-        packages=find_packages(),
-        include_package_data=True,
-        data_files=DATA_FILES
-    )
+setup(
+    name='metrilyx',
+    version='2.4.0',
+    url='https://github.com/TicketMaster/metrilyx-2.0.git',
+    description=DESCRIPTION,
+    long_description=DESCRIPTION,
+    author='euforia',
+    author_email='euforia@gmail.com',
+    license='LICENSE',
+    setup_requires=SETUP_REQUIRES,
+    install_requires=INSTALL_REQUIRES,
+    data_files=DATA_FILES,
+    packages=find_packages()
+)

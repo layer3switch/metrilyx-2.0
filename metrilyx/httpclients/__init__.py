@@ -246,8 +246,10 @@ class AsyncHttpJsonClient(object):
             self.body = JsonBodyProducer(self.body)
         if not kwargs.has_key('method'):
             self.method = 'GET'
+        if not kwargs.has_key('connectTimeout'):
+            self.connectTimeout = 3.0
 
-        self.agent = Agent(reactor)
+        self.agent = Agent(reactor, connectTimeout=self.connectTimeout)
         self.__d_agent = self.agent.request(
                 self.method,
                 self.uri,
@@ -348,7 +350,7 @@ class MetrilyxGraphFetcher(object):
         self.__rmActivePartial(url)
 
         respData = checkHttpResponse(respBodyStr, response, url)
-        logger.info("Partial response: %s" %(url))
+        logger.info("Partial response: %s" %(url.split("?")[-1]))
         if respData.has_key('error'):
             gmeta['series'][0]['data'] = respData
         else:

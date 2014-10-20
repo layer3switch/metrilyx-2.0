@@ -1,2 +1,1 @@
-# Add tsdb URL
-#OPENTSDB_ENDPOINT=""
+CACHER_CONFIG="/opt/metrilyx/etc/metrilyx/metrilyx.conf"

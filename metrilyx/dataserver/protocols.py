@@ -103,20 +103,24 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
 class GraphServerProtocol(BaseGraphServerProtocol):
 
 	__activeFetchers = {}
-	__activeFetchersTimeout = 1800
+	__activeFetchersTimeout = 900
 	__expirerDeferred = None
 
 	def __expireActiveFetchers(self):
-		
+		logger.info("Starting fetcher expiration...")
+
 		expireTime = time.time() - self.__activeFetchersTimeout
-		
+		expired = 0
 		for k,v in self.__activeFetchers.items():	
 			if float(k.split("-")[-1]) <= expireTime:
 				
 				v.cancelRequests()
-				del self.__activeFetchers[key]
+				self.__removeFetcher(k)
 				logger.info("Expired fetcher: %s" %(k))	
+				expired += 1
 
+		logger.info("Expired %d fetchers" %(expired))
+		
 		self.__expirerDeferred = reactor.callLater(self.__activeFetchersTimeout, self.__expireActiveFetchers)
 
 	def __removeFetcher(self, key):

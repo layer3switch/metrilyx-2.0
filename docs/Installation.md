@@ -3,10 +3,21 @@ Installation Guide
 
 Metrilyx will run on any system that supports the packages mentioned below.  It has primarily been tested on RedHat based flavors of Linux.
 
-
-## Pre-requisites:
+## Requirements:
 
 **Before you can install Metrilyx, you will need to have the following pre-requisites installed**
+
+Remove previously created temp files by pip. Depending on your platform one or both of the following directories willl need to be removed.
+	
+	rm -rf /tmp/pip_build_root
+	rm -rf /tmp/pip-build-root
+
+You will also need the following python packages:
+
+	numpy>=1.6.1
+
+
+This is to ensure that previous versions of existing packages do not interfere with the depenedencies.
 
 *	**nginx**
 
@@ -33,33 +44,11 @@ Once the above requirements have been fulfilled, run the following command to in
 
 ##### RHEL:
 
-	$ yum -y install git gcc gcc-c++ gcc-gfortran libffi libffi-devel libuuid uuid python-setuptools python-devel
+	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
 	
-##### Debian:
+##### Debian/Ubuntu:
 
 	$ apt-get install libuuid1 uuid-runtime nginx python-setuptools python-dev libpython-dev make git-core libffi-dev
-
-#### Python Packages:
-Altough the package versions should not be a concern, they been provided for convenience.
-
-	uuid 					>= 1.30
-	pymongo 				>= 2.7
-	django 					== 1.6.5
-	djangorestframework		>= 2.3.13
-	django-filter 			>= 0.7
-	django-cors-headers 	>= 0.12
-	django-reversion 		>= 1.8.0
-	django-jsonfield 		>= 0.9.20
-	celery 					>= 3.1.11
-	requests 				>= 2.2.1
-	twisted 				>= 14.0.0
-	uwsgi 					>= 2.0.4
-	six						>= 1.7
-	autobahn 				>= 0.8.8
-	elasticsearch 			>= 1.2
-	numpy 					>= 1.6.1
-	pandas 					>= 0.14
-
 
 ## Installation:
 The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below to install the application after the above mentioned requirements have been satisfied. The default install destination is **/opt/metrilyx**.	
@@ -68,11 +57,11 @@ The provided install script will work with both **RedHat** and **Debian** based 
 
 - Issue the following command to install the application:
 	
-		$ git clone https://github.com/Ticketmaster/metrilyx-2.0.git
+	$ pip install 'numpy>=1.6.1'
 	
-		$ cd metrilyx-2.0
+	$ pip install git+https://github.com/Ticketmaster/metrilyx-2.0.git
 	
-		$ ./install.sh app
+	$ pip install 'autobahn>=0.8.8'
 
 Assuming all required OS packages are installed, the script will install the needed python modules and configurations and prompt you to edit the metrilyx configuration files.
 

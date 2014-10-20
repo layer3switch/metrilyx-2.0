@@ -1,0 +1,112 @@
+<html lang="en">
+	<head>
+		<title>metrilyx</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="pragma" content="no-cache" />
+		<meta http-equiv="cache-control" content="no-cache" />
+		
+		<link rel="stylesheet" href="css/style.css">
+		<link rel="stylesheet" href="css/layout.css">
+		<link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css">
+		<link rel="stylesheet" href="libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css">
+		
+		<script src="config.js"></script>
+		
+		<script src="libs/jquery/jquery-1.10.2.min.js"></script>
+		<script src="libs/jquery/jquery-addons.js"></script>
+		<script src="libs/jquery/jquery-ui.js"></script>
+		<script src="libs/highstock/2.0.1/js/highstock.js"></script>
+		
+		<script src="libs/graphing.js"></script>
+
+		<script src="libs/bootstrap-datetimepicker/js/moment.min.js"></script>
+		<script src="libs/bootstrap/js/bootstrap.min.js"></script>
+		<script src="libs/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js"></script>
+		<script src="libs/angular/1.2.9/angular.min.js"></script>
+		<script src="libs/angular/1.2.9/angular-resource.min.js"></script>
+		<script src="libs/angular/1.2.9/angular-route.min.js"></script>
+		<script src="libs/angular/1.2.9/angular-sanitize.min.js"></script>
+
+		<script src="libs/angular-sortable.js"></script>
+		
+		<script src="app.js"></script>
+		<script src="controllers.js"></script>
+		<script src="services.js"></script>
+		<script src="libs/angular-factories.js"></script>
+		<script src="libs/angular-graphing.js"></script>
+
+	</head>
+	<body ng-app="app">
+		<div id="side-panel" ng-controller="sidePanelController" class="animated">	
+			<div class="model-list-ctrl-bar animated">
+				<div class="page-selector-header">
+					<span id="model-list-btn" ng-click="loadPagemodelList('#model-list-btn')" class="model-list-btn list-active pointer padl5 padr15 animated" title="Models">
+						<i class="glyphicon glyphicon-stats"></i>
+					</span>
+					<span onclick="$('#side-panel').addClass('offstage')" title="Close" class="pull-right animated side-panel-toggle" style="position:relative;top:3px;cursor:w-resize">
+						<i class="glyphicon glyphicon-chevron-left"></i>
+					</span>
+				</div>
+				<div class="input-group input-group-sm panel-searchbar model-listing" style="border-top:1px solid #606060;">
+					<span class="input-group-addon" style="padding-right:0px!important;border-right:none!important;padding-left:0px!important;">
+						<select class="dark animated" id="browse-by" ng-model="browseBy" ng-change="onChangeBrowseBy()">
+							<option value="name">Name</option>
+							<option value="tags">Tags</option>
+						</select>
+					</span>
+					<input type="text" class="dark" placeholder="Search" ng-model="modelQuery" style="margin-top:7px;">
+					<div class="input-group-btn padl10">
+        				<span class="dropdown-toggle pointer side-panel-page-controls" data-toggle="dropdown">
+        					<i class="glyphicon glyphicon-chevron-right"></i>
+        				</span>
+				        <ul class="dropdown-menu sp-page-controls in-side-panel bottom-shadow" role="menu">
+							<li ng-if="modelType===''">
+								<a href="#/new" class="page-icon" title="New">
+									<span><i class="glyphicon glyphicon-plus"></i></span>
+									<span>New</span>
+								</a>
+							</li>
+							<li>
+								<a href="javascript:void(0)" onclick="document.getElementById('modelimport').click()" title="Import">
+									<span><i class="glyphicon glyphicon-cloud-upload"></i></span>
+									<span>Import</span>
+									<input id="modelimport" type="file" style="display:none;" onchange="angular.element(this).scope().importModel(this.files);">
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div ng-if="browseBy === 'tags'" class="padlr20 small" style="color:#888!important;min-height:0">
+					<span id="tag-back-btn" class="interactive pointer" ng-click="loadList()" style="display:none">
+						<i class="glyphicon glyphicon-chevron-left" style="font-size:14px;"></i>
+					</span>
+					<span class="padl10 padr5" id="selected-tag" style="color:#666;font-size:14px;font-weight:bold;display:none">{{selectedTag}}</span>
+				</div>
+			</div>
+			<div class="padlr10 model-list-container {{browseBy}} animated">
+				<div style="height: 100%;overflow-y:scroll;">
+				<!-- instead of href: ng-click="listItemClicked(mdl)"-->
+				<a ng-repeat="mdl in modelsList | filter:{name:modelQuery} | orderBy:'name'" href="#/{{mdl._id}}">
+					<div class="page-list-item">
+						<span ng-if="browseBy === 'name'" class="page-icon">
+							<i class="glyphicon glyphicon-stats"></i>
+						</span>
+						<span ng-if="browseBy === 'tags' && selectedTag ===''" class="page-icon">
+							<i class="glyphicon glyphicon-tag"></i>
+						</span>
+						<span ng-if="browseBy === 'tags' && selectedTag !==''" class="page-icon">
+							<i class="glyphicon glyphicon-stats"></i>
+						</span>
+						<span class="padl5">{{mdl.name}}</span>
+						<span class="pull-right padr10" style="color:rgba(45,45,45,0)">{{mdl.user}}</span>
+					</div>
+				</a>
+				</div>
+			</div>
+		</div><!-- END #side-panel -->
+
+		<div ng-view></div>
+		<!--<div ng-include="jsonHtml"></div>-->
+		<div id="global-alerts" class="alert"></div>
+	</body>
+</html>

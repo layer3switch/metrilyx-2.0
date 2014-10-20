@@ -1,30 +1,28 @@
 #!/bin/sh
 #
 # chkconfig: 234 90 10
-# description: Metrilyx Data Server.  This provides data via websockets.
+# description: Metrilyx Metadata Cacher.
 #
 
 [ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
 
-NAME="metrilyx-cacher"
-APP_HOME="/opt/metrilyx"
-BIN=${APP_HOME}/bin/${NAME}
-LOGFILE=/var/log/metrilyx/${NAME}.log
-
-DEFAULT_OPTS="-url"
+[-f "/etc/sysconfig/${NAME}" ] && . /etc/sysconfig/${NAME}
 
 PGREP="/usr/bin/pgrep -f"
+OS=$(uname | tr '[:upper:]' '[:lower:]')
+ARCH="amd64"
 
-[ -f "/etc/sysconfig/${NAME}" ] || { echo "Config file missing: /etc/sysconfig/${NAME}"; exit 1 }
-	
-. /etc/sysconfig/${NAME}
+[ "$(uname -m)" == "x86_64" ] || { echo "Must be a 64 bit system!"; exit 1 }
 
-if [ "$OPENTSDB_ENDPOINT" == "" ]; then
-	echo "Must define 'OPENTSDB_ENDPOINT' in /etc/sysconfig/${NAME}"
-	exit 2
-else
-	DEFAULT_OPTS="$DEFAULT_OPTS $OPENTSDB_ENDPOINT"
-fi
+NAME="metrilyx-cacher"
+APP_HOME="/opt/metrilyx"
+BIN=${APP_HOME}/bin/${NAME}.${OS}.${ARCH}
+LOGFILE=${APP_HOME}/log/${NAME}.log
+
+CACHER_CONFIG=${CACHER_CONFIG:-${APP_HOME}/etc/metrilyx/metrilyx.conf}
+DEFAULT_OPTS="-config $CACHER_CONFIG"
+
+[ -f "$CACHER_CONFIG" ] || { echo "Config not found: %s $CACHER_CONFIG!"; exit 3; }
 
 RETVAL=0
 
@@ -37,7 +35,7 @@ start() {
 		PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
 		if [ "$PIDS" = "" ]; then
 			echo "[failed]";
-			RETVAL=3;
+			RETVAL=4;
 		else
 			echo "[ok]";
 		fi

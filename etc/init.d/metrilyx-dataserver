@@ -9,7 +9,7 @@
 NAME="metrilyx-dataserver"
 APP_HOME="/opt/metrilyx"
 BIN=${APP_HOME}/bin/${NAME}.py
-LOGFILE=/var/log/metrilyx/${NAME}.log
+LOGFILE=${APP_HOME}/log/${NAME}.log
 LOGLEVEL="WARNING"
 PGREP="/usr/bin/pgrep -f"
 

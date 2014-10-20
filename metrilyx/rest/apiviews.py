@@ -2,6 +2,7 @@
 import os
 import json
 import time
+import socket
 import requests
 
 from elasticsearch import Elasticsearch
@@ -108,6 +109,49 @@ class SchemaViewSet(viewsets.ViewSet):
 			return Response(schema)
 		except Exception,e:
 			return Response({"error": str(e)})
+
+class ConfigurationView(APIView):
+
+	def __metricSearchConfig(self):
+		if config['cache']['enabled']:
+			return { 'uri': config['cache']['datasource']['url'] }
+		else:
+			return {'uri': '/api/search'}
+
+	def __websocketConfig(self):
+		hostname = socket.gethostname()
+		resp = {
+			'hostname': hostname,
+			'extensions': ['compressed=true']
+			}
+
+		if config['websocket'].has_key('hostname'):
+			resp['hostname'] = config['websocket']['hostname']
+
+		resp['uri'] = 'ws://%s' %(resp['hostname'])
+
+		if config['websocket'].has_key('port'):
+			resp['port'] = config['websocket']['port']
+			resp['uri'] = "%s:%d" %(resp['uri'], resp['port'])
+
+		if config['websocket'].has_key('endpoint'):
+			resp['endpoint'] = config['websocket']['endpoint']
+			resp['uri'] = "%s%s" %(resp['uri'], resp['endpoint'])
+		
+		resp['uri'] = "%s?%s" %(resp['uri'], "&".join(resp['extensions']))
+
+		return resp
+
+	def get(self, request, pk=None):
+		'''
+			Websocket connection information for client requests.
+		'''
+		response = {
+			'websocket': self.__websocketConfig(),
+			'metric_search': self.__metricSearchConfig()
+			}
+
+		return Response(response)
 
 class EventsViewSet(APIView):
 	REQUIRED_QUERY_PARAMS = ('start','eventTypes','tags')
@@ -246,10 +290,8 @@ class SearchViewSet(viewsets.ViewSet):
 
 	def __init__(self, *args, **kwargs):
 		super(SearchViewSet, self).__init__(*args, **kwargs)
-		if config["cache"]["enabled"]:	
-			self.metricMetaSearch = CacheStore(config['cache']['datasource']['url'])		
-		else:
-			self.metricMetaSearch = OpenTSDBMetaSearch(config["dataprovider"])
+		# Only used if cache is disabled
+		self.metricMetaSearch = OpenTSDBMetaSearch(config["dataprovider"])
 
 	def list(self, request, pk=None):
 		return Response(['graphmaps', 'heatmaps', 'metrics', 'tagk', 'tagv', 'event_types'])
@@ -269,7 +311,7 @@ class SearchViewSet(viewsets.ViewSet):
 			serializer_obj = EventTypeSerializer(models_obj,many=True)
 			response = serializer_obj.data
 		elif pk in ('tagk','tagv', 'metrics'):
-			response = self.metricMetaSearch.search(type=pk,query=query,limit=limit)
+			response = self.metricMetaSearch.search({'type':pk,'query':query},limit=limit)
 		else:
 			response = {"error": "Invalid search: %s" %(pk)}
 		return Response(response)

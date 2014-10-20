@@ -9,6 +9,10 @@
 		"loader_class": "opentsdb.OpenTSDBDataProvider",
 		"suggest_limit": 50
 	},
+	"websocket": {
+		"hostname": "localhost",
+		"endpoint": "/api/data"
+	}
 	"cache": {
 		"enabled": false,
 		"interval": 180,
@@ -46,5 +50,5 @@
 	},
 	"tmpdir": "/dev/shm/metrilyx",
 	"debug": false,
-	"schema_path": "/opt/metrilyx/etc/schemas"
+	"schema_path": "/opt/metrilyx/etc/metrilyx/schemas"
 }

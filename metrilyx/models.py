@@ -15,6 +15,9 @@ class EventType(models.Model):
 
 	def save(self, *args, **kwargs):
 		self._id = self.name.lower()
+		'''
+			TODO: Creating mapping in elastic search for given event type.
+		'''
 		super(EventType, self).save(*args, **kwargs)	
 
 

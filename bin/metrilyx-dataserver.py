@@ -32,11 +32,11 @@ class MetrilyxWebSocketServerFactory(WebSocketServerFactory):
 
 	def addClient(self, client):
 		self.clients.append(client)
-		logger.info("WebSocket clients: %d" %(len(self.clients)))
+		logger.warning("WebSocket clients: %d" %(len(self.clients)))
 
 	def removeClient(self, client):
 		self.clients.remove(client)
-		logger.info("WebSocket clients: %d" %(len(self.clients)))
+		logger.warning("WebSocket clients: %d" %(len(self.clients)))
 
 
 def spawnWebsocketServer(uri, logLevel, protocol, externalPort=None):
@@ -62,7 +62,7 @@ def spawnServers(protocol):
 						target=spawnWebsocketServer, 
 						args=(uri, opts.logLevel, protocol, opts.externalPort))
 		proc.start()
-		logger.info("Started server - %s" %(uri))
+		logger.warning("Started server - %s" %(uri))
 		procs.append(proc)
 	return procs
 
@@ -106,17 +106,17 @@ if __name__ == '__main__':
 		sys.exit(1)
 
 	if opts.serverCount == 0:
-		logger.info("Using auto-spawn count.")
+		logger.warning("Using auto-spawn count.")
 		opts.serverCount = multiprocessing.cpu_count()-1
 		if opts.serverCount == 0:
 			opts.serverCount = 1
 	
 	try:
 		perfDP = getPerfDataProvider()
-		logger.info('Performance dataprovider [loaded]')
+		logger.warning('Performance dataprovider [loaded]')
 		if config['annotations']['enabled']:
 			eventDP = getEventDataProvider()
-			logger.info('Event dataprovider [loaded]')
+			logger.warning('Event dataprovider [loaded]')
 
 			class EventGraphProtocol(EventGraphServerProtocol):
 				dataprovider = perfDP
@@ -132,13 +132,13 @@ if __name__ == '__main__':
 		logger.error("Could not set dataprovider and/or protocol: %s" %(str(e)))
 		sys.exit(2)
 
-	logger.info("Protocol: %s" %(str(proto)))
+	logger.warning("Protocol: %s" %(str(proto)))
 
-	logger.info("Spawning %d server/s..." %(opts.serverCount))
+	logger.warning("Spawning %d server/s..." %(opts.serverCount))
 	server_procs = spawnServers(proto)
 
 	try:
 		for p in server_procs:
 			p.join()
 	except KeyboardInterrupt:
-		logger.info("Stopping...")
+		logger.warning("Stopping...")
