@@ -35,9 +35,6 @@ For Debian base systems follow the directions from the link below::
 	http://nginx.org/en/linux_packages.html#stable
 
 
-Installation
-------------
-
 Requirements
 ============
 
@@ -62,6 +59,10 @@ For Debian based distributions (tested w\ Ubuntu 14.04)::
 	## Install pip
 	$ which pip || easy_install pip
 
+
+Installation
+============
+
 Finally install metrilyx::
 
 	$ pip install git+https://github.com/Ticketmaster/metrilyx-2.0.git
@@ -69,7 +70,8 @@ Finally install metrilyx::
 The next step is configure your installation.
 
 Configuration
--------------
+=============
+
 The configuration file can be found at **/opt/metrilyx/etc/metrilyx**.  To begin, copy the sample config::
 
 	$ cd /opt/metrilyx/etc/metrilyx
