@@ -5,8 +5,10 @@ This is a quick start guide for RHEL/CentOS/Oracle 6.5 based distributions.  Alt
 
 If you currently have a running version of nginx >= 1.6.1 you can move on to the 'Metrilyx Installation' section.
 
+
 Nginx Installation
-------------------
+==================
+
 Download and install the appropriate nginx repository based on your distribution.  The setup has been tested with nginx >= 1.6.1
 
 Start by downloading the nginx repository rpm.
@@ -32,11 +34,13 @@ For Debian base systems follow the directions from the link below::
 
 	http://nginx.org/en/linux_packages.html#stable
 
-Metrilyx installation
-=====================
+
+Installation
+------------
 
 Requirements
-------------
+============
+
 The compiler requirements are needed specifically for numpy and pandas for computation.
 
 For RHEL, CentOS, Oracle distributions (test w\ CentOS/Oracle 6.5)::
@@ -61,7 +65,6 @@ For Debian based distributions (tested w\ Ubuntu 14.04)::
 Finally install metrilyx::
 
 	$ pip install git+https://github.com/Ticketmaster/metrilyx-2.0.git
-
 
 The next step is configure your installation.
 
