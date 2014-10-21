@@ -28,6 +28,10 @@ Disable the default nginx configuration::
 	
 	$ mv /etc/nginx/conf.d/default.conf{,.disabled}
 
+For Debian base systems follow the directions from the link below::
+
+	http://nginx.org/en/linux_packages.html#stable
+
 Metrilyx installation
 =====================
 
