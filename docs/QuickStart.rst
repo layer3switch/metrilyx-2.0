@@ -29,11 +29,15 @@ Disable the default nginx configuration::
 	$ mv /etc/nginx/conf.d/default.conf{,.disabled}
 
 Metrilyx installation
----------------------
+=====================
 
-For RHEL, CentOS, Oracle distributions::
+Requirements
+------------
+The compiler requirements are needed specifically for numpy and pandas for computation.
+
+For RHEL, CentOS, Oracle distributions (test w\ CentOS/Oracle 6.5)::
 		
-	## Install os packages
+	## Install OS packages
 	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
 
 	## Install pip
@@ -41,8 +45,17 @@ For RHEL, CentOS, Oracle distributions::
 
 	## Install numpy before installing metrilyx
 	$ pip install 'numpy>=1.6.1'
-	
-	## Install metrilyx
+
+For Debian based distributions (tested w\ Ubuntu 14.04)::
+
+	## Install OS packages
+	$ apt-get install make gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython-dev git-core libffi-dev libatlas-dev libblas-dev python-numpy
+
+	## Install pip
+	$ which pip || easy_install pip
+
+Finally install metrilyx::
+
 	$ pip install git+https://github.com/Ticketmaster/metrilyx-2.0.git
 
 
@@ -50,12 +63,12 @@ The next step is configure your installation.
 
 Configuration
 -------------
-The configuration file can be found at /opt/metrilyx/etc/metrilyx.  To begin, copy the sample config::
+The configuration file can be found at **/opt/metrilyx/etc/metrilyx**.  To begin, copy the sample config::
 
 	$ cd /opt/metrilyx/etc/metrilyx
 	$ cp metrilyx.conf.sample metrilyx.conf
 
-The 'dataprovider' and 'websocket' section are the only 2 needed configurations to start.  
+Now edit the **metrilyx.conf**.  The 'dataprovider' and 'websocket' section are the only 2 needed configurations to get started.  
 
 Fill in the uri and port for OpenTSDB in the 'dataprovider' section::
 
