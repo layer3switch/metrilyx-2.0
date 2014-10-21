@@ -40,7 +40,7 @@ Requirements
 
 The compiler requirements are needed specifically for numpy and pandas for computation.
 
-For RHEL, CentOS, Oracle distributions (test w\ CentOS/Oracle 6.5)::
+For RHEL, CentOS, Oracle distributions (test w/ CentOS/Oracle 6.5)::
 		
 	## Install OS packages
 	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
@@ -51,7 +51,7 @@ For RHEL, CentOS, Oracle distributions (test w\ CentOS/Oracle 6.5)::
 	## Install numpy before installing metrilyx
 	$ pip install 'numpy>=1.6.1'
 
-For Debian based distributions (tested w\ Ubuntu 14.04)::
+For Debian based distributions (tested w/ Ubuntu 14.04)::
 
 	## Install OS packages
 	$ apt-get install make gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython-dev git-core libffi-dev libatlas-dev libblas-dev python-numpy
