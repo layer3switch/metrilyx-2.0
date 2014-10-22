@@ -77,7 +77,7 @@ The configuration file can be found at **/opt/metrilyx/etc/metrilyx**.  To begin
 	$ cd /opt/metrilyx/etc/metrilyx
 	$ cp metrilyx.conf.sample metrilyx.conf
 
-Now edit the **metrilyx.conf**.  The 'dataprovider' and 'websocket' section are the only 2 needed configurations to get started.  
+Edit the **metrilyx.conf**.  The 'dataprovider' and 'websocket' section are the only 2 needed configurations to get started.  
 
 Fill in the uri and port for OpenTSDB in the 'dataprovider' section::
 

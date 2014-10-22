@@ -7,11 +7,6 @@
  */
 
 /* 
- * SERVER_NAME should be filled with the hostname of the web server
- *
- */
-var SERVER_NAME = "";
-/* 
  * This is a list of servers to use for backend calls.
  * This was specifically added to bypass the browser limitation
  * in the number of ajax requests that can be made.
@@ -25,9 +20,7 @@ var SERVER_NAME = "";
  *
  */
 var CONN_POOL_CFG = {
-	urls: [
-		"http://"+SERVER_NAME
-	]
+	urls: []
 };
 /* Auth config until auth is enabled. This is just a future placeholder. */
 var AUTHCONFIG = {
@@ -37,7 +30,8 @@ var AUTHCONFIG = {
 	}
 };
 /* WebSocket URI */
-var WS_URI = "ws://"+SERVER_NAME+"/api/data?compressed=true";
+//var WS_URI = "ws://"+SERVER_NAME+"/api/data?compressed=true";
+
 // Annotation poll interval //
 var ANNO_POLL_INTERVAL = 75000;
 // Annotation fetch time window //
