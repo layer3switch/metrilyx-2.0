@@ -1,9 +1,5 @@
 /*
  * Client Side Configuration 
- * 
- * This contains various configuration options for the web UI.
- * The only required  option is SERVER_NAME, unless other parameters have been changed.
- * 
  */
 
 /* 
