@@ -92,7 +92,9 @@ The configuration file can be found at **/opt/metrilyx/etc/metrilyx**.  To begin
 
 	$ cp etc/metrilyx/metrilyx.conf{.sample,}
 
-	$ cp www/config.js{.sample,}
+Also copy the provided default database::
+
+	$ cp data/metrilyx.sqlite3{.default,}
 
 Edit **etc/metrilyx/metrilyx.conf**.  The 'dataprovider' section is the only needed configuration assuming that the host has a resolvable FQDN ( i.e. resolves via socket.gethostname() ).  Otherwise the 'websocket' section will also need to be edited.
 

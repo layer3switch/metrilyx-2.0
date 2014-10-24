@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 from pprint import pprint
 
 DESCRIPTION = '''
-A web based dashboard engine to OpenTSDB that allows for analyzing, 
+A web based dashboard engine to OpenTSDB that allows for analyzing,
 cross cutting and viewing of time series data in a simple manner.
 '''
 LICENSE = "LICENSE.txt"
@@ -43,17 +43,17 @@ DATA_FILES = [
     ('/opt/metrilyx/bin',                  fileListBuilder('bin')),
     ('/opt/metrilyx/etc/metrilyx/schemas', fileListBuilder('etc/metrilyx/schemas')),
     ('/opt/metrilyx/data', [
-                            'data/metrilyx.sqlite3']),
+                            'data/metrilyx.sqlite3.default']),
     ('/opt/metrilyx/etc/metrilyx', [
                             'etc/metrilyx/ess-mapping.conf.sample',
-                            'etc/metrilyx/metrilyx.conf.sample', 
+                            'etc/metrilyx/metrilyx.conf.sample',
                             'etc/metrilyx/uwsgi.conf',
                             'etc/metrilyx/uwsgi_params.conf']),
     ('/etc/sysconfig',      ['etc/sysconfig/metrilyx-cacher']),
     ('/etc/nginx/conf.d',   ['etc/nginx/conf.d/metrilyx.conf'])
 ]
 
-## Re-create webroot directory structure 
+## Re-create webroot directory structure
 DATA_FILES += recursiveFileListBuilder('www', prefix='/opt/metrilyx/')
 
 setup(
