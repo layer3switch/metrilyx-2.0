@@ -8,7 +8,7 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 **Before you can install Metrilyx, you will need to have the following pre-requisites installed**
 
 Remove previously created temp files by pip. Depending on your platform one or both of the following directories willl need to be removed.
-	
+
 	rm -rf /tmp/pip_build_root
 	rm -rf /tmp/pip-build-root
 
@@ -21,7 +21,7 @@ This is to ensure that previous versions of existing packages do not interfere w
 
 *	**nginx**
 
-	This is used as the proxy layer to the model manager as well as the websocket data server. Installer packages are available on their site. Here's a link to the page for linux: 
+	This is used as the proxy layer to the model manager as well as the websocket data server. Installer packages are available on their site. Here's a link to the page for linux:
 
 		http://nginx.org/en/linux_packages.html#stable
 
@@ -37,40 +37,40 @@ This is to ensure that previous versions of existing packages do not interfere w
 *	**postgresql >= 9.3** (optional)
 
 	This component is only needed if you plan to store your models in a database other than the default sqlite3.  Based on the number of models and usage a proper database may be needed.  Metrilyx has been tested using postgresql and is currently in use at TicketMaster.  In order to install postgres on a RHEL based system, the OS version must be >= 6.5.  MySQL has not been tried due to the lack of JSON support.  Installer packages for postgres are available on their site.
-	
+
 
 #### OS Packages:
 Once the above requirements have been fulfilled, run the following command to install the required OS packages.
 
 ##### RHEL:
 
-	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
-	
+	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi-devel libuuid uuid python-setuptools python-devel
+
 ##### Debian/Ubuntu:
 
 	$ apt-get install libuuid1 uuid-runtime nginx python-setuptools python-dev libpython-dev make git-core libffi-dev
 
 ## Installation:
-The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below to install the application after the above mentioned requirements have been satisfied. The default install destination is **/opt/metrilyx**.	
+The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below to install the application after the above mentioned requirements have been satisfied. The default install destination is **/opt/metrilyx**.
 
 - Install the required OS packages.
 
 - Issue the following command to install the application:
-	
+
+	$ which pip || easy_install pip
+
 	$ pip install 'numpy>=1.6.1'
-	
+
 	$ pip install git+https://github.com/Ticketmaster/metrilyx-2.0.git
-	
-	$ pip install 'autobahn>=0.8.8'
 
 Assuming all required OS packages are installed, the script will install the needed python modules and configurations and prompt you to edit the metrilyx configuration files.
 
 After you have completed editing the configuration file, start the modelmanager and dataserver processes, then restart nginx.  Also start celeryd and celerybeat which consume and run periodic jobs repsectively.
-	
+
 	$ /etc/init.d/metrilyx-dataserver start
 	$ /etc/init.d/metrilyx-modelmanager start
 	$ /etc/init.d/nginx restart
-	
+
 
 **Note**: The default nginx configuration file may conflict with the metrilyx one.  In this case you'll need to disable the default one or edit the configuration file to accomodate for metrilyx's nginx configuration.
 
@@ -79,7 +79,7 @@ If you would like to use postgres for the backend database instead of the defaul
 
 ###### ***Before performing the next step please export all of your existing models.***
 
-You will also need to create the appropriate schemas in postgres and re-initialize django.  
+You will also need to create the appropriate schemas in postgres and re-initialize django.
 
 To initialize django for postgres, issue the command below.  If you get prompted to create a superuser, use the following credentials **admin/metrilyx**.  Setting them to anything else will cause the application to fail.  This is due to the fact that authentication has not been fully integrated and disabled in metrilyx.
 
@@ -87,7 +87,7 @@ To initialize django for postgres, issue the command below.  If you get prompted
 
 If you have existing models in sqlite follow the instructions to export/import them.
 
-#### Postgresql Client Install 
+#### Postgresql Client Install
 (only required if using postgres)
 
 To install the client, first get postrgres's yum repo rpm.  Once that has been installed, you'll need to install the dependencies for the python postgres client (psycopg2).
@@ -98,15 +98,9 @@ You will also need to symlink the pg_config binary as it is not in the path by d
 
 	ln -s /usr/pgsql-9.3/bin/pg_config /usr/local/bin/pg_config
 
-Finally install the python module i.e. psycopg2 
+Finally install the python module i.e. psycopg2
 
 	pip install psycopg2
-
-## Upgrade
-Upgrades are extactly similar to the install process with a couple of extra steps.  During the install process, the application directory gets copied with the current date and time keeping an existing state of your application.  After the install process has been completed you will need to perform the following steps to bring your existing models into the new installation.
-
-##### sqlite
-You can simply copy the sqlite db file from the previous installation into the current one.
 
 ##### Postgresql/MySQL
 No additional steps are required.

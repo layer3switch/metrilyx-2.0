@@ -1,6 +1,7 @@
 {
 	"Alarm": {
 		"properties": {
+			"data"		: {"type":"object","index":"not_analyzed"},
 			"fqdn"		: {"type":"string","index":"not_analyzed"},
 			"FQDN"		: {"type":"string","index":"not_analyzed"},
 			"host"		: {"type":"string","index":"not_analyzed"},

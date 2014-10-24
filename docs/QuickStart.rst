@@ -1,13 +1,27 @@
 ===========
 Quick Start
 ===========
-This is a quick start guide for RHEL/CentOS/Oracle 6.5 based distributions.  Although Metrilyx will run on any linux distribution, testing has been done againsts the os's mentioned above.
+This is a quick start guide for RHEL/CentOS/Oracle 6.5 and Debian/Ubuntu based distributions.
 
-If you currently have a running version of nginx >= 1.6.1 you can move on to the 'Metrilyx Installation' section.
+Although Metrilyx will run on any linux distribution, testing has been done againsts the following systems:
 
+* CentOS/Oracle 6.5
+* Ubuntu 14.04 (trusty)
+
+The quickest way to get up and running you can use the following method in 2 forms although going through the steps below is recommended::
+
+	## Install all prerequisites including the latest version of nginx
+	curl -s http://metrilyx.github.io/bootstrap.sh  | bash
+
+	## Install everything from above and metrilyx.
+	curl -s http://metrilyx.github.io/bootstrap.sh  | bash -s -- install
+
+The above is a script that nicely wraps up the steps mentioned below.
 
 Nginx Installation
 ==================
+
+If you have a running version of nginx >= 1.6.1 you can move on to the 'Installation' step.
 
 Download and install the appropriate nginx repository based on your distribution.  The setup has been tested with nginx >= 1.6.1
 
@@ -27,7 +41,7 @@ Finally install nginx::
 	$ chkconfig nginx on
 
 Disable the default nginx configuration::
-	
+
 	$ mv /etc/nginx/conf.d/default.conf{,.disabled}
 
 For Debian base systems follow the directions from the link below::
@@ -38,10 +52,10 @@ For Debian base systems follow the directions from the link below::
 Requirements
 ============
 
-The compiler requirements are needed specifically for numpy and pandas for computation.
+The compiler requirements are needed specifically by numpy and pandas for computation and analysis.
 
-For RHEL, CentOS, Oracle distributions (test w/ CentOS/Oracle 6.5)::
-		
+On RHEL, CentOS, Oracle distributions (test w/ CentOS/Oracle 6.5)::
+
 	## Install OS packages
 	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
 
@@ -74,10 +88,13 @@ Configuration
 
 The configuration file can be found at **/opt/metrilyx/etc/metrilyx**.  To begin, copy the sample config::
 
-	$ cd /opt/metrilyx/etc/metrilyx
-	$ cp metrilyx.conf.sample metrilyx.conf
+	$ cd /opt/metrilyx
 
-Edit the **metrilyx.conf**.  The 'dataprovider' and 'websocket' section are the only 2 needed configurations to get started.  
+	$ cp etc/metrilyx/metrilyx.conf{.sample,}
+
+	$ cp www/config.js{.sample,}
+
+Edit **etc/metrilyx/metrilyx.conf**.  The 'dataprovider' section is the only needed configuration assuming that the host has a resolvable FQDN ( i.e. resolves via socket.gethostname() ).  Otherwise the 'websocket' section will also need to be edited.
 
 Fill in the uri and port for OpenTSDB in the 'dataprovider' section::
 
@@ -92,7 +109,7 @@ Fill in the uri and port for OpenTSDB in the 'dataprovider' section::
 		}
 	}
 
-In the 'websocket' section fill in the fully qualified resolvable hostname for the server::
+The 'websocket' section can be skipped if your host is a resolvable FQDN, otherwise fill in the fully qualified resolvable hostname for the server ( i.e. resolves via socket.gethostname() )::
 
 	{
 		"websocket": {
@@ -104,15 +121,19 @@ In the 'websocket' section fill in the fully qualified resolvable hostname for t
 		}
 	}
 
-Finally start the metrilyx service::
+Start the metrilyx service/s::
 
 	/etc/init.d/metrilyx start
 
-This will start 3 other services::
+	This will start 3 other services::
 
-	metrilyx-dataserver
-	metrilyx-modelmanager
-	metrilyx-cacher
+		metrilyx-dataserver
+		metrilyx-modelmanager
+		metrilyx-cacher
+
+Restart nginx::
+
+	/etc/init.d/nginx restart
 
 You should now be able to visit http://my.host.name.org to start using Metrilyx.
 

@@ -1,38 +1,36 @@
 Configuration
 =============
-Metrilyx contains 2 configuration files
-
-- /opt/metrilyx/etc/metrilyx/metrilyx.conf
-This is the main configuration file.  
-
-- /opt/metrilyx/metrilyx/static/config.js
-This configuration file is used by the clients i.e. the UI
+Metrilyx configuration file is located at: /opt/metrilyx/etc/metrilyx/metrilyx.conf
 
 #### /opt/metrilyx/etc/metrilyx/metrilyx.conf
-A sample configuration file has been provided.  The configuration file is in JSON format.  
-	
+A sample configuration file has been provided.  The configuration file is in JSON format.
+
 	{
 		"dataprovider": {
 			"name": "OpenTSDB",
 			"uri": "http://<OpenTSDB host>",
 			"port": 4242,
+			"suggest_limit": 50,
 			"query_endpoint": "/api/query",
 			"search_endpoint": "/api/suggest",
 			"loader_class": "opentsdb.OpenTSDBDataProvider",
 			"suggest_limit": 50
 		},
+		"websocket": {
+			"endpoint": "/api/data"
+		},
 		"cache": {
-			"interval": 5,
-	    	"result_size": 50,
-	    	"enabled": false,
-	    	"datasource": {
-	    		"url": "http://localhost:8989"
-	    	}
+			"enabled": false,
+			"interval": 180,
+			"result_size": 50,
+			"datasource": {
+				"url": "http://localhost:8989"
+			}
 		},
 		"databases":[
 			{
 				"ENGINE": "django.db.backends.sqlite3",
-	        	"NAME": "/opt/metrilyx/metrilyx.sqlite3"
+				"NAME": "/opt/metrilyx/data/metrilyx.sqlite3"
 			},{
 				"ENGINE": "django.db.backends.postgresql_psycopg2",
 				"NAME": "metrilyx",
@@ -58,20 +56,23 @@ A sample configuration file has been provided.  The configuration file is in JSO
 		},
 		"tmpdir": "/dev/shm/metrilyx",
 		"debug": false,
-		"schema_path": "/opt/metrilyx/etc/schemas"
+		"schema_path": "/opt/metrilyx/etc/metrilyx/schemas"
 	}
-	
-##### tsdb.uri
+
+##### dataprovider.uri
 OpenTSDB http host
 
-##### tsdb.port
+##### dataprovider.port
 OpenTSDB http port (default: 4242)
 
-##### tsdb.suggest_limit
-OpenTSDB suggest max result limit. 
+##### dataprovider.suggest_limit
+OpenTSDB suggest max result limit.
 
-##### heatmaps
-This configuration option is only needed if you plan to use heatmaps.  If you choose to enable this feature the only needed change is the mongodb information relative to your setup i.e. **host**, **port**, and database
+##### websocket.hostname (optional)
+This configuration option only needs to be edited if the host does not have a resolvable FQDN..  Add a hostname key under the websocket section called 'hostname' with a client resolvable name.
+
+##### websocket.port (optional)
+This options is only needed if directly connecting with the websocket. For example: in development mode
 
 ##### databases
 The are 2 database configurations provided - sqlite and postgres.  The first one in the list will be the one used.  The default uses sqlite.  Postgresql can also be used.  To use postgres move that configuration option to the top of the list.  Using postgres requires the **psycopg2** python package.  All options are self explanatory.  MySQL can also be used but has not been tested as of writing this.
@@ -86,7 +87,7 @@ The interval at which to refresh the cache.  This is in minutes.
 Maximum number of results to return.  Setting this value too high may cause performance issues.
 
 ##### annotations
-In order to use annotations they need to be enabled in the config.  Once enabled, change the parameters per your environment.  The only required fields are **host** and **port**.  
+In order to use annotations they need to be enabled in the config.  Once enabled, change the parameters per your environment.  The only required fields are **host** and **port**.
 
 Now you will need to create the index in elasticsearch.  Create the index by issuing the following command:
 
@@ -98,24 +99,11 @@ Certain mappings need to be added for each event type in elasticsearch.  Here's 
 
 These need to be added for every event type created.  You can easily add a new type by replacing 'Alarm' in the url as well as sample file with your desired type name.
 
-#### /opt/metrilyx/metrilyx/static/config.js
-This is the client side configuration file. A sample for this configuration has also been provided.
-
-##### SERVER_NAME (required)
-Client accessible FQDN of the server.  This is the address used by the client to make the websocket connection.  This usually is the hostname of the machine it's running on.  Not having this configured correctly will cause client connections will fail.  This is the only required option in this configuration file.
-
-##### AUTHCONFIG (optional)
-This does not need to be changed.  This is a placeholder for a future feature to allow user authentication.  This should not be edited unless you know what you are doing.
-
-##### WS_URI (optional)
-The websocket URI used by the client.  This is made up of the **SERVER_NAME** and connection options.  This should not be edited unless you know what you are doing.
-
-
 #### Nginx
 The metrilyx nginx configuration is installed under **/etc/nginx/conf.d/metrilyx.conf**.  The default nginx configuration may conflict with the metrilyx configuration and should be disabled. The name of the default file will be different depending on the operating system you are using.  Here's an example from a CentOS/RHEL based system.
 
 	$ mv /etc/nginx/conf.d/default.conf{,.disabled}
-	
+
 You can also edit the default configuration file to work with the one provided with metrilyx but that is beyod the scope of this document.
 
 Optimization configuration changes also should be made.  Metrilyx can still function without these configuration changes but it is recommended these options be configured for scalability and performance.

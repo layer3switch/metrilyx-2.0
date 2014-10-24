@@ -10,7 +10,6 @@
 		"suggest_limit": 50
 	},
 	"websocket": {
-		"hostname": "localhost",
 		"endpoint": "/api/data"
 	},
 	"cache": {
@@ -24,7 +23,7 @@
 	"databases":[
 		{
 			"ENGINE": "django.db.backends.sqlite3",
-        	"NAME": "/opt/metrilyx/data/metrilyx.sqlite3"
+			"NAME": "/opt/metrilyx/data/metrilyx.sqlite3"
 		},{
 			"ENGINE": "django.db.backends.postgresql_psycopg2",
 			"NAME": "metrilyx",
