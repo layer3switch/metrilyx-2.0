@@ -20,7 +20,6 @@ import metrilyx
 from custompermissions import IsGroupOrReadOnly, IsCreatorOrReadOnly
 from serializers import *
 from ..models import *
-from ..datastores.metrilyxcacher import CacheStore
 
 from ..annotations import Annotator
 
@@ -65,7 +64,7 @@ class EventTypeViewSet(viewsets.ModelViewSet):
 
 
 class GraphMapViewSet(MapViewSet):
-	
+
 	queryset = MapModel.objects.filter(model_type="graph")
 
 	def pre_save(self, obj):
@@ -135,7 +134,7 @@ class ConfigurationView(APIView):
 		if config['websocket'].has_key('endpoint'):
 			resp['endpoint'] = config['websocket']['endpoint']
 			resp['uri'] = "%s%s" %(resp['uri'], resp['endpoint'])
-		
+
 		resp['uri'] = "%s?%s" %(resp['uri'], "&".join(resp['extensions']))
 
 		return resp
@@ -188,7 +187,7 @@ class EventsViewSet(APIView):
 		reqBody = self.__checkRequest(request)
 		if reqBody.has_key('error'):
 			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
-			
+
 		gevt = {
 			"_id": "annotations",
 			"annoEvents": {
@@ -199,7 +198,7 @@ class EventsViewSet(APIView):
 		}
 		if reqBody.has_key("end"):
 			gevt["end"] = reqBody["end"]
-		
+
 		ger = GraphEventRequest(gevt)
 		out = []
 		for gr in ger.split():
@@ -207,8 +206,8 @@ class EventsViewSet(APIView):
 				rslt = self.eventDataProvider.search(query)
 				if len(rslt["hits"]["hits"]) > 0:
 					out += [r['_source'] for r in rslt['hits']['hits']]
-		return Response(out)			
-	
+		return Response(out)
+
 	def post(self, request, pk=None):
 		'''
 			request object:
@@ -254,12 +253,12 @@ class TagViewSet(viewsets.ViewSet):
 		model_type = request.GET.get('model_type', '')
 		tags = self.__get_unique_tags(model_type)
 		return Response([ {'name': t } for t in tags ])
-	
+
 	def retrieve(self, request, pk=None):
 		model_type = request.GET.get('model_type', '')
 		if model_type == '':
 			objs = MapModel.objects.filter(tags__contains=pk)
-		else:	
+		else:
 			objs = MapModel.objects.filter(tags__contains=pk, model_type=model_type)
 		serializer = MapModelSerializer(objs, many=True)
 		return Response(serializer.data)
@@ -277,14 +276,14 @@ class OpenTSDBMetaSearch(object):
         if obj["type"] == "metric":
             obj["type"] = "metrics"
         if limit != None:
-        	resp = requests.get("%s?max=%d&type=%s&q=%s" %(self.tsdb_suggest_url, 
+        	resp = requests.get("%s?max=%d&type=%s&q=%s" %(self.tsdb_suggest_url,
         										limit, obj['type'], obj['query']))
         else:
-        	resp = requests.get("%s?max=%d&type=%s&q=%s" %(self.tsdb_suggest_url, 
+        	resp = requests.get("%s?max=%d&type=%s&q=%s" %(self.tsdb_suggest_url,
         							self.suggest_limit, obj['type'], obj['query']))
         return resp.json()
 
-class SearchViewSet(viewsets.ViewSet): 
+class SearchViewSet(viewsets.ViewSet):
 
 	def __init__(self, *args, **kwargs):
 		super(SearchViewSet, self).__init__(*args, **kwargs)
