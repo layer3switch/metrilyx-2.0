@@ -174,6 +174,12 @@ class EventsViewSet(APIView):
 			for rp in self.REQUIRED_WRITE_PARAMS:
 				if rp not in jsonReq.keys():
 					return {'error': 'missing parameter: %s' %(rp)}
+
+			try:
+				etype = EventType.objects.get(_id=jsonReq['eventType'].lower())
+			except EventType.DoesNotExist:
+				return {'error': 'event type: %s not found' %(jsonReq['eventType'])}
+
 		return jsonReq
 
 	def get(self, request, pk=None):
