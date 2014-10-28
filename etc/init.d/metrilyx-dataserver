@@ -45,11 +45,12 @@ status() {
 	fi
 }
 stop() {
+	echo -n "${NAME} stopping...";
 	PIDS=`${PGREP} "${BIN}" | sort -r`;
 	for pid in $PIDS; do
 		kill $pid;
 	done
-	${PGREP} "${BIN}" || echo "${NAME} stopped";
+	${PGREP} "${BIN}" || echo "[ok]" && echo "[failed]";
 }
 
 

@@ -736,6 +736,8 @@ angular.module("metrilyxHelperFactories", [])
 					if(__connectState === "disconnected") {
 						console.log("Re-connecting...");
 						initializeWebSocket();
+					} else {
+						console.log("Waiting for connection establishment")
 					}
 				}
 			}
