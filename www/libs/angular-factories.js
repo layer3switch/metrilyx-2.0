@@ -1,17 +1,17 @@
 angular.module("metrilyxHelperFactories", [])
 .factory("ComponentTemplates", function() {
-	
+
 	var ComponentTemplates = function(scope) {
-		
+
 		var partialsPrefix = "/ui/partials";
-		
+
 		var templates = {
 			pageMastHtml	: connectionPool.nextConnection()+partialsPrefix+"/page-mast.html",
 		};
 
 		function initialize() {
 			if(scope.modelType == "adhoc" || scope.modelType == "") {
-				
+
 				$.extend(templates, {
 					editPanelHtml			: connectionPool.nextConnection()+partialsPrefix+"/edit-panel.html",
 					thresholdsHtml 			: connectionPool.nextConnection()+partialsPrefix+"/thresholds.html",
@@ -24,10 +24,10 @@ angular.module("metrilyxHelperFactories", [])
 				}, true);
 
 				if(scope.modelType == "adhoc") {
-					
+
 					templates['queryEditorHtml'] = connectionPool.nextConnection()+partialsPrefix+"/adhocgraph-query-editor.html";
 				} else {
-					
+
 					$.extend(templates, {
 						queryEditorHtml		: connectionPool.nextConnection()+partialsPrefix+"/pagegraph-query-editor.html",
 						graphControlsHtml	: connectionPool.nextConnection()+partialsPrefix+"/graph-controls.html",
@@ -44,7 +44,7 @@ angular.module("metrilyxHelperFactories", [])
 	return (ComponentTemplates);
 })
 .factory("CtrlCommon", ['Metrics', 'Schema', '$route', '$location', function(Metrics, Schema, $route, $location) {
-	
+
 	var CtrlCommon = function(scope) {
 
 		var timerSearchForMetric;
@@ -78,22 +78,22 @@ angular.module("metrilyxHelperFactories", [])
 		}
 
 		function searchForMetric(args) {
-			
+
 			if (timerSearchForMetric) clearTimeout(timerSearchForMetric);
 
 			var myThis = this;
 			timerSearchForMetric = setTimeout(function(){
-				
+
 				var qstr;
 				if(args && args !== "") qstr = args;
 				if(myThis.metricQuery && myThis.metricQuery !== "") qstr = myThis.metricQuery;
 				if(qstr == "" || qstr == undefined) return;
-				
+
 				Metrics.suggest(qstr, function(result) {
-					
+
 					scope.metricQuery = qstr;
 					Schema.get({modelType:'metric'}, function(graphModel) {
-						
+
 						var arr = [];
 						for(var i in result) {
 							obj = JSON.parse(JSON.stringify(graphModel));
@@ -101,7 +101,7 @@ angular.module("metrilyxHelperFactories", [])
 							obj.query.metric = result[i];
 							arr.push(obj);
 						}
-						
+
 						scope.metricQueryResult = arr;
 					});
 				});
@@ -139,7 +139,7 @@ angular.module("metrilyxHelperFactories", [])
 .factory("AnnotationOptions", ['$location', '$routeParams', 'EventTypes', function($location, $routeParams, EventTypes) {
 
 	var AnnotationOptions = function(scope) {
-		
+
 		var scopeAttributes = {
 			'globalAnno': {'eventTypes':[], 'tags':{}, 'status': null },
 			'selectedAnno': {},
@@ -147,9 +147,9 @@ angular.module("metrilyxHelperFactories", [])
 		};
 
 		function initialize() {
-			
+
 			if($routeParams.annotationTypes && $routeParams.annotationTags) {
-				
+
 				try {
 
 					$.extend(true, scopeAttributes['globalAnno'], {
@@ -161,16 +161,16 @@ angular.module("metrilyxHelperFactories", [])
 
 			if(scopeAttributes.globalAnno.eventTypes.length > 0 && Object.keys(scopeAttributes.globalAnno.tags).length > 0)
 				scopeAttributes.globalAnno['status'] = 'load';
-			
+
 			// Apply this first as the next call will take some time
 			$.extend(scope, scopeAttributes, true);
 
 			// Get all available event types
 			EventTypes.listTypes(function(rslt) {
-				
+
 				var evtTypeList = [];
 				for(var i in rslt) {
-					
+
 					if(rslt[i].name === undefined || scopeAttributes.globalAnno.eventTypes.indexOf(rslt[i].name) >= 0) continue;
 					evtTypeList.push(rslt[i].name);
 				}
@@ -181,12 +181,12 @@ angular.module("metrilyxHelperFactories", [])
 
 
 		function applyAnnotationOptions() {
-			
+
 			if(scope.modelType == "adhoc") {
-				
+
 				scope.reloadGraph();
 				scope.globalAnno.status = 'reload';
-				
+
 				$('.graph-control-details.global-anno').hide();
 			}
 
@@ -201,7 +201,7 @@ angular.module("metrilyxHelperFactories", [])
 	return (AnnotationOptions);
 }])
 .factory("TimeWindow", ['$routeParams', function($routeParams) {
-	
+
 	var TimeWindow = function(scope) {
 		var t = this;
 
@@ -215,23 +215,23 @@ angular.module("metrilyxHelperFactories", [])
 		};
 
 		function initialize() {
-			
+
 			if(scope.modelType === "adhoc") scopeAttributes['updatesEnabled'] = false;
-			
+
 			if($routeParams.start) {
 
 				if($routeParams.end) {
-					
+
 					$.extend(true, scopeAttributes, {
 						'endTime': parseInt($routeParams.end),
 						'timeType': "absolute",
 						'updatesEnabled': false
 					}, true);
 				} else {
-					
+
 					scopeAttributes['timeType'] = $routeParams.start;
 				}
-				if(Object.prototype.toString.call($routeParams.start) === '[object String]' 
+				if(Object.prototype.toString.call($routeParams.start) === '[object String]'
 													&& $routeParams.start.match(/-ago$/)) {
 					scopeAttributes['startTime'] = $routeParams.start;
 				} else {
@@ -280,9 +280,9 @@ angular.module("metrilyxHelperFactories", [])
 		}
 
 		t.setAttribute = function(attr, value) {
-			
+
 			switch(attr) {
-				
+
 				case "timeType":
 					scope.timeType = value;
 					break;
@@ -302,7 +302,7 @@ angular.module("metrilyxHelperFactories", [])
 			}
 		}
 
-		function setStartTime(sTime) {			
+		function setStartTime(sTime) {
 			t.setAttribute('startTime', sTime);
 		}
 
@@ -322,8 +322,8 @@ angular.module("metrilyxHelperFactories", [])
 
 		function setPageGlobalTags() {
 
-			try { 
-				scope.$parent.globalTags = $routeParams.tags ? commaSepStrToDict($routeParams.tags) : {}; 
+			try {
+				scope.$parent.globalTags = $routeParams.tags ? commaSepStrToDict($routeParams.tags) : {};
 			} catch(e) {
 				console.warn("Could not parse global tags!");
 				scope.globalTags = {};
@@ -331,7 +331,7 @@ angular.module("metrilyxHelperFactories", [])
 		}
 
 		function initialize() {
-			
+
 			var scopeOpts = {};
 
 			if(scope.modelType === "adhoc") {
@@ -339,13 +339,13 @@ angular.module("metrilyxHelperFactories", [])
 				scopeOpts.editMode = $routeParams.editMode === "false" ? "" : " edit-mode";
 			} else {
 
-				
+
 				scopeOpts.editMode = (!$routeParams.editMode || $routeParams.editMode === "false") ? scope.editMode = "" : " edit-mode";
 				scopeOpts.editMode = $routeParams.pageId == "new" ? " edit-mode" : "";
 				// Parent global tags scope get's set so it cannot but coupled with the above logic and has to be separately. //
 				setPageGlobalTags();
 			}
-			
+
 			scopeOpts.updatesEnabled = scopeOpts.editMode === " edit-mode" ? false : true;
 
 			$.extend(true, scope, scopeOpts, true);
@@ -404,7 +404,7 @@ angular.module("metrilyxHelperFactories", [])
 		}
 
 		function parseAdhocParams() {
-			
+
 			var gmodel = {};
 			gmodel.size 		= $routeParams.size ? $routeParams.size : ADHOC_DEFAULT_GRAPH_SIZE;
 			gmodel.thresholds 	= parseAdhocThresholdParams();
@@ -415,17 +415,17 @@ angular.module("metrilyxHelperFactories", [])
 		}
 
 		function parsePageParams() {
-			
+
 			var out = {};
-			out.editMode 		= $routeParams.pageId == "new" ? " edit-mode" : "";	
+			out.editMode 		= $routeParams.pageId == "new" ? " edit-mode" : "";
 			out.updatesEnabled 	= editMode == " edit-mode" ? false : true;
 
-			
+
 			return out;
 		}
 
 		function getParams() {
-			
+
 			switch(scope.modelType) {
 				case "adhoc":
 					return parseAdhocParams();
@@ -444,7 +444,7 @@ angular.module("metrilyxHelperFactories", [])
 	return (RouteManager);
 }])
 .factory("URLSetter", ['$location', function($location) {
-	
+
 	var URLSetter = function(scope) {
 		var t = this;
 
@@ -452,13 +452,13 @@ angular.module("metrilyxHelperFactories", [])
 
 			var outarr = [];
 			for(var s=0; s < obj.series.length; s++) {
-				
+
 				serie = obj.series[s];
 				q = serie.query;
-				
+
 				var params = q.aggregator+":";
 				if(q.rate) params += "rate:";
-				
+
 				params += q.metric+"{"
 				tagstr = "";
 				for(var tk in q.tags) {
@@ -491,18 +491,18 @@ angular.module("metrilyxHelperFactories", [])
 			if(scope.editMode === "") srch.editMode = "false";
 
 			if(scope.timeType === "absolute") {
-				
+
 				srch.start = scope.startTime;
 				if(scope.endTime) srch.end = scope.endTime;
 			} else {
-				
+
 				srch.start = scope.timeType;
 			}
 
 			var uAnnoTagsStr = dictToCommaSepStr(scope.globalAnno.tags, ":");
 
 			if(scope.globalAnno.eventTypes.length > 0 && uAnnoTagsStr != "") {
-				
+
 				srch.annotationTypes = scope.globalAnno.eventTypes.join("|");
 				srch.annotationTags = uAnnoTagsStr;
 			}
@@ -534,7 +534,7 @@ angular.module("metrilyxHelperFactories", [])
 		}
 
 		function _removeModelCallback(rslt) {
-			
+
 			setGlobalAlerts(rslt);
 			if(rslt.error) {
 				flashAlertsBar();
@@ -555,7 +555,7 @@ angular.module("metrilyxHelperFactories", [])
 		}
 
 		function _saveModelCallback(rslt) {
-			
+
 			setGlobalAlerts(rslt);
 			if(rslt.error) {
 				flashAlertsBar();
@@ -563,9 +563,9 @@ angular.module("metrilyxHelperFactories", [])
 
 				document.getElementById('side-panel').dispatchEvent(
 					new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
-				
+
 				var currModelPath = "#/"+scope.model._id;
-				
+
 				if(location.hash === currModelPath) location.reload(true);
 				else location.hash = currModelPath;
 
@@ -574,14 +574,14 @@ angular.module("metrilyxHelperFactories", [])
 
 		function saveModel(args) {
 			if($routeParams.pageId == 'new') {
-				
-				Model.saveModel(scope.model, 
+
+				Model.saveModel(scope.model,
 					function(result) {
 						_saveModelCallback(result);
 					}, modelManagerErrback);
 			} else {
-				
-				Model.editModel({'pageId': scope.model._id}, scope.model, 
+
+				Model.editModel({'pageId': scope.model._id}, scope.model,
 					function(result) {
 						_saveModelCallback(result);
 					}, modelManagerErrback);
@@ -591,28 +591,25 @@ angular.module("metrilyxHelperFactories", [])
 		$.extend(scope, {
 			'saveModel': saveModel,
 			'removeModel': removeModel
-		}, true);	
+		}, true);
 
 	}
 
 	return (ModelManager);
 }])
 .factory("WebSocketDataProvider", ['Configuration', function(Configuration) {
-	
+
 	var WebSocketDataProvider = function(scope) {
-		
+
 		var queuedReqs = [];
 		var wssock = null;
 		var modelGraphIdIdx = {};
 
 		var __queuedEventListeners = {};
-		/*
-		var wsConfig = null;
-		Configuration.getConfig(function(data) {
-			wsConfig = data;
-		});
-		*/
-		
+
+		//this is store if a connection action has been initiated by the user//
+		var __connectState = "disconnected";
+
 		/*
 		 * Re-add event listeners registered by graphs
 		 *
@@ -624,12 +621,13 @@ angular.module("metrilyxHelperFactories", [])
 		}
 
 		function getWebSocket(callback) {
+			__connectState = "connecting";
 			Configuration.getConfig(function(wsConfig) {
 
 				if ("WebSocket" in window) callback(new WebSocket(wsConfig.websocket.uri));
-		    	else if ("MozWebSocket" in window) callback(new MozWebSocket(wsConfig.websocket.uri));
-		    	else callback(null);	
-		    });
+				else if ("MozWebSocket" in window) callback(new MozWebSocket(wsConfig.websocket.uri));
+				else callback(null);
+			});
 		}
 
 		function onOpenWssock() {
@@ -642,46 +640,47 @@ angular.module("metrilyxHelperFactories", [])
 		}
 
 		function onCloseWssock(e) {
-	     	console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
-	    	wssock = null;
-	   	}
+			console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
+			wssock = null;
+			__connectState = "disconnected";
+		}
 
-	   	function onMessageWssock(e) {
-       		var data = JSON.parse(e.data);
-       		if(data.error) {
+		function onMessageWssock(e) {
+			var data = JSON.parse(e.data);
+			if(data.error) {
 
-       			setGlobalAlerts(data);
-       			flashAlertsBar();
-       		} else if(data.annoEvents) {
-       			// Annotations
-   				scope.$apply(function(){scope.globalAnno.status = 'dispatching'});
-   				
-   				if(scope.modelType === 'adhoc') {
-   					
-   					data._id = scope.graph._id;
-   					var ce = new CustomEvent(data._id, {'detail': data });
-   					wssock.dispatchEvent(ce);
-   				} else {
-   					
-   					for(var i in modelGraphIdIdx) {
-	       				data._id = i;
-	       				var ce = new CustomEvent(data._id, {'detail': data });
-	       				wssock.dispatchEvent(ce);
-       				}
-   				}
-       			scope.$apply(function(){scope.globalAnno.status = 'dispatched'});
-       		} else {
-       			// graph data //
-	       		var ce = new CustomEvent(data._id, {'detail': data });
-	       		wssock.dispatchEvent(ce);
-       		}
+				setGlobalAlerts(data);
+				flashAlertsBar();
+			} else if(data.annoEvents) {
+				// Annotations
+				scope.$apply(function(){scope.globalAnno.status = 'dispatching'});
+
+				if(scope.modelType === 'adhoc') {
+
+					data._id = scope.graph._id;
+					var ce = new CustomEvent(data._id, {'detail': data });
+					wssock.dispatchEvent(ce);
+				} else {
+
+					for(var i in modelGraphIdIdx) {
+						data._id = i;
+						var ce = new CustomEvent(data._id, {'detail': data });
+						wssock.dispatchEvent(ce);
+					}
+				}
+				scope.$apply(function(){scope.globalAnno.status = 'dispatched'});
+			} else {
+				// graph data //
+				var ce = new CustomEvent(data._id, {'detail': data });
+				wssock.dispatchEvent(ce);
+			}
 		}
 
 		function _addGraphIdEventListener(graphId, funct) {
 			wssock.addEventListener(graphId, funct);
-			
+
 			modelGraphIdIdx[graphId] = funct;
-			
+
 			if(Object.keys(modelGraphIdIdx).length === scope.modelGraphIds.length) {
 				// trigger annotation request as all graph elems are loaded //
 				scope.globalAnno.status = 'load';
@@ -690,20 +689,22 @@ angular.module("metrilyxHelperFactories", [])
 
 		function initializeWebSocket() {
 			getWebSocket(function(ws) {
-				
+
 				wssock = ws;
 				if(wssock !== null) {
-		    		wssock.onopen 		= onOpenWssock;
-		   			wssock.onclose 		= onCloseWssock;
-		   			wssock.onmessage 	= onMessageWssock;
-		   			
-		   			for(k in __queuedEventListeners) {
-		   				_addGraphIdEventListener(k, __queuedEventListeners[k]);
-		   				delete __queuedEventListeners[k];
-		   			}
-		   		} else {
-		   			console.error("Null websocket");
-		   		}
+					wssock.onopen 		= onOpenWssock;
+					wssock.onclose 		= onCloseWssock;
+					wssock.onmessage 	= onMessageWssock;
+
+					__connectState = "connected";
+
+					for(k in __queuedEventListeners) {
+						_addGraphIdEventListener(k, __queuedEventListeners[k]);
+						delete __queuedEventListeners[k];
+					}
+				} else {
+					console.error("Null websocket");
+				}
 			});
 		}
 
@@ -720,25 +721,30 @@ angular.module("metrilyxHelperFactories", [])
 			if(wssock !== null) wssock.removeEventListener(graphId, funct);
 		}
 		this.requestData = function(query) {
-	    	try {
+			try {
 				wssock.send(JSON.stringify(query));
-	    	} catch(e) {
-	    		
-	    		if(e.code === 11) {
-	    			queuedReqs.push(JSON.stringify(query));
-	    		} else {
-	    			//reconnect
-	    			queuedReqs.push(JSON.stringify(query));
-	    			console.log("Re-connecting...");
-	    			initializeWebSocket();
-	    		}
-	    	}
-	    }
-	    this.closeConnection = function() {
-	    	wssock.close();
-	    }
+			} catch(e) {
 
-	    initializeWebSocket();
+				if(e.code === 11) {
+					queuedReqs.push(JSON.stringify(query));
+				} else {
+					//console.log(e);
+					console.log("iConnect state: " + __connectState);
+					//reconnect
+					queuedReqs.push(JSON.stringify(query));
+					/* only reconnect if there are no connection actions in progress */
+					if(__connectState === "disconnected") {
+						console.log("Re-connecting...");
+						initializeWebSocket();
+					}
+				}
+			}
+		}
+		this.closeConnection = function() {
+			wssock.close();
+		}
+
+		initializeWebSocket();
 	}
 	return (WebSocketDataProvider);
 }]);
