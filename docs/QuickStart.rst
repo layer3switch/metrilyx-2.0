@@ -16,7 +16,9 @@ The quickest way to  be get up and running is to use the following method in 2 f
 	## Install everything from above and metrilyx.
 	curl -s http://metrilyx.github.io/bootstrap.sh  | bash -s -- install
 
-The above is a script that nicely wraps up all the steps mentioned below including dependencies.  If you choose to manually perform the installation then follow the next steps or after successfully completion of the above script, continue on to the **Configuration** section.
+The above is a script that nicely wraps up all the steps mentioned below including dependencies.  If you choose to manually perform the installation then follow the next steps or after successfully completion of the above script, continue on to the `Configuration <https://github.com/Ticketmaster/metrilyx-2.0/blob/v2.4.0rc1/docs/QuickStart.rst#configuration/>`_ section.
+
+https://github.com/Ticketmaster/metrilyx-2.0/blob/v2.4.0rc1/docs/QuickStart.rst#configuration
 
 Nginx Installation
 ==================
