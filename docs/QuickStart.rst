@@ -129,12 +129,6 @@ Start the metrilyx service/s::
 
 	/etc/init.d/metrilyx start
 
-	This will start 3 other services::
-
-		metrilyx-dataserver
-		metrilyx-modelmanager
-		metrilyx-cacher
-
 Restart nginx::
 
 	/etc/init.d/nginx restart
