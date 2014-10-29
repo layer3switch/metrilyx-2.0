@@ -19,6 +19,9 @@ Metrilyx is a web based dashboard engine to OpenTSDB, a time series database use
 ##### Edit Mode
 ![Alt text](www/imgs/readme/screenshot_3.png)
 
+#### Getting Started
+To quick get up and running, follow the **Quick Start* guide.
+
 **Notes**
 
 - Please be aware that although the project has a Apache license, the graphing library is under the creative commons license.

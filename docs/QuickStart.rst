@@ -8,7 +8,7 @@ Although Metrilyx will run on any linux distribution, testing has been done agai
 * CentOS/Oracle 6.5
 * Ubuntu 14.04 (trusty)
 
-The quickest way to get up and running you can use the following method in 2 forms although going through the steps below is recommended::
+The quickest way to  be get up and running is to use the following method in 2 forms although going through the steps below is recommended::
 
 	## Install all prerequisites including the latest version of nginx
 	curl -s http://metrilyx.github.io/bootstrap.sh  | bash
@@ -16,7 +16,7 @@ The quickest way to get up and running you can use the following method in 2 for
 	## Install everything from above and metrilyx.
 	curl -s http://metrilyx.github.io/bootstrap.sh  | bash -s -- install
 
-The above is a script that nicely wraps up the steps mentioned below.
+The above is a script that nicely wraps up all the steps mentioned below including dependencies.  If you choose to manually perform the installation then follow the next steps or after successfully completion of the above script, continue on to the **Configuration** section.
 
 Nginx Installation
 ==================
@@ -82,6 +82,7 @@ Finally install metrilyx::
 	$ pip install git+https://github.com/Ticketmaster/metrilyx-2.0.git
 
 The next step is configure your installation.
+
 
 Configuration
 =============
