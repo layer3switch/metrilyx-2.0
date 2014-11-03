@@ -184,13 +184,13 @@ This is a helper script that can be used to fire an event. To see the available 
 When using POST requests, they should be made to the **/api/annotations** endpoint.  The description of the POST payload is described below.
 
 
-| Field | Description | Example | Required |
-|-------|-------------|---------|----------|
-| **timestamp** | Epoch time in **milliseconds**.  If not provided the current time is used. | 1408129158000 (Aug 15 11:59:22 2014) | **No** |
-| **eventType** | A pre-defined event type.  A list of event types can be found at the /api/event_types endpoint. | Maintenance | **Yes** |
-| **message** | This is the string used when hovering over the event on the graph. | "Scheduled Network Maintenance"| **Yes** |
-| **tags** | Any arbitrary tags that can be used later for searching/filtering. | {"host":"foo.bar.com","severity":"Warning"}| **Yes** |
-| **data** | This can be any arbitrary JSON data.  It must be a single level JSON structure. This is the data used as details which are shown when clicking on the event| {"Priority": "P1", "On Call": "Jon Doe", "Contact Email": "Jon.Doe@bar.com" }| No |
+| Field | Description | Example | Required | Type |
+|-------|-------------|---------|----------|------|
+| **timestamp** | Epoch time in **milliseconds**.  If not provided the current time is used. | 1408129158000 (Aug 15 11:59:22 2014) | **No** | int |
+| **eventType** | A pre-defined event type.  A list of event types can be found at the /api/event_types endpoint. | Maintenance | **Yes** | string |
+| **message** | This is the string used when hovering over the event on the graph. | "Scheduled Network Maintenance"| **Yes** | string |
+| **tags** | Any arbitrary tags that can be used later for searching/filtering. | {"host":"foo.bar.com","severity":"Warning"}| **Yes** | dict |
+| **data** | This can be any arbitrary JSON data.  It must be a single level JSON structure. This is the data used as details which are shown when clicking on the event| {"Priority": "P1", "On Call": "Jon Doe", "Contact Email": "Jon.Doe@bar.com" }| No | dict |
 
 **e.g.:**
 
