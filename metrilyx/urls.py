@@ -14,7 +14,7 @@ from metrilyxconfig import config
 from metrilyx.rest import apiviews
 
 router = routers.SimpleRouter(trailing_slash=False)
-router.register(r'(api/)?event_types', apiviews.EventTypeViewSet)
+router.register(r'(api/)?event_types(/.*)?', apiviews.EventTypeViewSet)
 router.register(r'(api/)?users', apiviews.UserViewSet)
 router.register(r'(api/)?groups', apiviews.GroupViewSet)
 router.register(r'(api/)?graphmaps', apiviews.GraphMapViewSet)
@@ -33,5 +33,5 @@ urlpatterns = patterns('',
 	url(r'^(api/)?admin/?', include(admin.site.urls)),
 )
 if config['debug']:
-	urlpatterns += static('/', 
-			document_root=os.path.join(os.path.dirname(__file__), 'www'))   
+	urlpatterns += static('/',
+			document_root=os.path.join(os.path.dirname(__file__), 'www'))

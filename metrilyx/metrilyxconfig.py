@@ -23,3 +23,15 @@ if not config.has_key("static_path"):
 
 if not config.has_key("schema_path"):
 	config["schema_path"] = os.path.join(_apphome, "etc/metrilyx/schemas")
+
+if not config['annotations']['dataprovider'].has_key('default_mapping'):
+    config['annotations']['dataprovider']['default_mapping'] = os.path.join(
+                            _apphome, "etc/metrilyx/ess-default-mappings.json")
+
+default_mapping = jsonFromFile(config['annotations']['dataprovider']['default_mapping'])
+if default_mapping.has_key('error'):
+    raise RuntimeError("Invalid mapping config: %s" % (
+                        config['annotations']['dataprovider']['default_mapping']))
+
+config['annotations']['dataprovider']['default_mapping'] = default_mapping
+

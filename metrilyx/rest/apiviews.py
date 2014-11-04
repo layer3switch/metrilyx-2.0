@@ -62,6 +62,23 @@ class EventTypeViewSet(viewsets.ModelViewSet):
 	serializer_class = EventTypeSerializer
 	permission_classes = (IsCreatorOrReadOnly,)
 
+	def create(self, request, path, pk=None):
+		if pk is None or pk in ("", "/"):
+			return Response({"error": "Invalid request"},
+						status=status.HTTP_400_BAD_REQUEST)
+
+		try:
+			obj = EventType.objects.get(_id=pk[1:].lower())
+			return Response({"error": "Event type already exists!"},
+								status=status.HTTP_400_BAD_REQUEST)
+		except EventType.DoesNotExist:
+			etype = EventType(name=pk[1:].title(), _id=pk[1:].lower(), metadata={})
+			rslt = etype.save()
+			if rslt.has_key("error"):
+				return Response(rslt, status=status.HTTP_400_BAD_REQUEST)
+
+			return Response(rslt)
+
 
 class GraphMapViewSet(MapViewSet):
 
