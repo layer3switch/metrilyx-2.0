@@ -93,12 +93,6 @@ Now you will need to create the index in elasticsearch.  Create the index by iss
 
 	curl -XPOST http://<elasticsearch_host>:<port>/eventannotations
 
-Certain mappings need to be added for each event type in elasticsearch.  Here's an example of an 'Alarm' mapping using a mapping configuration provided (*etc/metrilyx/ess-mapping-alarm.conf*).
-
-	curl -XPUT http://<ess_host>:<ess_port>/eventannotations/_mapping/Alarm -d @/opt/metrilyx/etc/metrilyx/ess-mapping-alarm.conf
-
-These need to be added for every event type created.  You can easily add a new type by replacing 'Alarm' in the url as well as sample file with your desired type name.
-
 #### Nginx
 The metrilyx nginx configuration is installed under **/etc/nginx/conf.d/metrilyx.conf**.  The default nginx configuration may conflict with the metrilyx configuration and should be disabled. The name of the default file will be different depending on the operating system you are using.  Here's an example from a CentOS/RHEL based system.
 

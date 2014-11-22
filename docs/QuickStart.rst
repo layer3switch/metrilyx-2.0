@@ -10,10 +10,7 @@ Although Metrilyx will run on any linux distribution, testing has been done agai
 
 The quickest way to  be get up and running is to use the following method in 2 forms although going through the steps below is recommended::
 
-	## Install all prerequisites including the latest version of nginx
-	curl -s http://metrilyx.github.io/bootstrap.sh  | bash
-
-	## Install everything from above and metrilyx.
+	## Install all prerequisites including the latest version of nginx and metrilyx.
 	curl -s http://metrilyx.github.io/bootstrap.sh  | bash -s -- install
 
 The above is a script that nicely wraps up all the steps mentioned below including dependencies.  If you choose to manually perform the installation then follow the next steps or after successfully completion of the above script, continue on to the **Configuration** section.
