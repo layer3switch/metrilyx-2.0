@@ -40,13 +40,12 @@ class MetrilyxWebSocketServerFactory(WebSocketServerFactory):
 
 
 def spawnWebsocketServer(uri, logLevel, protocol, externalPort=None):
-	if logLevel == "DEBUG":
-		isDebug = True
-	else:
-		isDebug = False
+	#if logLevel == "DEBUG":
+	#	isDebug = True
+	#else:
+	#	isDebug = False
 
-	#factory = WebSocketServerFactory(uri, debug=isDebug, externalPort=externalPort)
-	factory = MetrilyxWebSocketServerFactory(uri, debug=isDebug, externalPort=externalPort)
+	factory = MetrilyxWebSocketServerFactory(uri, debug=False, externalPort=externalPort)
 	factory.protocol = protocol
 	factory.setProtocolOptions(perMessageCompressionAccept=acceptedCompression)
 

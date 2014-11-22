@@ -21,7 +21,7 @@ def absoluteTime(relTime, convertTo='micro'):
 
 	val = int(relTime.split("-")[0][:-1])
 	unit = relTime.split("-")[0][-1]
-	
+
 	if unit == 's':
 		retVal = time.time() - val
 	elif unit == 'm':
@@ -32,7 +32,7 @@ def absoluteTime(relTime, convertTo='micro'):
 		retVal = time.time() - (val*86400)
 	elif unit == 'w':
 		retVal = time.time() - (val*604800)
-	
+
 	if convertTo == 'nano':
 		retVal *= 1000000000
 	elif convertTo == 'micro':
@@ -45,7 +45,7 @@ def absoluteTime(relTime, convertTo='micro'):
 class EventSerie(object):
 	'''
 	Args:
-		serie: event serie 
+		serie: event serie
 		graph: graph dictionary
 		eventType: event type of serie
 	'''
@@ -74,7 +74,7 @@ class EventSerie(object):
 									'data': s['data']
 									} for s in self._serie ]
 		return out
-	
+
 	def __microToMilli(self):
 		for s in self._serie:
 			s['timestamp'] = s['timestamp']/1000
@@ -94,7 +94,7 @@ class BasicSerie(object):
 
 		return dict((key, value) for (key, value) in list(flatten_dict_gen(d)))
 
-		
+
 	def _normalizeAlias(self, alias_str, obj, unique_tags_str):
 		"""
 		@args:
@@ -202,7 +202,7 @@ class MetrilyxSerie(BasicSerie):
 		if self._serie['query']['rate']:
 			dataset['dps'] = self.__rmNegativeRates(dataset['dps'])
 
-		## any custom callback for resulting data set 
+		## any custom callback for resulting data set
 		## e.g. scrape metadata
 		if self._dataCallback != None:
 			self._dataCallback(dataset)
@@ -242,7 +242,7 @@ class MetrilyxSerie(BasicSerie):
 		## only add unique tags if using string formating.
 		if self.uniqueTagsString:
 			normalizedAlias = normalizedAlias + self.uniqueTagsString %(flat_obj)
-		
+
 		return normalizedAlias
 	'''
 	def __normalizeTimestamp(self, data, toMillisecs=True):
@@ -267,9 +267,10 @@ class MetrilyxSerie(BasicSerie):
 
 	def __rmNegativeRates(self, data):
 		"""
-		Remove negative rates as current version of TSDB can't handle it 
-		@params
-			data 	tsdb dps structure
+		Remove negative rates as current version of TSDB can't handle it
+
+		Args:
+			data: 	tsdb dps structure
 		"""
 		return [ (ts,val) for ts,val in data if val >= 0 ]
 
@@ -277,7 +278,7 @@ class MetrilyxSerie(BasicSerie):
 class BasicAnalyticsSerie(object):
 
 	def _convertPandasTimestamp(self, timestampObj, unit="ms"):
-		
+
 		timestamp = timestampObj.value
 		if unit == 's':
 			# seconds
@@ -296,15 +297,15 @@ class BasicAnalyticsSerie(object):
 		try:
 			nonNaSerie = column.replace([numpy.inf, -numpy.inf], numpy.nan).dropna()
 			if self.graphType in ("pie", "column", "bar"):
-				
+
 				if aggr == "avg":
-					return [[eval("self._convertPandasTimestamp(column.index[-1], ts_unit)"), 
+					return [[eval("self._convertPandasTimestamp(column.index[-1], ts_unit)"),
 																	eval("nonNaSerie.mean()")]]
 				elif aggr == "sum":
-					return [[ eval("self._convertPandasTimestamp(column.index[-1], ts_unit)"), 
+					return [[ eval("self._convertPandasTimestamp(column.index[-1], ts_unit)"),
 																eval("nonNaSerie.%s()" %(aggr))]]
 				else:
-					return [[eval("self._convertPandasTimestamp(column.idx%s(), ts_unit)" %(aggr)), 
+					return [[eval("self._convertPandasTimestamp(column.idx%s(), ts_unit)" %(aggr)),
 																	eval("nonNaSerie.%s()" %(aggr))]]
 
 			else:
@@ -316,10 +317,10 @@ class BasicAnalyticsSerie(object):
 
 ### TODO: add error handling on per serie basis
 class MetrilyxAnalyticsSerie(MetrilyxSerie, BasicAnalyticsSerie):
-	
+
 	def __init__(self, serie, graphType="line", dataCallback=None):
 		super(MetrilyxAnalyticsSerie, self).__init__(serie, dataCallback)
-		
+
 		self.graphType = graphType
 
 		if not self.error:
@@ -331,22 +332,22 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie, BasicAnalyticsSerie):
 	def __getInternalStruct(self):
 		out = []
 		for d in self._serie['data']:
-			out.append((d['uuid'], Series([d['dps'][k] for k in sorted(d['dps'].keys())], 
+			out.append((d['uuid'], Series([d['dps'][k] for k in sorted(d['dps'].keys())],
 				index=to_datetime([int(ts) for ts in sorted(d['dps'].keys())], unit='s'))))
 		return DataFrame(dict(out))
-	
+
 	def __getSerieMetadata(self, serie):
 		return dict([(k,v) for k,v in serie.items() if k != 'dps'])
 
 	def data(self, ts_unit='ms'):
 		if self.error: return { 'error': self.error }
-		
+
 		out = []
 		for s in self._serie['data']:
 			md = self.__getSerieMetadata(s)
 
-			datapoints = self._getDataSerieDps(self._serie['query']['aggregator'], 
-												self._istruct[s['uuid']], ts_unit) 
+			datapoints = self._getDataSerieDps(self._serie['query']['aggregator'],
+												self._istruct[s['uuid']], ts_unit)
 			error = self._dataHasErrors(datapoints)
 			if not error:
 				md['dps'] = datapoints
@@ -381,7 +382,7 @@ class SecondariesGraph(BasicSerie, BasicAnalyticsSerie):
 		idx = self.__findSerieIdxInRequest(metrilyxAnalyticsSerie)
 		if idx < 0:
 			raise NameError("Serie not found in request: %s" %(str(metrilyxAnalyticsSerie._serie['query'])))
-		
+
 		self.__analyticsSeriess[idx] = metrilyxAnalyticsSerie
 
 	def __findSerieIdxInRequest(self, metrilyxAnalyticsSerie):
@@ -413,8 +414,8 @@ class SecondariesGraph(BasicSerie, BasicAnalyticsSerie):
 		metricName = self.__secondaryMetricName(secondary['query']['metric'], colname)
 
 		return {
-			'alias': self._normalizeAlias(secondary['alias'], 
-					{'tags': tags, 'metric': metricName}, 
+			'alias': self._normalizeAlias(secondary['alias'],
+					{'tags': tags, 'metric': metricName},
 					False),
 			'metric': metricName,
 			'tags': tags,
@@ -427,7 +428,7 @@ class SecondariesGraph(BasicSerie, BasicAnalyticsSerie):
 		for sec in self.__request['secondaries']:
 			try:
 				istruct = eval("%s" %(sec['query']['metric']))(*istructs)
-				
+
 				dArr = []
 				for colname in istruct.columns.values:
 					md = self.__getSecondariesMetadata(colname, sec)
