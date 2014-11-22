@@ -1,6 +1,9 @@
 Roadmap
 =======
 
+##### v2.4.x
+- Use of an opensource graphing library.
+
 ##### v2.4.0 (current)
 - Cross metric operations i.e. perform math against metrics to create secondary metrics.
 - Perform complex operations on time series data for statistical analysis. (rolling, percentile etc.)

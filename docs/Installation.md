@@ -44,7 +44,7 @@ Once the above requirements have been fulfilled, run the following command to in
 
 ##### RHEL:
 
-	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi-devel libuuid uuid python-setuptools python-devel
+	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel openblas-devel libffi-devel libuuid uuid python-setuptools python-devel
 
 ##### Debian/Ubuntu:
 
@@ -67,8 +67,7 @@ Assuming all required OS packages are installed, the script will install the nee
 
 After you have completed editing the configuration file, start the modelmanager and dataserver processes, then restart nginx.  Also start celeryd and celerybeat which consume and run periodic jobs repsectively.
 
-	$ /etc/init.d/metrilyx-dataserver start
-	$ /etc/init.d/metrilyx-modelmanager start
+	$ /etc/init.d/metrilyx start
 	$ /etc/init.d/nginx restart
 
 
@@ -83,7 +82,9 @@ You will also need to create the appropriate schemas in postgres and re-initiali
 
 To initialize django for postgres, issue the command below.  If you get prompted to create a superuser, use the following credentials **admin/metrilyx**.  Setting them to anything else will cause the application to fail.  This is due to the fact that authentication has not been fully integrated and disabled in metrilyx.
 
-	$ cd /opt/metrilyx && ./install.sh init_django
+	$ cd /opt/metrilyx
+	$ python manage.py syncdb
+	$ python manage.py createinitialrevisions
 
 If you have existing models in sqlite follow the instructions to export/import them.
 
@@ -92,18 +93,7 @@ If you have existing models in sqlite follow the instructions to export/import t
 
 To install the client, first get postrgres's yum repo rpm.  Once that has been installed, you'll need to install the dependencies for the python postgres client (psycopg2).
 
-	yum -y install postgresql93 postrgresql93-devel libpqxx-devel
-
-You will also need to symlink the pg_config binary as it is not in the path by default.
-
-	ln -s /usr/pgsql-9.3/bin/pg_config /usr/local/bin/pg_config
-
-Finally install the python module i.e. psycopg2
-
-	pip install psycopg2
-
-##### Postgresql/MySQL
-No additional steps are required.
+	yum -y install postgresql93 postrgresql93-devel libpqxx-devel python-psycopg2
 
 Once you have the data in the database you will need to upgrade the model schema of each model.  To do this run the following commands:
 
