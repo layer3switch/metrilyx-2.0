@@ -1,10 +1,10 @@
 """
-This module contains classes for datastores not supported by django. 
+This module contains classes for datastores not supported by django.
 e.g. NoSQL, filebased
 """
 import os
 import re
-import json
+import ujson as json
 
 def jsonFromFile(filepath):
 	if os.path.exists(filepath):
@@ -13,12 +13,12 @@ def jsonFromFile(filepath):
 		fh.close()
 		return jdata
 	else:
-		return { 
+		return {
 			"error": "file not found %s" %(filepath),
 			"message": "file not found %s" %(filepath) }
 
 def jsonToFile(obj, filepath):
-	try: 
+	try:
 		fh = open(filepath, 'wb')
 		json.dump(obj, fh, indent=4)
 		fh.close()
@@ -46,7 +46,7 @@ class FileModelStore(object):
 
 	def addModel(self, data):
 		if not data.get("_id"):
-			response = { 
+			response = {
 				"error": "_id not provided",
 				"message": "_id not provided"
 				}
@@ -56,7 +56,7 @@ class FileModelStore(object):
 			new_id = re.sub(r'\\', "_", re.sub(r"/", "_", data["_id"]))
 			model_path = os.path.join(self.repo_path, new_id+".json")
 			if os.path.exists(model_path):
-				response = { 
+				response = {
 					"error": "_id already exists %s" %(new_id),
 					"message": "_id already exists %s" %(new_id) }
 			else:
@@ -68,7 +68,7 @@ class FileModelStore(object):
 			model_path = os.path.join(self.repo_path, model_id+".json")
 		except:
 			raise RuntimeError(self.repo_path, model_id)
-			
+
 		if os.path.exists(model_path):
 			try:
 				os.remove(model_path)
@@ -76,11 +76,11 @@ class FileModelStore(object):
 					"success": "%s removed" %(model_id),
 					"message": "%s removed" %(model_id) }
 			except Exception, e:
-				response = { 
+				response = {
 					"error": str(e),
 					"message": str(e) }
 		else:
-			response = { 
+			response = {
 				"error": "file not found %s" %(model_path),
 				"message": "file not found %s" %(model_path) }
 		return response
@@ -88,7 +88,7 @@ class FileModelStore(object):
 	def editModel(self, model):
 		model_path = os.path.join(self.repo_path, model['_id']+".json")
 		if not os.path.exists(model_path):
-			response = { 
+			response = {
 				"error": "model not found %s" %(model_path),
 				"message": "model not found %s" %(model_path)
 				}
@@ -103,7 +103,7 @@ class FileModelStore(object):
 			if p.split(".")[-1] != "json": continue
 			abspath = os.path.join(self.repo_path, p)
 			j = jsonFromFile(abspath)
-			if j.get("error"): 
+			if j.get("error"):
 				print "[ModelDatastore.listModels]"
 				pprint(j)
 				continue

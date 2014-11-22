@@ -5,11 +5,11 @@ var metrilyxControllers = angular.module('metrilyxControllers', []);
 metrilyxControllers.controller('staticsController', [
 	'$scope', '$route', '$location', 'ComponentTemplates',
 	function($scope, $route, $location, ComponentTemplates) {
-		
+
 		$scope.modelType = "static";
 
 		clearAllTimeouts();
-		
+
 		var compTemplates = new ComponentTemplates($scope);
 
 		$scope.loadHome = function() {
@@ -21,9 +21,9 @@ metrilyxControllers.controller('staticsController', [
 metrilyxControllers.controller('sidePanelController', [
 	'$scope', 'Schema', 'Model','Tags',
 	function($scope, Schema, Model, Tags) {
-		
+
 		$scope.modelType = "";
-		
+
 		$scope.modelsList = [];
 		$scope.modelQuery = "";
 		$scope.browseBy = "name"; // name, tags //
@@ -56,7 +56,7 @@ metrilyxControllers.controller('sidePanelController', [
 			}
 		}
 		$scope.loadList = function() {
-			
+
 			$scope.selectedTag = '';
 
 			switch($scope.browseBy) {
@@ -78,17 +78,17 @@ metrilyxControllers.controller('sidePanelController', [
 			$('.model-list-container').removeClass('tag-selected');
 			$('#selected-tag').parent().removeClass('padb10');
 		}
-		
+
 		$scope.importModel = function(fileList) {
-			
+
 			var freader = new FileReader();
 			freader.onload = function(evt) {
-				
+
 				try {
 
 					jobj = JSON.parse(evt.target.result);
 					Model.saveModel(jobj, function(rslt) {
-						
+
 						setGlobalAlerts({message: 'Imported '+rslt._id});
 						flashAlertsBar();
 						document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
@@ -111,7 +111,7 @@ metrilyxControllers.controller('pageController', [
 
 		$scope.modelType = "";
 		$scope.modelGraphIds = [];
-		
+
 		$scope.tagsOnPage = {};
 
 		var annoOptions 	= new AnnotationOptions($scope);
@@ -123,7 +123,7 @@ metrilyxControllers.controller('pageController', [
 		var mdlMgr 			= new ModelManager($scope);
 
 		clearAllTimeouts();
-		
+
 		// Make sure modal window is not lingering around //
 		$('#confirm-delete').modal('hide');
 		$('.modal-backdrop').remove();
@@ -157,7 +157,7 @@ metrilyxControllers.controller('pageController', [
 			} else {
 				// initial page load
 				if($routeParams.pageId) {
-					
+
 					Model.getModel({pageId: $routeParams.pageId}, function(result) {
 						if(result.error) {
 							console.log(result);
@@ -167,7 +167,7 @@ metrilyxControllers.controller('pageController', [
 						}
 					});
 				} else {
-					
+
 					console.warn("Page id not provided");
 					setGlobalAlerts({"error": "", "message": "Page ID not provided!"});
 					flashAlertsBar();
@@ -222,18 +222,18 @@ metrilyxControllers.controller('pageController', [
 		}
 
 		$scope.addNewTags = function(elemSelector) {
-			var domNode = $(elemSelector); 
-			
+			var domNode = $(elemSelector);
+
 			var tagstr = domNode.val();
 			var tagsArr = tagstr.split(",");
 			for(var t=0; t < tagsArr.length; t++) {
-			
+
 				ctag = tagsArr[t].replace(/\s+$/,'');
 				ctag = ctag.replace(/^\s+/,'');
 				if($scope.model.tags.indexOf(ctag) < 0) $scope.model.tags.push(ctag);
 			}
 			$('#add-page-tag').modal('hide');
-			
+
 			domNode.val('');
 		}
 
@@ -241,7 +241,7 @@ metrilyxControllers.controller('pageController', [
 			$scope.globalTags[tagkey] = tagval;
 			$scope.setGlobalTags($scope.globalTags);
 		}
-		
+
 		$scope.setGlobalTags = function(gblTags) {
 			tagsLoc = dictToCommaSepStr(gblTags, ":");
 			tmp = $location.search();
@@ -273,18 +273,18 @@ metrilyxControllers.controller('pageController', [
 		}
 
 		$scope.setAbsoluteTime = function() {
-			
+
 			var tmp = $location.search();
 			tmp.start = $scope.startTime;
 			tmp.end = $scope.endTime;
 			$location.search(tmp);
 		}
 		$scope.setTimeType = function(newRelativeTime, reloadPage) {
-			
+
 			timeWindow.setAttribute('timeType', newRelativeTime);
 			if(reloadPage !== undefined && reloadPage) $scope.delayLoadPageModel($routeParams.pageId);
 		}
-	
+
 		$scope.addGraph = function(toPod) {
 			Schema.get({modelType:'graph'}, function(result) {
 				toPod.graphs.push(result);
@@ -314,7 +314,7 @@ metrilyxControllers.controller('pageController', [
 				});
 			}, 600);
 		}
-		
+
 		$scope.baseQuery = function(graphObj) {
 			var q = {
 				_id: graphObj._id,
@@ -336,15 +336,15 @@ metrilyxControllers.controller('pageController', [
 
 			$(".graph-metrics-panel").collapse('show');
 			$('input.edit-comp').attr('disabled',false);
-			
+
 			$scope.enableDragDrop();
 		}
 		$scope.disableEditMode = function() {
 			if($scope.timeType != "absolute") $scope.updatesEnabled = true;
-			
+
 			$(".graph-metrics-panel").collapse('hide');
 			$('input.edit-comp').attr('disabled',true);
-			
+
 			$scope.editMode = "";
 			$scope.disableDragDrop();
 		}
@@ -367,21 +367,21 @@ metrilyxControllers.controller('pageController', [
 		$scope.removeTag = function(tags, tagkey) {
 			delete tags[tagkey];
 		}
-		
+
 		$scope.previewGraph = function(graph) {
 			$scope.reloadGraph(graph);
 			$("[data-query-set='"+graph._id+"']").collapse('hide');
 		}
-		
+
 		$scope.reloadGraph = function(gobj) {
 
 			$('.adhoc-metric-editor').hide();
-			
+
 			if(gobj.series.length < 1) return;
-			
+
 			q = $scope.baseQuery(gobj)
 			q.series = gobj.series;
-			
+
 			$scope.requestData(q);
 
 			var domNode = $('[data-graph-id='+gobj._id+']');
@@ -392,14 +392,14 @@ metrilyxControllers.controller('pageController', [
 		$scope.$on('$destroy', function() {
 			try { wsdp.closeConnection(); } catch(e){};
 		});
-		
+
 		submitAnalytics({page: "/"+$routeParams.pageId, title: $routeParams.pageId});
 }]);
 
 metrilyxControllers.controller('adhocGraphController', [
 	'$scope', 'Schema', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions', 'CtrlCommon', 'RouteManager', 'URLSetter',
 	function($scope, Schema, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions, CtrlCommon, RouteManager, URLSetter) {
-		
+
 		$scope.modelType 		= "adhoc";
 		$scope.modelGraphIds 	= [];
 
@@ -423,7 +423,7 @@ metrilyxControllers.controller('adhocGraphController', [
 
 			$.extend(graphModel, routeMgr.getParams(), true);
 			$scope.graph = graphModel
-			
+
 			if($scope.graph.series.length > 0) {
 				$scope.modelGraphIds = [ $scope.graph._id ];
 				$scope.reloadGraph();
@@ -431,7 +431,7 @@ metrilyxControllers.controller('adhocGraphController', [
 		});
 
 		$('#side-panel').addClass('offstage');
-		
+
 		$scope.metricListSortOpts.disabled = $scope.editMode === "" ? true : false;
 
 		$scope.addGraphIdEventListener = function(graphId, funct) {
@@ -457,12 +457,12 @@ metrilyxControllers.controller('adhocGraphController', [
 		}
 
 		$scope.setTimeType = function(newRelativeTime, reloadPage) {
-			
+
 			timeWindow.setAttribute('timeType', newRelativeTime);
 		}
 
 		$scope.setAbsoluteTime = function() {
-		
+
 			$scope.reloadGraph();
 			$scope.globalAnno.status = 'reload';
 		}
@@ -486,7 +486,7 @@ metrilyxControllers.controller('adhocGraphController', [
 		}
 
 		$scope.reloadGraph = function(gobj) {
-			
+
 			if(!gobj) gobj = $scope.graph;
 
 			$('.adhoc-metric-editor').hide();
@@ -497,12 +497,12 @@ metrilyxControllers.controller('adhocGraphController', [
 			q = $scope.baseQuery(gobj)
 			q.series = gobj.series;
 
-			var domNode = $("[data-graph-id='"+gobj._id+"']"); 
-			
+			var domNode = $("[data-graph-id='"+gobj._id+"']");
+
 			/* Destroy current graph */
 			try { domNode.highcharts().destroy(); } catch(e) {};
 			domNode.html(GRAPH_LOADING_HTML);
-			
+
 			$scope.requestData(q);
 		}
 

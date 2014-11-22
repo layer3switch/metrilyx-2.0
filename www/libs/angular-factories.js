@@ -346,7 +346,7 @@ angular.module("metrilyxHelperFactories", [])
 				setPageGlobalTags();
 			}
 
-			scopeOpts.updatesEnabled = scopeOpts.editMode === " edit-mode" ? false : true;
+			//scopeOpts.updatesEnabled = scopeOpts.editMode === " edit-mode" ? false : true;
 
 			$.extend(true, scope, scopeOpts, true);
 
@@ -418,7 +418,7 @@ angular.module("metrilyxHelperFactories", [])
 
 			var out = {};
 			out.editMode 		= $routeParams.pageId == "new" ? " edit-mode" : "";
-			out.updatesEnabled 	= editMode == " edit-mode" ? false : true;
+			out.updatesEnabled 	= (editMode == " edit-mode" || scope.updatesEnabled == false) ? false : true;
 
 
 			return out;

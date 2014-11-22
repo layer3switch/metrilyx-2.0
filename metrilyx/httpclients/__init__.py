@@ -1,7 +1,7 @@
 
 
 import httplib
-import json
+import ujson as json
 import logging
 
 import StringIO
@@ -46,7 +46,7 @@ class HttpJsonClient(object):
                 return json.loads(raw_data)
             except Exception,e:
                 return { 'error': str(e) }
-                
+
         compressedstream = StringIO.StringIO(raw_data)
         gzipper = gzip.GzipFile(fileobj=compressedstream)
         return json.loads(gzipper.read())
@@ -86,7 +86,7 @@ class OpenTSDBResponse(object):
             for d in data_arr:
                 d['dps'] = self.__sort_dps(d['dps'])
         self._data = data_arr
-        
+
 
     @property
     def data(self):
@@ -152,7 +152,7 @@ class OpenTSDBClient(object):
         else:
             return "%s?start=%s%s" %(self.query_endpoint,
                                         query['start'], cq_str)
-    
+
     def query(self, q):
         """
             Args:
@@ -167,7 +167,7 @@ class OpenTSDBClient(object):
         else:
             return OpenTSDBResponse(hjc.GET(self.query_endpoint+"?"+q))
 
-## ASYNC ##     
+## ASYNC ##
 def checkHttpResponse(respBodyStr, response, url):
     if response.code < 200 or response.code > 304:
         logger.warning("Request failed %d %s %s" %(response.code, respBodyStr, url))
@@ -217,7 +217,7 @@ class AsyncHttpResponseProtocol(Protocol):
         #    self.remaining -= len(bytes[:self.remaining])
 
     def __ungzip_(self):
-        try:   
+        try:
             compressedstream = StringIO.StringIO(self.data)
             gzipper = gzip.GzipFile(fileobj=compressedstream)
             return gzipper.read()
@@ -267,7 +267,7 @@ class AsyncHttpJsonClient(object):
         self.__deferredResponse.addCallback(userCb, *([response]+list(cbargs)))
         return self.__deferredResponse
 
-    def __readErrorCallback(self, error, userCb, *cbargs):    
+    def __readErrorCallback(self, error, userCb, *cbargs):
         self.__deferredResponse.addErrback(userCb, *cbargs)
 
     def addResponseCallback(self, callback, *cbargs):
@@ -358,7 +358,7 @@ class MetrilyxGraphFetcher(object):
                                             respData['data'], url, gmeta)
 
         mas = MetrilyxAnalyticsSerie(gmeta['series'][0], graphType=gmeta['graphType'])
-        
+
         if self.containsSecondaries:
             self.__secondariesGraph.add(mas)
         else:
@@ -373,33 +373,33 @@ class MetrilyxGraphFetcher(object):
             else:
                 self.__completedDeferred.callback(None)
 
-    def __partialResponseErrback(self, error, *cbargs): 
+    def __partialResponseErrback(self, error, *cbargs):
         self.completed += 1
         (url, gmeta, idx) = cbargs
         self.__rmActivePartial(url)
 
         if self.total == self.completed:
             self.__completedDeferred.errback(error)
-        
+
         self.__partialDeferreds[idx].errback(error)
 
-    
+
     def __fetch(self):
-        
+
         counter = 0
         for gr in self.__graphReq.split():
-            
+
             (url, method, query) = self.__dataprovider.getQuery(gr)
-            
+
             a = AsyncHttpJsonClient(uri=url, method=method, body=query)
             a.addResponseCallback(self.__partialResponseCallback, url, gr, counter)
             a.addResponseErrback(self.__partialResponseErrback, url, gr, counter)
-            
+
             self.__activePartials[url] = a
             counter += 1
 
             logger.info("Partial query (%s): %s" %(gr['_id'], url))
-            
+
 
     def addCompleteCallback(self, callback, *cbargs):
         self.__completedDeferred.addCallback(callback, *cbargs)
@@ -418,5 +418,5 @@ class MetrilyxGraphFetcher(object):
     def cancelRequests(self):
         for k,d in self.__activePartials.items():
             d.cancelRequest()
-        
-        self.__activePartials = {}  
+
+        self.__activePartials = {}

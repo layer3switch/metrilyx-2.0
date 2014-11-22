@@ -4,7 +4,7 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(
 						os.path.abspath(__file__))))
-import json
+import ujson as json
 import time
 import logging
 
@@ -49,7 +49,7 @@ def spawnWebsocketServer(uri, logLevel, protocol, externalPort=None):
 	factory = MetrilyxWebSocketServerFactory(uri, debug=isDebug, externalPort=externalPort)
 	factory.protocol = protocol
 	factory.setProtocolOptions(perMessageCompressionAccept=acceptedCompression)
-	
+
 	listenWS(factory)
 	reactor.run()
 
@@ -59,7 +59,7 @@ def spawnServers(protocol):
 	for i in range(opts.serverCount):
 		uri = "%s:%d" %(opts.uri, opts.startPort+i)
 		proc = multiprocessing.Process(
-						target=spawnWebsocketServer, 
+						target=spawnWebsocketServer,
 						args=(uri, opts.logLevel, protocol, opts.externalPort))
 		proc.start()
 		logger.warning("Started server - %s" %(uri))
@@ -80,7 +80,7 @@ def getLogger(level):
 if __name__ == '__main__':
 
 	parser = OptionParser()
-	parser.add_option("-l", "--log-level", dest="logLevel", default="INFO", 
+	parser.add_option("-l", "--log-level", dest="logLevel", default="INFO",
 		help="Logging level.")
 	parser.add_option("-u", "--uri", dest="uri", default="ws://localhost",
 		help="ws://<hostname>")
@@ -99,7 +99,7 @@ if __name__ == '__main__':
 		observer = log.PythonLoggingObserver()
 		observer.start()
 	logger = getLogger(opts.logLevel)
-	
+
 	if not opts.uri:
 		print " --uri required!"
 		parser.print_help()
@@ -110,7 +110,7 @@ if __name__ == '__main__':
 		opts.serverCount = multiprocessing.cpu_count()-1
 		if opts.serverCount == 0:
 			opts.serverCount = 1
-	
+
 	try:
 		perfDP = getPerfDataProvider()
 		logger.warning('Performance dataprovider [loaded]')

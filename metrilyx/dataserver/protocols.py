@@ -1,14 +1,13 @@
 
 import logging
-import json
+import ujson as json
 import time
 from datetime import datetime
 
 from twisted.internet import reactor
 
 from autobahn.twisted.websocket import WebSocketServerProtocol
-from autobahn.websocket.compress import PerMessageDeflateOffer, \
-										PerMessageDeflateOfferAccept
+from autobahn.websocket.compress import PerMessageDeflateOffer, PerMessageDeflateOfferAccept
 
 from ..httpclients import AsyncHttpJsonClient, MetrilyxGraphFetcher, checkHttpResponse
 from transforms import MetrilyxSerie, EventSerie, MetrilyxAnalyticsSerie
@@ -22,228 +21,228 @@ logger = logging.getLogger(__name__)
 
 
 def writeRequestLogLine(request_obj):
-	logger.info("Request type=%s, name='%s', sub-queries=%d, id=%s, start='%s'" %(
-		request_obj['graphType'], request_obj['name'], len(request_obj['series']), 
-		request_obj['_id'], datetime.fromtimestamp(float(request_obj['start']))))
+    logger.info("Request type=%s, name='%s', sub-queries=%d, id=%s, start='%s'" %(
+        request_obj['graphType'], request_obj['name'], len(request_obj['series']),
+        request_obj['_id'], datetime.fromtimestamp(float(request_obj['start']))))
 
 
 def writeResponseLogLine(graph):
-	logger.info("Response type=%s, id=%s, name='%s', start='%s'" %(
-						graph['graphType'], graph['_id'],  graph['name'], 
-					datetime.fromtimestamp(float(graph['start']))))
+    logger.info("Response type=%s, id=%s, name='%s', start='%s'" %(
+                        graph['graphType'], graph['_id'],  graph['name'],
+                        datetime.fromtimestamp(float(graph['start']))))
 
 
 ## Enable WebSocket extension "permessage-deflate".
 ## Function to accept offers from the client ..
 def acceptedCompression(offers):
-	for offer in offers:
-		if isinstance(offer, PerMessageDeflateOffer):
-			return PerMessageDeflateOfferAccept(offer)
+    for offer in offers:
+        if isinstance(offer, PerMessageDeflateOffer):
+            return PerMessageDeflateOfferAccept(offer)
 
 
 class BaseGraphServerProtocol(WebSocketServerProtocol):
-	'''
-		Basic protocol that handles incoming requests. 
-		This does nothing more than check the request and submit for processing.  
-		If needed, 'GraphServerProtocol' should be subclassed instead.
-	'''
-	def onConnect(self, request):
-		logger.info("Connection request by %s" %(str(request.peer)))
+    '''
+        Basic protocol that handles incoming requests.
+        This does nothing more than check the request and submit for processing.
+        If needed, 'GraphServerProtocol' should be subclassed instead.
+    '''
+    def onConnect(self, request):
+        logger.info("Connection request by %s" %(str(request.peer)))
 
-	def onOpen(self):
-		logger.info("Connection opened. extensions: %s" %(
-										self.websocket_extensions_in_use))
-		self.factory.addClient(self)
+    def onOpen(self):
+        logger.info("Connection opened. extensions: %s" %(
+                                        self.websocket_extensions_in_use))
+        self.factory.addClient(self)
 
-	def onClose(self, wasClean, code, reason):
-		logger.info("Connection closed: wasClean=%s code=%s reason=%s" %(
-								str(wasClean), str(code), str(reason)))
-		self.factory.removeClient(self)
+    def onClose(self, wasClean, code, reason):
+        logger.info("Connection closed: wasClean=%s code=%s reason=%s" %(
+                                str(wasClean), str(code), str(reason)))
+        self.factory.removeClient(self)
 
 
-	def checkMessage(self, payload, isBinary):
-		if not isBinary:
-			try:
-				return json.loads(payload)
-			except Exception, e:
-				self.sendMessage(json.dumps({'error': str(e)}))
-				logger.error(str(e))
-				return {'error': str(e)}
-		else:
-			self.sendMessage(json.dumps({'error': 'Binary data not support!'}))
-			logger.warning("Binary data not supported!")
-			return {'error': 'Binary data not support!'}
+    def checkMessage(self, payload, isBinary):
+        if not isBinary:
+            try:
+                return json.loads(payload)
+            except Exception, e:
+                self.sendMessage(json.dumps({'error': str(e)}))
+                logger.error(str(e))
+                return {'error': str(e)}
+        else:
+            self.sendMessage(json.dumps({'error': 'Binary data not support!'}))
+            logger.warning("Binary data not supported!")
+            return {'error': 'Binary data not support!'}
 
-	def onMessage(self, payload, isBinary):
+    def onMessage(self, payload, isBinary):
 
-		request_obj = self.checkMessage(payload, isBinary)
-		if not request_obj.get("error"):
-			try:
-				if request_obj['_id'] == 'annotations':
-					logger.info("Annotation Request: %s" %(str(request_obj)))
-					self.processRequest(request_obj)
-				else:
-					writeRequestLogLine(request_obj)
-					
-					graphReq = GraphRequest(request_obj)
-					self.processRequest(graphReq)
-			
-			except Exception,e:
-				logger.error(str(e) + " " + str(request_obj))
-		else:
-			logger.error("Invalid request object: %s" %(str(request_obj)))
+        request_obj = self.checkMessage(payload, isBinary)
+        if not request_obj.get("error"):
+            try:
+                if request_obj['_id'] == 'annotations':
+                    logger.info("Annotation Request: %s" %(str(request_obj)))
+                    self.processRequest(request_obj)
+                else:
+                    writeRequestLogLine(request_obj)
 
-	def processRequest(self, graphOrAnnoRequest):
-		'''
-			Implemented by subclasser
-		'''
-		pass
+                    graphReq = GraphRequest(request_obj)
+                    self.processRequest(graphReq)
+
+            except Exception,e:
+                logger.error(str(e) + " " + str(request_obj))
+        else:
+            logger.error("Invalid request object: %s" %(str(request_obj)))
+
+    def processRequest(self, graphOrAnnoRequest):
+        '''
+            Implemented by subclasser
+        '''
+        pass
 
 
 class GraphServerProtocol(BaseGraphServerProtocol):
 
-	__activeFetchers = {}
-	__activeFetchersTimeout = 900
-	__expirerDeferred = None
+    __activeFetchers = {}
+    __activeFetchersTimeout = 900
+    __expirerDeferred = None
 
-	def __expireActiveFetchers(self):
-		logger.info("Starting fetcher expiration...")
+    def __expireActiveFetchers(self):
+        logger.info("Starting fetcher expiration...")
 
-		expireTime = time.time() - self.__activeFetchersTimeout
-		expired = 0
-		for k,v in self.__activeFetchers.items():	
-			if float(k.split("-")[-1]) <= expireTime:
-				
-				v.cancelRequests()
-				self.__removeFetcher(k)
-				logger.info("Expired fetcher: %s" %(k))	
-				expired += 1
+        expireTime = time.time() - self.__activeFetchersTimeout
+        expired = 0
+        for k,v in self.__activeFetchers.items():
+            if float(k.split("-")[-1]) <= expireTime:
 
-		logger.info("Expired %d fetchers" %(expired))
-		
-		self.__expirerDeferred = reactor.callLater(self.__activeFetchersTimeout, self.__expireActiveFetchers)
+                v.cancelRequests()
+                self.__removeFetcher(k)
+                logger.info("Expired fetcher: %s" %(k))
+                expired += 1
 
-	def __removeFetcher(self, key):
-		if self.__activeFetchers.has_key(key):
-			del self.__activeFetchers[key]
-		logger.info("Active fetchers: %d" %(len(self.__activeFetchers.keys())))
+        logger.info("Expired %d fetchers" %(expired))
 
-	def __addFetcher(self, key, fetcher):
-		if self.__activeFetchers.has_key(key):
-			logger.warning("Fetcher inprogress: %s" %(key))
+        self.__expirerDeferred = reactor.callLater(self.__activeFetchersTimeout, self.__expireActiveFetchers)
 
-		self.__activeFetchers[key] = fetcher
+    def __removeFetcher(self, key):
+        if self.__activeFetchers.has_key(key):
+            del self.__activeFetchers[key]
+        logger.info("Active fetchers: %d" %(len(self.__activeFetchers.keys())))
 
-	def processRequest(self, graphRequest):
-		self.submitPerfQueries(graphRequest)
+    def __addFetcher(self, key, fetcher):
+        if self.__activeFetchers.has_key(key):
+            logger.warning("Fetcher inprogress: %s" %(key))
 
-	def submitPerfQueries(self, graphRequest):
-		mgf = MetrilyxGraphFetcher(self.dataprovider, graphRequest)
+        self.__activeFetchers[key] = fetcher
 
-		stamp = "%s-%f" %(graphRequest.request['_id'], time.time())
-		
-		mgf.addCompleteCallback(self.completeCallback, stamp)
-		mgf.addCompleteErrback(self.completeErrback, graphRequest.request, stamp)
-		mgf.addPartialResponseCallback(self.partialResponseCallback)
-		mgf.addPartialResponseErrback(self.partialResponseErrback, graphRequest.request)
+    def processRequest(self, graphRequest):
+        self.submitPerfQueries(graphRequest)
 
-		self.__addFetcher(stamp, mgf)
+    def submitPerfQueries(self, graphRequest):
+        mgf = MetrilyxGraphFetcher(self.dataprovider, graphRequest)
 
-	def completeErrback(self, error, *cbargs):
-		(request, key) = cbargs
-		self.__removeFetcher(key)
+        stamp = "%s-%f" %(graphRequest.request['_id'], time.time())
 
-		if "CancelledError" not in str(error):
-			logger.error("%s" %(str(error)))
+        mgf.addCompleteCallback(self.completeCallback, stamp)
+        mgf.addCompleteErrback(self.completeErrback, graphRequest.request, stamp)
+        mgf.addPartialResponseCallback(self.partialResponseCallback)
+        mgf.addPartialResponseErrback(self.partialResponseErrback, graphRequest.request)
 
-	def completeCallback(self, *cbargs):
-		(graph, key) = cbargs
-		self.__removeFetcher(key)
-		
-		if graph != None:
-			self.sendMessage(json.dumps(graph))
-			logger.info("Reponse (secondaries graph) %s '%s' start: %s" %(graph['_id'], 
-					graph['name'], datetime.fromtimestamp(float(graph['start']))))
+        self.__addFetcher(stamp, mgf)
 
+    def completeErrback(self, error, *cbargs):
+        (request, key) = cbargs
+        self.__removeFetcher(key)
 
-	def partialResponseCallback(self, graph):
-		self.sendMessage(json.dumps(graph))
-		writeResponseLogLine(graph)
+        if "CancelledError" not in str(error):
+            logger.error("%s" %(str(error)))
 
-	def partialResponseErrback(self, error, *cbargs):
-		(graphMeta,) = cbargs
-		if "CancelledError" not in str(error):
-			logger.error("%s" %(str(error)))
-			errResponse = self.dataprovider.responseErrback(error, graphMeta)
-			self.sendMessage(json.dumps(errResponse))
+    def completeCallback(self, *cbargs):
+        (graph, key) = cbargs
+        self.__removeFetcher(key)
 
-	def onOpen(self):
-		logger.info("Connection opened. extensions: %s" %(
-										self.websocket_extensions_in_use))
-		self.factory.addClient(self)
-		## Expire fetchers
-		logger.info("Scheduling fetcher expiration...")
-		self.__expirerDeferred = reactor.callLater(self.__activeFetchersTimeout, self.__expireActiveFetchers)
+        if graph != None:
+            self.sendMessage(json.dumps(graph))
+            logger.info("Reponse (secondaries graph) %s '%s' start: %s" %(graph['_id'],
+                    graph['name'], datetime.fromtimestamp(float(graph['start']))))
 
 
-	def onClose(self, wasClean, code, reason):
-		logger.info("Connection closed: wasClean=%s code=%s reason=%s" %(
-								str(wasClean), str(code), str(reason)))
+    def partialResponseCallback(self, graph):
+        self.sendMessage(json.dumps(graph))
+        writeResponseLogLine(graph)
 
-		for k,d in self.__activeFetchers.items():
-			d.cancelRequests()
-			self.__removeFetcher(k)
+    def partialResponseErrback(self, error, *cbargs):
+        (graphMeta,) = cbargs
+        if "CancelledError" not in str(error):
+            logger.error("%s" %(str(error)))
+            errResponse = self.dataprovider.responseErrback(error, graphMeta)
+            self.sendMessage(json.dumps(errResponse))
 
-		self.factory.removeClient(self)
+    def onOpen(self):
+        logger.info("Connection opened. extensions: %s" %(
+                                        self.websocket_extensions_in_use))
+        self.factory.addClient(self)
+        ## Expire fetchers
+        logger.info("Scheduling fetcher expiration...")
+        self.__expirerDeferred = reactor.callLater(self.__activeFetchersTimeout, self.__expireActiveFetchers)
 
-		try:
-			self.__expirerDeferred.cancel()
-		except Exception:
-			pass
-		
+
+    def onClose(self, wasClean, code, reason):
+        logger.info("Connection closed: wasClean=%s code=%s reason=%s" %(
+                                str(wasClean), str(code), str(reason)))
+
+        for k,d in self.__activeFetchers.items():
+            d.cancelRequests()
+            self.__removeFetcher(k)
+
+        self.factory.removeClient(self)
+
+        try:
+            self.__expirerDeferred.cancel()
+        except Exception:
+            pass
+
 
 class EventGraphServerProtocol(GraphServerProtocol):
-	eventDataprovider = None
+    eventDataprovider = None
 
-	def processRequest(self, graphOrAnnoRequest):
-		if isinstance(graphOrAnnoRequest, GraphRequest):	
-			# submit graph data queries
-			self.submitPerfQueries(graphOrAnnoRequest)
-		elif graphOrAnnoRequest['_id'] == 'annotations':
-			# submit annnotation queries
-			self.submitEventQueries(graphOrAnnoRequest)
-		
-	def eventResponseCallback(self, data, response, url, eventType, request):
-		dct = checkHttpResponse(data, response, url)
-		if dct.has_key('error'):
-			logger.error(str(dct))
-			return
+    def processRequest(self, graphOrAnnoRequest):
+        if isinstance(graphOrAnnoRequest, GraphRequest):
+            # submit graph data queries
+            self.submitPerfQueries(graphOrAnnoRequest)
+        elif graphOrAnnoRequest['_id'] == 'annotations':
+            # submit annnotation queries
+            self.submitEventQueries(graphOrAnnoRequest)
 
-		eas = EventSerie(self.eventDataprovider.responseCallback(dct['data']), eventType, request)
-		if len(eas.data['annoEvents']['data']) < 1:
-			logger.info("Event annotation: type=%s no data" %(eventType))
-			return
+    def eventResponseCallback(self, data, response, url, eventType, request):
+        dct = checkHttpResponse(data, response, url)
+        if dct.has_key('error'):
+            logger.error(str(dct))
+            return
 
-		self.sendMessage(json.dumps(eas.data))
-		logger.info("Event annotation: type=%s count=%d" %(eventType, 
-									len(eas.data['annoEvents']['data'])))
-	
-	def eventReponseErrback(self, error, url, eventType, request):
-		logger.error(str(error))
+        eas = EventSerie(self.eventDataprovider.responseCallback(dct['data']), eventType, request)
+        if len(eas.data['annoEvents']['data']) < 1:
+            logger.info("Event annotation: type=%s no data" %(eventType))
+            return
 
-	def submitEventQueries(self, request):
-		## TODO: this will raise an exception 
-		if len(request['annoEvents']['tags'].keys()) < 1 or \
-					len(request['annoEvents']['eventTypes']) < 1: 
-			return
+        self.sendMessage(json.dumps(eas.data))
+        logger.info("Event annotation: type=%s count=%d" %(eventType,
+                                    len(eas.data['annoEvents']['data'])))
 
-		graphEvtReq = GraphEventRequest(request)
+    def eventReponseErrback(self, error, url, eventType, request):
+        logger.error(str(error))
 
-		for graphEvent in graphEvtReq.split():
-			for (url, method, query) in self.eventDataprovider.getQuery(graphEvent):
-				a = AsyncHttpJsonClient(uri=url, method=method, body=query)
-				a.addResponseCallback(self.eventResponseCallback, 
-						url, graphEvent['eventTypes'][0], request)
-				a.addResponseErrback(self.eventReponseErrback,
-						url, graphEvent['eventTypes'][0], request)
+    def submitEventQueries(self, request):
+        ## TODO: this will raise an exception
+        if len(request['annoEvents']['tags'].keys()) < 1 or \
+                    len(request['annoEvents']['eventTypes']) < 1:
+            return
+
+        graphEvtReq = GraphEventRequest(request)
+
+        for graphEvent in graphEvtReq.split():
+            for (url, method, query) in self.eventDataprovider.getQuery(graphEvent):
+                a = AsyncHttpJsonClient(uri=url, method=method, body=query)
+                a.addResponseCallback(self.eventResponseCallback,
+                        url, graphEvent['eventTypes'][0], request)
+                a.addResponseErrback(self.eventReponseErrback,
+                        url, graphEvent['eventTypes'][0], request)
 

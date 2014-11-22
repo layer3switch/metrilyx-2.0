@@ -62,7 +62,7 @@ angular.module('pageLayout', [])
 			require: '?ngModel',
 			link: function(scope, elem, attrs, ngModel) {
 				if(!ngModel) return;
-				
+
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
@@ -157,7 +157,7 @@ angular.module('pageLayout', [])
 			require: '?ngModel',
 			link: function(scope, elem, attrs, ngModel) {
 				if(!ngModel) return;
-				
+
 				$(elem).dblclick(function(evt) {
 					if(scope.editMode == "") return;
 					if(evt.offsetY < $(evt.currentTarget).height()/2) {
@@ -198,10 +198,10 @@ angular.module('graphing', [])
 					for (var ms=0; ms < ngModel.$modelValue.series.length; ms++) {
 
 						var mdlSerie = ngModel.$modelValue.series[ms];
-						
+
 						var qgt = $.extend(true, {}, mdlSerie.query);
 						$.extend(qgt.tags, scope.globalTags, true);
-						
+
 						if (equalObjects(qgt, newData.series[ns].query)) {
 							mdlSerie.status = status;
 							break;
@@ -218,7 +218,7 @@ angular.module('graphing', [])
 
 						var mdlSerie = ngModel.$modelValue.series[ms];
 						if (equalObjects(mdlSerie.query, series[ns].query)) {
-							
+
 							if (mdlSerie.status === undefined || mdlSerie.status !== 'querying') {
 								out.push(series[ns]);
 								break;
@@ -230,9 +230,9 @@ angular.module('graphing', [])
 			}
 
 			function getUpdateQuery() {
-				
+
 				var modelVal = ngModel.$modelValue;
-				
+
 				var bq = scope.baseQuery(ngModel.$modelValue);
 				bq.series = modelVal.series;
 
@@ -249,12 +249,13 @@ angular.module('graphing', [])
 			function getUpdates() {
 				if (ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
 					q = getUpdateQuery();
+					console.info('Requesting new data...');
 					scope.requestData(q);
 					setSerieStatus(q, 'updating');
 				}
-				
+
 				if (currTimer) clearTimeout(currTimer);
-				
+
 				currTimer = setTimeout(function() {
 					getUpdates();
 				}, METRIC_POLL_INTERVAL);
@@ -276,17 +277,17 @@ angular.module('graphing', [])
 
 				checkDataErrors(data);
 				if (data.series) {
-					
+
 					var mg = new MetrilyxGraph(data, scope.getTimeWindow(true));
 					mg.applyData();
-					
+
 					var sTags = (new SeriesFormatter(data.series)).seriesTags();
 					scope.$apply(function() { scope.updateTagsOnPage(sTags) });
-					
+
 					setSerieStatus(data, 'loaded');
 				}
 				if(data.annoEvents && data.annoEvents.data && data.annoEvents.data.length > 0 && ngModel.$modelValue.graphType !== 'pie') {
-					
+
 					anno = new MetrilyxAnnotation(data);
 					anno.applyData();
 				}
@@ -344,9 +345,9 @@ angular.module('graphing', [])
 				// Initialize graph object
 				scope.$watch(function() {
 					return ngModel.$modelValue._id;
-				
+
 				}, function(newVal, oldVal) {
-					if (newVal === undefined) return;	
+					if (newVal === undefined) return;
 
 					scope.addGraphIdEventListener(newVal, wsHelper.processRecievedData);
 					_graphDomNode = $("[data-graph-id='"+ngModel.$modelValue._id+"']");
@@ -359,7 +360,7 @@ angular.module('graphing', [])
 					if (newVal === undefined || oldVal === undefined) return;
 
 					if(newVal !== oldVal) {
-						
+
 						scope.reloadGraph(ngModel.$modelValue);
 						wsHelper.setSerieStatus(ngModel.$modelValue, 'querying');
 					}
@@ -384,37 +385,37 @@ angular.module('graphing', [])
 					// Initial populate //
 					hc = _graphDomNode.highcharts();
 					if(hc == undefined) {
-						
+
 						var gseries = wsHelper.getSeriesInNonQueryState(newVal);
 						if(gseries.length > 0) {
-							
+
 							_graphDomNode.html(GRAPH_LOADING_HTML);
-							
+
 							var q = scope.baseQuery(ngModel.$modelValue);
 							q.series = gseries;
-							
+
 							wsHelper.setSerieStatus(q, 'querying');
 							scope.requestData(q);
 						}
-						
+
 						if(scope.modelType == 'adhoc') scope.setURL(ngModel.$modelValue);
 						return;
 					}
 
 					if(newVal.length == oldVal.length) {
-						
+
 						return;
 					} else if(newVal.length > oldVal.length) {
-						
+
 						var q = scope.baseQuery(ngModel.$modelValue);
 						q.series = wsHelper.getNewlyAddedSeries(newVal);
-						
+
 						scope.requestData(q);
 						wsHelper.setSerieStatus(q,'querying');
-						
+
 						if(scope.modelType == 'adhoc') scope.setURL(ngModel.$modelValue);
 					} else {
-						
+
 						var deltas = getSeriesDeltaByQuery(newVal, oldVal);
 						mg = new MetrilyxGraph(ngModel.$modelValue, scope.getTimeWindow(true));
 						mg.removeSeries(deltas);
@@ -424,7 +425,7 @@ angular.module('graphing', [])
 				}, true);
 
 				scope.$on("$destroy", function( event ) {
-            		scope.removeGraphIdEventListener(ngModel.$modelValue._id, wsHelper.processRecievedData);	
+            		scope.removeGraphIdEventListener(ngModel.$modelValue._id, wsHelper.processRecievedData);
                 });
 			}
 		};
@@ -437,7 +438,7 @@ angular.module('timeframe', [])
 			require: '?ngModel',
 			link: function(scope, elem, attrs, ctrl) {
 				if(!ctrl) return;
-				
+
 				function isStartTime() {
 					return attrs.ngModel === "startTime";
 				}
@@ -452,25 +453,25 @@ angular.module('timeframe', [])
 
 				if(scope.timeType === "absolute") {
 					if(isStartTime()) {
-						
+
 						$(elem).data("DateTimePicker").setDate(new Date(scope.startTime*1000));
 					} else if(isEndTime()) {
-						
+
 						$(elem).data("DateTimePicker").setDate(new Date(scope.endTime*1000));
 					}
 				}
 
 				$(elem).on("change.dp",function (e) {
-					
+
 					if(e.date != undefined) {
-						
+
 						try {
 
 							d = new Date(e.date.valueOf());
 							scope.$apply(function() {
-								
+
 								if(isStartTime()) {
-									
+
 									stime = Math.floor(d.getTime()/1000);
 									if(stime != scope.startTime) {
 
@@ -478,7 +479,7 @@ angular.module('timeframe', [])
 										$(elem).data("DateTimePicker").setDate(e.date);
 									}
 								} else if(isEndTime()) {
-									
+
 									etime = Math.ceil(d.getTime()/1000);
 									if(etime != scope.endTime) {
 
@@ -505,15 +506,15 @@ angular.module('timeframe', [])
 					if(newValue === oldValue) return;
 
 					if(newValue == "absolute") {
-						
+
 						scope.setTimeType(newValue);
-						
+
 						if(scope.modelType !== 'adhoc') scope.setUpdatesEnabled(false);
-						
+
 						d = new Date();
 						endTime = Math.ceil(d.getTime()/1000);
 						startTime = endTime - relativeToAbsoluteTime(oldValue);
-						
+
 						scope.setStartTime(startTime);
 						$('[ng-model=startTime]').data("DateTimePicker").setDate(new Date(startTime*1000));
 						scope.setEndTime(endTime);
@@ -521,16 +522,16 @@ angular.module('timeframe', [])
 					} else {
 
 						if(scope.modelType === 'adhoc') {
-							
+
 							scope.setTimeType(newValue);
 							scope.reloadGraph();
 						} else {
-							
+
 							tmp = $location.search();
-							
+
 							if(tmp.end) delete tmp.end;
 							tmp['start'] = newValue;
-							
+
 							$location.search(tmp);
 						}
 					}

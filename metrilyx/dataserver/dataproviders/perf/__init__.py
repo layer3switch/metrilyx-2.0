@@ -1,4 +1,4 @@
-import json
+import ujson as json
 import logging
 
 from metrilyx import BaseClassWithConfig
@@ -22,12 +22,12 @@ class BasePerfDataProvider(BaseClassWithConfig):
 			graphMeta['series'][0]['data'] = {"error": err_obj['message'][:100]}
 
 		#logger.error("%s %s" %(str(graphMeta['series']), err_obj['message']))
-		
+
 		return graphMeta
 
 	def responseCallback(self, response, url, graphMeta):
 		'''
-			This should be subclassed if response needs to be formatted 
+			This should be subclassed if response needs to be formatted
 			before calling MetrilyxSerie
 		'''
 		return response

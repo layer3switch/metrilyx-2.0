@@ -1,5 +1,5 @@
 
-import json
+import ujson as json
 import requests
 
 from django.db import models
