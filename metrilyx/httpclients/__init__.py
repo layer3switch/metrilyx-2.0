@@ -312,7 +312,8 @@ class MetrilyxGraphFetcher(object):
         self.__graphReq = metrilyxGraphReq
         self.__dataprovider = dataprovider
 
-        if len(self.__graphReq.request['secondaries']) > 0 and \
+        if self.__graphReq.request.has_key('secondaries') and \
+                len(self.__graphReq.request['secondaries']) > 0 and \
                 self.__graphReq.request['secondaries'][0]['query'] != "":
             self.containsSecondaries = True
             self.__secondariesGraph = SecondariesGraph(self.__graphReq.request)
