@@ -65,11 +65,9 @@ angular.module('filters',[]).
 		return function(epoch, millisecs) {
 			try {
 				var d;
-				if(millisecs) {
-					d = new Date(epoch);
-				} else {
-					d = new Date(epoch*1000);	
-				}
+				if(millisecs) d = new Date(epoch);
+				else d = new Date(epoch*1000);
+
 				return d.toLocaleString("en-US", {hour12:false});
 			} catch(e) {
 				return epoch;
@@ -77,15 +75,18 @@ angular.module('filters',[]).
 		}
 	}).filter('rateString', function() {
 		return function(rate) {
+
 			if(rate) return "rate:";
 			return "";
 		}
 	}).filter('tagsString', function() {
 		return function(obj, html) {
+
 			return tagsString(obj, html);
 		};
 	}).filter('tagsLink', function() {
 		return function(obj) {
+
 		    var tstr = '?tags=';
 		    for(var i in obj) {
 			    tstr += i+":"+obj[i]+",";
@@ -95,6 +96,7 @@ angular.module('filters',[]).
 		}
 	}).filter('metricQuery', function() {
 		return function(query) {
+
 			return metricQueryString(query);
 		}
 	}).filter('loadedSeries', function() {
@@ -119,14 +121,14 @@ app.directive('eventTypes', function() {
 		require: '?ngModel',
 		link: function(scope, elem, attrs, ctrl) {
 			if(!ctrl) return;
-			
+
 			ctrl.$formatters.push(function(modelValue){return "";});
 			ctrl.$parsers.unshift(function(viewValue){return ctrl.$modelValue;});
-			
+
 			$(elem).autocomplete({
 				/*source: ANNO_EVENT_TYPES,*/
 				source: function(request, response) {
-	            	$.getJSON('/api/search/event_types?q='+request.term, 
+	            	$.getJSON('/api/search/event_types?q='+request.term,
 	            		function(a,b,c) {
 		            		for(var o in a) {
 		            			a[o].label = a[o].name;
@@ -144,8 +146,8 @@ app.directive('eventTypes', function() {
 	        		for(var i in ctrl.$modelValue) {
 	        			if(ctrl.$modelValue[i] === ui.item.value) {
 	        				$(elem).val('');
-	        				event.preventDefault();	
-	        				return;	
+	        				event.preventDefault();
+	        				return;
 	        			}
 	        		}
 	        		scope.$apply(ctrl.$modelValue.push(ui.item.value));
@@ -153,12 +155,12 @@ app.directive('eventTypes', function() {
 	        		event.preventDefault();
 	        	}
 			});
-			
+
 			$(elem).keyup(function(e) {
 				if(e.keyCode === 13) {
 					// clear input & close autocomplete on 'enter' //
 					$(elem).val('');
-					$(elem).autocomplete('close');	
+					$(elem).autocomplete('close');
 				}
 			});
 		}
@@ -207,13 +209,13 @@ app.directive('tagkeyvalue', function() {
 	        				retstr += tvals[i]+"|";
 	        			}
 	        			retstr += ui.item.value;
-	        			
+
 	        			// this throws en error due to | character //
 	        			scope.$apply(ctrl.$modelValue[kv[0]] = retstr);
-	        			
+
 	        			$(elem).val('');
 	        			event.preventDefault();
-	        			//return false;	
+	        			//return false;
 	        		}
 	        	},
 	        	focus: function( event, ui ) {
@@ -239,14 +241,14 @@ app.directive('tagkeyvalue', function() {
 					var arr = ival.split("=");
 					if(arr.length == 2 && arr[1] !== "") {
 						$(elem).val('');
-						$(elem).autocomplete('close');	
+						$(elem).autocomplete('close');
 					}
 				}
 			});
-			
+
 			// model --> view
 			ctrl.$formatters.push(function(modelValue) { return ""; });
-			
+
 			// view --> model
 			ctrl.$parsers.unshift(function(viewValue) {
 				var kv = viewValue.split("=");
@@ -278,7 +280,7 @@ app.directive('pageId', function() {
 		require: '?ngModel',
 		link: function(scope, elem, attrs, ctrl) {
 			if(!ctrl) return;
-			
+
 			// view -- > model //
 			ctrl.$parsers.unshift(function(viewValue) {
 				if(viewValue == "") {
@@ -310,9 +312,9 @@ app.directive('globalAnnotations', function() {
 			if(!ctrl) return;
 
 			var currTimer;
-			
+
 			function getAnnoQuery(sVal, timeWindow) {
-				
+
 				annoq = {
 					'annoEvents': {
 						'eventTypes': sVal.eventTypes,
@@ -324,9 +326,9 @@ app.directive('globalAnnotations', function() {
 				if(timeWindow && timeWindow.start) return $.extend(timeWindow, annoq);
 				else return $.extend(scope.getTimeWindow(), annoq);
 			}
-			
+
 			function hasOptions(annoOptions) {
-				return (annoOptions.eventTypes.length > 0) 
+				return (annoOptions.eventTypes.length > 0)
 					&& (Object.keys(annoOptions.tags).length > 0);
 			}
 
@@ -344,7 +346,7 @@ app.directive('globalAnnotations', function() {
 				}
 
 				if(currTimer) clearTimeout(currTimer);
-				currTimer = setTimeout(function() { 
+				currTimer = setTimeout(function() {
 					getUpdates();
 				}, ANNO_POLL_INTERVAL-1000);
 			}
@@ -352,14 +354,14 @@ app.directive('globalAnnotations', function() {
 			scope.$watch(function() {
 				return ctrl.$modelValue;
 			}, function(newVal, oldVal) {
-				
+
 				if(!newVal) return;
-				
+
 				if(!hasOptions(newVal)) return;
-				
+
 				// load, reload, dispatched, dispatching //
 				if(newVal.status === 'load' || newVal.status === 'reload') {
-					
+
 					scope.requestData(getAnnoQuery(newVal));
 					setTimeout(function() {getUpdates();}, ANNO_FETCH_TIME_WIN);
 				}
@@ -372,13 +374,13 @@ app.directive('tooltipArrow', function() {
 	return {
 		restrict: 'A',
 		require: '?ngModel',
-		link: function(scope, elem, attrs, ctrl) {	
+		link: function(scope, elem, attrs, ctrl) {
 			if(!ctrl) return;
 
 			var canvas = document.createElement('canvas');
 			canvas.width = attrs.width;
 			canvas.height = attrs.height;
-			
+
 			$(elem).append(canvas);
 			drawTriOnCanvas(canvas, attrs.color, attrs.direction);
 		}
@@ -446,7 +448,7 @@ app.directive('keyValuePairs', function() {
 	        		if(ttagstr !== undefined) {
 						ngModel.$setViewValue(ttagstr);
 						$(elem).val(ttagstr);
-	        			event.preventDefault();	
+	        			event.preventDefault();
 	        		}
 	        	},
 	        	focus: function(event, ui) {
@@ -486,7 +488,7 @@ app.directive('keyValuePairs', function() {
 				}
         		ngModel.$setValidity('keyValuePairs', true);
         		return mVal;
-      		});	 
+      		});
 		}
 	};
 });
@@ -542,7 +544,7 @@ function tagsString(obj, html) {
 		}
 	}
 	if(outstr === "") return "";
-	return "{ " + outstr.replace(/\, $/, "") + " }"; 
+	return "{ " + outstr.replace(/\, $/, "") + " }";
 };
 
 /*
@@ -550,7 +552,7 @@ function tagsString(obj, html) {
  * return: key1=val1,key2=val2
  */
 function dictToCommaSepStr(obj, delim) {
-	if(delim === undefined) delim = "="; 
+	if(delim === undefined) delim = "=";
 	tstr = '';
     for(var i in obj) {
         tstr += i+delim+obj[i]+",";
@@ -563,15 +565,15 @@ function dictToCommaSepStr(obj, delim) {
  */
 function commaSepStrToDict(tagsStr, delim) {
 	if(tagsStr == "") return {};
-	
+
 	var d = {};
 	kvpairs = tagsStr.replace(/;$/, '').split(",");
 	for(var i=0; i < kvpairs.length; i++) {
-		
+
 		kv = kvpairs[i].split(/:|=/);
 		if(kv.length != 2) continue;
 		if(kv[0] == "") continue;
-		
+
 		d[kv[0]] = kv[1];
 	}
 	if(equalObjects(d,{})) return;
@@ -583,7 +585,7 @@ function clearAllTimeouts() {
 	var id = window.setTimeout(function() {}, 0);
 	while (id--) {
 		// will do nothing if no timeout with id is present //
-		window.clearTimeout(id); 
+		window.clearTimeout(id);
 	}
 }
 
