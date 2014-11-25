@@ -4,19 +4,19 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta http-equiv="pragma" content="no-cache" />
 		<meta http-equiv="cache-control" content="no-cache" />
-		
+
 		<link rel="stylesheet" href="css/style.css">
 		<link rel="stylesheet" href="css/layout.css">
 		<link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css">
 		<link rel="stylesheet" href="libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css">
-		
+
 		<script src="config.js"></script>
-		
+
 		<script src="libs/jquery/jquery-1.10.2.min.js"></script>
 		<script src="libs/jquery/jquery-addons.js"></script>
 		<script src="libs/jquery/jquery-ui.js"></script>
 		<script src="libs/highstock/2.0.1/js/highstock.js"></script>
-		
+
 		<script src="libs/graphing.js"></script>
 
 		<script src="libs/bootstrap-datetimepicker/js/moment.min.js"></script>
@@ -28,7 +28,7 @@
 		<script src="libs/angular/1.2.9/angular-sanitize.min.js"></script>
 
 		<script src="libs/angular-sortable.js"></script>
-		
+
 		<script src="app.js"></script>
 		<script src="controllers.js"></script>
 		<script src="services.js"></script>
@@ -37,7 +37,7 @@
 
 	</head>
 	<body ng-app="app">
-		<div id="side-panel" ng-controller="sidePanelController" class="animated">	
+		<div id="side-panel" ng-controller="sidePanelController" class="animated">
 			<div class="model-list-ctrl-bar animated">
 				<div class="page-selector-header">
 					<span id="model-list-btn" ng-click="loadPagemodelList('#model-list-btn')" class="model-list-btn list-active pointer padl5 padr15 animated" title="Models">
@@ -85,8 +85,7 @@
 			</div>
 			<div class="padlr10 model-list-container {{browseBy}} animated">
 				<div style="height: 100%;overflow-y:scroll;">
-				<!-- instead of href: ng-click="listItemClicked(mdl)"-->
-				<a ng-repeat="mdl in modelsList | filter:{name:modelQuery} | orderBy:'name'" href="#/{{mdl._id}}">
+				<a ng-repeat="mdl in modelsList | filter:{name:modelQuery} | orderBy:'name'" href="listItemClicked(mdl)">
 					<div class="page-list-item">
 						<span ng-if="browseBy === 'name'" class="page-icon">
 							<i class="glyphicon glyphicon-stats"></i>
