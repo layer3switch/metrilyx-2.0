@@ -10,6 +10,7 @@ Roadmap
 - Additional graph types: bar and column.
 - Correctly apply aggregator for bar, column and pie graphs.
 - Annotation mappings automatically added when creating new event types.
+- Optimization to the websocket layer by using 'wsaccel' and 'ujson'
 
 ##### v2.3.4
 - Server side code optimization.
