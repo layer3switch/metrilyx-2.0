@@ -16,8 +16,8 @@
 			<span class="input-group-addon nobg interactive" ng-click="reloadGraph(graph);" title="Refresh">
 				<i class="glyphicon glyphicon-refresh interactive" style="font-size:12px;color:#888;font-weight:bold"></i>
 			</span>
-		</div>
-		<div class="graph {{graph.size}} text-center animated"  style="width:99.9%" data-graph-id="{{graph._id}}" ui-sortable ng-model="graph.series">
+		</div><!--style="width:99.9%"-->
+		<div class="graph {{graph.size}} text-center animated" data-graph-id="{{graph._id}}" ui-sortable ng-model="graph.series">
 			<table class='gif-loader-table' style="color:#ccc"><tr><td>
 				Drag metrics here from search
 			</td></tr></table>
@@ -53,7 +53,7 @@
 					</span>
 					<span class="padl5">
 						<span class="small"><b>Type :</b></span>
-						<select ng-model="graph.graphType" class="dark"> 
+						<select ng-model="graph.graphType" class="dark">
 							<option value="area">area</option>
 							<option value="bar">bar</option>
 							<option value="column">column</option>
@@ -118,7 +118,7 @@
 							    			<div class="input-group input-group-sm">
 							    				<span class="input-group-addon trans">{{tk}}</span>
 							    				<input ng-model="graph.annoEvents.tags[tk]" type="text" title="Edit tag values" class="form-control trans">
-							    				<span class="input-group-addon trans interactive" ng-click="removeTag(graph.annoEvents.tags, tk);">		
+							    				<span class="input-group-addon trans interactive" ng-click="removeTag(graph.annoEvents.tags, tk);">
 							    					<i class="glyphicon glyphicon-remove"></i>
 							    				</span>
 							    			</div>

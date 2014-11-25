@@ -553,9 +553,9 @@ input[ng-model='model.name'].edit-mode:hover {
 }
 .page-model-header {
 	margin:0;
-	padding-top: 10px;
-	padding-left:5px;
-	padding-right:5px;
+	padding-top: 15px;
+	padding-left: 5px;
+	padding-right: 5px;
 }
 .page-model-header.edit-mode {
 	padding-bottom: 10px;
@@ -762,6 +762,8 @@ div.graphs [class*='col-md-'] {
 /* === .graph === */
 .graph {
 	/*background-color:#ddd;*/
+	margin-left: 10px;
+	margin-right: 10px;
 }
 .highcharts-container {
 	overflow: visible !important;

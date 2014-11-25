@@ -6,6 +6,8 @@ var DEFAULT_CHART_OPTS = {
         gridLineColor: "#ddd",
         minorGridLineColor: '#f8f8f8',
         startOnTick: false,
+        endOnTick: false,
+        lineColor: '#ccc'
     },
     BASIC: {
         colors: [
@@ -597,7 +599,7 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
             type: 'line'
         },
         tooltip: {
-            crosshairs: [{color: '#428bca'},false],
+            crosshairs: [{color: '#ccc'},{color: '#ccc'}],
             borderColor: 'none',
             backgroundColor: 'none',
             valueDecimals: 2,

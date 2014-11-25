@@ -1,5 +1,5 @@
 <div class="page-model-header edit-comp{{editMode}}">
-	<div class="row padb5" style="margin:0;border-bottom:1px solid #bbb">
+	<div class="row" style="padding-bottom:10px;margin:0;border-bottom:1px solid #bbb">
 		<div class="col-md-4" style="padding:0;">
 			<span class="page-list-btn pointer interactive" title="Page List" onclick="$('#side-panel').toggleClass('offstage');">
 				<i class="glyphicon glyphicon-list"></i>
@@ -17,7 +17,7 @@
 					</span>
 					<span>{{tag}}</span>
 				</span>
-					
+
 			</div>
 		</div>
 		<!-- Page Name/ID -->
@@ -57,7 +57,7 @@
 		</div>
 		<!-- page tags -->
 		<div class="col-md-4 text-right" style="padding:0;">
-			<span ng-if="(modelType=='' && editMode!==' edit-mode')||(modelType==='adhoc')" class="animated">	
+			<span ng-if="(modelType=='' && editMode!==' edit-mode')||(modelType==='adhoc')" class="animated">
 				<span id="auto-update">
 					<span ng-if="timeType !== 'absolute'" class="animated">
 						<span>Auto-Update : </span>
@@ -123,7 +123,7 @@
 								<li title="Export">
 									<a href="/api/graphmaps/{{model._id}}?export=true" target="_blank" download="{{model._id}}.json">
 										<span class="padr5"><i class="glyphicon glyphicon-cloud-download"></i></span>
-										<span>Export</span>	
+										<span>Export</span>
 									</a>
 								</li>
 							</ul>
