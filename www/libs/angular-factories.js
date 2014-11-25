@@ -556,19 +556,19 @@ angular.module("metrilyxHelperFactories", [])
 
 		function _saveModelCallback(rslt) {
 
-			setGlobalAlerts(rslt);
 			if(rslt.error) {
+				setGlobalAlerts(rslt);
 				flashAlertsBar();
 			} else {
 
 				document.getElementById('side-panel').dispatchEvent(
 					new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
 
-				var currModelPath = "#/"+scope.model._id;
-
-				if(location.hash === currModelPath) location.reload(true);
-				else location.hash = currModelPath;
-
+				if($routeParams.pageId === "new") {
+					location.hash = "#/" + scope.model._id;
+				} else {
+					location.reload(true);
+				}
 			}
 		}
 
