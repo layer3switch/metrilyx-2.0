@@ -85,7 +85,7 @@
 			</div>
 			<div class="padlr10 model-list-container {{browseBy}} animated">
 				<div style="height: 100%;overflow-y:scroll;">
-				<a ng-repeat="mdl in modelsList | filter:{name:modelQuery} | orderBy:'name'" href="listItemClicked(mdl)">
+				<a ng-repeat="mdl in modelsList | filter:{name:modelQuery} | orderBy:'name'" ng-click="listItemClicked(mdl)">
 					<div class="page-list-item">
 						<span ng-if="browseBy === 'name'" class="page-icon">
 							<i class="glyphicon glyphicon-stats"></i>
