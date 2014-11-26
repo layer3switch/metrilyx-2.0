@@ -1,8 +1,9 @@
 <div class="shift" id="stage">
+	<title>Metrilyx : {{model.name}}</title>
 	<ng-include src="pageMastHtml"></ng-include>
-	
+
 	<ng-include src="editPanelHtml" onload="onEditPanelLoad()"></ng-include>
-	
+
 	<div class="row edit-comp{{editMode}}" id="main-view">
 		<div class="col-md-12" style="padding:0">
 			<ng-include src="pageHeaderHtml" onload="onPageHeaderLoad()"></ng-include>
