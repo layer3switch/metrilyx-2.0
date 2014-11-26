@@ -98,6 +98,11 @@ def udpateSecondaries(graph):
         printStatus(graph, "ADDED", "secondaries")
         graph["secondaries"] = []
 
+def fixSeriesAlias(graph):
+    for serie in graph['series']:
+        print serie['alias']
+
+
 def processGraphLayout(model):
     for row in model.layout:
         for col in row:
@@ -107,7 +112,7 @@ def processGraphLayout(model):
                     addEventAnnoDef(graph)
                     updateMultiPaneOptions(graph)
                     udpateSecondaries(graph)
-
+                    #fixSeriesAlias(graph)
 
 parser = OptionParser()
 parser.add_option("--commit", "-c", dest="commit", default=False, action="store_true")
