@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import re
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(
                         os.path.abspath(__file__))))
@@ -14,6 +15,7 @@ from metrilyx.models import *
 from metrilyx.metrilyxconfig import config
 
 graphSchema = json.load(open(config['schema_path']+"/graph.json", "rb"))
+
 
 def printStatus(graph, status, msg):
     if status in ('ADDED', 'UPDATED'):
@@ -98,9 +100,24 @@ def udpateSecondaries(graph):
         printStatus(graph, "ADDED", "secondaries")
         graph["secondaries"] = []
 
-def fixSeriesAlias(graph):
+#def fixSeriesAlias(graph):
+#    for serie in graph['series']:
+#        print serie['alias']
+
+ytransRe2 = re.compile(r"(lambda x\: x) if \((x > [0-9]+)\) else None")
+def checkYTransform(graph):
     for serie in graph['series']:
-        print serie['alias']
+        if serie['yTransform'] == "":
+            continue
+        if serie['yTransform'].startswith("lambda x: x if ("):
+            m = ytransRe2.match(serie['yTransform'])
+            if m != None:
+                serie['yTransform'] = "%s[%s]" %(m.groups()[0],m.groups()[1])
+                print "UPDATING: %s" %(serie['yTransform'])
+            else:
+                print "potentially update: %s" %(serie['yTransform'])
+        else:
+            print "skipping: %s" % (serie['yTransform'])
 
 
 def processGraphLayout(model):
@@ -113,6 +130,7 @@ def processGraphLayout(model):
                     updateMultiPaneOptions(graph)
                     udpateSecondaries(graph)
                     #fixSeriesAlias(graph)
+                    checkYTransform(graph)
 
 parser = OptionParser()
 parser.add_option("--commit", "-c", dest="commit", default=False, action="store_true")
@@ -133,5 +151,6 @@ else:
         print "[%s]" %(m._id)
         if m.model_type == "graph":
             processGraphLayout(m)
+            ## save model
             m.save()
         print ""
