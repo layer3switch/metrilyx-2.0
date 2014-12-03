@@ -100,10 +100,6 @@ def udpateSecondaries(graph):
         printStatus(graph, "ADDED", "secondaries")
         graph["secondaries"] = []
 
-#def fixSeriesAlias(graph):
-#    for serie in graph['series']:
-#        print serie['alias']
-
 ytransRe2 = re.compile(r"(lambda x\: x) if \((x > [0-9]+)\) else None")
 def checkYTransform(graph):
     for serie in graph['series']:
@@ -129,7 +125,6 @@ def processGraphLayout(model):
                     addEventAnnoDef(graph)
                     updateMultiPaneOptions(graph)
                     udpateSecondaries(graph)
-                    #fixSeriesAlias(graph)
                     checkYTransform(graph)
 
 parser = OptionParser()

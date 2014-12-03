@@ -26,6 +26,8 @@ This is the graph type to be rendered.  Currently, the following types are suppo
 *	pie
 *	area
 *	stacked
+*	bar
+*	column
 
 
 ## Metric Options
