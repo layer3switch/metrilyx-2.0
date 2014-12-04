@@ -2,10 +2,10 @@
 #########################
 celerybeat-schedule*
 metrilyx.conf
-config.js
 pagemodels
 heatmaps
 *.sqlite3
+test.py
 
 # Python #
 ##########

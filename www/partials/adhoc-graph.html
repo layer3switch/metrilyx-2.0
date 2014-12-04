@@ -1,0 +1,29 @@
+<div class="shift" id="stage">
+	<div ng-include="pageMastHtml"></div>
+	<ng-include src="editPanelHtml" onload="onEditPanelLoad()"></ng-include>
+	<div class="row edit-comp{{editMode}}" id="main-view">
+		<div class="col-md-12" style="padding:0">
+			<div ng-include="pageHeaderHtml"></div>
+			<div ng-model="graph" ws-highstock-graph>
+				<div class="row" style="margin:0;margin-left:auto;margin-right:auto">
+					<div class="col-md-12" style="padding:0">
+						<div ng-include="queryEditorHtml"></div>
+					</div>
+				</div>
+				<div id="adhoc-graph-container" class="bottom-shadow">
+					<div id="adhoc-graph" class="graph {{graph.size}} text-center animated" data-graph-id="{{graph._id}}" ui-sortable="adhocGraphSortOpts" ng-model="graph.series">
+						<table class='gif-loader-table' style="color:#ccc"><tr><td>
+						Drag metrics here from search
+						</td></tr></table>
+					</div>
+					<div ng-include="graphFooterHtml"></div>
+				</div>
+				<div class="padtb5">
+					<div ng-include="thresholdsHtml"></div>	
+				</div>
+			</div>
+			<div ng-include="pageFooterHtml"></div>
+		</div>
+	</div>
+	<ng-include src="eventAnnoDetailsHtml"></ng-include>
+</div>

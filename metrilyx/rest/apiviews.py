@@ -1,7 +1,8 @@
 
 import os
-import json
+import ujson as json
 import time
+import socket
 import requests
 
 from elasticsearch import Elasticsearch
@@ -14,14 +15,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, viewsets, permissions, filters
 
-from celery import Celery
-
 import metrilyx
 
 from custompermissions import IsGroupOrReadOnly, IsCreatorOrReadOnly
 from serializers import *
-from ..models import * 
-from ..datastores.mongodb import MetricCacheDatastore
+from ..models import *
 
 from ..annotations import Annotator
 
@@ -64,8 +62,26 @@ class EventTypeViewSet(viewsets.ModelViewSet):
 	serializer_class = EventTypeSerializer
 	permission_classes = (IsCreatorOrReadOnly,)
 
+	def create(self, request, path, pk=None):
+		if pk is None or pk in ("", "/"):
+			return Response({"error": "Invalid request"},
+						status=status.HTTP_400_BAD_REQUEST)
+
+		try:
+			obj = EventType.objects.get(_id=pk[1:].lower())
+			return Response({"error": "Event type already exists!"},
+								status=status.HTTP_400_BAD_REQUEST)
+		except EventType.DoesNotExist:
+			etype = EventType(name=pk[1:].title(), _id=pk[1:].lower(), metadata={})
+			rslt = etype.save()
+			if rslt.has_key("error"):
+				return Response(rslt, status=status.HTTP_400_BAD_REQUEST)
+
+			return Response(rslt)
+
+
 class GraphMapViewSet(MapViewSet):
-	
+
 	queryset = MapModel.objects.filter(model_type="graph")
 
 	def pre_save(self, obj):
@@ -93,32 +109,6 @@ class GraphMapViewSet(MapViewSet):
 				})
 
 
-class HeatMapViewSet(MapViewSet):
-	
-	queryset = MapModel.objects.filter(model_type="heat")
-
-	def pre_save(self, obj):
-		super(HeatMapViewSet,self).pre_save(obj)
-		obj.model_type = "heat"
-
-	def list(self, request, pk=None):
-		serializer = MapModelListSerializer(self.queryset, many=True)
-		return Response(serializer.data)
-
-	def retrieve(self, request, pk=None):
-		export_model = request.GET.get('export', None)
-		if export_model == None:
-			return super(HeatMapViewSet, self).retrieve(request,pk)
-		else:
-			heatmap = get_object_or_404(MapModel, model_type='heat', _id=pk)
-			serializer = MapModelSerializer(heatmap)
-			request.accepted_media_type = "application/json; indent=4"
-			return Response(serializer.data, headers={
-				'Content-Disposition': 'attachment; filename: %s.json' %(pk),
-				'Content-Type': 'application/json'
-				})
-
-
 class SchemaViewSet(viewsets.ViewSet):
 
 	def list(self, request):
@@ -133,6 +123,49 @@ class SchemaViewSet(viewsets.ViewSet):
 			return Response(schema)
 		except Exception,e:
 			return Response({"error": str(e)})
+
+class ConfigurationView(APIView):
+
+	def __metricSearchConfig(self):
+		if config['cache']['enabled']:
+			return { 'uri': config['cache']['datasource']['url'] }
+		else:
+			return {'uri': '/api/search'}
+
+	def __websocketConfig(self):
+		hostname = socket.gethostname()
+		resp = {
+			'hostname': hostname,
+			'extensions': ['compressed=true']
+			}
+
+		if config['websocket'].has_key('hostname'):
+			resp['hostname'] = config['websocket']['hostname']
+
+		resp['uri'] = 'ws://%s' %(resp['hostname'])
+
+		if config['websocket'].has_key('port'):
+			resp['port'] = config['websocket']['port']
+			resp['uri'] = "%s:%d" %(resp['uri'], resp['port'])
+
+		if config['websocket'].has_key('endpoint'):
+			resp['endpoint'] = config['websocket']['endpoint']
+			resp['uri'] = "%s%s" %(resp['uri'], resp['endpoint'])
+
+		resp['uri'] = "%s?%s" %(resp['uri'], "&".join(resp['extensions']))
+
+		return resp
+
+	def get(self, request, pk=None):
+		'''
+			Websocket connection information for client requests.
+		'''
+		response = {
+			'websocket': self.__websocketConfig(),
+			'metric_search': self.__metricSearchConfig()
+			}
+
+		return Response(response)
 
 class EventsViewSet(APIView):
 	REQUIRED_QUERY_PARAMS = ('start','eventTypes','tags')
@@ -158,6 +191,12 @@ class EventsViewSet(APIView):
 			for rp in self.REQUIRED_WRITE_PARAMS:
 				if rp not in jsonReq.keys():
 					return {'error': 'missing parameter: %s' %(rp)}
+
+			try:
+				etype = EventType.objects.get(_id=jsonReq['eventType'].lower())
+			except EventType.DoesNotExist:
+				return {'error': 'event type: %s not found' %(jsonReq['eventType'])}
+
 		return jsonReq
 
 	def get(self, request, pk=None):
@@ -171,7 +210,7 @@ class EventsViewSet(APIView):
 		reqBody = self.__checkRequest(request)
 		if reqBody.has_key('error'):
 			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
-			
+
 		gevt = {
 			"_id": "annotations",
 			"annoEvents": {
@@ -182,7 +221,7 @@ class EventsViewSet(APIView):
 		}
 		if reqBody.has_key("end"):
 			gevt["end"] = reqBody["end"]
-		
+
 		ger = GraphEventRequest(gevt)
 		out = []
 		for gr in ger.split():
@@ -190,8 +229,8 @@ class EventsViewSet(APIView):
 				rslt = self.eventDataProvider.search(query)
 				if len(rslt["hits"]["hits"]) > 0:
 					out += [r['_source'] for r in rslt['hits']['hits']]
-		return Response(out)			
-	
+		return Response(out)
+
 	def post(self, request, pk=None):
 		'''
 			request object:
@@ -237,12 +276,12 @@ class TagViewSet(viewsets.ViewSet):
 		model_type = request.GET.get('model_type', '')
 		tags = self.__get_unique_tags(model_type)
 		return Response([ {'name': t } for t in tags ])
-	
+
 	def retrieve(self, request, pk=None):
 		model_type = request.GET.get('model_type', '')
 		if model_type == '':
 			objs = MapModel.objects.filter(tags__contains=pk)
-		else:	
+		else:
 			objs = MapModel.objects.filter(tags__contains=pk, model_type=model_type)
 		serializer = MapModelSerializer(objs, many=True)
 		return Response(serializer.data)
@@ -260,21 +299,19 @@ class OpenTSDBMetaSearch(object):
         if obj["type"] == "metric":
             obj["type"] = "metrics"
         if limit != None:
-        	resp = requests.get("%s?max=%d&type=%s&q=%s" %(self.tsdb_suggest_url, 
+        	resp = requests.get("%s?max=%d&type=%s&q=%s" %(self.tsdb_suggest_url,
         										limit, obj['type'], obj['query']))
         else:
-        	resp = requests.get("%s?max=%d&type=%s&q=%s" %(self.tsdb_suggest_url, 
+        	resp = requests.get("%s?max=%d&type=%s&q=%s" %(self.tsdb_suggest_url,
         							self.suggest_limit, obj['type'], obj['query']))
         return resp.json()
 
-class SearchViewSet(viewsets.ViewSet): 
+class SearchViewSet(viewsets.ViewSet):
 
 	def __init__(self, *args, **kwargs):
 		super(SearchViewSet, self).__init__(*args, **kwargs)
-		if config["cache"]["enabled"]:
-			self.metricMetaSearch = MetricCacheDatastore(**config['cache']['datastore']['mongodb'])			
-		else:
-			self.metricMetaSearch = OpenTSDBMetaSearch(config["dataprovider"])
+		# Only used if cache is disabled
+		self.metricMetaSearch = OpenTSDBMetaSearch(config["dataprovider"])
 
 	def list(self, request, pk=None):
 		return Response(['graphmaps', 'heatmaps', 'metrics', 'tagk', 'tagv', 'event_types'])
@@ -289,38 +326,12 @@ class SearchViewSet(viewsets.ViewSet):
 			models_obj = MapModel.objects.filter(name__contains=query, model_type='graph')
 			serializer_obj = MapModelSerializer(models_obj, many=True)
 			response = serializer_obj.data
-		elif pk == 'heatmaps':
-			models_obj = MapModel.objects.filter(name__contains=query, model_type='heat')
-			#print models_obj
-			serializer_obj = MapModelSerializer(models_obj, many=True)
-			response = serializer_obj.data
-		elif pk == 'metrics':
-			response = self.metricMetaSearch.search({'type': 'metric', 'query': query}, limit=limit)
-		elif pk in ('tagk','tagv'):
-			response = self.metricMetaSearch.search({'type': pk, 'query': query}, limit=limit)
 		elif pk == 'event_types':
 			models_obj = EventType.objects.filter(name__contains=query)
 			serializer_obj = EventTypeSerializer(models_obj,many=True)
 			response = serializer_obj.data
+		elif pk in ('tagk','tagv', 'metrics'):
+			response = self.metricMetaSearch.search({'type':pk,'query':query},limit=limit)
 		else:
 			response = {"error": "Invalid search: %s" %(pk)}
 		return Response(response)
-
-class HeatView(APIView):
-	def get(self, request, heat_id=None):
-		# list heat queries
-		if heat_id == None:
-			objs = HeatQuery.objects.all()
-			serializer  = HeatQuerySerializer(objs, many=True)
-			out = serializer.data
-		else:
-			app = Celery('metrilyx')
-			app.config_from_object('metrilyx.heatmapsconfig')
-			rslt = app.AsyncResult(heat_id)
-
-			hquery = get_object_or_404(HeatQuery, _id=heat_id)
-			serializer = HeatQuerySerializer(hquery)
-			out = serializer.data
-			out['data'] = rslt.get()
-
-		return Response(out)

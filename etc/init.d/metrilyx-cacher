@@ -1,0 +1,87 @@
+#!/bin/sh
+#
+# chkconfig: 234 90 10
+# description: Metrilyx Metadata Cacher.
+#
+
+[ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
+
+[ -f "/etc/sysconfig/${NAME}" ] && . /etc/sysconfig/${NAME}
+
+PGREP="/usr/bin/pgrep -f"
+OS=$(uname | tr '[:upper:]' '[:lower:]')
+ARCH="amd64"
+
+if [ "$(uname -m)" != "x86_64" ]; then
+	echo "Must be a 64 bit system!"; 
+	exit 1;
+fi
+
+NAME="metrilyx-cacher"
+APP_HOME="/opt/metrilyx"
+BIN="${APP_HOME}/bin/${NAME}.${OS}.${ARCH}"
+LOGFILE="${APP_HOME}/log/${NAME}.log"
+
+CACHER_CONFIG=${CACHER_CONFIG:-${APP_HOME}/etc/metrilyx/metrilyx.conf}
+DEFAULT_OPTS="-config $CACHER_CONFIG";
+
+[ -f "$CACHER_CONFIG" ] || { echo "Config not found: $CACHER_CONFIG!"; exit 3; }
+
+RETVAL=0;
+
+start() {
+	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+	if [ "$PIDS" = "" ]; then
+		echo -n "${NAME} starting... "
+		${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
+		sleep 2;
+		PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+		if [ "$PIDS" = "" ]; then
+			echo "[failed]";
+			RETVAL=4;
+		else
+			echo "[ok]";
+		fi
+	else
+		echo -n "${NAME} already running... ${PIDS}";
+		RETVAL=1
+	fi
+}
+status() {
+	PIDS=`${PGREP} "${BIN}" | xargs`;
+	if [ "$PIDS" = "" ]; then
+		echo "${NAME} not running";
+	else
+		echo "${NAME} running... ${PIDS}"
+	fi
+}
+stop() {
+	PIDS=`${PGREP} "${BIN}" | sort -r`;
+	for pid in $PIDS; do
+		kill $pid;
+	done
+	${PGREP} "${BIN}" || echo "${NAME} stopped";
+}
+
+
+case "$1" in
+	start)
+		start;
+		;;
+	stop)
+		stop;
+		;;
+	status)
+		status;
+		;;
+	restart)
+		$0 stop;
+		sleep 3;
+		$0 start;
+		;;
+	*)
+		echo "$0 [start|stop|restart|status]";
+		exit 1;
+		;;
+esac
+exit 0;

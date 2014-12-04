@@ -1,7 +1,7 @@
 
 
 import httplib
-import json
+import ujson as json
 import logging
 
 import StringIO
@@ -18,6 +18,9 @@ from twisted.internet.protocol import Protocol
 
 from metrilyx.metrilyxconfig import config
 from ..dataserver.transforms import MetrilyxSerie
+
+from ..dataserver.transforms import MetrilyxAnalyticsSerie, SecondariesGraph
+from ..dataserver.dataproviders import re_504
 
 from pprint import pprint
 
@@ -43,7 +46,7 @@ class HttpJsonClient(object):
                 return json.loads(raw_data)
             except Exception,e:
                 return { 'error': str(e) }
-                
+
         compressedstream = StringIO.StringIO(raw_data)
         gzipper = gzip.GzipFile(fileobj=compressedstream)
         return json.loads(gzipper.read())
@@ -83,7 +86,7 @@ class OpenTSDBResponse(object):
             for d in data_arr:
                 d['dps'] = self.__sort_dps(d['dps'])
         self._data = data_arr
-        
+
 
     @property
     def data(self):
@@ -149,7 +152,7 @@ class OpenTSDBClient(object):
         else:
             return "%s?start=%s%s" %(self.query_endpoint,
                                         query['start'], cq_str)
-    
+
     def query(self, q):
         """
             Args:
@@ -163,8 +166,27 @@ class OpenTSDBClient(object):
             return OpenTSDBResponse(hjc.GET(q_str))
         else:
             return OpenTSDBResponse(hjc.GET(self.query_endpoint+"?"+q))
-   
-## ASYNC ##     
+
+## ASYNC ##
+def checkHttpResponse(respBodyStr, response, url):
+    if response.code < 200 or response.code > 304:
+        logger.warning("Request failed %d %s %s" %(response.code, respBodyStr, url))
+        m = re_504.search(respBodyStr)
+        if  m != None:
+            return {"error": "code=%d,response=%s" %(response.code, m.group(1))}
+        return {"error": "code=%s,response=%s" %(response.code, respBodyStr)}
+
+    try:
+        d = json.loads(respBodyStr)
+        if isinstance(d, dict) and d.has_key('error'):
+            logger.warning(str(d))
+            return d
+        return {'data': d}
+    except Exception, e:
+        logger.warning("%s %s" %(str(e), url))
+        return {"error": str(e)}
+
+
 class JsonBodyProducer(object):
     implements(IBodyProducer)
 
@@ -195,12 +217,12 @@ class AsyncHttpResponseProtocol(Protocol):
         #    self.remaining -= len(bytes[:self.remaining])
 
     def __ungzip_(self):
-        try:   
+        try:
             compressedstream = StringIO.StringIO(self.data)
             gzipper = gzip.GzipFile(fileobj=compressedstream)
             return gzipper.read()
         except Exception,e:
-            logger.error(e)
+            #logger.error(e)
             return json.dumps({"error": str(e)})
 
     def connectionLost(self, reason):
@@ -224,8 +246,10 @@ class AsyncHttpJsonClient(object):
             self.body = JsonBodyProducer(self.body)
         if not kwargs.has_key('method'):
             self.method = 'GET'
+        if not kwargs.has_key('connectTimeout'):
+            self.connectTimeout = 3.0
 
-        self.agent = Agent(reactor)
+        self.agent = Agent(reactor, connectTimeout=self.connectTimeout)
         self.__d_agent = self.agent.request(
                 self.method,
                 self.uri,
@@ -243,7 +267,7 @@ class AsyncHttpJsonClient(object):
         self.__deferredResponse.addCallback(userCb, *([response]+list(cbargs)))
         return self.__deferredResponse
 
-    def __readErrorCallback(self, error, userCb, *cbargs):    
+    def __readErrorCallback(self, error, userCb, *cbargs):
         self.__deferredResponse.addErrback(userCb, *cbargs)
 
     def addResponseCallback(self, callback, *cbargs):
@@ -288,6 +312,14 @@ class MetrilyxGraphFetcher(object):
         self.__graphReq = metrilyxGraphReq
         self.__dataprovider = dataprovider
 
+        if self.__graphReq.request.has_key('secondaries') and \
+                len(self.__graphReq.request['secondaries']) > 0 and \
+                self.__graphReq.request['secondaries'][0]['query'] != "":
+            self.containsSecondaries = True
+            self.__secondariesGraph = SecondariesGraph(self.__graphReq.request)
+        else:
+            self.containsSecondaries = False
+
         self.total = len([o for o in self.__graphReq.split()])
         self.completed = 0
 
@@ -299,6 +331,7 @@ class MetrilyxGraphFetcher(object):
         self.__activePartials = {}
 
         self.__fetch()
+
 
     def __initGraphResponse(self):
         graphResponse = { "series": [] }
@@ -316,51 +349,59 @@ class MetrilyxGraphFetcher(object):
         self.completed += 1
         (url, gmeta, idx) = cbargs
         self.__rmActivePartial(url)
-        
+
         respData = checkHttpResponse(respBodyStr, response, url)
-        logger.info("Partial response: %s" %(url))
+        logger.info("Partial response: %s" %(url.split("?")[-1]))
         if respData.has_key('error'):
             gmeta['series'][0]['data'] = respData
         else:
             gmeta['series'][0]['data'] = self.__dataprovider.responseCallback(
                                             respData['data'], url, gmeta)
 
-        mas = MetrilyxSerie(gmeta['series'][0])
-        gmeta['series'][0]['data'] = mas.data()
+        mas = MetrilyxAnalyticsSerie(gmeta['series'][0], graphType=gmeta['graphType'])
 
-        self.__partialDeferreds[idx].callback(gmeta)
+        if self.containsSecondaries:
+            self.__secondariesGraph.add(mas)
+        else:
+            gmeta['series'][0]['data'] = mas.data()
+            gmeta['series'][0]['uuid'] = str(mas.uuid)
+            self.__partialDeferreds[idx].callback(gmeta)
 
         if self.total == self.completed:
-            ## Cannot trigger callback without some data.
-            self.__completedDeferred.callback(None)
+            if self.containsSecondaries:
+                data = self.__secondariesGraph.data()
+                self.__completedDeferred.callback(data)
+            else:
+                self.__completedDeferred.callback(None)
 
-    def __partialResponseErrback(self, error, *cbargs): 
+
+    def __partialResponseErrback(self, error, *cbargs):
         self.completed += 1
         (url, gmeta, idx) = cbargs
         self.__rmActivePartial(url)
 
         if self.total == self.completed:
             self.__completedDeferred.errback(error)
-        
+
         self.__partialDeferreds[idx].errback(error)
 
-    
+
     def __fetch(self):
-        
+
         counter = 0
         for gr in self.__graphReq.split():
-            
+
             (url, method, query) = self.__dataprovider.getQuery(gr)
-            
+
             a = AsyncHttpJsonClient(uri=url, method=method, body=query)
             a.addResponseCallback(self.__partialResponseCallback, url, gr, counter)
             a.addResponseErrback(self.__partialResponseErrback, url, gr, counter)
-            
+
             self.__activePartials[url] = a
             counter += 1
 
             logger.info("Partial query (%s): %s" %(gr['_id'], url))
-            
+
 
     def addCompleteCallback(self, callback, *cbargs):
         self.__completedDeferred.addCallback(callback, *cbargs)
@@ -379,5 +420,5 @@ class MetrilyxGraphFetcher(object):
     def cancelRequests(self):
         for k,d in self.__activePartials.items():
             d.cancelRequest()
-        
-        self.__activePartials = {}  
+
+        self.__activePartials = {}

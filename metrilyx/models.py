@@ -1,4 +1,7 @@
 
+import ujson as json
+import requests
+
 from django.db import models
 import jsonfield
 
@@ -13,30 +16,29 @@ class EventType(models.Model):
 	_id = models.CharField(max_length=32, primary_key=True)
 	metadata = jsonfield.JSONField(default={},null=True,blank=True)
 
+	def __createElasticsearchMapping(self):
+		mapping = { self.name: config['annotations']['dataprovider']['default_mapping'] }
+		mappingUrl = "http://%s:%d/%s/%s/_mapping" % (
+						config['annotations']['dataprovider']['host'],
+						config['annotations']['dataprovider']['port'],
+						config['annotations']['dataprovider']['index'],
+						self.name)
+		return requests.put(mappingUrl, data=json.dumps(mapping))
+
+
 	def save(self, *args, **kwargs):
 		self._id = self.name.lower()
-		super(EventType, self).save(*args, **kwargs)	
 
-class HeatQuery(models.Model):
-	"""
-	Model for storing heat queries.  Queries are extracted from the
-	heatmap and assembled into HeatQuerys.
-	"""
-	_id = models.CharField(max_length=256, primary_key=True)
-	query = models.CharField(max_length=256)
-	name = models.CharField(max_length=128, default="", blank=True)
-
-	def save(self, *args, **kwargs):
-		if self.name == "":
-			self.name = self._id
-		super(HeatQuery, self).save(*args, **kwargs)
+		resp = self.__createElasticsearchMapping()
+		if resp.status_code >= 200 and resp.status_code <= 304:
+			super(EventType, self).save(*args, **kwargs)
+			return {"status": "Event type created: %s" % (self._id)}
+		else:
+			return resp.json()
 
 
 class MapModel(models.Model):
-	MODELTYPE_CHOICES = (
-		("graph", "graph"),
-		("heat", "heat")
-	)
+	MODELTYPE_CHOICES = (("graph", "graph"),)
 
 	_id = models.CharField(max_length=128,primary_key=True)
 	name = models.CharField(max_length=128, default="", blank=True)
@@ -62,14 +64,14 @@ class MapModel(models.Model):
 	def __get_heat_query(self, serie_query, name=""):
 		if serie_query.get('rate'):
 			qbase = "%(aggregator)s:rate:%(metric)s" %(serie_query)
-		else:	
+		else:
 			qbase = "%(aggregator)s:%(metric)s" %(serie_query)
 		tags = ",".join([ "%s=%s" %(k,v) for k,v in serie_query['tags'].items() ])
 		return {
 			"_id": "%s{%s}" %(qbase, tags),
 			"query": "%s{%s}" %(qbase, tags),
 			"name": name
-			}		
+			}
 
 	def __extract_heat_queries(self):
 		for row in self.layout:
@@ -97,7 +99,7 @@ class MapModel(models.Model):
 				if hq_obj == None or len(hq_obj) < 1:
 					hq_obj = HeatQuery(**hq)
 					hq_obj.save()
-		
+
 		super(MapModel, self).save(*args, **kwargs)
 
 

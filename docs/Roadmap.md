@@ -1,10 +1,18 @@
 Roadmap
 =======
 
-##### v2.3.5 - v2.4.0
-- Metric operatorations i.e. perform math against different series.
+##### v2.4.x
+- Use of an opensource graphing library.
 
-##### v2.3.4 (current)
+##### v2.4.0 (current)
+- Cross metric operations i.e. perform math against metrics to create secondary metrics.
+- Perform complex operations on time series data for statistical analysis. (rolling, percentile etc.)
+- Additional graph types: bar and column.
+- Correctly apply aggregator for bar, column and pie graphs.
+- Annotation mappings automatically added when creating new event types.
+- Optimization to the websocket layer by using 'wsaccel' and 'ujson'
+
+##### v2.3.4
 - Server side code optimization.
 - Cleanup of pending calls upon client disconnection.
 - Behavioural changes in UI.

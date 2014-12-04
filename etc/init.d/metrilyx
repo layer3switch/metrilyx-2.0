@@ -1,0 +1,59 @@
+#!/bin/sh
+#
+# chkconfig: 234 90 10
+# description: Metrilyx script to manage all metrilyx processes (dataserver, modelmanager, cacher)
+#
+
+[ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
+
+NAME="metrilyx"
+APP_HOME="/opt/metrilyx"
+
+NGINX_USER="nginx"
+
+SERVICE_START_ORDER="metrilyx-cacher metrilyx-dataserver metrilyx-modelmanager"
+SERVICE_STOP_ORDER="metrilyx-cacher metrilyx-dataserver metrilyx-modelmanager"
+
+
+check_paths() {
+	[ -d "${APP_HOME}/log" ] || { mkdir -m 0775 "${APP_HOME}/log"; chgrp $NGINX_USER "${APP_HOME}/log"; }
+	[ -d "${APP_HOME}/run" ] || { mkdir -m 0775 "${APP_HOME}/run"; chgrp $NGINX_USER "${APP_HOME}/run"; }
+}
+
+start() {
+	check_paths;
+	for service in ${SERVICE_START_ORDER}; do
+		service $service start
+	done
+}
+status() {
+	for service in ${SERVICE_START_ORDER}; do
+		service $service status
+	done
+}
+stop() {
+	for service in ${SERVICE_STOP_ORDER}; do
+		service $service stop
+	done
+}
+
+case "$1" in
+	start)
+		start;
+		;;
+	stop)
+		stop;
+		;;
+	restart)
+		stop;
+		sleep 3
+		start;
+		;;
+	status)
+		status;
+		;;
+	*)
+		echo "$0 [ start | stop | restart | status ]"
+		exit 1;
+esac
+exit 0

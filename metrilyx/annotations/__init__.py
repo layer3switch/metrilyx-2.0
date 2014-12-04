@@ -1,9 +1,9 @@
 
-import json
+import ujson as json
 import re
 import hashlib
 import time
-	
+
 VALID_KEYS = ('_id', 'timestamp', 'eventType', 'message', 'tags', 'data')
 
 class Annotator(object):

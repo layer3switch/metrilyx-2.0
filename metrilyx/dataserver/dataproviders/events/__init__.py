@@ -1,5 +1,5 @@
 
-import json
+import ujson as json
 import logging
 
 from metrilyx import BaseClassWithConfig
@@ -9,7 +9,7 @@ from pprint import pprint
 logger = logging.getLogger(__name__)
 
 class BaseEventDataProvider(BaseClassWithConfig):
-	
+
 	def responseErrback(self, error, graphMeta):
 		logger.error(str(error))
 		try:
@@ -25,12 +25,12 @@ class BaseEventDataProvider(BaseClassWithConfig):
 
 		logger.error("BaseEventDataProvider.responseErrback: %s" %(
 										str(graphMeta['annoEvents'])))
-		
+
 		return graphMeta
 
 	def responseCallback(self, response, url, graphMeta):
 		'''
-			This should be subclassed if response needs to be formatted 
+			This should be subclassed if response needs to be formatted
 			before calling MetrilyxSerie
 		'''
 		return response

@@ -12,11 +12,6 @@ class EventTypeSerializer(serializers.HyperlinkedModelSerializer):
 		model = EventType
 		fields = ('_id','name','metadata')
 
-class HeatQuerySerializer(serializers.HyperlinkedModelSerializer):
-	class Meta:
-		model = HeatQuery
-		fields = ('_id','name','query')
-
 class MapModelSerializer(serializers.HyperlinkedModelSerializer):
 	user = serializers.Field(source='user.username')
 	group = serializers.Field(source='group.name')

@@ -62,7 +62,6 @@ class GraphRequest(object):
 		self.__cleanRequest(request)
 		self.request = request
 		self.__applyGlobalTagsToSeries()
-		self.__adjustTimeWindow()
 
 	def split(self):
 		'''
@@ -79,6 +78,12 @@ class GraphRequest(object):
 				if s.has_key('$$hashKey'):
 					del s['$$hashKey']
 
+		if request.has_key('secondaries'):
+			for s in request['secondaries']:
+				if s.has_key('$$hashKey'):
+					del s['$$hashKey']
+
+		
 	def __checkRequest(self, request):
 		for k in self.REQUIRED_REQUEST_KEYS:
 			if not request.has_key(k):
@@ -89,11 +94,4 @@ class GraphRequest(object):
 			for k,v in self.request['tags'].items():
 				serie['query']['tags'][k] = v
 
-	def __adjustTimeWindow(self):
-		if self.request.get('end'):
-			if self.request['graphType'] == 'pie':
-				self.request['start'] = self.request['end']-300
-		else:
-			if self.request['graphType'] == 'pie':
-				self.request['start'] = int(time.time()-300)
 

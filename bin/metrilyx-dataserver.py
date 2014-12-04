@@ -4,7 +4,7 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(
 						os.path.abspath(__file__))))
-import json
+import ujson as json
 import time
 import logging
 
@@ -25,16 +25,30 @@ from metrilyx.dataserver.dataproviders import getEventDataProvider, \
 
 LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s %(lineno)d] %(message)s"
 
-def spawnWebsocketServer(uri, logLevel, protocol, externalPort=None):
-	if logLevel == "DEBUG":
-		isDebug = True
-	else:
-		isDebug = False
 
-	factory = WebSocketServerFactory(uri, debug=isDebug, externalPort=externalPort)
+class MetrilyxWebSocketServerFactory(WebSocketServerFactory):
+
+	clients = []
+
+	def addClient(self, client):
+		self.clients.append(client)
+		logger.warning("WebSocket clients: %d" %(len(self.clients)))
+
+	def removeClient(self, client):
+		self.clients.remove(client)
+		logger.warning("WebSocket clients: %d" %(len(self.clients)))
+
+
+def spawnWebsocketServer(uri, logLevel, protocol, externalPort=None):
+	#if logLevel == "DEBUG":
+	#	isDebug = True
+	#else:
+	#	isDebug = False
+
+	factory = MetrilyxWebSocketServerFactory(uri, debug=False, externalPort=externalPort)
 	factory.protocol = protocol
 	factory.setProtocolOptions(perMessageCompressionAccept=acceptedCompression)
-	
+
 	listenWS(factory)
 	reactor.run()
 
@@ -44,26 +58,13 @@ def spawnServers(protocol):
 	for i in range(opts.serverCount):
 		uri = "%s:%d" %(opts.uri, opts.startPort+i)
 		proc = multiprocessing.Process(
-						target=spawnWebsocketServer, 
+						target=spawnWebsocketServer,
 						args=(uri, opts.logLevel, protocol, opts.externalPort))
 		proc.start()
-		logger.info("Started server - %s" %(uri))
+		logger.warning("Started server - %s" %(uri))
 		procs.append(proc)
 	return procs
 
-"""
-def getPerfDataProvider():
-	mc = config['dataprovider']['loader_class'].split(".")
-	mod = __import__('metrilyx.dataserver.dataproviders.perf.%s'%(
-									".".join(mc[:-1])), fromlist=['*']) 
-	return eval("mod.%s(config['dataprovider'])" %(mc[-1]))
-
-def getEventDataProvider():
-	mc = config['annotations']['dataprovider']['loader_class'].split(".")
-	mod = __import__('metrilyx.dataserver.dataproviders.events.%s' %(
-									".".join(mc[:-1])), fromlist=['*'])
-	return eval("mod.%s(config['annotations']['dataprovider'])" %(mc[-1]))
-"""
 
 def getLogger(level):
 	try:
@@ -78,7 +79,7 @@ def getLogger(level):
 if __name__ == '__main__':
 
 	parser = OptionParser()
-	parser.add_option("-l", "--log-level", dest="logLevel", default="INFO", 
+	parser.add_option("-l", "--log-level", dest="logLevel", default="INFO",
 		help="Logging level.")
 	parser.add_option("-u", "--uri", dest="uri", default="ws://localhost",
 		help="ws://<hostname>")
@@ -97,23 +98,24 @@ if __name__ == '__main__':
 		observer = log.PythonLoggingObserver()
 		observer.start()
 	logger = getLogger(opts.logLevel)
-	
+
 	if not opts.uri:
 		print " --uri required!"
 		parser.print_help()
 		sys.exit(1)
 
 	if opts.serverCount == 0:
-		logger.info("Using auto-spawn count.")
+		logger.warning("Using auto-spawn count.")
 		opts.serverCount = multiprocessing.cpu_count()-1
 		if opts.serverCount == 0:
 			opts.serverCount = 1
+
 	try:
 		perfDP = getPerfDataProvider()
-		logger.info('Performance dataprovider [loaded]')
+		logger.warning('Performance dataprovider [loaded]')
 		if config['annotations']['enabled']:
 			eventDP = getEventDataProvider()
-			logger.info('Event dataprovider [loaded]')
+			logger.warning('Event dataprovider [loaded]')
 
 			class EventGraphProtocol(EventGraphServerProtocol):
 				dataprovider = perfDP
@@ -129,13 +131,13 @@ if __name__ == '__main__':
 		logger.error("Could not set dataprovider and/or protocol: %s" %(str(e)))
 		sys.exit(2)
 
-	logger.info("Protocol: %s" %(str(proto)))
+	logger.warning("Protocol: %s" %(str(proto)))
 
-	logger.info("Spawning %d server/s..." %(opts.serverCount))
+	logger.warning("Spawning %d server/s..." %(opts.serverCount))
 	server_procs = spawnServers(proto)
 
 	try:
 		for p in server_procs:
 			p.join()
 	except KeyboardInterrupt:
-		logger.info("Stopping...")
+		logger.warning("Stopping...")
