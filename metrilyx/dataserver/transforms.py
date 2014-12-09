@@ -105,6 +105,7 @@ class BasicSerie(object):
             obj      : dict containing atleast 'tags' and 'metric' keys
         """
         flat_obj = self._flatten_dict(obj)
+        ## set unique tags string
         if unique_tags_str:
             uniqueTagsString = unique_tags_str %(flat_obj)
 
@@ -114,17 +115,18 @@ class BasicSerie(object):
             try:
                 return eval(alias_str[1:])(flat_obj)
             except Exception,e:
-                logger.warn("could not transform alias: %s %s %s" %(alias_str, obj['metric'], str(e)))
+                logger.warn("Failed to transform alias: %s %s %s" %(alias_str, obj['metric'], str(e)))
                 normalizedAlias = obj['metric']
         else:
             try:
+                ## string interpolation if any.
                 normalizedAlias = alias_str %(flat_obj)
             except Exception, e:
-                logger.error("could not normalize alias: %s %s" %(obj['metric'], str(e)))
-                normalizedAlias =  obj['metric']
+                logger.error("Failed to normalize alias: %s %s" %(obj['metric'], str(e)))
+                #normalizedAlias =  obj['metric']
 
         if unique_tags_str:
-            if normalizedAlias == obj['metric']:
+            if normalizedAlias == obj['metric'] or normalizedAlias == alias_str:
                 normalizedAlias += " " + uniqueTagsString
             elif normalizedAlias == "":
                 normalizedAlias = obj['metric'] + " " + uniqueTagsString
