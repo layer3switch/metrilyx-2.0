@@ -14,6 +14,11 @@ LICENSE = "LICENSE.txt"
 SETUP_REQUIRES = ["six>=1.7.3"]
 INSTALL_REQUIRES = [ p for p in open('REQUIREMENTS.txt').read().split('\n') if p != '' and not p.startswith('#') ]
 
+def get_version():
+    fh = open('VERSION')
+    version = fh.read().strip("\n").strip()
+    close(fh)
+    return version
 
 def fileListBuilder(dirPath, regexp='*'):
     matches = []
@@ -58,7 +63,7 @@ DATA_FILES += recursiveFileListBuilder('www', prefix='/opt/metrilyx/')
 
 setup(
     name='metrilyx',
-    version='2.4.0',
+    version=get_version(),
     url='https://github.com/TicketMaster/metrilyx-2.0.git',
     description=DESCRIPTION,
     long_description=DESCRIPTION,
