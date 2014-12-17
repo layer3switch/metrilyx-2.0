@@ -17,7 +17,7 @@ INSTALL_REQUIRES = [ p for p in open('REQUIREMENTS.txt').read().split('\n') if p
 def get_version():
     fh = open('VERSION')
     version = fh.read().strip("\n").strip()
-    close(fh)
+    fh.close()
     return version
 
 def fileListBuilder(dirPath, regexp='*'):
