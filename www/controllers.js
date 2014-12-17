@@ -91,7 +91,8 @@ metrilyxControllers.controller('sidePanelController', [
 
 						setGlobalAlerts({message: 'Imported '+rslt._id});
 						flashAlertsBar();
-						document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
+						document.getElementById('side-panel')
+							.dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
 					});
 
 				} catch(e) {
@@ -102,21 +103,24 @@ metrilyxControllers.controller('sidePanelController', [
 		}
 
 		$scope.loadList();
-		document.getElementById('side-panel').addEventListener('refresh-model-list', function(evt){$scope.loadList();});
+		document.getElementById('side-panel')
+			.addEventListener('refresh-model-list', function(evt){ $scope.loadList(); });
 	}
 ]);
 metrilyxControllers.controller('pageController', [
-	'$scope', '$routeParams', '$location', 'Schema', 'Model', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions', 'CtrlCommon', 'RouteManager', 'ModelManager',
-	function($scope, $routeParams, $location, Schema, Model, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions, CtrlCommon, RouteManager, ModelManager) {
+	'$scope', '$routeParams', '$location', 'Schema', 'Model', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationsManager', 'CtrlCommon', 'RouteManager', 'ModelManager',
+	function($scope, $routeParams, $location, Schema, Model, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationsManager, CtrlCommon, RouteManager, ModelManager) {
 
 		$scope.modelType = "";
 		$scope.modelGraphIds = [];
 
 		$scope.tagsOnPage = {};
 
-		var annoOptions 	= new AnnotationOptions($scope);
-		var compTemplates 	= new ComponentTemplates($scope);
 		var timeWindow 		= new TimeWindow($scope);
+		
+		var annoManager 	= new AnnotationsManager($scope);
+		
+		var compTemplates 	= new ComponentTemplates($scope);
 		var wsdp 			= new WebSocketDataProvider($scope);
 		var ctrlCommon		= new CtrlCommon($scope);
 		var routeMgr 		= new RouteManager($scope);
@@ -164,6 +168,9 @@ metrilyxControllers.controller('pageController', [
 						} else {
 							$scope.model = result;
 							$scope.modelGraphIds = getModelGraphIds();
+
+							/* get annotations */
+							annoManager.connect($scope.modelGraphIds.length);
 						}
 					});
 				} else {

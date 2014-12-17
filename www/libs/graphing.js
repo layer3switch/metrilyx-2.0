@@ -125,6 +125,17 @@ var NON_TS_TOOLTIP_OPTS = {
 $.extend(DEFAULT_CHART_OPTS.BASIC, {xAxis: DEFAULT_CHART_OPTS.AXIS}, true);
 $.extend(DEFAULT_CHART_OPTS.BASIC.xAxis, {opposite:true}, true);
 
+function equalAnnotations(obj1, obj2) {
+    try {
+        return obj1.eventType === obj2.eventType && 
+            obj1.message === obj2.message && 
+            obj1.timestamp === obj2.timestamp &&
+            obj1.color === obj2.color 
+    } catch(e) {
+        return false
+    }
+}
+
 function onAnnotationClick(event) {
     var ead = $('#event-anno-details');
     var newAnno = {
@@ -138,7 +149,7 @@ function onAnnotationClick(event) {
     scope = angular.element($(ead)).scope();
     if(scope) {
         scope.$apply(function(){
-            if(equalObjects(scope.selectedAnno, newAnno) && ead.hasClass('open')) {
+            if(equalAnnotations(scope.selectedAnno, newAnno) && ead.hasClass('open')) {
                 ead.removeClass('open');
             } else {
                 scope.selectedAnno = newAnno;
@@ -146,7 +157,7 @@ function onAnnotationClick(event) {
             }
         });
     } else {
-        console.warning('Counld not get scope for #event-anno-details!');
+        console.warning('Couldnt not get scope for #event-anno-details!');
     }
 }
 
@@ -447,12 +458,24 @@ MetrilyxGraph.prototype.destroyGraph = function() {
     this._chart.destroy();
     this._domNode.html("<table class='gif-loader-table' style='color:#ccc'><tr><td>Drag metrics here from search</td></tr></table>");
 }
+/*
+function MetrilyxAnnotation(id, annoData, evtAnnoTypes) {
+    this._data = [];
+    this._chartElem = $("[data-graph-id='"+id+"']");
+    this._statusElem = $("[data-graph-status='"+id+"']");
+    this._evtAnnoTypes = evtAnnoTypes;
 
-function MetrilyxAnnotation(obj) {
-    this._data = obj;
-    this._chartElem = $("[data-graph-id='"+this._data._id+"']");
-    this._statusElem = $("[data-graph-status='"+this._data._id+"']");
+    for(var i=0;i< annoData.length; i++) {
+        this._data.push({
+            x: annoData[i].timestamp*1000,
+            title: annoData[i].type,
+            text: annoData[i].message,
+            data: annoData[i].data,
+            color: evtAnnoTypes[annoData[i].type.toLowerCase()].metadata.color
+        });
+    }
 }
+
 MetrilyxAnnotation.prototype.sortAnno = function(a,b) {
     if (a.x < b.x) return -1;
     if (a.x > b.x) return 1;
@@ -467,14 +490,16 @@ MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
                     x: chrt.series[serieIdx].data[i].x,
                     title: chrt.series[serieIdx].data[i].title,
                     text: chrt.series[serieIdx].data[i].text,
-                    data: chrt.series[serieIdx].data[i].data
+                    data: chrt.series[serieIdx].data[i].data,
+                    color: this._evtAnnoTypes[chrt.series[serieIdx].data[i].title.toLowerCase()].metadata.color
                 });
             } else if(!equalObjects(chrt.series[serieIdx].data[i], this._data.annoEvents.data[0])) {
                 ndata.push({
                     x: chrt.series[serieIdx].data[i].x,
                     title: chrt.series[serieIdx].data[i].title,
                     text: chrt.series[serieIdx].data[i].text,
-                    data: chrt.series[serieIdx].data[i].data
+                    data: chrt.series[serieIdx].data[i].data,
+                    color: this._evtAnnoTypes[chrt.series[serieIdx].data[i].title.toLowerCase()].metadata.color
                 });
             } else {break;}
         } catch(e) {
@@ -487,6 +512,7 @@ MetrilyxAnnotation.prototype.appendData = function(chrt, serieIdx) {
     }
     chrt.series[serieIdx].setData(ndata.sort(this.sortAnno));
 }
+
 MetrilyxAnnotation.prototype.queueDataForRendering = function() {
     // queue annotations until graph is rendered with metric data //
     var ma = this;
@@ -498,7 +524,7 @@ MetrilyxAnnotation.prototype.queueDataForRendering = function() {
             $(ma._statusElem).html("<span class='small'>waiting for graph to initialize (annotations)...</span>");
             ma.queueDataForRendering();
         } else {
-            wsf = new SeriesFormatter(ma._data.annoEvents.data);
+            //wsf = new SeriesFormatter(ma._data.annoEvents.data);
             var idx = -1;
             for(var i=0; i < wchrt.series.length; i++) {
                 if(wchrt.series[i].type === 'flags') {
@@ -509,8 +535,19 @@ MetrilyxAnnotation.prototype.queueDataForRendering = function() {
                 }
             }
             if(idx < 0) {
-                var sf = new SeriesFormatter(ma._data.annoEvents.data);
-                wchrt.addSeries(sf.flagsSeries(ma._data.annoEvents.eventType));
+                //var sf = new SeriesFormatter(ma._data.annoEvents.data);
+                var sf = new SeriesFormatter(ma._data);
+                //wchrt.addSeries(sf.flagsSeries(ma._data.annoEvents.eventType));
+                //console.log(this._evtAnnoTypes);
+                wchrt.addSeries(
+                    sf.flagsSeries({ 
+                        name: ma._data[0].title,
+                        id: ma._data[0].title.toLowerCase(),
+                        color: ma._evtAnnoTypes[ma._data[0].title.toLowerCase()].metadata.color
+                    })
+                );
+
+
             } else {
                 ma.appendData(wchrt, idx);
             }
@@ -518,12 +555,11 @@ MetrilyxAnnotation.prototype.queueDataForRendering = function() {
     }, 3000);
 }
 MetrilyxAnnotation.prototype.applyData = function() {
-    /*
-        Graph must be initialized before adding annotations or they disappear.
-        Queue the data until graph has been initialized with performance data.
-    */
+    //Graph must be initialized before adding annotations or they disappear.
+    //Queue the data until graph has been initialized with performance data.
     this.queueDataForRendering();
 }
+*/
 
 /*
  * Preps data from server (metrilyx graph objects) for highcharts
@@ -664,9 +700,9 @@ ChartOptions.prototype.lineChartDefaults = function(extraOpts) {
     }
 
     if(this.flagSeries) {
-        $.extend(opts,{'series':this._sfmt.flagsSeries(this._graph.annoEvents.eventType)},true);
+        $.extend(opts, {'series':this._sfmt.flagsSeries(this._graph.annoEvents.eventType, this._graph.annoEvents.eventType.toLowerCase()) },true);
     } else {
-        $.extend(opts,{'series':this._sfmt.lineSeries(this._graph.multiPane)},true);
+        $.extend(opts, {'series':this._sfmt.lineSeries(this._graph.multiPane)},true);
     }
     return opts;
 }
@@ -732,15 +768,17 @@ SeriesFormatter.prototype.seriesTags = function() {
     }
     return tags;
 }
-SeriesFormatter.prototype.flagsSeries = function(eventType) {
-    return {
-        name: eventType,
+SeriesFormatter.prototype.flagsSeries = function(opts) {
+    return $.extend({}, opts, {
+        /*name: annoType,
+        id: annoTypeId,
+        color: annoColor,*/
         type:'flags',
         data: this.metSeries,
         shape: 'squarepin',
         index: 0,
         style: {
-            color: CHART_TEXT_COLOR,
+            color: CHART_TEXT_COLOR
         },
         y: -48,
         stackDistance: 20,
@@ -750,7 +788,7 @@ SeriesFormatter.prototype.flagsSeries = function(eventType) {
         events: {
             click: onAnnotationClick
         }
-    };
+    }, true);
 }
 SeriesFormatter.prototype.lineSeries = function(isMultiPane) {
     out = [];
@@ -896,7 +934,11 @@ function keyCount(obj) {
     return size;
 };
 function equalObjects(obj1, obj2) {
-    if(keyCount(obj1) != keyCount(obj2)) {
+    if(obj1 === undefined && obj2 === undefined) return true;
+    else if(obj1 === undefined && obj2 !== undefined) return false;
+    else if(obj1 !== undefined && obj2 === undefined) return false;
+
+    if(Object.keys(obj1).length !== Object.keys(obj2).length) {
         return false;
     }
     for(var i in obj1) {

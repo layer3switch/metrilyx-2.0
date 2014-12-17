@@ -407,7 +407,7 @@ input[ng-model='modelQuery'] {
 [ng-repeat='metric in metricQueryResult'] {
 	word-wrap:break-word;
 }
-[ng-repeat='evtType in globalAnno.eventTypes'].removable-tag,
+[ng-repeat="(typeId, aetype) in eventAnnoTypes"].removable-tag,
 [ng-repeat='evtType in graph.annoEvents.eventTypes'].removable-tag {
 	border:1px solid #888;
 	border-radius:26px;

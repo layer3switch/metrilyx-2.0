@@ -8,7 +8,8 @@ var app = angular.module('app', [
 	'pageLayout',
 	'metrilyxHelperFactories',
 	'metrilyxControllers',
-	'metrilyxServices'
+	'metrilyxServices',
+	'metrilyxAnnotations'
 ]);
 
 app.config(['$sceProvider', function($sceProvider) {
@@ -303,7 +304,7 @@ app.directive('pageId', function() {
 		}
 	};
 });
-
+/*
 app.directive('globalAnnotations', function() {
 	return {
 		restrict: 'A',
@@ -369,7 +370,7 @@ app.directive('globalAnnotations', function() {
 		}
 	};
 });
-
+*/
 app.directive('tooltipArrow', function() {
 	return {
 		restrict: 'A',

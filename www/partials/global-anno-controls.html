@@ -5,11 +5,11 @@
 			<div>
 		    	<div class="small text-left marginb5"><b>Tags :</b></div>
 		    	<ul style="margin-bottom:5px;padding-left:10px">
-					<li ng-repeat="(tk,tv) in globalAnno.tags" class="padtb3">
+					<li ng-repeat="(tk,tv) in annoFilter.tags" class="padtb3">
 		    			<div class="input-group input-group-sm">
 		    				<span class="input-group-addon trans">{{tk}}</span>
-		    				<input ng-model="globalAnno.tags[tk]" type="text" title="Edit tag values" class="form-control trans">
-		    				<span class="input-group-addon trans interactive pointer" ng-click="removeTag(globalAnno.tags, tk);">		
+		    				<input ng-model="annoFilter.tags[tk]" type="text" title="Edit tag values" class="form-control trans">
+		    				<span class="input-group-addon trans interactive pointer" ng-click="removeTag(annoFilter.tags, tk);">		
 		    					<i class="glyphicon glyphicon-remove"></i>
 		    				</span>
 		    			</div>
@@ -20,31 +20,31 @@
 		    	<span class="input-group-addon nobg" style="color:#ccc;border-color:#888;padding-left:0">
 		    		<i class="glyphicon glyphicon-search"></i>
 		    	</span>
-		    	<input type="text" class="form-control dark" ng-model="globalAnno.tags" tagkeyvalue style="border-color:#888 !important;border-radius:30px;">
+		    	<input type="text" class="form-control dark" ng-model="annoFilter.tags" tagkeyvalue style="border-color:#888 !important;border-radius:30px;">
 		    </div>
 	    </div>
 	    <div class="padlr10" style="border-top:1px solid #808080;">
 		    <div class="padt10">
 				<div class="small"><b>Types :</b></div>
 				<div class="padl7 padb10">
-					<div ng-repeat="evtType in globalAnno.eventTypes" class="small removable-tag">
-						<a href="javascript:void(0)" style="color:#606060" class="interactive" ng-click="annoEventTypes.push(globalAnno.eventTypes.splice($index,1)[0])">
+					<div ng-repeat="(typeId, aetype) in eventAnnoTypes" class="small removable-tag" ng-if="aetype.selected===true"	>
+						<a href="javascript:void(0)" style="color:#606060" class="interactive" ng-click="aetype.selected=false;">
 							<i class="glyphicon glyphicon-remove"></i>
 						</a>
-						<span>{{evtType}}</span>
+						<span>{{aetype.name}}</span>
 					</div>
 				</div>
 				<div style="clear:both;"></div>
 		    	<div style="border-top: 1px solid #606060">
-		    		<div class="small interactive event-type-item" ng-repeat="aetype in annoEventTypes" ng-click="globalAnno.eventTypes.push(annoEventTypes.splice($index,1)[0])">
+		    		<div class="small interactive event-type-item" ng-repeat="(typeId, aetype) in eventAnnoTypes" ng-click="aetype.selected=true;" ng-if="aetype.selected===false">
 		    			<span class="interactive glyphicon glyphicon-plus"></span>
-		    			<span class="padl5">{{aetype}}</span>
+		    			<span class="padl5">{{aetype.name}}</span>
 		    		</div>
 		    	</div>
 			</div>
 		</div>
 		<div class="padt10 padlr10 marginlr10" style="border-top:1px solid #808080!important">
-			<div class="gcontrols-apply-btn pointer" title="Apply event annotation changes" ng-click="setAnnotations()" >
+			<div class="gcontrols-apply-btn pointer" title="Apply event annotation changes" ng-click="setAnnotationsFilter(eventAnnoTypes, annoFilter.tags)" >
 				<span>Apply</span>
 			</div>
 		</div>
