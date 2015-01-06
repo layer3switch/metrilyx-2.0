@@ -333,6 +333,7 @@ angular.module('graphing', [])
 		t.getUpdateQuery = getUpdateQuery;
 		t.checkDataErrors = checkDataErrors;
 
+		// FIX: scope is not ready here
 		scope.addAnnotationListener(onAnnotationData);
 
 		scope.$on("$destroy", function( event ) { clearTimeout(currTimer); });

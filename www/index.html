@@ -9,7 +9,7 @@
 		<link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css">
 		<link rel="stylesheet" href="libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css">
 
-		<script src="config.js"></script>
+		<script src="app/config.js"></script>
 
 		<script src="libs/jquery/jquery-1.10.2.min.js"></script>
 		<script src="libs/jquery/jquery-addons.js"></script>
@@ -28,15 +28,17 @@
 
 		<script src="libs/angular-sortable.js"></script>
 
-		<script src="app.js"></script>
-		<script src="controllers.js"></script>
-		<script src="services.js"></script>
-		<script src="libs/angular-factories.js"></script>
-		<script src="libs/angular-graphing.js"></script>
-		<script type="text/javascript" src="libs/angular-annotations.js"></script>
+		<script type="text/javascript" src="app/app.js"></script>
+		<script type="text/javascript" src="app/controllers.js"></script>
+		<script type="text/javascript" src="app/services.js"></script>
+		<script type="text/javascript" src="app/annotations/Annotations.js"></script>
+		
+		<script type="text/javascript" src="libs/angular-factories.js"></script>
+		<script type="text/javascript" src="libs/angular-graphing.js"></script>
+		
 
 	</head>
-	<body ng-app="app">
+	<body>
 		<div id="side-panel" ng-controller="sidePanelController" class="animated">
 			<div class="model-list-ctrl-bar animated">
 				<div class="page-selector-header">
@@ -105,7 +107,6 @@
 		</div><!-- END #side-panel -->
 
 		<div ng-view></div>
-		<!--<div ng-include="jsonHtml"></div>-->
 		<div id="global-alerts" class="alert"></div>
 	</body>
 </html>

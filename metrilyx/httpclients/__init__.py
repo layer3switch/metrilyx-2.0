@@ -20,7 +20,7 @@ from metrilyx.metrilyxconfig import config
 from ..dataserver.transforms import MetrilyxSerie
 
 from ..dataserver.transforms import MetrilyxAnalyticsSerie, SecondariesGraph
-from ..dataserver.dataproviders import re_504
+from ..dataserver.dataproviders.opentsdb import re_504
 
 from pprint import pprint
 

@@ -26,37 +26,13 @@ angular.module('metrilyxServices', ['ngResource'])
         }
     };
 }])
-.factory('Configuration', ['$http',
-	function($http) {
-		var cache = null;
-		
-		return {
-			getConfig: function(callback) {
-
-				var dfd = $.Deferred();
-
-				if(cache !== null) {
-					
-					dfd.resolve(cache);
-				} else {
-					$http.get('/api/config').success(function(response) {
-
-						dfd.resolve(response);
-					}).error(function(err) {
-						
-						console.error(err)
-					})
-				}
-				dfd.done(callback)
-			}
-		}
-	}
-])
 .factory('Metrics', ['$http', 'Auth', 'Configuration', function($http, Auth, Configuration) {
+	/*
 	var queryURL = "";
 	Configuration.getConfig(function(config) {
 		queryURL = config.metric_search.uri + "/metrics?q=";
 	});
+ 	*/
 	var cache = {};
 
     return {
@@ -67,7 +43,8 @@ angular.module('metrilyxServices', ['ngResource'])
 			} else if(cache[query] === undefined){
 			    Auth.clearCredentials();
 			    // TODO: check query url
-			    $http.get(queryURL+query)
+			    //$http.get(queryURL+query)
+			    $http.get(Configuration.metric_search.uri+query)
 			    	.success(function(res){
 						cache[query] = res;
 						dfd.resolve(res);
@@ -155,3 +132,30 @@ angular.module('metrilyxServices', ['ngResource'])
 		}
 	}
 ]);
+/*
+.factory('Configuration', ['$http',
+	function($http) {
+		var cache = null;
+		
+		return {
+			getConfig: function(callback) {
+
+				var dfd = $.Deferred();
+
+				if(cache !== null) {
+					
+					dfd.resolve(cache);
+				} else {
+					$http.get('/api/config').success(function(response) {
+
+						dfd.resolve(response);
+					}).error(function(err) {
+						
+						console.error(err)
+					})
+				}
+				dfd.done(callback)
+			}
+		}
+	}
+])*/

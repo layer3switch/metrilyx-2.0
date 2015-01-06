@@ -10,9 +10,9 @@ from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.websocket.compress import PerMessageDeflateOffer, PerMessageDeflateOfferAccept
 
 from ..httpclients import AsyncHttpJsonClient, MetrilyxGraphFetcher, checkHttpResponse
-from transforms import MetrilyxSerie, EventSerie, MetrilyxAnalyticsSerie
+from transforms import MetrilyxSerie, MetrilyxAnalyticsSerie
 
-from ..dataserver import GraphRequest, GraphEventRequest
+from datarequest import GraphRequest
 
 from pprint import pprint
 
@@ -184,8 +184,8 @@ class GraphServerProtocol(BaseGraphServerProtocol):
         self.__expirerDeferred = reactor.callLater(self.__activeFetchersTimeout, self.__expireActiveFetchers)
 
     def onClose(self, wasClean, code, reason):
-        logger.info("Connection closed: wasClean=%s code=%s reason=%s" %(
-                                str(wasClean), str(code), str(reason)))
+        logger.info("Connection closed: wasClean=%s code=%s reason=%s" % 
+                                (str(wasClean), str(code), str(reason)))
 
         for k,d in self.__activeFetchers.items():
             d.cancelRequests()
@@ -197,50 +197,3 @@ class GraphServerProtocol(BaseGraphServerProtocol):
             self.__expirerDeferred.cancel()
         except Exception:
             pass
-
-
-class EventGraphServerProtocol(GraphServerProtocol):
-    eventDataprovider = None
-
-    def processRequest(self, graphOrAnnoRequest):
-        if isinstance(graphOrAnnoRequest, GraphRequest):
-            # submit graph data queries
-            self.submitPerfQueries(graphOrAnnoRequest)
-        elif graphOrAnnoRequest['_id'] == 'annotations':
-            # submit annnotation queries
-            self.submitEventQueries(graphOrAnnoRequest)
-
-    def eventResponseCallback(self, data, response, url, eventType, request):
-        dct = checkHttpResponse(data, response, url)
-        if dct.has_key('error'):
-            logger.error(str(dct))
-            return
-
-        eas = EventSerie(self.eventDataprovider.responseCallback(dct['data']), eventType, request)
-        if len(eas.data['annoEvents']['data']) < 1:
-            logger.info("Event annotation: type=%s no data" %(eventType))
-            return
-
-        self.sendMessage(json.dumps(eas.data))
-        logger.info("Event annotation: type=%s count=%d" %(eventType,
-                                    len(eas.data['annoEvents']['data'])))
-
-    def eventReponseErrback(self, error, url, eventType, request):
-        logger.error(str(error))
-
-    def submitEventQueries(self, request):
-        ## TODO: this will raise an exception
-        if len(request['annoEvents']['tags'].keys()) < 1 or \
-                    len(request['annoEvents']['eventTypes']) < 1:
-            return
-
-        graphEvtReq = GraphEventRequest(request)
-
-        for graphEvent in graphEvtReq.split():
-            for (url, method, query) in self.eventDataprovider.getQuery(graphEvent):
-                a = AsyncHttpJsonClient(uri=url, method=method, body=query)
-                a.addResponseCallback(self.eventResponseCallback,
-                        url, graphEvent['eventTypes'][0], request)
-                a.addResponseErrback(self.eventReponseErrback,
-                        url, graphEvent['eventTypes'][0], request)
-

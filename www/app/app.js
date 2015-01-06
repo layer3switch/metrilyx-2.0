@@ -12,6 +12,33 @@ var app = angular.module('app', [
 	'metrilyxAnnotations'
 ]);
 
+(function() {
+	// Bootstrap the app with the config fetched via http //
+	var configConstant = "Configuration";
+	var configUrl      = "/api/config";
+
+    function fetchAndInjectConfig() {
+        var initInjector = angular.injector(["ng"]);
+        var $http = initInjector.get("$http");
+
+        return $http.get(configUrl).then(function(response) {
+            app.constant(configConstant, response.data);
+        }, function(errorResponse) {
+            // Handle error case
+            console.log(errorResponse);
+        });
+    }
+
+    function bootstrapApplication() {
+        angular.element(document).ready(function() {
+            angular.bootstrap(document, ["app"]);
+        });
+    }
+
+    fetchAndInjectConfig().then(bootstrapApplication);
+    
+}());
+
 app.config(['$sceProvider', function($sceProvider) {
     $sceProvider.enabled(false);
 }]);

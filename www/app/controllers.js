@@ -404,13 +404,13 @@ metrilyxControllers.controller('pageController', [
 }]);
 
 metrilyxControllers.controller('adhocGraphController', [
-	'$scope', 'Schema', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions', 'CtrlCommon', 'RouteManager', 'URLSetter',
-	function($scope, Schema, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions, CtrlCommon, RouteManager, URLSetter) {
+	'$scope', 'Schema', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationsManager', 'CtrlCommon', 'RouteManager', 'URLSetter',
+	function($scope, Schema, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationsManager, CtrlCommon, RouteManager, URLSetter) {
 
 		$scope.modelType 		= "adhoc";
 		$scope.modelGraphIds 	= [];
 
-		var annoOptions 	= new AnnotationOptions($scope);
+		var annoOptions 	= new AnnotationsManager($scope);
 		var wsdp 			= new WebSocketDataProvider($scope);
 		var compTemplates 	= new ComponentTemplates($scope);
 		var timeWindow 		= new TimeWindow($scope);

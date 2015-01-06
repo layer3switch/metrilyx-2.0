@@ -559,12 +559,10 @@ angular.module("metrilyxHelperFactories", [])
 
         function getWebSocket(callback) {
             __connectState = "connecting";
-            Configuration.getConfig(function(wsConfig) {
 
-                if ("WebSocket" in window) callback(new WebSocket(wsConfig.websocket.uri));
-                else if ("MozWebSocket" in window) callback(new MozWebSocket(wsConfig.websocket.uri));
-                else callback(null);
-            });
+            if ("WebSocket" in window) callback(new WebSocket(Configuration.websocket.uri));
+            else if ("MozWebSocket" in window) callback(new MozWebSocket(Configuration.websocket.uri));
+            else callback(null);
         }
 
         function onOpenWssock() {
