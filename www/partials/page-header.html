@@ -130,13 +130,7 @@
 						</div>
 					</div>
 					<div class="col-md-10" style="padding:0">
-						<div>
-							<span style="font-size:13px;font-weight:bold;color:#777" class="pointer interactive" onclick="$(this).next().children().toggle()">
-								<span>Annotations</span>
-								<span class="caret"></span>
-							</span>
-							<ng-include src="annoControlsHtml"></ng-include>
-						</div>
+						<div ng-model="annoFilter" annotation-editor style="z-index:1;"></div>
 					</div>
 				</div>
 			</div>

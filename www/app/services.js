@@ -44,7 +44,7 @@ angular.module('metrilyxServices', ['ngResource'])
 			    Auth.clearCredentials();
 			    // TODO: check query url
 			    //$http.get(queryURL+query)
-			    $http.get(Configuration.metric_search.uri+query)
+			    $http.get(Configuration.metric_search.uri + "/metrics?q=" + query)
 			    	.success(function(res){
 						cache[query] = res;
 						dfd.resolve(res);

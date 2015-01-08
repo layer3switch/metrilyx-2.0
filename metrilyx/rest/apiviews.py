@@ -99,7 +99,8 @@ class ConfigurationView(APIView):
 
 	def __annotationsConfig(self):
 		if config["annotations"]:
-			pprint(config["annotations"])
+			return config["annotations"]
+		return {}
 
 	def __metricSearchConfig(self):
 		if config['cache']['enabled']:

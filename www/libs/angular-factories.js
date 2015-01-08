@@ -12,12 +12,12 @@ angular.module("metrilyxHelperFactories", [])
         function initialize() {
             if(scope.modelType == "adhoc" || scope.modelType == "") {
 
+                //annoControlsHtml        : connectionPool.nextConnection()+partialsPrefix+"/global-anno-controls.html",
+                //eventAnnoDetailsHtml    : connectionPool.nextConnection()+partialsPrefix+"/event-anno-details.html",
                 $.extend(templates, {
                     editPanelHtml           : connectionPool.nextConnection()+partialsPrefix+"/edit-panel.html",
                     thresholdsHtml          : connectionPool.nextConnection()+partialsPrefix+"/thresholds.html",
                     pageHeaderHtml          : connectionPool.nextConnection()+partialsPrefix+"/page-header.html",
-                    annoControlsHtml        : connectionPool.nextConnection()+partialsPrefix+"/global-anno-controls.html",
-                    eventAnnoDetailsHtml    : connectionPool.nextConnection()+partialsPrefix+"/event-anno-details.html",
                     metricOperationsHtml    : connectionPool.nextConnection()+partialsPrefix+"/metric-operations.html",
                     pageFooterHtml          : connectionPool.nextConnection()+partialsPrefix+"/page-footer.html",
                     graphFooterHtml         : connectionPool.nextConnection()+partialsPrefix+"/graph-footer.html"
@@ -375,7 +375,7 @@ angular.module("metrilyxHelperFactories", [])
         initialize();
 
         t.getParams = getParams;
-
+        //console.log($routeParams);
     }
     return (RouteManager);
 }])
@@ -434,17 +434,23 @@ angular.module("metrilyxHelperFactories", [])
 
                 srch.start = scope.timeType;
             }
-            /*
-            var uAnnoTagsStr = dictToCommaSepStr(scope.globalAnno.tags, ":");
 
+            //var annoTagsStr = dictToCommaSepStr(scope.annoFilter.tags, ":");
+            //if(annoTagsStr != "") {
+             //   srch.annotationTags  = annoTagsStr;
+            //}
+            //var uAnnoTagsStr = dictToCommaSepStr(scope.globalAnno.tags, ":");
+            /*
             if(scope.globalAnno.eventTypes.length > 0 && uAnnoTagsStr != "") {
 
                 srch.annotationTypes = scope.globalAnno.eventTypes.join("|");
                 srch.annotationTags = uAnnoTagsStr;
             }
             */
+            //var tmp = $location.search();
+            console.log('setURL()');
 
-            $location.search(srch);
+            $location.search($.extend(false, {}, $location.search(), srch, true));
         }
 
         t.setURL = setURL;

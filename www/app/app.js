@@ -4,6 +4,7 @@ var app = angular.module('app', [
 	'ngRoute',
 	'ui.sortable',
 	'timeframe',
+	'adhoc',
 	'graphing',
 	'pageLayout',
 	'metrilyxHelperFactories',
@@ -12,8 +13,10 @@ var app = angular.module('app', [
 	'metrilyxAnnotations'
 ]);
 
+/*
+ * Bootstrap the app with the config fetched via http
+ */
 (function() {
-	// Bootstrap the app with the config fetched via http //
 	var configConstant = "Configuration";
 	var configUrl      = "/api/config";
 
@@ -36,7 +39,6 @@ var app = angular.module('app', [
     }
 
     fetchAndInjectConfig().then(bootstrapApplication);
-    
 }());
 
 app.config(['$sceProvider', function($sceProvider) {
@@ -59,7 +61,7 @@ app.config(['$routeProvider',
 			.when('/graph', {
 				templateUrl: 'partials/adhoc-graph.html',
 				controller: 'adhocGraphController',
-				reloadOnSearch: false
+				/*reloadOnSearch: false*/
 			})
 			.when('/:pageId', {
 				templateUrl: 'partials/page.html',

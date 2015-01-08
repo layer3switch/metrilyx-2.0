@@ -424,7 +424,10 @@ angular.module('graphing', [])
 							scope.requestData(q);
 						}
 
-						if(scope.modelType == 'adhoc') scope.setURL(ngModel.$modelValue);
+						if(scope.modelType == 'adhoc') {
+							console.log('init graph: setURL');
+							scope.setURL(ngModel.$modelValue);
+						}
 						return;
 					}
 
@@ -439,14 +442,20 @@ angular.module('graphing', [])
 						scope.requestData(q);
 						wsHelper.setSerieStatus(q,'querying');
 
-						if(scope.modelType == 'adhoc') scope.setURL(ngModel.$modelValue);
+						if(scope.modelType == 'adhoc') {
+							console.log('setURL');
+							scope.setURL(ngModel.$modelValue);
+						}
 					} else {
 
 						var deltas = getSeriesDeltaByQuery(newVal, oldVal);
 						mg = new MetrilyxGraph(ngModel.$modelValue, scope.getTimeWindow(true));
 						mg.removeSeries(deltas);
 
-						if(scope.modelType == 'adhoc') scope.setURL(ngModel.$modelValue);
+						if(scope.modelType == 'adhoc') {
+							console.log('setURL');
+							scope.setURL(ngModel.$modelValue);
+						}
 					}
 				}, true);
 

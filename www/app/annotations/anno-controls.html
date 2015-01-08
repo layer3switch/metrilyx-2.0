@@ -1,6 +1,12 @@
-<div class="graph-control-details global-anno bottom-shadow" style="color: #ccc">
-	<div ng-model="graph._id" tooltip-arrow width="30" height="12" color="rgba(95,95,95,0.9)" direction="up" style="position:relative;left:25px;"></div>
-	<div class="padtb10 padlr5" style="background:rgba(95,95,95,0.9);border-radius:2px">
+<span style="font-size:13px;font-weight:bold;color:#777" class="pointer interactive" ng-click="toggleDisplay()">
+	<span>Annotations</span>
+	<span class="caret"></span>
+</span>
+<div class="anno-editor-content bottom-shadow" style="color: #ccc;display:{{displayAnnoEditor}}">
+	<svg width="20" height="10" fill="rgba(95,95,95,0.9)" style="position:relative;left:15px">
+		<polygon points="10,0 20,10 0,10"></polygon>
+	</svg>
+	<div class="anno-editor-content-body">
 		<div class="padlr10" style="border-bottom:1px solid #606060">
 			<div>
 		    	<div class="small text-left marginb5"><b>Tags :</b></div>

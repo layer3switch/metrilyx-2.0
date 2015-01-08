@@ -1,7 +1,8 @@
 angular.module("metrilyxAnnotations", ['ngResource'])
-.factory('EventAnnoService', ['$resource',
-    function($resource) {
-        return $resource('http://localhost:9898/api/annotations', {}, {
+.factory('EventAnnoService', ['$resource', 'Configuration',
+    function($resource, Configuration) {
+        return $resource(Configuration.annotations.url+
+            Configuration.annotations.endpoints.annotate, {}, {
             search: {
                 method: 'GET',
                 isArray: true
@@ -9,9 +10,10 @@ angular.module("metrilyxAnnotations", ['ngResource'])
         });
     }
 ])
-.factory('EventAnnoTypesService', ['$resource',
-    function($resource) {
-        return $resource('http://localhost:9898/api/types/:type', {}, {
+.factory('EventAnnoTypesService', ['$resource', 'Configuration',
+    function($resource, Configuration) {
+        return $resource(Configuration.annotations.url+
+            Configuration.annotations.endpoints.types+'/:type', {}, {
             listTypes: {
                 method: 'GET',
                 isArray: true
@@ -91,11 +93,15 @@ angular.module("metrilyxAnnotations", ['ngResource'])
             }
 
             function setAnnotationsFilter(evtAnnoTypes, annoTagsFilter) {
+
                 var tmp = $location.search();
                 $.extend(true, tmp, {
                     annotationTypes: _types2string(evtAnnoTypes),
                     annotationTags: dictToCommaSepStr(annoTagsFilter, ':')
                 }, true);
+
+                if(tmp.annotationTypes === "") delete tmp.annotationTypes;
+                if(tmp.annotationTags === "") delete tmp.annotationTags;
 
                 $location.search(tmp);
             }
@@ -226,6 +232,9 @@ angular.module("metrilyxAnnotations", ['ngResource'])
                 initializeAnnoAndTypes();
                 /* This will actually be set before the above call because async */
                 scope.annoFilter = parseAnnoParams();
+                //console.log(scope.annoFilter);
+
+                scope.displayAnnoEditor = "none";
                 scope.addAnnotationListener = addAnnotationListener;
                 scope.setAnnotationsFilter = setAnnotationsFilter;
 
@@ -243,7 +252,9 @@ angular.module("metrilyxAnnotations", ['ngResource'])
 .factory('AnnotationUIManager', [ 
     function() {
         'use strict';
-        
+        /*
+         * Highcharts annotation manager
+         */
         var AnnotationUIManager = function(graphId, scope) {
 
             var t = this;
@@ -353,4 +364,31 @@ angular.module("metrilyxAnnotations", ['ngResource'])
             _initialize();
         };
         return (AnnotationUIManager);
+}])
+.directive("annotationEditor", [function() {
+    return {
+        restrict: 'A',
+        require: "?ngModel",
+        templateUrl: 'app/annotations/anno-controls.html',
+        link: function(scope, elem, attrs, ctrl) {
+
+            scope.toggleDisplay = function() {
+                if(scope.displayAnnoEditor == "none") 
+                    scope.displayAnnoEditor = "block";
+                else 
+                    scope.displayAnnoEditor = "none";    
+            }
+        }
+    }
+}])
+.directive("annotationDetails", [function() {
+    return {
+        restrict: 'A',
+        require: '?ngModel',
+        templateUrl: 'app/annotations/anno-details.html',
+        link: function(scope, elem, attrs, ctrl) {
+            if(!ctrl) return;
+        
+        }
+    }
 }]);

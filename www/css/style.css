@@ -1240,6 +1240,20 @@ input.threshold-input:hover {
 input.threshold-input.wide {
 	width: 140px;
 }
+.anno-editor-content {
+	/*background:rgba(95,95,95,0.95);*/
+	/*border-radius: 0 2px 2px 2px;*/
+    display: none;
+    width: 280px;
+    position: absolute;
+    z-index: 1;
+}
+.anno-editor-content-body {
+	padding: 10px 5px;
+	background:rgba(95,95,95,0.9);
+	border-radius:2px;
+}
+
 .graph-control-details {
 	background:rgba(95,95,95,0.95);
 	border-radius: 0 2px 2px 2px;
