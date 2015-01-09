@@ -66,7 +66,7 @@ On RHEL, CentOS, Oracle distributions (test w/ CentOS/Oracle 6.5)::
 For Debian based distributions (tested w/ Ubuntu 14.04)::
 
 	## Install OS packages
-	$ apt-get install make gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython-dev git-core libffi-dev libatlas-dev libblas-dev python-numpy
+	$ apt-get install make g++ gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython-dev git-core libffi-dev libatlas-dev libblas-dev python-numpy
 
 	## Install pip
 	$ which pip || easy_install pip
