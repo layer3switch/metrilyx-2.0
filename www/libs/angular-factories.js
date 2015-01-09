@@ -25,7 +25,7 @@ angular.module("metrilyxHelperFactories", [])
 
                 if(scope.modelType == "adhoc") {
 
-                    templates['queryEditorHtml'] = connectionPool.nextConnection()+partialsPrefix+"/adhocgraph-query-editor.html";
+                    templates['queryEditorHtml'] = "app/adhoc/adhocgraph-query-editor.html";
                 } else {
 
                     $.extend(templates, {
@@ -435,19 +435,6 @@ angular.module("metrilyxHelperFactories", [])
                 srch.start = scope.timeType;
             }
 
-            //var annoTagsStr = dictToCommaSepStr(scope.annoFilter.tags, ":");
-            //if(annoTagsStr != "") {
-             //   srch.annotationTags  = annoTagsStr;
-            //}
-            //var uAnnoTagsStr = dictToCommaSepStr(scope.globalAnno.tags, ":");
-            /*
-            if(scope.globalAnno.eventTypes.length > 0 && uAnnoTagsStr != "") {
-
-                srch.annotationTypes = scope.globalAnno.eventTypes.join("|");
-                srch.annotationTags = uAnnoTagsStr;
-            }
-            */
-            //var tmp = $location.search();
             console.log('setURL()');
 
             $location.search($.extend(false, {}, $location.search(), srch, true));

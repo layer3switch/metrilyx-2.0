@@ -60,7 +60,7 @@ angular.module("adhoc", [])
         $scope.setAbsoluteTime = function() {
 
             $scope.reloadGraph();
-            $scope.globalAnno.status = 'reload';
+            //$scope.globalAnno.status = 'reload';
         }
 
         $scope.baseQuery = function(graphObj) {
@@ -99,12 +99,10 @@ angular.module("adhoc", [])
 
         $scope.enableEditMode = function() {
             $scope.editMode = " edit-mode";
-            //$scope.enableDragDrop();
             $scope.reflow();
         }
         $scope.disableEditMode = function() {
             $scope.editMode = "";
-            //$scope.disableDragDrop();
             $scope.reflow();
         }
         $scope.toggleEditMode = function() {
@@ -142,7 +140,6 @@ angular.module("adhoc", [])
 
                 if($scope.graph.series.length > 0) {
                     $scope.modelGraphIds = [ $scope.graph._id ];
-                    //$scope.reloadGraph();
                 }
             });
             submitAnalytics({title:'adhoc', page:'/graph'});

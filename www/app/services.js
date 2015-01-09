@@ -132,30 +132,3 @@ angular.module('metrilyxServices', ['ngResource'])
 		}
 	}
 ]);
-/*
-.factory('Configuration', ['$http',
-	function($http) {
-		var cache = null;
-		
-		return {
-			getConfig: function(callback) {
-
-				var dfd = $.Deferred();
-
-				if(cache !== null) {
-					
-					dfd.resolve(cache);
-				} else {
-					$http.get('/api/config').success(function(response) {
-
-						dfd.resolve(response);
-					}).error(function(err) {
-						
-						console.error(err)
-					})
-				}
-				dfd.done(callback)
-			}
-		}
-	}
-])*/

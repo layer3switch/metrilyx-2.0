@@ -3,7 +3,6 @@
 		"name": "OpenTSDB",
 		"uri": "http://<OpenTSDB host>",
 		"port": 4242,
-		"suggest_limit": 50,
 		"query_endpoint": "/api/query",
 		"search_endpoint": "/api/suggest",
 		"loader_class": "opentsdb.OpenTSDBDataProvider",
@@ -35,16 +34,11 @@
 	],
 	"annotations": {
 		"enabled": false,
-		"line_re": "([0-9]+) (.+) ([a-zA-Z0-9_]+):(.+) '({.*})'",
-		"dataprovider":{
-			"name": "Elasticsearch",
-			"host": "localhost",
-			"port": 9200,
-			"use_ssl": false,
-			"search_endpoint": "_search",
-			"index": "eventannotations",
-			"result_size": 10000000,
-			"loader_class": "ess.ElasticsearchEventDataProvider"
+		"url": "http://localhost:9898",
+		"endpoints": {
+			"annotate": "/api/annotations",
+			"search": "/api/query",
+			"types": "/api/types"
 		}
 	},
 	"tmpdir": "/dev/shm/metrilyx",

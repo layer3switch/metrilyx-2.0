@@ -59,7 +59,7 @@ app.config(['$routeProvider',
 				controller: 'staticsController'
 			})
 			.when('/graph', {
-				templateUrl: 'partials/adhoc-graph.html',
+				templateUrl: 'app/adhoc/adhoc-graph.html',
 				controller: 'adhocGraphController',
 				/*reloadOnSearch: false*/
 			})
@@ -144,7 +144,7 @@ angular.module('filters',[]).
 			return l;
 		}
 	});
-
+/*
 app.directive('eventTypes', function() {
 	return {
 		restrict: 'A',
@@ -156,7 +156,6 @@ app.directive('eventTypes', function() {
 			ctrl.$parsers.unshift(function(viewValue){return ctrl.$modelValue;});
 
 			$(elem).autocomplete({
-				/*source: ANNO_EVENT_TYPES,*/
 				source: function(request, response) {
 	            	$.getJSON('/api/search/event_types?q='+request.term,
 	            		function(a,b,c) {
@@ -196,7 +195,7 @@ app.directive('eventTypes', function() {
 		}
 	};
 });
-
+*/
 app.directive('tagkeyvalue', function() {
 	return {
 		restrict: 'A',
@@ -249,18 +248,8 @@ app.directive('tagkeyvalue', function() {
 	        		}
 	        	},
 	        	focus: function( event, ui ) {
-	        		//var ival = $(elem).val();
-	        		//kv = ival.split("=");
-	        		//if(kv.length == 2) {
-	        		//	var tvals = kv[1].split("|");
-	        		//	var retstr = "";
-	        		//	for(var i=0;i<tvals.length-1;i++) {
-	        		//		retstr += tvals[i]+"|";
-	        		//	}
-	        		//	retstr += ui.item.value;
-	        		//	$(elem).val(kv[0]+"="+retstr);
-	        			event.preventDefault();
-	        		//}
+
+	        		event.preventDefault();
 	        	}
 			});
 

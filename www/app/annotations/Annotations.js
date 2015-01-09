@@ -44,26 +44,22 @@ angular.module("metrilyxAnnotations", ['ngResource'])
             var _callbacks = [];
 
             var _expectedListeners = 0;
-/*
-            var scopeAttributes = {
-                //annoFilter: parseAnnoParams(),
-                //setAnnotationsFilter: setAnnotationsFilter,
-                //addAnnotationListener: addAnnotationListener,
-                eventAnnoTypes: {}
-            };
-*/
+
             function _parseAnnoTags() {
+                
                 var out = {};
                 if ($routeParams.annotationTags) {
                     
                     var annoTagKVs = $routeParams.annotationTags.split(",");
-                    for(var i=0; i<annoTagKVs.length; i++) {
+                    for( var i=0; i < annoTagKVs.length; i++ ) {
                         
                         var kv = annoTagKVs[i].split(":");
-                        if(kv.length !== 2 || kv[0] === '' || kv[1] === '') {
+                        if( kv.length !== 2 || kv[0] === '' || kv[1] === '' ) {
+                            
                             console.log('invalid annotation tags: '+kv);
                             continue;
                         } else {
+                            
                             out[kv[0]] = kv[1];
                         }
                     }
@@ -122,7 +118,6 @@ angular.module("metrilyxAnnotations", ['ngResource'])
                 retryCount = 0;
                 /* subsciption message */
                 sendMessage(scope.annoFilter);
-                //sendMessage(scopeAttributes.annoFilter);
 
                 for(var i=0; i< _callbacks.length; i++) {
                     console.log('adding listener...');
@@ -163,7 +158,6 @@ angular.module("metrilyxAnnotations", ['ngResource'])
                 } else {
                     //console.log('on message', data);
                     wsock.dispatchEvent(new CustomEvent('annotation', {'detail': data}));
-                    //t.dispatchEvent(new CustomEvent('annotation', {'detail': data}));
                 }
             }
 
@@ -232,7 +226,6 @@ angular.module("metrilyxAnnotations", ['ngResource'])
                 initializeAnnoAndTypes();
                 /* This will actually be set before the above call because async */
                 scope.annoFilter = parseAnnoParams();
-                //console.log(scope.annoFilter);
 
                 scope.displayAnnoEditor = "none";
                 scope.addAnnotationListener = addAnnotationListener;
@@ -253,7 +246,7 @@ angular.module("metrilyxAnnotations", ['ngResource'])
     function() {
         'use strict';
         /*
-         * Highcharts annotation manager
+         * Manages Highcharts annotation rendering on graphs.
          */
         var AnnotationUIManager = function(graphId, scope) {
 
@@ -366,6 +359,8 @@ angular.module("metrilyxAnnotations", ['ngResource'])
         return (AnnotationUIManager);
 }])
 .directive("annotationEditor", [function() {
+    'use strict';
+    /* Controls annotation editor display */
     return {
         restrict: 'A',
         require: "?ngModel",
