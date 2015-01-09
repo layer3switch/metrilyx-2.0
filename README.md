@@ -26,3 +26,6 @@ To quickly get up and running, follow the  [Quick Start](https://github.com/Tick
 
 - Please be aware that although the project has a Apache license, the graphing library is under the creative commons license.
 - The default username and password for the site are admin and metrilyx respectively. Changing these will cause the application to stop functioning as other configurations also need to be updated.  This should not be harmful as metrilyx does not store any sensitive information.
+
+**Warning**
+This application is meant for internal 'trusted' organizational use.  Due to the use of certain methods and functions code injection attacks are possible. 
