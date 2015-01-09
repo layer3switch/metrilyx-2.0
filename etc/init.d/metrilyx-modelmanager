@@ -18,11 +18,13 @@ DEFAULT_OPTS="--ini ${APP_HOME}/etc/metrilyx/uwsgi.conf"
 
 RETVAL=0
 
+PYTHON_EGG_CACHE="/dev/shm/metrilyx"
+
 start() {
 	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
 	if [ "$PIDS" = "" ]; then
 		echo -n "${NAME} starting... "
-		METRILYX_HOME=${APP_HOME} ${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
+		PYTHON_EGG_CACHE=$PYTHON_EGG_CACHE METRILYX_HOME=${APP_HOME} ${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
 		sleep 1;
 		PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
 		if [ "$PIDS" = "" ]; then
