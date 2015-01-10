@@ -52,7 +52,7 @@ Requirements
 
 The compiler requirements are needed specifically by numpy and pandas for computation and analysis.
 
-On RHEL, CentOS, Oracle distributions (test w/ CentOS/Oracle 6.5)::
+- RHEL, CentOS, Oracle distributions (test w/ CentOS/Oracle 6.5)::
 
 	## Install OS packages
 	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
@@ -63,13 +63,11 @@ On RHEL, CentOS, Oracle distributions (test w/ CentOS/Oracle 6.5)::
 	## Install numpy before installing metrilyx
 	$ pip install 'numpy>=1.6.1'
 
-For Debian based distributions (tested w/ Ubuntu 14.04)::
+
+- Debian based distributions (tested w/ Ubuntu 14.04 & 12.04)::
 
 	## Install OS packages
-	$ apt-get install make g++ gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython-dev git-core libffi-dev libatlas-dev libblas-dev python-numpy
-
-	## Install pip
-	$ which pip || easy_install pip
+	$ apt-get install build-essential make g++ gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython2.7 python-pip git-core libffi-dev libatlas-dev libblas-dev python-numpy
 
 
 Installation
@@ -85,15 +83,11 @@ The next step is configure your installation.
 Configuration
 =============
 
-The configuration file can be found at **/opt/metrilyx/etc/metrilyx**.  To begin, copy the sample config::
+The configuration file can be found at **/opt/metrilyx/etc/metrilyx**.  To begin, copy the sample configs::
 
-	$ cd /opt/metrilyx
+	$ make config
 
-	$ cp etc/metrilyx/metrilyx.conf{.sample,}
-
-Also copy the provided default database::
-
-	$ cp data/metrilyx.sqlite3{.default,}
+This will only copy the configs if none exist.
 
 Edit **etc/metrilyx/metrilyx.conf**.  The 'dataprovider' section is the only needed configuration assuming that the host has a resolvable FQDN ( i.e. resolves via socket.gethostname() ).  Otherwise the 'websocket' section will also need to be edited.
 
@@ -122,14 +116,18 @@ The 'websocket' section can be skipped if your host is a resolvable FQDN ( resol
 		}
 	}
 
-Start the metrilyx service/s::
+
+Services
+========
+Once the configuration is complete, start the metrilyx service/s::
 
 	/etc/init.d/metrilyx start
 
-Restart nginx::
+Also start or restart nginx::
 
 	/etc/init.d/nginx restart
 
-You should now be able to visit http://my.host.name.org to start using Metrilyx.
+
+You should now be able to visit http://$my_ip_or_hostname to start using Metrilyx.
 
 Thats It!

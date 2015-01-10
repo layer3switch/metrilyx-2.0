@@ -1,8 +1,19 @@
 Roadmap
 =======
+- Dataserver as a service.
+- Analysis engine as a service.
+- Peeling of individual components.
 
-##### v2.4.x
-- Use of an opensource graphing library.
+##### v2.5.0
+- Annotations as a seperate service (no longer part of default metrilyx).
+
+##### v2.4.2
+- Fix for Ubuntu 12 and 14 installation.
+- Added basic modelmanager and dataserver tests.
+- Added preliminary CI configuration for automated tests/builds.
+
+##### v2.4.1
+- Fix for alias's
 
 ##### v2.4.0 (current)
 - Cross metric operations i.e. perform math against metrics to create secondary metrics.
