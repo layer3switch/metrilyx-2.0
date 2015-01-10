@@ -10,9 +10,10 @@ DESCRIPTION = '''
 A web based dashboard engine to OpenTSDB that allows for analyzing,
 cross cutting and viewing of time series data in a simple manner.
 '''
+
 LICENSE = "LICENSE.txt"
 SETUP_REQUIRES = ["six>=1.7.3"]
-INSTALL_REQUIRES = [ p for p in open('REQUIREMENTS.txt').read().split('\n') if p != '' and not p.startswith('#') ]
+INSTALL_REQUIRES = [ p for p in open('requirements.txt').read().split('\n') if p != '' and not p.startswith('#') ]
 
 def get_version():
     fh = open('VERSION')
