@@ -7,11 +7,11 @@ before_install:
   - "curl -s https://metrilyx.github.io/bootstrap.sh | bash -s -- nonginx"
 
 install:
-  - "python setup.py install"
-  - "make config"
+  - "sudo python setup.py install"
+  - "sudo make config"
 
 after_install:
-  - "make start"
+  - "sudo make start"
 
 branches:
   only:
