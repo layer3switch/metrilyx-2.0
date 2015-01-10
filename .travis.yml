@@ -4,7 +4,7 @@ python:
   - "2.7"
 
 before_install:
-  - "curl -s https://metrilyx.github.io/bootstrap.sh | bash -s -- install v2.5.0-dev"
+  - "curl -s https://metrilyx.github.io/bootstrap.sh | bash"
 
 install:
   - "sudo python setup.py install"
