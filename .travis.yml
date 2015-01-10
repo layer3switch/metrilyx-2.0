@@ -1,0 +1,19 @@
+language: python
+
+python:
+  - "2.6"
+  - "2.7"
+
+before_install:
+  - "curl -s https://metrilyx.github.io/boostrap.sh | bash"
+
+install:
+  - "python setup.py install"
+  - "make config"
+
+after_install:
+  - "make start"
+
+branches:
+  only:
+    - v2.4.2-dev
