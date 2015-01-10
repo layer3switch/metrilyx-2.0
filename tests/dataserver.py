@@ -3,11 +3,15 @@ import unittest
 
 import ujson as json
 import time
+import sys
 
 from twisted.internet import reactor
 from autobahn.twisted.websocket import WebSocketClientProtocol, \
                                        WebSocketClientFactory
 from pprint import pprint
+
+testWsHost = "127.0.0.1"
+testWsPort = 9000
 
 testMetric = "proc.loadavg.1min"
 testWsMsg = {
@@ -36,6 +40,7 @@ class TestWebSockServer(unittest.TestCase):
     def setUp(self):
 
         tester = self
+        pprint(sys.argv)
 
         ## Twisted websocket client
         class TestWSProto(WebSocketClientProtocol):
@@ -63,13 +68,13 @@ class TestWebSockServer(unittest.TestCase):
                 #print "Connection closed: %s" % (reason)
                 reactor.stop()
 
-        self.wsFactory = WebSocketClientFactory("ws://localhost:9000", debug = False)
+        self.wsFactory = WebSocketClientFactory("ws://%s:%d" % (testWsHost, testWsPort), debug = False)
         self.wsFactory.protocol = TestWSProto
         
 
     def runTest(self):
 
-        reactor.connectTCP("127.0.0.1", 9000, self.wsFactory)
+        reactor.connectTCP(testWsHost, testWsPort, self.wsFactory)
         reactor.run()
 
 
