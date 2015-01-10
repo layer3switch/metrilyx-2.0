@@ -8,10 +8,9 @@ before_install:
 
 install:
   - "sudo python setup.py install"
-  - "sudo make config"
 
-after_install:
-  - "sudo make start"
+script:
+  - "sudo make config"
 
 branches:
   only:
