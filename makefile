@@ -20,7 +20,7 @@ test:
 	python -m unittest tests.dataserver
 	python -m unittest tests.modelmanager
 
-# Copies sample configs if no configs exits
+# Copies sample configs if no configs exist
 config:
 	[ -f $(METRILYX_CONF) ] || cp $(METRILYX_CONF).sample $(METRILYX_CONF)
 	[ -f $(DEFAULT_DB) ] || cp $(DEFAULT_DB).default $(DEFAULT_DB)

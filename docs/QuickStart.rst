@@ -3,7 +3,7 @@ Quick Start
 ===========
 This is a quick start guide for RHEL/CentOS/Oracle 6.4 & 6.5 and Debian/Ubuntu based distributions.
 
-Although Metrilyx will run on any linux distribution, testing has been done againsts the following systems:
+Although Metrilyx will run on any linux distribution, testing has been done againsts the following 64bit systems:
 
 * CentOS/Oracle 6.4 & 6.5
 * Ubuntu 14.04 (trusty)
