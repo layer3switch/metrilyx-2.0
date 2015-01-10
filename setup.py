@@ -51,7 +51,6 @@ DATA_FILES = [
     ('/opt/metrilyx/data', [
                             'data/metrilyx.sqlite3.default']),
     ('/opt/metrilyx/etc/metrilyx', [
-                            'etc/metrilyx/ess-default-mappings.json',
                             'etc/metrilyx/metrilyx.conf.sample',
                             'etc/metrilyx/uwsgi.conf',
                             'etc/metrilyx/uwsgi_params.conf']),
@@ -65,7 +64,7 @@ DATA_FILES += recursiveFileListBuilder('www', prefix='/opt/metrilyx/')
 setup(
     name='metrilyx',
     version=get_version(),
-    url='https://github.com/TicketMaster/metrilyx-2.0.git',
+    url='https://github.com/TicketMaster/metrilyx-2.0',
     description=DESCRIPTION,
     long_description=DESCRIPTION,
     author='euforia',
