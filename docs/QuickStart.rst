@@ -6,7 +6,7 @@ This is a quick start guide for RHEL/CentOS/Oracle 6.4 & 6.5 and Debian/Ubuntu b
 Although Metrilyx will run on any linux distribution, testing has been done againsts the following 64bit systems:
 
 * CentOS/Oracle 6.4 & 6.5
-* Ubuntu 14.04 (trusty)
+* Ubuntu 14.04 (trusty), 12.04 (precise)
 
 The quickest way to  be get up and running is to use the following method in 2 forms although going through the steps below is recommended::
 
