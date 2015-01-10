@@ -28,11 +28,3 @@ config:
 start:
 	/etc/init.d/metrilyx start
 	/etc/init.d/nginx restart
-
-rpm:
-	echo "TBI"
-
-deb:
-	echo "TBI"
-
-artifacts: rpm deb

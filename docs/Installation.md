@@ -44,11 +44,11 @@ Once the above requirements have been fulfilled, run the following command to in
 
 ##### RHEL:
 
-	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel openblas-devel libffi-devel libuuid uuid python-setuptools python-devel
+	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
 
 ##### Debian/Ubuntu:
 
-	$ apt-get install libuuid1 uuid-runtime nginx python-setuptools python-dev libpython-dev make git-core libffi-dev
+	$ apt-get install build-essential make g++ gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython2.7 python-pip git-core libffi-dev libatlas-dev libblas-dev python-numpy
 
 ## Installation:
 The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below to install the application after the above mentioned requirements have been satisfied. The default install destination is **/opt/metrilyx**.

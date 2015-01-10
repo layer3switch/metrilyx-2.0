@@ -1,6 +1,6 @@
+Upgrading
+---------
 
-Upgrade from 2.3.x to 2.4.0
----------------------------
 * Stop all metrilyx related services::
 
     $ /etc/init.d/metrilyx stop
@@ -27,7 +27,7 @@ Upgrade from 2.3.x to 2.4.0
 
     $ /etc/init.d/metrilyx start
 
-* Update models to version 2.4.0::
+* Update models::
 
     $ cd /opt/metrilyx
     $ METRILYX_HOME=$(pwd) ./bin/mdlmgr.py

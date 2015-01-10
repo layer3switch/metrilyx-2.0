@@ -1,6 +1,15 @@
+Testing (python)
+================
 
-Unit testing
-============
+The 'dataserver' test currently only works in dev mode as the host and port need to be changed accordingly.
+
+- python -m unittest tests.dataserver
+
+- python -m unittest tests.modelmanager
+
+
+Testing (Javascript)
+====================
 
 ##### Libraries:
 
