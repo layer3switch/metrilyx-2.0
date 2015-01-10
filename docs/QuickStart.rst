@@ -110,13 +110,13 @@ Fill in the uri and port for OpenTSDB in the 'dataprovider' section::
 		}
 	}
 
-The 'websocket' section can be skipped if your host is a resolvable FQDN, otherwise fill in the fully qualified resolvable hostname for the server ( i.e. resolves via socket.gethostname() )::
+The 'websocket' section can be skipped if your host is a resolvable FQDN ( resolves via socket.gethostname() ), otherwise add the 'hostname' field and fill in the IP address of the server.  This should be the same address as the one used for web browser access ::
 
 	{
 		"websocket": {
 			.
 			.
-			"hostname": "my.host.name.org"
+			"hostname": "10.101.101.10"
 			.
 			.
 		}
