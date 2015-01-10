@@ -3,8 +3,8 @@ language: python
 python:
   - "2.7"
 
-before_script:
-  - "curl -s https://metrilyx.github.io/boostrap.sh | bash"
+before_install:
+  - "curl -s https://metrilyx.github.io/bootstrap.sh | bash"
 
 install:
   - "python setup.py install"
