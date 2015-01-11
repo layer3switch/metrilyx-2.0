@@ -108,8 +108,12 @@ metrilyxControllers.controller('sidePanelController', [
 	}
 ]);
 metrilyxControllers.controller('pageController', [
-	'$scope', '$routeParams', '$location', 'Schema', 'Model', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationsManager', 'CtrlCommon', 'RouteManager', 'ModelManager',
-	function($scope, $routeParams, $location, Schema, Model, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationsManager, CtrlCommon, RouteManager, ModelManager) {
+	'$scope', '$routeParams', '$location', 'Configuration', 
+	'Schema', 'Model', 'TimeWindow', 'ComponentTemplates', 
+	'WebSocketDataProvider', 'AnnotationsManager', 'CtrlCommon', 'RouteManager', 'ModelManager',
+	function($scope, $routeParams, $location, Configuration, 
+		Schema, Model, TimeWindow, ComponentTemplates, WebSocketDataProvider, 
+		AnnotationsManager, CtrlCommon, RouteManager, ModelManager) {
 
 		$scope.modelType = "";
 		$scope.modelGraphIds = [];
@@ -170,7 +174,7 @@ metrilyxControllers.controller('pageController', [
 							$scope.modelGraphIds = getModelGraphIds();
 
 							/* get annotations */
-							annoManager.connect($scope.modelGraphIds.length);
+							if(Configuration.annotations.enabled) annoManager.connect($scope.modelGraphIds.length);
 						}
 					});
 				} else {

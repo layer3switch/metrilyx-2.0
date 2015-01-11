@@ -1,7 +1,9 @@
 angular.module("adhoc", [])
 .controller('adhocGraphController', [
-    '$scope', 'Schema', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationsManager', 'CtrlCommon', 'RouteManager', 'URLSetter',
-    function($scope, Schema, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationsManager, CtrlCommon, RouteManager, URLSetter) {
+    '$scope', 'Configuration', 'Schema', 'TimeWindow', 'ComponentTemplates', 
+    'WebSocketDataProvider', 'AnnotationsManager', 'CtrlCommon', 'RouteManager', 'URLSetter',
+    function($scope, Configuration, Schema, TimeWindow, ComponentTemplates, 
+        WebSocketDataProvider, AnnotationsManager, CtrlCommon, RouteManager, URLSetter) {
 
         $scope.modelType     = "adhoc";
         $scope.modelGraphIds = [];
@@ -143,7 +145,8 @@ angular.module("adhoc", [])
                 }
             });
             submitAnalytics({title:'adhoc', page:'/graph'});
-            annoManager.connect(1);
+            
+            if(Configuration.annotations.enabled) annoManager.connect(1);
         }
 
         _init();

@@ -186,7 +186,7 @@ angular.module('pageLayout', [])
 
 /* graph initialization and loading */
 angular.module('graphing', [])
-.factory('WsHighstockGraphHelper', [function() {
+.factory('WsHighstockGraphHelper', ['Configuration', function(Configuration) {
 	return function (scope, ngModel) {
 		var t = this;
 
@@ -334,7 +334,8 @@ angular.module('graphing', [])
 		t.checkDataErrors = checkDataErrors;
 
 		// FIX: scope is not ready here
-		scope.addAnnotationListener(onAnnotationData);
+		if(Configuration.annotations.enabled) 
+			scope.addAnnotationListener(onAnnotationData);
 
 		scope.$on("$destroy", function( event ) { clearTimeout(currTimer); });
 	}

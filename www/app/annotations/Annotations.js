@@ -27,8 +27,8 @@ angular.module("metrilyxAnnotations", ['ngResource'])
     }
 ])
 .factory("AnnotationsManager", [
-    '$location', '$routeParams', '$http', 'EventAnnoTypesService', 'EventAnnoService',
-    function($location, $routeParams, $http, EventAnnoTypesService, EventAnnoService) {
+    '$location', '$routeParams', '$http', 'Configuration', 'EventAnnoTypesService', 'EventAnnoService',
+    function($location, $routeParams, $http, Configuration, EventAnnoTypesService, EventAnnoService) {
         'use strict';
 
         var AnnotationsManager = function(scope) {
@@ -36,7 +36,7 @@ angular.module("metrilyxAnnotations", ['ngResource'])
             var t = this;
 
             var wsock;
-            var uri = 'ws://localhost:9898/data';
+            //var uri = 'ws://localhost:9898/data';
             
             var maxRetries = 3;
             var retryCount = 0;
@@ -164,7 +164,7 @@ angular.module("metrilyxAnnotations", ['ngResource'])
             function connect(expectedListeners) {
                 _expectedListeners = expectedListeners;
 
-                wsock = new WebSocket(uri);
+                wsock = new WebSocket(Configuration.annotations.websocket.uri);
                 wsock.addEventListener('open', onWsOpen);
                 wsock.addEventListener('message', onWsMessage);
                 wsock.addEventListener('close', onWsClose);
@@ -222,18 +222,22 @@ angular.module("metrilyxAnnotations", ['ngResource'])
             }
 
             function _initialize() {
-                /* Sets eventAnnoTypes (i.e. list of types) to scope. */
-                initializeAnnoAndTypes();
-                /* This will actually be set before the above call because async */
-                scope.annoFilter = parseAnnoParams();
+                if(Configuration.annotations.enabled) {
+                    /* Sets eventAnnoTypes (i.e. list of types) to scope. */
+                    initializeAnnoAndTypes();
+                    /* This will actually be set before the above call because async */
+                    scope.annoFilter = parseAnnoParams();
 
-                scope.displayAnnoEditor = "none";
-                scope.addAnnotationListener = addAnnotationListener;
-                scope.setAnnotationsFilter = setAnnotationsFilter;
+                    scope.displayAnnoEditor = "none";
+                    scope.addAnnotationListener = addAnnotationListener;
+                    scope.setAnnotationsFilter = setAnnotationsFilter;
 
-                t.fetchAnnotationsForTimeFrame = fetchAnnotationsForTimeFrame;
-                t.sendMessage = sendMessage;
-                t.connect = connect;
+                    t.fetchAnnotationsForTimeFrame = fetchAnnotationsForTimeFrame;
+                    t.sendMessage = sendMessage;
+                    t.connect = connect;
+                } else {
+                    console.log("Annotations disabled!");
+                }
             }
 
             _initialize();
@@ -358,7 +362,7 @@ angular.module("metrilyxAnnotations", ['ngResource'])
         };
         return (AnnotationUIManager);
 }])
-.directive("annotationEditor", [function() {
+.directive("annotationEditor", ['Configuration', function(Configuration) {
     'use strict';
     /* Controls annotation editor display */
     return {
@@ -367,11 +371,19 @@ angular.module("metrilyxAnnotations", ['ngResource'])
         templateUrl: 'app/annotations/anno-controls.html',
         link: function(scope, elem, attrs, ctrl) {
 
-            scope.toggleDisplay = function() {
-                if(scope.displayAnnoEditor == "none") 
-                    scope.displayAnnoEditor = "block";
-                else 
-                    scope.displayAnnoEditor = "none";    
+            var jelem = $(elem[0]);
+
+            if(Configuration.annotations.enabled) {
+
+                scope.toggleDisplay = function() {
+                    if(scope.displayAnnoEditor == "none") 
+                        scope.displayAnnoEditor = "block";
+                    else 
+                        scope.displayAnnoEditor = "none";    
+                }
+            } else {
+
+                jelem.css("display", "none");
             }
         }
     }
