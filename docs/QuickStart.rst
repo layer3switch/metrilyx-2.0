@@ -8,6 +8,8 @@ Although Metrilyx will run on any linux distribution, testing has been done agai
 * CentOS/Oracle 6.4 & 6.5
 * Ubuntu 14.04 (trusty), 12.04 (precise)
 
+Also a minimum of 1GB of memory is also required.
+
 The quickest way to  be get up and running is to use the following method in 2 forms although going through the steps below is recommended::
 
 	## Install all prerequisites including the latest version of nginx and metrilyx.
