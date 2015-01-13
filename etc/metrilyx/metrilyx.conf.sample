@@ -39,6 +39,9 @@
 			"annotate": "/api/annotations",
 			"search": "/api/query",
 			"types": "/api/types"
+		},
+		"websocket": {
+			"uri": "ws://localhost:9898/data"
 		}
 	},
 	"tmpdir": "/dev/shm/metrilyx",
