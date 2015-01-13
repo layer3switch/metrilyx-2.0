@@ -4,10 +4,11 @@ python:
   - "2.7"
 
 before_install:
-  - "sudo make deps nginx"
+  - "sudo make .deps .nginx"
 
 install:
   - "sudo make install"
 
 script:
-  - "sudo make config"
+  - "sudo make .config"
+  - "sudo make .start-service"

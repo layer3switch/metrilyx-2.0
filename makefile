@@ -14,9 +14,8 @@ REDHAT_REL_F := /etc/redhat-release
 ## Determine OS and Distribution
 ifeq ($(UNAME),Darwin)
 	DISTRO := osx
-endif
 ## Check oracle first as it also has the redhat-release file
-ifneq ("$(wildcard $(ORACLE_REL_F))", "")
+else ifneq ("$(wildcard $(ORACLE_REL_F))", "")
 	DISTRO := oracle
 else ifneq ("$(wildcard $(REDHAT_REL_F))", "")
 	DISTRO := redhat
@@ -29,7 +28,7 @@ else ifneq ("$(wildcard $(DEBIAN_REL_F))", "")
 	CODENAME = $(shell cat $(DEBIAN_REL_F))
 endif
 
-ifeq ($(DISTRO),"")
+ifeq ("$(DISTRO)","")
 	echo "Could not determine distro!"
 	exit 1
 endif
@@ -59,7 +58,7 @@ DEFAULT_DB := $(METRILYX_HOME)/data/metrilyx.sqlite3
 
 # Install nginx
 # TODO: add check for exising nginx
-nginx:
+.nginx:
 	if [[ ( "$(DISTRO)" == "ubuntu" ) || ( "$(DISTRO)" == "debian" ) ]]; then \
 		[ -f $(NGINX_SOURCES_LIST) ] || { \
 			wget "$(NGINX_KEY_URL)" && apt-key add $(NGINX_KEY) && rm -rf $(NGINX_KEY); \
@@ -75,7 +74,7 @@ nginx:
 #
 # Install each pkg individually in case any fail the others still install.
 #
-deps:
+.deps:
 	if [[ ( "$(DISTRO)" == "ubuntu" ) || ( "$(DISTRO)" == "debian" ) ]]; then \
 		apt-get update -qq; \
 		for pkg in $(DEB_DEPS); do \
@@ -93,32 +92,27 @@ deps:
 install:
 	python setup.py install
 
-
-distro:
-	echo $(DISTRO) $(CODENAME)
-
-
 #
 # Test dataserver and modelmanager after they have been started.
 #
-test:
+.test:
 	python -m unittest tests.dataserver
 	python -m unittest tests.modelmanager
 
 
 # Copy sample configs if no configs exist
-config:
+.config:
 	[ -f $(METRILYX_CONF) ] || cp $(METRILYX_CONF).sample $(METRILYX_CONF)
 	[ -f $(DEFAULT_DB) ] || cp $(DEFAULT_DB).default $(DEFAULT_DB)
 
 
 # Start services (last step)
-start:
+.start-service:
 	/etc/init.d/metrilyx start
 	/etc/init.d/nginx restart
 
 
-clean:
+.clean:
 	rm -rf /tmp/pip_build_root
 	rm -rf /tmp/pip-*
 	rm -rf ./build ./dist 
