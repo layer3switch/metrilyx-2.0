@@ -14,6 +14,7 @@ REDHAT_REL_F := /etc/redhat-release
 ## Determine OS and Distribution
 ifeq ($(UNAME),Darwin)
 	DISTRO := osx
+	CODENAME = $(shell sw_vers -productVersion  | sed "s/\./_/g")
 ## Check oracle first as it also has the redhat-release file
 else ifneq ("$(wildcard $(ORACLE_REL_F))", "")
 	DISTRO := oracle
