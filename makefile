@@ -4,7 +4,7 @@
 
 SHELL = /bin/bash
 
-UNAME = `uname | tr '[:upper:]' '[:lower:]'`
+UNAME = $(shell uname)
 
 ## Release file to determin distro and os
 UBUNTU_REL_F := /etc/lsb-release
@@ -23,10 +23,10 @@ else ifneq ("$(wildcard $(REDHAT_REL_F))", "")
 ## Check ubuntu first as it also has the debian_version file
 else ifneq ("$(wildcard $(UBUNTU_REL_F))","")
 	DISTRO := ubuntu
-	CODENAME := `grep 'DISTRIB_CODENAME=' $(UBUNTU_REL_F) | cut -d '=' -f 2 | tr '[:upper:]' '[:lower:]'`
+	CODENAME = $(shell grep 'DISTRIB_CODENAME=' $(UBUNTU_REL_F) | cut -d '=' -f 2 | tr '[:upper:]' '[:lower:]')
 else ifneq ("$(wildcard $(DEBIAN_REL_F))", "")
 	DISTRO := debian
-	CODENAME := `cat $(DEBIAN_REL_F)`
+	CODENAME = $(shell cat $(DEBIAN_REL_F))
 endif
 
 ifeq ($(DISTRO),"")
