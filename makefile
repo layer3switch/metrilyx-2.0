@@ -3,14 +3,16 @@ METRILYX_HOME = /opt/metrilyx
 METRILYX_CONF = $(METRILYX_HOME)/etc/metrilyx/metrilyx.conf
 DEFAULT_DB = $(METRILYX_HOME)/data/metrilyx.sqlite3
 
-INSTALL_DIR = ./build/metrilyx
+INSTALL_DIR = $(shell pwd)/build/metrilyx
 
 deps:
-	[ -e $(INSTALL_DIR) ] || mkdir $(INSTALL_DIR)
-	pip install --root $(INSTALL_DIR) -e .
+	which pip || easy_install pip
+	[ -e "$(INSTALL_DIR)" ] || mkdir -p "$(INSTALL_DIR)"
+	pip install -v --root $(INSTALL_DIR) -e .
 
 install:
-	python setup.py install --root $(INSTALL_DIR)
+	python setup.py install -v --root $(INSTALL_DIR)
+	cp -a $(INSTALL_DIR)/$(METRILYX_HOME)/* $(INSTALL_DIR)/
 
 .clean:
 	rm -rf /tmp/pip_build_root
