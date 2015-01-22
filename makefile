@@ -45,8 +45,9 @@ NGINX_KEY = nginx_signing.key
 NGINX_KEY_URL = $(NGINX_URL)/keys/$(NGINX_KEY)
 NGINX_SOURCES_LIST := /etc/apt/sources.list.d/nginx.list
 # nginx rhel confs
-NGINX_RPM := nginx-release-$(DISTRO)-6-0.el6.ngx.noarch.rpm
-NGINX_REPORPM_URL := $(NGINX_URL)/packages/$(DISTRO)/6/noarch/RPMS/$(NGINX_RPM)
+NGINX_RPM := nginx-release-centos-6-0.el6.ngx.noarch.rpm
+NGINX_REPORPM_URL := $(NGINX_URL)/packages/centos/6/noarch/RPMS/$(NGINX_RPM)
+EPEL_REPORPM_URL := http://mirror.pnl.gov/epel/6/i386/epel-release-6-8.noarch.rpm
 
 RPM_DEPS := git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
 DEB_DEPS := build-essential make g++ gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython2.7 python-pip git-core libffi-dev libatlas-dev libblas-dev python-numpy
