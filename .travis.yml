@@ -7,8 +7,7 @@ before_install:
   - "curl -s https://metrilyx.github.io/bootstrap.sh | bash"
 
 install:
-  - "sudo pip install --root /opt/metrilyx -e ."
-  - "sudo python setup.py install --root /opt/metrilyx"
+  - "sudo make"
 
 script:
-  - "sudo make config"
+  - "ls -l /opt/metrilyx/"
