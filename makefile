@@ -6,35 +6,35 @@ DEFAULT_DB = $(METRILYX_HOME)/data/metrilyx.sqlite3
 INSTALL_DIR = $(shell pwd)/build/metrilyx
 
 deps:
-    which pip || easy_install pip
-    [ -e "$(INSTALL_DIR)/$(METRILYX_HOME)" ] || mkdir -p "$(INSTALL_DIR)/$(METRILYX_HOME)"
-    pip install --root $(INSTALL_DIR)/$(METRILYX_HOME) -e .
+	which pip || easy_install pip
+	[ -e "$(INSTALL_DIR)/$(METRILYX_HOME)" ] || mkdir -p "$(INSTALL_DIR)/$(METRILYX_HOME)"
+	pip install --root $(INSTALL_DIR)/$(METRILYX_HOME) -e .
 
 install:
-    python setup.py install --root $(INSTALL_DIR)/$(METRILYX_HOME)
+	python setup.py install --root $(INSTALL_DIR)/$(METRILYX_HOME)
 
 .clean:
-    rm -rf /tmp/pip_build_root
-    rm -rf /tmp/pip-*
-    rm -rf ./build ./dist 
-    rm -rf ./numpy-1*
-    rm -rf ./Twisted-14*
-    rm -rf ./six-1*
-    rm -rf ./node_modules
-    rm -rf ./metrilyx.egg-info
-    find . -name '*.py[c|o]' -exec rm -rvf '{}' \;
+	rm -rf /tmp/pip_build_root
+	rm -rf /tmp/pip-*
+	rm -rf ./build ./dist 
+	rm -rf ./numpy-1*
+	rm -rf ./Twisted-14*
+	rm -rf ./six-1*
+	rm -rf ./node_modules
+	rm -rf ./metrilyx.egg-info
+	find . -name '*.py[c|o]' -exec rm -rvf '{}' \;
 #
 # Test dataserver and modelmanager after they have been started.
 #
 .test:
-    python -m unittest tests.dataserver
-    python -m unittest tests.modelmanager
+	python -m unittest tests.dataserver
+	python -m unittest tests.modelmanager
 
 # Copies sample configs if no configs exist
 .config:
-    [ -f $(METRILYX_CONF) ] || cp $(METRILYX_CONF).sample $(METRILYX_CONF)
-    [ -f $(DEFAULT_DB) ] || cp $(DEFAULT_DB).default $(DEFAULT_DB)
+	[ -f $(METRILYX_CONF) ] || cp $(METRILYX_CONF).sample $(METRILYX_CONF)
+	[ -f $(DEFAULT_DB) ] || cp $(DEFAULT_DB).default $(DEFAULT_DB)
 
 .start:
-    /etc/init.d/metrilyx start
-    /etc/init.d/nginx restart
+	/etc/init.d/metrilyx start
+	/etc/init.d/nginx restart
