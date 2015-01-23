@@ -1,4 +1,6 @@
 
+SHELL = /bin/bash
+
 METRILYX_HOME = /opt/metrilyx
 METRILYX_CONF = $(METRILYX_HOME)/etc/metrilyx/metrilyx.conf
 DEFAULT_DB = $(METRILYX_HOME)/data/metrilyx.sqlite3
@@ -7,11 +9,12 @@ INSTALL_DIR = $(shell pwd)/build/metrilyx
 
 deps:
 	which pip || easy_install pip
-	[ -e "$(INSTALL_DIR)/$(METRILYX_HOME)" ] || mkdir -p "$(INSTALL_DIR)/$(METRILYX_HOME)"
-	pip install --root $(INSTALL_DIR)/$(METRILYX_HOME) -e .
+	[ -e "$(INSTALL_DIR)$(METRILYX_HOME)" ] || mkdir -p "$(INSTALL_DIR)$(METRILYX_HOME)"
+	pip install --root $(INSTALL_DIR)$(METRILYX_HOME) -e .
+	find $(INSTALL_DIR)$(METRILYX_HOME) -name 'zope' -type d -exec touch '{}'/__init__.py \;
 
 install:
-	python setup.py install --root $(INSTALL_DIR)/$(METRILYX_HOME)
+	python setup.py install --root $(INSTALL_DIR)$(METRILYX_HOME)
 
 .clean:
 	rm -rf /tmp/pip_build_root
