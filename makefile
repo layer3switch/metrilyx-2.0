@@ -1,6 +1,4 @@
-#
-# Generate a self contained installation under $(INSTALL_DIR)
-#
+
 METRILYX_HOME = /opt/metrilyx
 METRILYX_CONF = $(METRILYX_HOME)/etc/metrilyx/metrilyx.conf
 DEFAULT_DB = $(METRILYX_HOME)/data/metrilyx.sqlite3
@@ -10,10 +8,10 @@ INSTALL_DIR = $(shell pwd)/build/metrilyx
 deps:
 	which pip || easy_install pip
 	[ -e "$(INSTALL_DIR)/$(METRILYX_HOME)" ] || mkdir -p "$(INSTALL_DIR)/$(METRILYX_HOME)"
-	pip install --root $(INSTALL_DIR)/$(METRILYX_HOME) -e .
+    pip install --root $(INSTALL_DIR)/$(METRILYX_HOME) -e .
 
 install:
-	python setup.py install --root $(INSTALL_DIR)
+	python setup.py install --root $(INSTALL_DIR)/$(METRILYX_HOME)
 
 .clean:
 	rm -rf /tmp/pip_build_root
