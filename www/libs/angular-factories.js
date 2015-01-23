@@ -97,6 +97,10 @@ angular.module("metrilyxHelperFactories", [])
 						var arr = [];
 						for(var i in result) {
 							obj = JSON.parse(JSON.stringify(graphModel));
+							if(obj.err) {
+								console.log(obj);
+								continue;
+							}
 							obj.alias = result[i];
 							obj.query.metric = result[i];
 							arr.push(obj);
