@@ -9,12 +9,11 @@ INSTALL_DIR = $(shell pwd)/build/metrilyx
 
 deps:
 	which pip || easy_install pip
-	[ -e "$(INSTALL_DIR)" ] || mkdir -p "$(INSTALL_DIR)"
-	pip install --root $(INSTALL_DIR) -e .
+	[ -e "$(INSTALL_DIR)/$(METRILYX_HOME)" ] || mkdir -p "$(INSTALL_DIR)/$(METRILYX_HOME)"
+	pip install --root $(INSTALL_DIR)/$(METRILYX_HOME) -e .
 
 install:
 	python setup.py install --root $(INSTALL_DIR)
-	cp -a $(INSTALL_DIR)/$(METRILYX_HOME)/* $(INSTALL_DIR)/
 
 .clean:
 	rm -rf /tmp/pip_build_root
