@@ -11,4 +11,4 @@ install:
   - "make install"
 
 script:
-  - "ls -l /opt/metrilyx/"
+  - "ls -lh ./build/metrilyx/"
