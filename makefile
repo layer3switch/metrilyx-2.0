@@ -19,7 +19,7 @@ deps:
 	find $(INSTALL_DIR)$(METRILYX_HOME) -name 'zope' -type d -exec touch '{}'/__init__.py \;
 
 install:
-	cd build && tar -czvf metrilyx.tgz metrilyx ; cd -
+	cd ./build && tar -czf metrilyx.tgz metrilyx ; cd -
 	rsync -vaHP $(INSTALL_DIR)/ /
 
 post_install:

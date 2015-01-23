@@ -7,11 +7,8 @@ before_install:
   - "curl -s https://metrilyx.github.io/bootstrap.sh | bash"
 
 install:
-  - "make build"
-  - "make deps"
-  - "make install"
+  - "pip install -e ."
+  - "python setup.py install"
 
 script:
-  - "make post_install"
-  - "ls -lh ./build/metrilyx"
-  - "ls -lh ./build"
+  - "sudo make .config"
