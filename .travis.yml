@@ -7,8 +7,11 @@ before_install:
   - "curl -s https://metrilyx.github.io/bootstrap.sh | bash"
 
 install:
+  - "make build"
   - "make deps"
   - "make install"
 
 script:
-  - "ls -lh ./build/metrilyx/"
+  - "make post_install"
+  - "ls -lh ./build/metrilyx"
+  - "ls -lh ./build"

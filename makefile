@@ -1,11 +1,16 @@
 
 SHELL = /bin/bash
 
+USER = metrilyx
 METRILYX_HOME = /opt/metrilyx
 METRILYX_CONF = $(METRILYX_HOME)/etc/metrilyx/metrilyx.conf
 DEFAULT_DB = $(METRILYX_HOME)/data/metrilyx.sqlite3
 
 INSTALL_DIR = $(shell pwd)/build/metrilyx
+
+
+build:
+	python setup.py install --root $(INSTALL_DIR)
 
 deps:
 	which pip || easy_install pip
@@ -14,7 +19,14 @@ deps:
 	find $(INSTALL_DIR)$(METRILYX_HOME) -name 'zope' -type d -exec touch '{}'/__init__.py \;
 
 install:
-	python setup.py install --root $(INSTALL_DIR)$(METRILYX_HOME)
+	cd build && tar -czvf metrilyx.tgz metrilyx ; cd -
+	rsync -vaHP $(INSTALL_DIR)/ /
+
+post_install:
+	( id $(USER) > /dev/null 2>&1 ) || ( useradd $(USER) > /dev/null 2>&1 )
+	chown -R $(USER) $(METRILYX_HOME)
+	
+	find $(METRILYX_HOME)/usr -type d -name 'site-packages' -exec echo export PYTHONPATH='{}':\$$PYTHONPATH >> ~$(USER)/.bashrc \;
 
 .clean:
 	rm -rf /tmp/pip_build_root
