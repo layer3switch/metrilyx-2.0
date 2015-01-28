@@ -63,7 +63,16 @@ USER = metrilyx
 
 INSTALL_DIR = $(shell pwd)/build/metrilyx
 
-
+.clean:
+	rm -rf /tmp/pip_build_root
+	rm -rf /tmp/pip-*
+	rm -rf ./build ./dist 
+	rm -rf ./numpy-1*
+	rm -rf ./Twisted-14*
+	rm -rf ./six-1*
+	rm -rf ./node_modules
+	rm -rf ./metrilyx.egg-info
+	find . -name '*.py[c|o]' -exec rm -rvf '{}' \;
 
 # Install nginx
 # TODO: add check for exising nginx
@@ -97,6 +106,9 @@ INSTALL_DIR = $(shell pwd)/build/metrilyx
 		pip install $(MIN_NUMPY_VERSION); \
 	fi;	
 
+#
+# Must be installed before deps
+#
 build:
 	python setup.py install --root $(INSTALL_DIR)
 
@@ -116,17 +128,6 @@ post_install:
 	
 	find $(METRILYX_HOME)/usr -type d -name 'site-packages' -exec echo export PYTHONPATH='{}':\$$PYTHONPATH >> ~$(USER)/.bashrc \;
 
-.clean:
-	rm -rf /tmp/pip_build_root
-	rm -rf /tmp/pip-*
-	rm -rf ./build ./dist 
-	rm -rf ./numpy-1*
-	rm -rf ./Twisted-14*
-	rm -rf ./six-1*
-	rm -rf ./node_modules
-	rm -rf ./metrilyx.egg-info
-	find . -name '*.py[c|o]' -exec rm -rvf '{}' \;
-
 #
 # Test dataserver and modelmanager after they have been started.
 #
@@ -144,14 +145,3 @@ post_install:
 	/etc/init.d/metrilyx start
 	/etc/init.d/nginx restart
 
-
-.clean:
-	rm -rf /tmp/pip_build_root
-	rm -rf /tmp/pip-*
-	rm -rf ./build ./dist 
-	rm -rf ./numpy-1*
-	rm -rf ./Twisted-14*
-	rm -rf ./six-1*
-	rm -rf ./node_modules
-	rm -rf ./metrilyx.egg-info
-	find . -name '*.py[c|o]' -exec rm -rvf '{}' \;
