@@ -114,19 +114,19 @@ angular.module("metrilyxAnnotations", ['ngResource'])
             }
 
             function onWsOpen(evt) {
-                console.log('Connection open', evt);
+                console.log('Connection opened (annolityx) ', evt);
                 retryCount = 0;
                 /* subsciption message */
                 sendMessage(scope.annoFilter);
 
                 for(var i=0; i< _callbacks.length; i++) {
-                    console.log('adding listener...');
+                    //console.log('adding listener...');
                     wsock.addEventListener('annotation', _callbacks[i]);
                 } 
             }
 
             function onWsClose(evt) {
-                console.log('Connection closed', evt);
+                console.log('Connection closed (annolityx) ', evt);
                 wsock = null;
                 
                 console.log('Reconnecting in 5 sec...');
@@ -137,7 +137,7 @@ angular.module("metrilyxAnnotations", ['ngResource'])
                     } else {
                         console.log('Max retries exceeded!');
                     }
-                }, 5000);
+                }, 10000);
             }
 
             function msgErrback(e) {
