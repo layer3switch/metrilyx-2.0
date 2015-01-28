@@ -7,9 +7,7 @@ before_install:
   - "sudo make .deps .nginx"
 
 install:
-  - "sudo make install"
+  - "sudo make build deps install"
 
 script:
-  - "sudo make .config"
-  - "sudo make .start-service"
-
+  - "sudo make .config post_install"
