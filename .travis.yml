@@ -7,7 +7,9 @@ before_install:
   - "sudo make .deps .nginx"
 
 install:
-  - "sudo make build deps install"
+  - "sudo make build"
+  - "ls -la"
+  - "du -sh ./build/metrilyx"
 
 script:
-  - "sudo make .config post_install"
+  - "sudo make .post_install"
