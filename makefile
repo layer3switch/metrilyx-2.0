@@ -118,9 +118,11 @@ deps:
 	pip install --root $(INSTALL_DIR)$(METRILYX_HOME) -e .
 	find $(INSTALL_DIR)$(METRILYX_HOME) -name 'zope' -type d -exec touch '{}'/__init__.py \;
 
-install:
-	cd `dirname $(INSTALL_DIR)` && tar -czf metrilyx-$(DISTRO).tgz metrilyx ; cd -
+install:	
 	rsync -aHP $(INSTALL_DIR)/ /
+
+.package:
+	cd `dirname $(INSTALL_DIR)` && tar -czf metrilyx-$(DISTRO).tgz metrilyx ; cd -
 
 .post_install:
 	( id $(USER) > /dev/null 2>&1 ) || ( useradd $(USER) > /dev/null 2>&1 )

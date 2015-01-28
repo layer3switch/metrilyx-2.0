@@ -12,4 +12,4 @@ install:
   - "du -sh ./build/metrilyx"
 
 script:
-  - "sudo make .post_install"
+  - "sudo make .package"
