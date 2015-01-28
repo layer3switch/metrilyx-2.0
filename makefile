@@ -120,7 +120,7 @@ deps:
 
 install:
 	cd `dirname $(INSTALL_DIR)` && tar -czf metrilyx-$(DISTRO).tgz metrilyx ; cd -
-	rsync -vaHP $(INSTALL_DIR)/ /
+	rsync -aHP $(INSTALL_DIR)/ /
 
 post_install:
 	( id $(USER) > /dev/null 2>&1 ) || ( useradd $(USER) > /dev/null 2>&1 )
