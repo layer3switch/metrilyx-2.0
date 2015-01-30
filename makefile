@@ -109,8 +109,9 @@ INSTALL_DIR = $(shell pwd)/build/metrilyx-2.0
 deps:
 	which pip || easy_install pip
 	[ -e "$(INSTALL_DIR)$(METRILYX_HOME)" ] || mkdir -p "$(INSTALL_DIR)$(METRILYX_HOME)"
-	pip install zope.interface --root $(INSTALL_DIR)$(METRILYX_HOME)
-	pip install --root $(INSTALL_DIR)$(METRILYX_HOME) -e .
+	for pkg in `cat requirements.txt`; do \
+		pip install --root $(INSTALL_DIR)$(METRILYX_HOME) $$pkg; \
+	done;
 	find $(INSTALL_DIR)$(METRILYX_HOME) -name 'zope' -type d -exec touch '{}'/__init__.py \;
 
 build:
