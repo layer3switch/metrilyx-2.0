@@ -61,7 +61,7 @@ DEFAULT_DB := $(METRILYX_HOME)/data/metrilyx.sqlite3
 
 USER = metrilyx
 
-INSTALL_DIR = $(shell pwd)/build/metrilyx
+INSTALL_DIR = $(shell pwd)/build/metrilyx-2.0
 
 .clean:
 	rm -rf /tmp/pip_build_root
@@ -106,17 +106,15 @@ INSTALL_DIR = $(shell pwd)/build/metrilyx
 		pip install $(MIN_NUMPY_VERSION); \
 	fi;	
 
-#
-# Must be installed before deps
-#
-build:
-	python setup.py install --root $(INSTALL_DIR)
-
 deps:
 	which pip || easy_install pip
 	[ -e "$(INSTALL_DIR)$(METRILYX_HOME)" ] || mkdir -p "$(INSTALL_DIR)$(METRILYX_HOME)"
+	pip install zope.interface --root $(INSTALL_DIR)$(METRILYX_HOME)
 	pip install --root $(INSTALL_DIR)$(METRILYX_HOME) -e .
 	find $(INSTALL_DIR)$(METRILYX_HOME) -name 'zope' -type d -exec touch '{}'/__init__.py \;
+
+build:
+	python setup.py install --root $(INSTALL_DIR)
 
 install:	
 	rsync -aHP $(INSTALL_DIR)/ /
