@@ -61,7 +61,7 @@ DEFAULT_DB := $(METRILYX_HOME)/data/metrilyx.sqlite3
 USER = metrilyx
 
 INSTALL_DIR = $(shell pwd)/build/metrilyx-2.0
-PYTHONPATH = ./build/metrilyx-2.0/usr/lib/python2.6/site-packages:./build/metrilyx-2.0/usr/lib64/python2.6/site-packages 
+PYTHONPATH = ./build/metrilyx-2.0/opt/metrilyx/usr/lib/python2.6/site-packages:./build/metrilyx-2.0/opt/metrilyx/usr/lib64/python2.6/site-packages:./build/metrilyx-2.0/usr/lib/python2.6/site-packages:./build/metrilyx-2.0/usr/lib64/python2.6/site-packages
 
 .clean:
 	rm -rf /tmp/pip_build_root
