@@ -49,5 +49,6 @@
 	},
 	"tmpdir": "/dev/shm/metrilyx",
 	"debug": false,
-	"schema_path": "/opt/metrilyx/etc/metrilyx/schemas"
+	"schema_path": "/opt/metrilyx/etc/metrilyx/schemas",
+	"version": "2.4.3"
 }

@@ -3,7 +3,6 @@
 ##
 
 SHELL = /bin/bash
-
 UNAME = $(shell uname)
 
 ## Release file to determin distro and os
@@ -62,6 +61,7 @@ DEFAULT_DB := $(METRILYX_HOME)/data/metrilyx.sqlite3
 USER = metrilyx
 
 INSTALL_DIR = $(shell pwd)/build/metrilyx-2.0
+
 
 .clean:
 	rm -rf /tmp/pip_build_root
@@ -141,7 +141,7 @@ install:
 	[ -f $(METRILYX_CONF) ] || cp $(METRILYX_CONF).sample $(METRILYX_CONF)
 	[ -f $(DEFAULT_DB) ] || cp $(DEFAULT_DB).default $(DEFAULT_DB)
 
-# Start services (last step)
+
 .start-service:
 	/etc/init.d/metrilyx start
 	/etc/init.d/nginx restart

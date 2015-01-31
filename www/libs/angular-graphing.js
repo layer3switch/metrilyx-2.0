@@ -371,7 +371,7 @@ angular.module('graphing', [])
 					return ngModel.$modelValue.series;
 				}, function(newVal, oldVal) {
 					if(newVal === undefined) return;
-					//if(newVal.length <= 0) return;
+					else if(newVal.length <= 0) return;
 
 					// Ignore status changes
 					if(newVal.length > 0 && oldVal !== undefined && oldVal.length > 0) {
@@ -381,7 +381,6 @@ angular.module('graphing', [])
 							}
 						}
 					}
-
 					// Initial populate //
 					hc = _graphDomNode.highcharts();
 					if(hc == undefined) {
