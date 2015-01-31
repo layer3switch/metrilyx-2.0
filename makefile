@@ -61,7 +61,7 @@ DEFAULT_DB := $(METRILYX_HOME)/data/metrilyx.sqlite3
 USER = metrilyx
 
 INSTALL_DIR = $(shell pwd)/build/metrilyx-2.0
-
+PYTHONPATH = ./build/metrilyx-2.0/usr/lib/python2.6/site-packages:./build/metrilyx-2.0/usr/lib64/python2.6/site-packages 
 
 .clean:
 	rm -rf /tmp/pip_build_root
@@ -109,6 +109,7 @@ INSTALL_DIR = $(shell pwd)/build/metrilyx-2.0
 deps:
 	which pip || easy_install pip
 	[ -e "$(INSTALL_DIR)$(METRILYX_HOME)" ] || mkdir -p "$(INSTALL_DIR)$(METRILYX_HOME)"
+	export PYTHONPATH=$(PYTHONPATH)
 	for pkg in `cat requirements.txt`; do \
 		pip install --root $(INSTALL_DIR)$(METRILYX_HOME) $$pkg; \
 	done;
