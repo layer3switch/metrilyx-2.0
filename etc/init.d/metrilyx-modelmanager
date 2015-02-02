@@ -7,7 +7,7 @@
 [ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
 
 NAME="metrilyx-modelmanager"
-BIN="uwsgi"
+BIN="/opt/metrilyx/usr/bin/uwsgi"
 APP_HOME="/opt/metrilyx"
 LOGFILE="${APP_HOME}/log/${NAME}.log"
 PIDFILE="/tmp/${NAME}.pid"
