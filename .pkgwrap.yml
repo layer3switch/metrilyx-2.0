@@ -1,0 +1,38 @@
+Distributions:
+    - name: centos
+      release: 6
+      
+      build_deps:
+      - git
+      - gcc
+      - gcc-c++
+      - gcc-gfortran
+      - atlas-devel
+      - blas-devel
+      - libffi-devel
+      - python-setuptools
+      - python-devel
+    
+      deps:
+      - libgfortran
+      - libffi
+      - blas
+      - atlas
+      - libuuid
+      - uuid
+    
+      build_cmd: 
+      - sudo make .build deps
+    
+      post_install: 
+      - "[ -f /opt/metrilyx/etc/metrilyx/metrilyx.conf ] || cp /opt/metrilyx/etc/metrilyx/metrilyx.conf.sample /opt/metrilyx/etc/metrilyx/metrilyx.conf"
+      - "[ -f /opt/metrilyx/data/metrilyx.sqlite3 ] || cp /opt/metrilyx/data/metrilyx.sqlite3.default /opt/metrilyx/data/metrilyx.sqlite3"
+      - "( id metrilyx > /dev/null 2>&1 ) || useradd metrilyx"
+      - "chown -R metrilyx /opt/metrilyx"
+      - "echo 'source /opt/metrilyx/bin/set-run-env.sh' >> ~metrilyx/.bashrc"
+     
+Package:
+    - packager: ticketmaster
+      build_env: python
+      url: https://github.com/Ticketmaster/metrilyx-2.0
+      tagbranch: v2.4.3

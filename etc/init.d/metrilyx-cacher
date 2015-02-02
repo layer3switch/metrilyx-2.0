@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 #
 # chkconfig: 234 90 10
 # description: Metrilyx Metadata Cacher.
