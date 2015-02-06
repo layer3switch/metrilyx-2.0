@@ -56,7 +56,7 @@ DATA_FILES = [
                             'etc/metrilyx/uwsgi.conf',
                             'etc/metrilyx/uwsgi_params.conf']),
     ('/opt/metrilyx',       ['VERSION']),
-    ('/etc/sysconfig',      ['etc/sysconfig/metrilyx-cacher']),
+    ('/etc/sysconfig',      ['etc/sysconfig/metrilyx']),
     ('/etc/nginx/conf.d',   ['etc/nginx/conf.d/metrilyx.conf'])
 ]
 

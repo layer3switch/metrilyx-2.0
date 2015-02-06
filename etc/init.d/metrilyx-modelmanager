@@ -6,6 +6,13 @@
 
 [ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
 
+if [ -f "/etc/sysconfig/metrilyx" ]; then
+	. /etc/sysconfig/metrilyx
+else
+	echo "/etc/sysconfig/metrilyx not found!";
+	exit 1;
+fi
+
 NAME="metrilyx-modelmanager"
 BIN="/opt/metrilyx/usr/bin/uwsgi"
 APP_HOME="/opt/metrilyx"
@@ -24,7 +31,7 @@ start() {
 	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
 	if [ "$PIDS" = "" ]; then
 		echo -n "${NAME} starting... "
-		PYTHON_EGG_CACHE=$PYTHON_EGG_CACHE METRILYX_HOME=${APP_HOME} ${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
+		PYTHONPATH=${PYTHONPATH} PYTHON_EGG_CACHE=$PYTHON_EGG_CACHE METRILYX_HOME=${APP_HOME} ${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
 		sleep 1;
 		PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
 		if [ "$PIDS" = "" ]; then
