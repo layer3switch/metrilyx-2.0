@@ -109,15 +109,14 @@ PYTHONPATH = ./build/metrilyx-2.0/opt/metrilyx/usr/lib/python2.6/site-packages:.
 deps:
 	which pip || easy_install pip
 	[ -e "$(INSTALL_DIR)$(METRILYX_HOME)" ] || mkdir -p "$(INSTALL_DIR)$(METRILYX_HOME)"
-	export PYTHONPATH=$(PYTHONPATH)
+
 	for pkg in `cat requirements.txt`; do \
-		pip install --root $(INSTALL_DIR)$(METRILYX_HOME) $$pkg; \
+		PYTHONPATH=$(PYTHONPATH) pip install --root $(INSTALL_DIR)$(METRILYX_HOME) $$pkg; \
 	done;
 	find $(INSTALL_DIR)$(METRILYX_HOME) -name 'zope' -type d -exec touch '{}'/__init__.py \;
 
 .build:
-	export PYTHONPATH=$(PYTHONPATH)
-	python setup.py install --root $(INSTALL_DIR)
+	PYTHONPATH=$(PYTHONPATH) python setup.py install --root $(INSTALL_DIR)
 
 install:	
 	rsync -aHP $(INSTALL_DIR)/ /
