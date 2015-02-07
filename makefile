@@ -116,6 +116,7 @@ deps:
 	find $(INSTALL_DIR)$(METRILYX_HOME) -name 'zope' -type d -exec touch '{}'/__init__.py \;
 
 .build:
+	export PYTHONPATH=$(PYTHONPATH)
 	python setup.py install --root $(INSTALL_DIR)
 
 install:	
