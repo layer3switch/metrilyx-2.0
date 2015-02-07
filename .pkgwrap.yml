@@ -20,6 +20,7 @@ Distributions:
       - atlas
       - libuuid
       - uuid
+      - python-importlib
       - nginx
     
       build_cmd: 
