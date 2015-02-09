@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 #
 # chkconfig: 234 90 10
 # description: Metrilyx Metadata Cacher.
@@ -6,7 +6,12 @@
 
 [ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
 
-[ -f "/etc/sysconfig/${NAME}" ] && . /etc/sysconfig/${NAME}
+if [ -f "/etc/sysconfig/metrilyx" ]; then
+	. /etc/sysconfig/metrilyx
+else
+	echo "/etc/sysconfig/metrilyx not found!";
+	exit 1;
+fi
 
 PGREP="/usr/bin/pgrep -f"
 OS=$(uname | tr '[:upper:]' '[:lower:]')
@@ -18,7 +23,6 @@ if [ "$(uname -m)" != "x86_64" ]; then
 fi
 
 NAME="metrilyx-cacher"
-APP_HOME="/opt/metrilyx"
 BIN="${APP_HOME}/bin/${NAME}.${OS}.${ARCH}"
 LOGFILE="${APP_HOME}/log/${NAME}.log"
 

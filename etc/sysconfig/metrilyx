@@ -1,0 +1,6 @@
+APP_HOME="/opt/metrilyx"
+# For pandas/numpy
+PYTHON_EGG_CACHE="/dev/shm/metrilyx"
+PYTHONPATH=${APP_HOME}/usr/lib/python2.6/site-packages:${APP_HOME}/usr/lib64/python2.6/site-packages
+# Metrilyx cacher config
+CACHER_CONFIG=${APP_HOME}/etc/metrilyx/metrilyx.conf

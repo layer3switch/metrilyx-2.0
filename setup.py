@@ -11,7 +11,7 @@ A web based dashboard engine to OpenTSDB that allows for analyzing,
 cross cutting and viewing of time series data in a simple manner.
 '''
 
-LICENSE = "LICENSE.txt"
+LICENSE = open("LICENSE.txt", "rb").read()
 SETUP_REQUIRES = ["six>=1.7.3"]
 INSTALL_REQUIRES = [ p for p in open('requirements.txt').read().split('\n') if p != '' and not p.startswith('#') ]
 
@@ -55,7 +55,8 @@ DATA_FILES = [
                             'etc/metrilyx/metrilyx.conf.sample',
                             'etc/metrilyx/uwsgi.conf',
                             'etc/metrilyx/uwsgi_params.conf']),
-    ('/etc/sysconfig',      ['etc/sysconfig/metrilyx-cacher']),
+    ('/opt/metrilyx',       ['VERSION']),
+    ('/etc/sysconfig',      ['etc/sysconfig/metrilyx']),
     ('/etc/nginx/conf.d',   ['etc/nginx/conf.d/metrilyx.conf'])
 ]
 
