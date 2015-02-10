@@ -32,7 +32,38 @@ Distributions:
       - "( id metrilyx > /dev/null 2>&1 ) || useradd metrilyx"
       - "chown -R metrilyx /opt/metrilyx"
       - "echo 'source /opt/metrilyx/bin/set-run-env.sh' >> ~metrilyx/.bashrc"
-     
+    
+    - name: ubuntu
+      release: 14.04
+
+      build_deps:
+      - build-essential 
+      - make 
+      - g++ 
+      - gfortran 
+      - libuuid1 
+      - uuid-runtime 
+      - python-setuptools 
+      - python-dev 
+      - libpython2.7 
+      - python-pip 
+      - git-core 
+      - libffi-dev 
+      - libatlas-dev 
+      - libblas-dev 
+      - python-numpy
+      deps:
+      - libuuid1 
+      - uuid-runtime 
+      - python-setuptools 
+      - python-dev 
+      - libpython2.7 
+      - python-pip
+      - libffi-dev 
+      - libatlas-dev 
+      - libblas-dev 
+      - python-numpy
+
 Package:
     packager: ticketmaster
     build_env: python
