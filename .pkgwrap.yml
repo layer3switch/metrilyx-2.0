@@ -36,6 +36,9 @@ Distributions:
     - name: ubuntu
       release: 14.04
 
+      build_cmd: 
+      - sudo make .build deps
+      
       build_deps:
       - build-essential 
       - make 
