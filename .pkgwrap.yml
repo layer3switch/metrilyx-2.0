@@ -38,7 +38,7 @@ Distributions:
 
       build_cmd: 
       - sudo make .build deps
-      
+
       build_deps:
       - build-essential 
       - make 
@@ -66,6 +66,13 @@ Distributions:
       - libatlas-dev 
       - libblas-dev 
       - python-numpy
+
+      post_install: 
+      - "[ -f /opt/metrilyx/etc/metrilyx/metrilyx.conf ] || cp /opt/metrilyx/etc/metrilyx/metrilyx.conf.sample /opt/metrilyx/etc/metrilyx/metrilyx.conf"
+      - "[ -f /opt/metrilyx/data/metrilyx.sqlite3 ] || cp /opt/metrilyx/data/metrilyx.sqlite3.default /opt/metrilyx/data/metrilyx.sqlite3"
+      - "( id metrilyx > /dev/null 2>&1 ) || useradd metrilyx"
+      - "chown -R metrilyx /opt/metrilyx"
+      - "echo 'source /opt/metrilyx/bin/set-run-env.sh' >> ~metrilyx/.profile"
 
 Package:
     packager: ticketmaster
