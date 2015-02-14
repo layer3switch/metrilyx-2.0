@@ -72,7 +72,7 @@ Distributions:
       - "[ -f /opt/metrilyx/data/metrilyx.sqlite3 ] || cp /opt/metrilyx/data/metrilyx.sqlite3.default /opt/metrilyx/data/metrilyx.sqlite3"
       - "( id metrilyx > /dev/null 2>&1 ) || useradd metrilyx"
       - "chown -R metrilyx /opt/metrilyx"
-      - "echo 'source /opt/metrilyx/bin/set-run-env.sh' >> ~metrilyx/.profile"
+      - "echo 'source /opt/metrilyx/bin/set-run-env.sh' >> ~metrilyx/.bashrc"
 
 Package:
     build_env: python
