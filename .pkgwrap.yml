@@ -75,7 +75,4 @@ Distributions:
       - "echo 'source /opt/metrilyx/bin/set-run-env.sh' >> ~metrilyx/.profile"
 
 Package:
-    packager: ticketmaster
     build_env: python
-    url: https://github.com/Ticketmaster/metrilyx-2.0
-    tagbranch: v2.4.3
