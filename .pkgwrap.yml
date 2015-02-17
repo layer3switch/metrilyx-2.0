@@ -1,0 +1,78 @@
+Distributions:
+    - name: centos
+      release: 6
+      
+      build_deps:
+      - git
+      - gcc
+      - gcc-c++
+      - gcc-gfortran
+      - atlas-devel
+      - blas-devel
+      - libffi-devel
+      - python-setuptools
+      - python-devel
+    
+      deps:
+      - libgfortran
+      - libffi
+      - blas
+      - atlas
+      - libuuid
+      - uuid
+      - python-importlib
+      - nginx
+    
+      build_cmd: 
+      - sudo make .build deps
+    
+      post_install: 
+      - "[ -f /opt/metrilyx/etc/metrilyx/metrilyx.conf ] || cp /opt/metrilyx/etc/metrilyx/metrilyx.conf.sample /opt/metrilyx/etc/metrilyx/metrilyx.conf"
+      - "[ -f /opt/metrilyx/data/metrilyx.sqlite3 ] || cp /opt/metrilyx/data/metrilyx.sqlite3.default /opt/metrilyx/data/metrilyx.sqlite3"
+      - "( id metrilyx > /dev/null 2>&1 ) || useradd metrilyx"
+      - "chown -R metrilyx /opt/metrilyx"
+      - "echo 'source /opt/metrilyx/bin/set-run-env.sh' >> ~metrilyx/.bashrc"
+    
+    - name: ubuntu
+      release: 14.04
+
+      build_cmd: 
+      - sudo make .build deps
+
+      build_deps:
+      - build-essential 
+      - make 
+      - g++ 
+      - gfortran 
+      - libuuid1 
+      - uuid-runtime 
+      - python-setuptools 
+      - python-dev 
+      - libpython2.7 
+      - python-pip 
+      - git-core 
+      - libffi-dev 
+      - libatlas-dev 
+      - libblas-dev 
+      - python-numpy
+      deps:
+      - libuuid1 
+      - uuid-runtime 
+      - python-setuptools 
+      - python-dev 
+      - libpython2.7 
+      - python-pip
+      - libffi-dev 
+      - libatlas-dev 
+      - libblas-dev 
+      - python-numpy
+
+      post_install: 
+      - "[ -f /opt/metrilyx/etc/metrilyx/metrilyx.conf ] || cp /opt/metrilyx/etc/metrilyx/metrilyx.conf.sample /opt/metrilyx/etc/metrilyx/metrilyx.conf"
+      - "[ -f /opt/metrilyx/data/metrilyx.sqlite3 ] || cp /opt/metrilyx/data/metrilyx.sqlite3.default /opt/metrilyx/data/metrilyx.sqlite3"
+      - "( id metrilyx > /dev/null 2>&1 ) || useradd metrilyx"
+      - "chown -R metrilyx /opt/metrilyx"
+      - "echo 'source /opt/metrilyx/bin/set-run-env.sh' >> ~metrilyx/.bashrc"
+
+Package:
+    build_env: python
