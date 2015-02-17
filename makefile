@@ -3,7 +3,6 @@
 ##
 
 SHELL = /bin/bash
-
 UNAME = $(shell uname)
 
 ## Release file to determin distro and os
@@ -61,7 +60,8 @@ DEFAULT_DB := $(METRILYX_HOME)/data/metrilyx.sqlite3
 
 USER = metrilyx
 
-INSTALL_DIR = $(shell pwd)/build/metrilyx
+INSTALL_DIR = $(shell pwd)/build/metrilyx-2.0
+PYTHONPATH = ./build/metrilyx-2.0/opt/metrilyx/usr/lib/python2.6/site-packages:./build/metrilyx-2.0/opt/metrilyx/usr/lib64/python2.6/site-packages:./build/metrilyx-2.0/usr/lib/python2.6/site-packages:./build/metrilyx-2.0/usr/lib64/python2.6/site-packages
 
 .clean:
 	rm -rf /tmp/pip_build_root
@@ -106,17 +106,17 @@ INSTALL_DIR = $(shell pwd)/build/metrilyx
 		pip install $(MIN_NUMPY_VERSION); \
 	fi;	
 
-#
-# Must be installed before deps
-#
-build:
-	python setup.py install --root $(INSTALL_DIR)
-
 deps:
 	which pip || easy_install pip
 	[ -e "$(INSTALL_DIR)$(METRILYX_HOME)" ] || mkdir -p "$(INSTALL_DIR)$(METRILYX_HOME)"
-	pip install --root $(INSTALL_DIR)$(METRILYX_HOME) -e .
+
+	for pkg in `cat requirements.txt`; do \
+		PYTHONPATH=$(PYTHONPATH) pip install --root $(INSTALL_DIR)$(METRILYX_HOME) $$pkg; \
+	done;
 	find $(INSTALL_DIR)$(METRILYX_HOME) -name 'zope' -type d -exec touch '{}'/__init__.py \;
+
+.build:
+	PYTHONPATH=$(PYTHONPATH) python setup.py install --root $(INSTALL_DIR)
 
 install:	
 	rsync -aHP $(INSTALL_DIR)/ /
@@ -124,11 +124,17 @@ install:
 .package:
 	cd `dirname $(INSTALL_DIR)` && tar -czf metrilyx-$(DISTRO).tgz metrilyx ; cd -
 
+# Copies sample configs and db
+# Create user
+# Set ownership
 .post_install:
-	( id $(USER) > /dev/null 2>&1 ) || ( useradd $(USER) > /dev/null 2>&1 )
+	[ -f $(METRILYX_CONF) ] || cp $(METRILYX_CONF).sample $(METRILYX_CONF)
+	[ -f $(DEFAULT_DB) ] || cp $(DEFAULT_DB).default $(DEFAULT_DB)
+	( id $(USER) > /dev/null 2>&1 ) || useradd $(USER)
 	chown -R $(USER) $(METRILYX_HOME)
 	
-	find $(METRILYX_HOME)/usr -type d -name 'site-packages' -exec echo export PYTHONPATH='{}':\$$PYTHONPATH >> ~$(USER)/.bashrc \;
+	
+# find $(METRILYX_HOME)/usr -type d -name 'site-packages' -exec echo export PYTHONPATH='{}':\$$PYTHONPATH >> ~$(USER)/.bashrc \;
 
 #
 # Test dataserver and modelmanager after they have been started.
@@ -137,13 +143,6 @@ install:
 	python -m unittest tests.dataserver
 	python -m unittest tests.modelmanager
 
-# Copies sample configs if no configs exist
-.config:
-	[ -f $(METRILYX_CONF) ] || cp $(METRILYX_CONF).sample $(METRILYX_CONF)
-	[ -f $(DEFAULT_DB) ] || cp $(DEFAULT_DB).default $(DEFAULT_DB)
-
-# Start services (last step)
 .start-service:
 	/etc/init.d/metrilyx start
 	/etc/init.d/nginx restart
-
