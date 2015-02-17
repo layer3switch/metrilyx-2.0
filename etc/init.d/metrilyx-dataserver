@@ -6,8 +6,14 @@
 
 [ -f "/etc/rc.d/init.d/functions" ] && . /etc/rc.d/init.d/functions
 
+if [ -f "/etc/sysconfig/metrilyx" ]; then
+	. /etc/sysconfig/metrilyx
+else
+	echo "/etc/sysconfig/metrilyx not found!";
+	exit 1;
+fi
+
 NAME="metrilyx-dataserver"
-APP_HOME="/opt/metrilyx"
 BIN=${APP_HOME}/bin/${NAME}.py
 LOGFILE=${APP_HOME}/log/${NAME}.log
 LOGLEVEL="WARNING"
@@ -22,7 +28,7 @@ start() {
 	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
 	if [ "$PIDS" = "" ]; then
 		echo -n "${NAME} starting... "
-		METRILYX_HOME=${APP_HOME} ${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
+		METRILYX_HOME=${APP_HOME} PYTHONPATH=${PYTHONPATH} ${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
 		sleep 2;
 		PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
 		if [ "$PIDS" = "" ]; then
