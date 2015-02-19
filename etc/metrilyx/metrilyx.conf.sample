@@ -22,11 +22,11 @@
 		}
 	],
 	"cache": {
-		"enabled": false,
+		"enabled": true,
 		"interval": 180,
     	"result_size": 50,
     	"datasource": {
-    		"url": "http://localhost:8989"
+    		"url": "/search"
     	}
 	},
 	"annotations": {
