@@ -38,7 +38,7 @@
 			"types": "/api/types"
 		},
 		"websocket": {
-			"uri": "ws://localhost:9898/data"
+			"uri": "ws://localhost:9898/annotations/data"
 		}
 	},
 	"websocket": {
