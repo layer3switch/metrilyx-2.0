@@ -42,8 +42,6 @@
 		}
 	},
 	"websocket": {
-		"hostname": "localhost",
-		"port": 9000,
 		"endpoint": "/api/data"
 	},
 	"tmpdir": "/dev/shm/metrilyx",
