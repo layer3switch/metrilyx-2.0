@@ -45,6 +45,6 @@
 		"endpoint": "/api/data"
 	},
 	"tmpdir": "/dev/shm/metrilyx",
-	"debug": true,
+	"debug": false,
 	"version": "2.5.0"
 }
