@@ -398,7 +398,7 @@ angular.module('graphing', [])
 					return ngModel.$modelValue.series;
 				}, function(newVal, oldVal) {
 					if(newVal === undefined) return;
-					else if(newVal.length <= 0) return;
+					//else if(newVal.length <= 0) return;
 
 					// Ignore status changes
 					if(newVal.length > 0 && oldVal !== undefined && oldVal.length > 0) {
@@ -424,10 +424,10 @@ angular.module('graphing', [])
 							scope.requestData(q);
 						}
 
-						if(scope.modelType == 'adhoc') {
-							console.log('init graph: setURL');
-							scope.setURL(ngModel.$modelValue);
-						}
+						//if(scope.modelType == 'adhoc') {
+							//console.log('init graph: setURL');
+							//scope.setURL(ngModel.$modelValue);
+						//}
 						return;
 					}
 

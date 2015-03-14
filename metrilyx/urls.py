@@ -33,4 +33,4 @@ urlpatterns = patterns('',
 )
 if config['debug']:
 	urlpatterns += static('/',
-			document_root=os.path.join(os.path.dirname(__file__), 'www'))
+			document_root=os.path.join(os.path.dirname(os.path.dirname(__file__)), 'www'))
