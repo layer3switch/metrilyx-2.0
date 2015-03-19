@@ -31,11 +31,13 @@ angular.module("metrilyxAnnotations", ['ngResource'])
     function($location, $routeParams, $http, Configuration, EventAnnoTypesService, EventAnnoService) {
         'use strict';
 
+        var wsock;
+
         var AnnotationsManager = function(scope) {
 
             var t = this;
 
-            var wsock;
+
             //var uri = 'ws://localhost:9898/data';
             
             var maxRetries = 3;
@@ -55,11 +57,9 @@ angular.module("metrilyxAnnotations", ['ngResource'])
                         
                         var kv = annoTagKVs[i].split(":");
                         if( kv.length !== 2 || kv[0] === '' || kv[1] === '' ) {
-                            
                             console.log('invalid annotation tags: '+kv);
                             continue;
                         } else {
-                            
                             out[kv[0]] = kv[1];
                         }
                     }
@@ -235,6 +235,12 @@ angular.module("metrilyxAnnotations", ['ngResource'])
                     t.fetchAnnotationsForTimeFrame = fetchAnnotationsForTimeFrame;
                     t.sendMessage = sendMessage;
                     t.connect = connect;
+
+                    /* Close websocket on controller reload to avoid multiple connections. */
+                    scope.$on('$destroy', function() {
+                        wsock.removeEventListener('close', onWsClose);
+                        wsock.close();
+                    })
                 } else {
                     console.log("Annotations disabled!");
                 }

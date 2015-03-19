@@ -14,4 +14,5 @@ class MetrilyxWebSocketServerFactory(WebSocketServerFactory):
 
     def removeClient(self, client):
         self.clients.remove(client)
+        client = None ## ??
         logger.warning("WebSocket clients: %d" %(len(self.clients)))

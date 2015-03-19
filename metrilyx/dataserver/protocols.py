@@ -12,12 +12,13 @@ from autobahn.websocket.compress import PerMessageDeflateOffer, PerMessageDeflat
 from ..httpclients import AsyncHttpJsonClient, MetrilyxGraphFetcher, checkHttpResponse
 from transforms import MetrilyxSerie, MetrilyxAnalyticsSerie
 
+from dataproviders.opentsdb import getPerfDataProvider
+
 from datarequest import GraphRequest
 
 from pprint import pprint
 
 logger = logging.getLogger(__name__)
-
 
 
 def writeRequestLogLine(request_obj):
@@ -197,3 +198,15 @@ class GraphServerProtocol(BaseGraphServerProtocol):
             self.__expirerDeferred.cancel()
         except Exception:
             pass
+
+
+def getConfiguredProtocol():
+    try:
+        class GraphProtocol(GraphServerProtocol):
+            dataprovider = getPerfDataProvider()
+
+        return GraphProtocol
+        #logger.warning("Protocol: %s" %(str(proto)))
+    except Exception,e:
+        logger.error("Could not set dataprovider and/or protocol: %s" %(str(e)))
+        sys.exit(2)

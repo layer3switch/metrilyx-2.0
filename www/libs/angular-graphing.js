@@ -414,7 +414,7 @@ angular.module('graphing', [])
 
 						var gseries = wsHelper.getSeriesInNonQueryState(newVal);
 						if(gseries.length > 0) {
-
+							//console.log('trigger');
 							_graphDomNode.html(GRAPH_LOADING_HTML);
 
 							var q = scope.baseQuery(ngModel.$modelValue);
