@@ -1,14 +1,10 @@
-<div class="shift" id="stage">
+<div class="shift edit-comp {{editMode}}" id="stage">
 	<title>Metrilyx : {{model.name}}</title>
-	<ng-include src="pageMastHtml"></ng-include>
-
-	<ng-include src="editPanelHtml" onload="onEditPanelLoad()"></ng-include>
-
-	<div class="row edit-comp{{editMode}}" id="main-view">
+	<div class="row" id="main-view">
 		<div class="col-md-12" style="padding:0">
 			<ng-include src="pageHeaderHtml" onload="onPageHeaderLoad()"></ng-include>
-			<div class="row layout edit-comp{{editMode}}" ui-sortable="layoutSortOpts" ng-model="model.layout" layout="true">
-				<div ng-repeat="row in model.layout" class="row layout-row edit-comp{{editMode}}" ng-include="podHtml" ui-sortable="rowSortOpts" ng-model="row" row="true">
+			<div class="row layout edit-comp {{editMode}}" ui-sortable="layoutSortOpts" ng-model="model.layout" layout="true">
+				<div ng-repeat="row in model.layout" class="row layout-row edit-comp {{editMode}}" ng-include="podHtml" ui-sortable="rowSortOpts" ng-model="row" row="true">
 				</div>
 			</div>
 			<div ng-include="pageFooterHtml"></div>

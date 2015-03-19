@@ -1,10 +1,10 @@
-<div class="page-model-header edit-comp{{editMode}}">
+<div class="page-model-header edit-comp {{editMode}}">
 	<div class="row" style="padding-bottom:10px;margin:0;border-bottom:1px solid #bbb">
 		<div class="col-md-4" style="padding:0;">
 			<span class="page-list-btn pointer interactive" title="Page List" onclick="$('#side-panel').toggleClass('offstage');">
 				<i class="glyphicon glyphicon-list"></i>
 			</span>
-			<div ng-if="modelType!=='adhoc'" class="tags-panel edit-comp{{editMode}}">
+			<div ng-if="modelType!=='adhoc'" class="tags-panel edit-comp {{editMode}}">
 				<span class="interactive pointer" data-toggle="modal" data-target="#add-page-tag" title="Add page tag" style="position:relative;top:3px;">
 					<span><i class="glyphicon glyphicon-tag" style="font-size:16px;"></i></span>
 					<span style="position:relative;left:-10px;bottom:9px;">
@@ -24,8 +24,8 @@
 		<div ng-if="modelType!=='adhoc'" class="col-md-4 text-center" style="padding:0">
 			<div class="row">
 				<div class="col-md-12" style="padding:0px">
-					<input type="text" ng-model="model.name" class="edit-comp{{editMode}}" placeholder="Page Name" title="Page Name" required style="width:100%">
-					<input type="text" ng-model="model._id" class="edit-comp{{editMode}}" placeholder="Page ID" required style="min-width: 40px;width:100%;" title="Page ID" page-id>
+					<input type="text" ng-model="model.name" class="edit-comp {{editMode}}" placeholder="Page Name" title="Page Name" required style="width:100%">
+					<input type="text" ng-model="model._id" class="edit-comp {{editMode}}" placeholder="Page ID" required style="min-width: 40px;width:100%;" title="Page ID" page-id>
 				</div>
 			</div>
 		</div>
@@ -57,7 +57,7 @@
 		</div>
 		<!-- page tags -->
 		<div class="col-md-4 text-right" style="padding:0;">
-			<span ng-if="(modelType=='' && editMode!==' edit-mode')||(modelType==='adhoc')" class="animated">
+			<span ng-if="(modelType=='' && editMode!=='edit-mode')||(modelType==='adhoc')" class="animated">
 				<span id="auto-update">
 					<span ng-if="timeType !== 'absolute'" class="animated">
 						<span>Auto-Update : </span>
@@ -65,7 +65,7 @@
 					</span>
 				</span>
 			</span>
-			<span class="animated" ng-if="modelType!=='adhoc' && editMode === ' edit-mode'">
+			<span class="animated" ng-if="modelType!=='adhoc' && editMode === 'edit-mode'">
 				<span style="position:relative;top:3px;">
 					<span ng-click="toggleEditMode()" class="edit-panel-btn pointer interactive" title="Cancel">
 						<div class="iblk">
@@ -108,7 +108,7 @@
 										</span>
 									</a>
 								</li>
-								<li ng-if="editMode === ' edit-mode'" title="Edit">
+								<li ng-if="editMode === 'edit-mode'" title="Edit">
 									<a href="javascript:void(0)" ng-click="toggleEditMode()">
 										<span ng-if="modelType===''">
 											<span class="padr5"><i class="glyphicon glyphicon-ban-circle"></i></span>

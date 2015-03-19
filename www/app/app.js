@@ -3,6 +3,7 @@ var app = angular.module('app', [
 	'filters',
 	'ngRoute',
 	'ui.sortable',
+	'metrilyx.mast',
 	'timeframe',
 	'adhoc',
 	'graphing',
@@ -60,13 +61,11 @@ app.config(['$routeProvider',
 			})
 			.when('/graph', {
 				templateUrl: 'app/adhoc/adhoc-graph.html',
-				controller: 'adhocGraphController',
-				/*reloadOnSearch: false*/
+				controller: 'adhocGraphController'
 			})
 			.when('/:pageId', {
 				templateUrl: 'partials/page.html',
-				controller: 'pageController',
-				/*reloadOnSearch: false*/
+				controller: 'pageController'
 			})
 			.otherwise({
 				redirectTo: '/graph'

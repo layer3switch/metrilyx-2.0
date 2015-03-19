@@ -1,3 +1,5 @@
+'use strict';
+
 angular.module("metrilyxAnnotations", ['ngResource'])
 .factory('EventAnnoService', ['$resource', 'Configuration',
     function($resource, Configuration) {
@@ -26,73 +28,79 @@ angular.module("metrilyxAnnotations", ['ngResource'])
         });
     }
 ])
-.factory("AnnotationsManager", [
-    '$location', '$routeParams', '$http', 'Configuration', 'EventAnnoTypesService', 'EventAnnoService',
-    function($location, $routeParams, $http, Configuration, EventAnnoTypesService, EventAnnoService) {
-        'use strict';
+.factory("AnnotationParsers", ['$routeParams', function($routeParams) {
+    
+    var getURLAnnoTags = function() {
+        var out = {};
+        if ($routeParams.annotationTags) {
+            
+            var annoTagKVs = $routeParams.annotationTags.split(",");
+            for( var i=0; i < annoTagKVs.length; i++ ) {
+                
+                var kv = annoTagKVs[i].split(":");
+                if( kv.length !== 2 || kv[0] === '' || kv[1] === '' ) {
+                    console.log('invalid annotation tags: '+kv);
+                    continue;
+                } else {
+                    out[kv[0]] = kv[1];
+                }
+            }
+        }
+        return out;
+    }
 
-        var wsock;
+    var getURLAnnoTypes = function() {
+        var out = [];
+        if($routeParams.annotationTypes !== undefined) {
+            var annoTypes = $routeParams.annotationTypes.split(",");
+            for(var i=0; i<annoTypes.length; i++) {
+                if(annoTypes[i] !== '') 
+                    out.push(annoTypes[i]);
+            }
+        }
+        return out;
+    }
+
+    var annoTypesString = function(annoIdx) {
+        var out = [];
+        for(var k in annoIdx) {
+            if(annoIdx[k].selected) out.push(k);
+        }
+        return out.join(',');
+    }
+
+    var getAnnoFilter = function() {
+        return {
+            tags: getURLAnnoTags(),
+            types: getURLAnnoTypes() /* this holds the types used for subscription */
+        };
+    }
+    
+    return {
+        annoTypesString: annoTypesString,
+        getAnnoFilter: getAnnoFilter
+    }
+}])
+.factory("AnnotationsManager", [
+    '$location', '$routeParams', '$http', 'Configuration', 'EventAnnoTypesService', 'EventAnnoService', 'AnnotationParsers',
+    function($location, $routeParams, $http, Configuration, EventAnnoTypesService, EventAnnoService, AnnotationParsers) {
 
         var AnnotationsManager = function(scope) {
 
             var t = this;
 
+            var maxRetries = 3,
+                retryCount = 0,
+                _callbacks = [],
+                _expectedListeners = 0;
 
-            //var uri = 'ws://localhost:9898/data';
-            
-            var maxRetries = 3;
-            var retryCount = 0;
+            var wsock;
 
-            var _callbacks = [];
-
-            var _expectedListeners = 0;
-
-            function _parseAnnoTags() {
-                
-                var out = {};
-                if ($routeParams.annotationTags) {
-                    
-                    var annoTagKVs = $routeParams.annotationTags.split(",");
-                    for( var i=0; i < annoTagKVs.length; i++ ) {
-                        
-                        var kv = annoTagKVs[i].split(":");
-                        if( kv.length !== 2 || kv[0] === '' || kv[1] === '' ) {
-                            console.log('invalid annotation tags: '+kv);
-                            continue;
-                        } else {
-                            out[kv[0]] = kv[1];
-                        }
-                    }
-                }
-                return out;
-            }
-
-            function _parseAnnoTypes() {
-                
-                var out = [];
-                if($routeParams.annotationTypes !== undefined) {
-                    var annoTypes = $routeParams.annotationTypes.split(",");
-                    for(var i=0; i<annoTypes.length; i++) {
-                        if(annoTypes[i] !== '') 
-                            out.push(annoTypes[i]);
-                    }
-                }
-                return out;
-            }
-
-            function _types2string(annoIdx) {
-                var out = [];
-                for(var k in annoIdx) {
-                    if(annoIdx[k].selected) out.push(k);
-                }
-                return out.join(',');
-            }
-
-            function setAnnotationsFilter(evtAnnoTypes, annoTagsFilter) {
+            var setAnnotationsFilter = function(annoTypes, annoTagsFilter) {
 
                 var tmp = $location.search();
                 $.extend(true, tmp, {
-                    annotationTypes: _types2string(evtAnnoTypes),
+                    annotationTypes: AnnotationParsers.annoTypesString(annoTypes),
                     annotationTags: dictToCommaSepStr(annoTagsFilter, ':')
                 }, true);
 
@@ -102,19 +110,12 @@ angular.module("metrilyxAnnotations", ['ngResource'])
                 $location.search(tmp);
             }
 
-            function parseAnnoParams() {
-                return {
-                    tags: _parseAnnoTags(),
-                    types: _parseAnnoTypes() /* this holds the types used for subscription */
-                };
-            }
-
             function sendMessage(data) {
-                wsock.send(JSON.stringify(data));
+                wsock.send(angular.toJson(data));
             }
 
             function onWsOpen(evt) {
-                console.log('Connection opened (annolityx) ', evt);
+                console.log('Connection opened (annolityx): ', evt);
                 retryCount = 0;
                 /* subsciption message */
                 sendMessage(scope.annoFilter);
@@ -172,7 +173,7 @@ angular.module("metrilyxAnnotations", ['ngResource'])
 
             function _getAnnoQuery() {
                 var q = scope.getTimeWindow();
-                q.types = _types2string(scope.eventAnnoTypes);
+                q.types = AnnotationParsers.annoTypesString(scope.eventAnnoTypes);
                 q.tags = dictToCommaSepStr(scope.annoFilter.tags, ':');
                 
                 if(q.tags === '') delete q.tags;
@@ -204,7 +205,7 @@ angular.module("metrilyxAnnotations", ['ngResource'])
                 }
             }
 
-            function initializeAnnoAndTypes() {
+            var initializeAnnoAndTypes = function() {
                 EventAnnoTypesService.listTypes(function(result) {
                     var _eventAnnoTypes = {};
                     for(var j=0; j< result.length; j++) {
@@ -221,12 +222,23 @@ angular.module("metrilyxAnnotations", ['ngResource'])
                 });
             }
 
+            var disconnect = function() {
+                if( wsock && wsock.readyState == 1 ) {
+                    wsock.removeEventListener('open', onWsOpen);
+                    wsock.removeEventListener('message', onWsMessage);
+                    wsock.removeEventListener('close', onWsClose);
+                    wsock.close();
+                }
+            }
+
             function _initialize() {
                 if(Configuration.annotations.enabled) {
+                    
                     /* Sets eventAnnoTypes (i.e. list of types) to scope. */
                     initializeAnnoAndTypes();
+                    
                     /* This will actually be set before the above call because async */
-                    scope.annoFilter = parseAnnoParams();
+                    scope.annoFilter = AnnotationParsers.getAnnoFilter();
 
                     scope.displayAnnoEditor = "none";
                     scope.addAnnotationListener = addAnnotationListener;
@@ -238,11 +250,11 @@ angular.module("metrilyxAnnotations", ['ngResource'])
 
                     /* Close websocket on controller reload to avoid multiple connections. */
                     scope.$on('$destroy', function() {
-                        wsock.removeEventListener('close', onWsClose);
-                        wsock.close();
-                    })
+                        disconnect();   
+                    });
+
                 } else {
-                    console.log("Annotations disabled!");
+                    console.log('Annotations disabled!');
                 }
             }
 

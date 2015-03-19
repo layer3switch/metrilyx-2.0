@@ -31,7 +31,7 @@ angular.module('pageLayout', [])
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
 					// enable inputs in edit mode //
-					if(scope.editMode == " edit-mode") {
+					if(scope.editMode == "edit-mode") {
 						$(elem).find("input[ng-model*=name]").each(function() {
 							$(this).attr('disabled', false);
 						});
@@ -98,7 +98,7 @@ angular.module('pageLayout', [])
 				scope.$watch(function() {
 					return ngModel.$modelValue;
 				}, function(newValue, oldValue) {
-					if(scope.editMode == " edit-mode") {
+					if(scope.editMode == "edit-mode") {
 						$(elem).find('.graph-metrics-panel').each(function() {
 							$(this).collapse('show');
 						});
@@ -249,7 +249,7 @@ angular.module('graphing', [])
 		function getUpdates() {
 			if (ngModel.$modelValue && scope.updatesEnabled && (ngModel.$modelValue.series.length > 0)) {
 				q = getUpdateQuery();
-				console.info('Requesting new data...');
+				//console.info('Requesting new data...');
 				scope.requestData(q);
 				setSerieStatus(q, 'updating');
 			}
@@ -337,7 +337,10 @@ angular.module('graphing', [])
 		if(Configuration.annotations.enabled) 
 			scope.addAnnotationListener(onAnnotationData);
 
-		scope.$on("$destroy", function( event ) { clearTimeout(currTimer); });
+		scope.$on("$destroy", function( event ) { 
+			clearTimeout(currTimer); 
+			currTimer = null;
+		});
 	}
 }])
 .directive('wsHighstockGraph', [
@@ -352,7 +355,7 @@ angular.module('graphing', [])
 				var _graphDomNode;
 				var wsHelper = new WsHighstockGraphHelper(scope, ngModel);
 
-				if(scope.editMode == " edit-mode") {
+				if(scope.editMode == "edit-mode") {
 					$(elem).find("input[ng-model*=name]").each(function() {
 						$(this).attr('disabled', false);
 					});
@@ -422,12 +425,14 @@ angular.module('graphing', [])
 
 							wsHelper.setSerieStatus(q, 'querying');
 							scope.requestData(q);
-						}
-
+						}						
+						
 						//if(scope.modelType == 'adhoc') {
-							//console.log('init graph: setURL');
-							//scope.setURL(ngModel.$modelValue);
+						//	console.log('adhoc init: setURL');
+						//	scope.setURL(ngModel.$modelValue);
+						
 						//}
+
 						return;
 					}
 

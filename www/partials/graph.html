@@ -1,5 +1,5 @@
 <div class="graph-container">
-	<div class="graph-face front{{editMode}}">
+	<div class="graph-face front {{editMode}}">
 		<div class="graph-progress loaded{{graph|loadedSeries:false}}{{graph.series.length}}">
 			<div class="progress" style="margin-top:0px!important;margin-bottom:0px!important;height:4px;text-align:bottom;">
 				<div class="progress-bar" role="progressbar" aria-valuenow="graph|loadedSeries: true" aria-valuemin="0" aria-valuemax="100" style="width: {{graph|loadedSeries: true}}%;background-color: #428bca"></div>
@@ -25,7 +25,7 @@
 		<!-- graph footer -->
 		<div ng-include="graphFooterHtml"></div>
 		<!-- graph controls overlayed on top of graph -->
-		<div class="graph-face back{{editMode}} animated">
+		<div class="graph-face back {{editMode}} animated">
 			<div style="border-right: 1px solid #454545;border-left:1px solid #636363">
 			<div class="padtb10 padl5 padr4" style="background:rgb(95,95,95);border-bottom:1px solid #454545;border-top:1px solid #777">
 				<div class="input-group input-group-sm" style="width:100%">

@@ -1,13 +1,12 @@
-<div class="shift" id="stage">
-	<div ng-include="pageMastHtml"></div>
-	<ng-include src="editPanelHtml" onload="onEditPanelLoad()"></ng-include>
-	<div class="row edit-comp{{editMode}}" id="main-view">
+<div class="shift edit-comp {{editMode}}" id="stage">
+	<title>Metrilyx : Graph</title>
+	<div class="row" id="main-view">
 		<div class="col-md-12" style="padding:0">
 			<div ng-include="pageHeaderHtml"></div>
 			<div ng-model="graph" ws-highstock-graph>
 				<div class="row" style="margin:0;margin-left:auto;margin-right:auto">
 					<div class="col-md-12" style="padding:0">
-						<div ng-include="queryEditorHtml"></div>
+						<adhoc-query-editor></adhoc-query-editor>
 					</div>
 				</div>
 				<div id="adhoc-graph-container" class="bottom-shadow">

@@ -35,6 +35,7 @@
 		<script type="text/javascript" src="app/annotations/Annotations.js"></script>
 
 		<script type="text/javascript" src="app/adhoc/Adhoc.js"></script>
+		<script type="text/javascript" src="app/mast/Mast.js"></script>
 
 		<script type="text/javascript" src="libs/angular-factories.js"></script>
 		<script type="text/javascript" src="libs/angular-graphing.js"></script>
@@ -42,17 +43,18 @@
 
 	</head>
 	<body>
-		<div id="side-panel" ng-controller="sidePanelController" class="animated">
+		<div id="side-panel" ng-controller="sidePanelController" class="animated offstage">
 			<div class="model-list-ctrl-bar animated">
 				<div class="page-selector-header">
-					<span id="model-list-btn" ng-click="loadPagemodelList('#model-list-btn')" class="model-list-btn list-active pointer padl5 padr15 animated" title="Models">
+					<span id="model-list-btn" class="model-list-btn padl5 padr15" title="Models">
 						<i class="glyphicon glyphicon-stats"></i>
+						<span style="padding-left:15px">Dashboards</span>
 					</span>
 					<span onclick="$('#side-panel').addClass('offstage')" title="Close" class="pull-right animated side-panel-toggle" style="position:relative;top:3px;cursor:w-resize">
 						<i class="glyphicon glyphicon-chevron-left"></i>
 					</span>
 				</div>
-				<div class="input-group input-group-sm panel-searchbar model-listing" style="border-top:1px solid #606060;">
+				<div class="input-group input-group-sm panel-searchbar model-listing" style="border-top:1px solid #555;">
 					<span class="input-group-addon" style="padding-right:0px!important;border-right:none!important;padding-left:0px!important;">
 						<select class="dark animated" id="browse-by" ng-model="browseBy" ng-change="onChangeBrowseBy()">
 							<option value="name">Name</option>
@@ -108,7 +110,8 @@
 				</div>
 			</div>
 		</div><!-- END #side-panel -->
-
+		<metrilyx-mast></metrilyx-mast>
+		<metric-search-panel></metric-search-panel>
 		<div ng-view></div>
 		<div id="global-alerts" class="alert"></div>
 	</body>

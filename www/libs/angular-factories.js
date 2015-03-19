@@ -10,32 +10,25 @@ angular.module("metrilyxHelperFactories", [])
         };
 
         function initialize() {
-            if(scope.modelType == "adhoc" || scope.modelType == "") {
+            $.extend(templates, {
+                editPanelHtml        : connectionPool.nextConnection()+partialsPrefix+"/edit-panel.html",
+                thresholdsHtml       : connectionPool.nextConnection()+partialsPrefix+"/thresholds.html",
+                pageHeaderHtml       : connectionPool.nextConnection()+partialsPrefix+"/page-header.html",
+                metricOperationsHtml : connectionPool.nextConnection()+partialsPrefix+"/metric-operations.html",
+                pageFooterHtml       : connectionPool.nextConnection()+partialsPrefix+"/page-footer.html",
+                graphFooterHtml      : connectionPool.nextConnection()+partialsPrefix+"/graph-footer.html"
+            }, true);
 
-                //annoControlsHtml        : connectionPool.nextConnection()+partialsPrefix+"/global-anno-controls.html",
-                //eventAnnoDetailsHtml    : connectionPool.nextConnection()+partialsPrefix+"/event-anno-details.html",
+            if(scope.modelType==="") {
+                
                 $.extend(templates, {
-                    editPanelHtml           : connectionPool.nextConnection()+partialsPrefix+"/edit-panel.html",
-                    thresholdsHtml          : connectionPool.nextConnection()+partialsPrefix+"/thresholds.html",
-                    pageHeaderHtml          : connectionPool.nextConnection()+partialsPrefix+"/page-header.html",
-                    metricOperationsHtml    : connectionPool.nextConnection()+partialsPrefix+"/metric-operations.html",
-                    pageFooterHtml          : connectionPool.nextConnection()+partialsPrefix+"/page-footer.html",
-                    graphFooterHtml         : connectionPool.nextConnection()+partialsPrefix+"/graph-footer.html"
+                    queryEditorHtml     : connectionPool.nextConnection()+partialsPrefix+"/pagegraph-query-editor.html",
+                    graphControlsHtml   : connectionPool.nextConnection()+partialsPrefix+"/graph-controls.html",
+                    graphHtml           : connectionPool.nextConnection()+partialsPrefix+"/graph.html",
+                    podHtml             : connectionPool.nextConnection()+partialsPrefix+"/pod.html",
                 }, true);
-
-                if(scope.modelType == "adhoc") {
-
-                    templates['queryEditorHtml'] = "app/adhoc/adhocgraph-query-editor.html";
-                } else {
-
-                    $.extend(templates, {
-                        queryEditorHtml     : connectionPool.nextConnection()+partialsPrefix+"/pagegraph-query-editor.html",
-                        graphControlsHtml   : connectionPool.nextConnection()+partialsPrefix+"/graph-controls.html",
-                        graphHtml           : connectionPool.nextConnection()+partialsPrefix+"/graph.html",
-                        podHtml             : connectionPool.nextConnection()+partialsPrefix+"/pod.html",
-                    }, true);
-                }
             }
+
             $.extend(scope, templates, true);
         }
 
@@ -46,8 +39,6 @@ angular.module("metrilyxHelperFactories", [])
 .factory("CtrlCommon", ['Metrics', 'Schema', '$route', '$location', function(Metrics, Schema, $route, $location) {
 
     var CtrlCommon = function(scope) {
-
-        var timerSearchForMetric;
 
         function setUpdatesEnabled(value) {
             scope.updatesEnabled = value;
@@ -77,37 +68,6 @@ angular.module("metrilyxHelperFactories", [])
             scope.tagsOnPage = top;
         }
 
-        function searchForMetric(args) {
-
-            if (timerSearchForMetric) clearTimeout(timerSearchForMetric);
-
-            var myThis = this;
-            timerSearchForMetric = setTimeout(function(){
-
-                var qstr;
-                if(args && args !== "") qstr = args;
-                if(myThis.metricQuery && myThis.metricQuery !== "") qstr = myThis.metricQuery;
-                if(qstr == "" || qstr == undefined) return;
-
-                Metrics.suggest(qstr, function(result) {
-
-                    scope.metricQuery = qstr;
-                    Schema.get({modelType:'metric'}, function(graphModel) {
-
-                        var arr = [];
-                        for(var i in result) {
-                            obj = JSON.parse(JSON.stringify(graphModel));
-                            obj.alias = result[i];
-                            obj.query.metric = result[i];
-                            arr.push(obj);
-                        }
-
-                        scope.metricQueryResult = arr;
-                    });
-                });
-            }, 1000);
-        }
-
         function disableDragDrop() {
             $('[ui-sortable]').each(function() {
                 $(this).sortable({disabled: true});
@@ -122,7 +82,7 @@ angular.module("metrilyxHelperFactories", [])
 
         function loadHome() {
             $location.path('/graph').search({});
-            $route.reload();
+            //$route.reload();
         }
 
         scope.disableDragDrop   = disableDragDrop;
@@ -130,8 +90,6 @@ angular.module("metrilyxHelperFactories", [])
         scope.loadHome          = loadHome;
         scope.setUpdatesEnabled = setUpdatesEnabled;
         scope.updateTagsOnPage  = updateTagsOnPage;
-        scope.searchForMetric   = searchForMetric;
-
     }
 
     return (CtrlCommon);
@@ -250,6 +208,48 @@ angular.module("metrilyxHelperFactories", [])
     };
     return (TimeWindow);
 }])
+.factory("ModeManager", [
+    '$location', '$routeParams', '$rootScope', 
+    function($location, $routeParams, $rootScope) {
+
+        var _editMode = "";
+
+        var setEditMode = function(bool) {
+            if (bool) {
+                _editMode = "edit-mode";
+                $rootScope.$emit('mode:changed', {rw:true});
+            } else {
+                _editMode = "";
+                $rootScope.$emit('mode:changed', {ro:true});
+            }
+            console.log('set', _editMode);
+            return _editMode;
+        }
+
+        var getEditMode = function() {
+            return _editMode;
+        }
+
+        var isEditing = function() {
+            return _editMode == "edit-mode" ? true : false;
+        }
+
+        var toggleMode = function() {
+            if(!isEditing()) {
+                return setEditMode(true);
+            } else {
+                return setEditMode(false);
+            }
+        }
+
+        return  {
+            isEditing  : isEditing,
+            setEditMode: setEditMode,
+            getEditMode: getEditMode,
+            toggleMode : toggleMode
+        }
+    }
+])
 .factory("RouteManager", ['$routeParams', function($routeParams) {
 
     var RouteManager = function(scope) {
@@ -266,116 +266,55 @@ angular.module("metrilyxHelperFactories", [])
             }
         }
 
-        function initialize() {
-
-            var scopeOpts = {};
-
-            if(scope.modelType === "adhoc") {
-
-                scopeOpts.editMode = $routeParams.editMode === "false" ? "" : " edit-mode";
-            } else {
-
-
-                scopeOpts.editMode = (!$routeParams.editMode || $routeParams.editMode === "false") ? scope.editMode = "" : " edit-mode";
-                scopeOpts.editMode = $routeParams.pageId == "new" ? " edit-mode" : "";
-                // Parent global tags scope get's set so it cannot but coupled with the above logic and has to be separately. //
-                setPageGlobalTags();
-            }
-
-            //scopeOpts.updatesEnabled = scopeOpts.editMode === " edit-mode" ? false : true;
-
-            $.extend(true, scope, scopeOpts, true);
-
-        }
-
-        function parseAdhocMetricParams() {
-
-            var series = [];
-            if($routeParams.m) {
-                var metrics = Object.prototype.toString.call($routeParams.m) === '[object Array]' ? $routeParams.m : [ $routeParams.m ];
-                for(var i=0; i < metrics.length; i++) {
-
-                    var arr = metrics[i].match(/^(.*)\{(.*)\}\{alias:(.*),yTransform:(.*)\}$/);
-                    var met = arr[1].split(":");
-
-                    var rate = met.length == 3 ? true: false;
-                    series.push({
-                        'alias': arr[3],
-                        'yTransform': arr[4],
-                        'query':{
-                            'aggregator': met[0],
-                            'rate': rate,
-                            'metric': met[met.length-1],
-                            'tags': commaSepStrToDict(arr[2])
-                        }
-                    });
-                }
-            }
-            return series;
-        }
-
-        function parseAdhocThresholdParams() {
-            if($routeParams.thresholds) {
-                try {
-                    var arr = $routeParams.thresholds.split(":");
-                    if(arr.length == 3) {
-                        var dmm = arr[0].split("-");
-                        var wmm = arr[1].split("-");
-                        var imm = arr[2].split("-");
-                        return {
-                            'danger':   { max:dmm[0], min:dmm[1] },
-                            'warning':  { max:wmm[0], min:wmm[1] },
-                            'info':     { max:imm[0], min:imm[1] }
-                        };
-                    }
-                } catch(e) {
-                    console.warn("cannot set thresholds", e);
-                }
-            }
-            return {
-                danger: {max:'', min:''},
-                warning: {max:'', min:''},
-                info: {max:'', min:''}
-            };
-        }
-
-        function parseAdhocParams() {
-
-            var gmodel = {};
-            gmodel.size         = $routeParams.size ? $routeParams.size : ADHOC_DEFAULT_GRAPH_SIZE;
-            gmodel.thresholds   = parseAdhocThresholdParams();
-            gmodel.graphType    = $routeParams.type ? $routeParams.type: ADHOC_DEFAULT_GRAPH_TYPE;
-            gmodel.series       = parseAdhocMetricParams();
-
-            return gmodel;
-        }
-
         function parsePageParams() {
 
             var out = {};
-            out.editMode        = $routeParams.pageId == "new" ? " edit-mode" : "";
-            out.updatesEnabled  = (editMode == " edit-mode" || scope.updatesEnabled == false) ? false : true;
-
+            out.editMode        = $routeParams.pageId == "new" ? "edit-mode" : "";
+            out.updatesEnabled  = (editMode == "edit-mode" || scope.updatesEnabled == false) ? false : true;
 
             return out;
         }
 
         function getParams() {
 
-            switch(scope.modelType) {
-                case "adhoc":
-                    return parseAdhocParams();
-                    break;
-                default:
+            //switch(scope.modelType) {
+            //    case "adhoc":
+            //        return parseAdhocParams();
+            //        break;
+            //    default:
                     return parsePageParams();
-                    break;
-            }
+            //        break;
+            //}
         }
 
-        initialize();
+        var init = function() {
 
-        t.getParams = getParams;
-        //console.log($routeParams);
+            //var scopeOpts = {};
+
+            //if(scope.modelType === "adhoc") {
+
+            //    scopeOpts.editMode = $routeParams.editMode === "false" ? "" : "edit-mode";
+            //} else {
+
+                //var inEditMode = (!$routeParams.editMode || $routeParams.editMode === "false") ? false : true;
+                //inEditMode = $routeParams.pageId == "new" ? true : false;
+                //setEditMode(inEditMode);
+
+                //scopeOpts.editMode = (!$routeParams.editMode || $routeParams.editMode === "false") ? "" : "edit-mode";
+                //scopeOpts.editMode = $routeParams.pageId == "new" ? "edit-mode" : "";
+                
+                // Parent global tags scope get's set so it cannot but coupled with the above logic and has to be separately. //
+                setPageGlobalTags();
+            //}
+            //scopeOpts.updatesEnabled = scopeOpts.editMode === "edit-mode" ? false : true;
+
+            //$.extend(true, scope, scopeOpts, true);
+
+            t.getParams = getParams;
+            //t.setEditMode = setEditMode;
+        }
+
+        init();
     }
     return (RouteManager);
 }])
@@ -436,7 +375,6 @@ angular.module("metrilyxHelperFactories", [])
             }
 
             console.log('setURL()');
-
             $location.search($.extend(false, {}, $location.search(), srch, true));
         }
 
@@ -531,6 +469,8 @@ angular.module("metrilyxHelperFactories", [])
 
     var WebSocketDataProvider = function(scope) {
 
+        var t = this;
+
         var queuedReqs = [];
         var wssock = null;
         var modelGraphIdIdx = {};
@@ -559,7 +499,7 @@ angular.module("metrilyxHelperFactories", [])
         }
 
         function onOpenWssock() {
-            console.log("Connected. Extensions: [" + wssock.extensions + "]");
+            console.log("Connected (metrilyx): Extensions: [" + wssock.extensions + "]");
             console.log("Submitting queued requests:", queuedReqs.length);
 
             reAddGraphEventListeners();
@@ -568,7 +508,8 @@ angular.module("metrilyxHelperFactories", [])
         }
 
         function onCloseWssock(e) {
-            console.log("Disconnected (clean=" + e.wasClean + ", code=" + e.code + ", reason='" + e.reason + "')");
+            console.log("Disconnected (metrilyx): clean=" + e.wasClean + ", code=" + 
+                                            e.code + ", reason='" + e.reason + "'");
             wssock = null;
             __connectState = "disconnected";
         }
@@ -580,9 +521,7 @@ angular.module("metrilyxHelperFactories", [])
                 setGlobalAlerts(data);
                 flashAlertsBar();
             } else if(data.annoEvents) {
-                // Annotations
-                //scope.$apply(function(){scope.globalAnno.status = 'dispatching'});
-
+                
                 if(scope.modelType === 'adhoc') {
 
                     data._id = scope.graph._id;
@@ -617,7 +556,7 @@ angular.module("metrilyxHelperFactories", [])
             */
         }
 
-        function initializeWebSocket() {
+        var initializeWebSocket = function() {
             getWebSocket(function(ws) {
 
                 wssock = ws;
@@ -647,9 +586,10 @@ angular.module("metrilyxHelperFactories", [])
             }
         }
 
-        this.removeGraphIdEventListener = function(graphId, funct) {
+        var removeGraphIdEventListener = function(graphId, funct) {
             if(wssock !== null) wssock.removeEventListener(graphId, funct);
         }
+
         this.requestData = function(query) {
             try {
                 wssock.send(JSON.stringify(query));
@@ -672,11 +612,38 @@ angular.module("metrilyxHelperFactories", [])
                 }
             }
         }
-        this.closeConnection = function() {
-            wssock.close();
+
+        var closeConnection = function() {
+            if(wssock && wssock.readyState == 1) {
+                wssock.removeEventListener('message', onMessageWssock)
+                wssock.removeEventListener('open', onOpenWssock)
+                wssock.close();
+
+                //queuedReqs = [];
+                
+                // Remove all event listeners //
+                //for(var i in modelGraphIdIdx) {
+                //    removeGraphIdEventListener(i, modelGraphIdIdx[i]);
+                //    delete modelGraphIdIdx[i];
+                //}
+                
+            } else {
+                console.log("Socket state:", wssock.readyState);
+            }
         }
 
-        initializeWebSocket();
+        var init = function() {
+            
+            t.removeGraphIdEventListener = removeGraphIdEventListener;
+
+            initializeWebSocket();
+            
+            scope.$on('$destroy', function() {
+                closeConnection();
+            });
+        }
+
+        init();
     }
     return (WebSocketDataProvider);
 }]);

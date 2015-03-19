@@ -14,7 +14,7 @@ metrilyxControllers.controller('staticsController', [
 
 		$scope.loadHome = function() {
 			$location.path('/graph').search({});
-			$route.reload();
+			//$route.reload();
 		}
 	}
 ]);
@@ -108,10 +108,10 @@ metrilyxControllers.controller('sidePanelController', [
 	}
 ]);
 metrilyxControllers.controller('pageController', [
-	'$scope', '$routeParams', '$location', 'Configuration', 
+	'$scope', '$routeParams', '$location', 'Configuration', 'ModeManager',
 	'Schema', 'Model', 'TimeWindow', 'ComponentTemplates', 
 	'WebSocketDataProvider', 'AnnotationsManager', 'CtrlCommon', 'RouteManager', 'ModelManager',
-	function($scope, $routeParams, $location, Configuration, 
+	function($scope, $routeParams, $location, Configuration, ModeManager, 
 		Schema, Model, TimeWindow, ComponentTemplates, WebSocketDataProvider, 
 		AnnotationsManager, CtrlCommon, RouteManager, ModelManager) {
 
@@ -132,10 +132,13 @@ metrilyxControllers.controller('pageController', [
 
 		clearAllTimeouts();
 
+		console.log('Controller: '+ $routeParams.pageId);
+
+
 		// Make sure modal window is not lingering around //
 		$('#confirm-delete').modal('hide');
 		$('.modal-backdrop').remove();
-		$('#side-panel').addClass('offstage');
+		//$('#side-panel').addClass('offstage');
 
 		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
 		$scope.graphSortOpts 		= DNDCONFIG.graph;
@@ -185,6 +188,7 @@ metrilyxControllers.controller('pageController', [
 				}
 			}
 		});
+
 		// index graph id's for the model //
 		function getModelGraphIds() {
 			out = [];
@@ -217,13 +221,14 @@ metrilyxControllers.controller('pageController', [
 		$scope.onPageHeaderLoad = function() {
 			// setTimeout is to account for processing time //
 			setTimeout(function() {
-				if($scope.editMode === ' edit-mode') {
+				if($scope.editMode === 'edit-mode') {
 					$('input.edit-comp').attr('disabled', false);
 				} else {
 					$('input.edit-comp').attr('disabled', true);
 				}
 			}, 150);
 		}
+		/*
 		$scope.onEditPanelLoad = function() {
 			document.getElementById('edit-panel').addEventListener('refresh-metric-list',
 				function() {
@@ -231,7 +236,7 @@ metrilyxControllers.controller('pageController', [
 				}
 			);
 		}
-
+		*/
 		$scope.addNewTags = function(elemSelector) {
 			var domNode = $(elemSelector);
 
@@ -342,30 +347,35 @@ metrilyxControllers.controller('pageController', [
 		}
 
 		$scope.enableEditMode = function() {
-			$scope.editMode = " edit-mode";
-			$scope.updatesEnabled = false;
 
+			$scope.editMode = ModeManager.setEditMode(true);
+			
+			$scope.updatesEnabled = false;
+			
 			$(".graph-metrics-panel").collapse('show');
 			$('input.edit-comp').attr('disabled',false);
 
 			$scope.enableDragDrop();
 		}
+
 		$scope.disableEditMode = function() {
 			if($scope.timeType != "absolute") $scope.updatesEnabled = true;
 
 			$(".graph-metrics-panel").collapse('hide');
 			$('input.edit-comp').attr('disabled',true);
 
-			$scope.editMode = "";
+			$scope.editMode = ModeManager.setEditMode(true);
+		
 			$scope.disableDragDrop();
 		}
 
 		$scope.toggleEditMode = function() {
-			if($scope.editMode == "") {
+			if( !ModeManager.isEditing() ) {
 				$scope.enableEditMode();
 			} else {
 				$scope.disableEditMode();
 			}
+
 			$scope.reflow();
 		}
 
@@ -400,9 +410,18 @@ metrilyxControllers.controller('pageController', [
 			domNode.html(GRAPH_LOADING_HTML);
 		}
 
-		$scope.$on('$destroy', function() {
-			try { wsdp.closeConnection(); } catch(e){};
-		});
+		var init = function() {
+			setTimeout(function() {$('#side-panel').addClass('offstage');}, 1000);
+			// Set edit mode.
+			$scope.editMode = ModeManager.setEditMode($routeParams.pageId == "new" ? true:false);
+			
+			$scope.$on('$destroy', clearAllTimeouts);
 
-		submitAnalytics({page: "/"+$routeParams.pageId, title: $routeParams.pageId});
-}]);
+			submitAnalytics({page: "/"+$routeParams.pageId, title: $routeParams.pageId});
+		}
+
+		init();
+	}
+]);
+
+
