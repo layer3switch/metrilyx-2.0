@@ -356,6 +356,8 @@ metrilyxControllers.controller('pageController', [
 			$('input.edit-comp').attr('disabled',false);
 
 			$scope.enableDragDrop();
+
+			$scope.reflow();
 		}
 
 		$scope.disableEditMode = function() {
@@ -364,9 +366,11 @@ metrilyxControllers.controller('pageController', [
 			$(".graph-metrics-panel").collapse('hide');
 			$('input.edit-comp').attr('disabled',true);
 
-			$scope.editMode = ModeManager.setEditMode(true);
+			$scope.editMode = ModeManager.setEditMode(false);
 		
 			$scope.disableDragDrop();
+
+			$scope.reflow();
 		}
 
 		$scope.toggleEditMode = function() {
@@ -375,8 +379,6 @@ metrilyxControllers.controller('pageController', [
 			} else {
 				$scope.disableEditMode();
 			}
-
-			$scope.reflow();
 		}
 
 		$scope.setPlotBands = function(graph) {
