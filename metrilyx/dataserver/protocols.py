@@ -1,4 +1,6 @@
 
+import sys
+
 import logging
 import ujson as json
 import time
@@ -9,12 +11,11 @@ from twisted.internet import reactor
 from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.websocket.compress import PerMessageDeflateOffer, PerMessageDeflateOfferAccept
 
-from ..httpclients import AsyncHttpJsonClient, MetrilyxGraphFetcher, checkHttpResponse
+from httpfetcher import MetrilyxGraphFetcher
 from transforms import MetrilyxSerie, MetrilyxAnalyticsSerie
+from datarequest import PanelRequest
 
 from dataproviders.opentsdb import getPerfDataProvider
-
-from datarequest import GraphRequest
 
 from pprint import pprint
 
@@ -42,24 +43,98 @@ def acceptedCompression(offers):
 
 
 class BaseGraphServerProtocol(WebSocketServerProtocol):
-    '''
+    """
         Basic protocol that handles incoming requests.
-        This does nothing more than check the request and submit for processing.
+        This checks the request and submits it for processing. It also keeps track 
+        of all active queries to the backend (i.e. fetcher).
+
         If needed, 'GraphServerProtocol' should be subclassed instead.
-    '''
+    """
+    # Store active fetchers
+    __activeFetchers = {}
+    # Timeout for long running fetchers
+    __activeFetchersTimeout = 900
+    # Expirer deferred
+    expirerDeferred = None
+
+    __isDraining = False
+
+    def removeFetcher(self, key):
+        """
+            Remove a fetcher.  Disconnect client if draining and the
+            drain is complete.
+        """
+        if self.__activeFetchers.has_key(key):
+            try:
+                del self.__activeFetchers[key]
+            except Exception, e:
+                logger.warning(e)
+        
+        logger.info("Active fetchers: %d" %(len(self.__activeFetchers.keys())))
+
+        if len(self.__activeFetchers.keys()) == 0 and self.__isDraining:
+            self.__onDrainComplete()
+
+    def __onDrainComplete(self):
+        try:
+            self.expirerDeferred.cancel()
+        except Exception:
+            pass
+        logger.warning("Fetcher drain complete. Disconnecting client...")
+        self.transport.loseConnection()
+
+    def addFetcher(self, key, fetcher):
+        """
+            Add a new fetcher if we are not draining. This is for tracking purposes.
+        """
+        if self.__activeFetchers.has_key(key):
+            logger.warning("Fetcher inprogress: %s" %(key))
+            self.__activeFetchers[key].cancelRequests()
+        
+        self.__activeFetchers[key] = fetcher
+
+
+    def scheduleExpiration(self):
+        self.expirerDeferred = reactor.callLater(self.__activeFetchersTimeout, 
+                                                    self.__expireActiveFetchers)
+
+    def __expireActiveFetchers(self):
+        """
+            Expire long running or stuck fetchers
+        """
+        logger.info("Removing fetchers with runtime > %d" % (self.__activeFetchersTimeout))
+
+        expireTime = time.time() - self.__activeFetchersTimeout
+        expired = 0
+        for k,v in self.__activeFetchers.items():
+            if float(k.split("-")[-1]) <= expireTime:
+                v.cancelRequests()
+                self.removeFetcher(k)
+                logger.info("Expired fetcher: %s" %(k))
+                expired += 1
+
+        logger.info("Expired %d fetchers" %(expired))
+        self.scheduleExpiration()
+
+
+    def cancelAllFetchers(self):
+        """
+            Cancel all active fetchers.
+        """
+        for k, d in self.__activeFetchers.items():
+            d.cancelRequests()
+            self.removeFetcher(k)
+
+    def startDrain(self):
+        """ 
+            Start draining fetchers 
+        """
+        self.__isDraining = True
+        if len(self.__activeFetchers.keys()) == 0:
+            self.__onDrainComplete()
+
     def onConnect(self, request):
-        logger.info("Connection request by %s" %(str(request.peer)))
-
-    def onOpen(self):
-        logger.info("Connection opened. extensions: %s" %(
-                                        self.websocket_extensions_in_use))
-        self.factory.addClient(self)
-
-    def onClose(self, wasClean, code, reason):
-        logger.info("Connection closed: wasClean=%s code=%s reason=%s" %(
-                                str(wasClean), str(code), str(reason)))
-        self.factory.removeClient(self)
-
+        logger.info("Connected: %s" %(str(request.peer)))
 
     def checkMessage(self, payload, isBinary):
         if not isBinary:
@@ -74,90 +149,65 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
             logger.warning("Binary data not supported!")
             return {'error': 'Binary data not support!'}
 
+
     def onMessage(self, payload, isBinary):
+        # Drop requests from active connections if we are shutting down.
+        if self.__isDraining:
+            logger.info("Draining connections. Dropping request...")
+            return
 
         request_obj = self.checkMessage(payload, isBinary)
         if not request_obj.get("error"):
+            
+            writeRequestLogLine(request_obj)
             try:
-                if request_obj['_id'] == 'annotations':
-                    logger.info("Annotation Request: %s" %(str(request_obj)))
-                    self.processRequest(request_obj)
-                else:
-                    writeRequestLogLine(request_obj)
-
-                    graphReq = GraphRequest(request_obj)
-                    self.processRequest(graphReq)
-
+                panelReq = PanelRequest(**request_obj)
+                self.processRequest(panelReq)
             except Exception,e:
                 logger.error(str(e) + " " + str(request_obj))
         else:
             logger.error("Invalid request object: %s" %(str(request_obj)))
 
+
     def processRequest(self, graphOrAnnoRequest):
-        '''
+        """
             Implemented by subclasser
-        '''
+        """
         pass
 
 
 class GraphServerProtocol(BaseGraphServerProtocol):
-
-    __activeFetchers = {}
-    __activeFetchersTimeout = 900
-    __expirerDeferred = None
-
-    def __expireActiveFetchers(self):
-        logger.info("Starting fetcher expiration...")
-
-        expireTime = time.time() - self.__activeFetchersTimeout
-        expired = 0
-        for k,v in self.__activeFetchers.items():
-            if float(k.split("-")[-1]) <= expireTime:
-
-                v.cancelRequests()
-                self.__removeFetcher(k)
-                logger.info("Expired fetcher: %s" %(k))
-                expired += 1
-
-        logger.info("Expired %d fetchers" %(expired))
-
-        self.__expirerDeferred = reactor.callLater(self.__activeFetchersTimeout, self.__expireActiveFetchers)
-
-    def __removeFetcher(self, key):
-        if self.__activeFetchers.has_key(key):
-            del self.__activeFetchers[key]
-        logger.info("Active fetchers: %d" %(len(self.__activeFetchers.keys())))
-
-    def __addFetcher(self, key, fetcher):
-        if self.__activeFetchers.has_key(key):
-            logger.warning("Fetcher inprogress: %s" %(key))
-        self.__activeFetchers[key] = fetcher
-
+    """ 
+        This class should be subclassed with the 'dataprovider' attribute
+        initialized accordingly.
+    """
+    
     def processRequest(self, graphRequest):
-        self.submitPerfQueries(graphRequest)
-
-    def submitPerfQueries(self, graphRequest):
         mgf = MetrilyxGraphFetcher(self.dataprovider, graphRequest)
 
-        stamp = "%s-%f" %(graphRequest.request['_id'], time.time())
-
+        # id and timestamp key to track fetcher.
+        stamp = "%s-%f" %(graphRequest._id, time.time())
         mgf.addCompleteCallback(self.completeCallback, stamp)
-        mgf.addCompleteErrback(self.completeErrback, graphRequest.request, stamp)
+        mgf.addCompleteErrback(self.completeErrback, graphRequest.request(), stamp)
         mgf.addPartialResponseCallback(self.partialResponseCallback)
-        mgf.addPartialResponseErrback(self.partialResponseErrback, graphRequest.request)
+        mgf.addPartialResponseErrback(self.partialResponseErrback, graphRequest.request())
 
-        self.__addFetcher(stamp, mgf)
+        self.addFetcher(stamp, mgf)
+
 
     def completeErrback(self, error, *cbargs):
         (request, key) = cbargs
-        self.__removeFetcher(key)
+        self.removeFetcher(key)
 
         if "CancelledError" not in str(error):
             logger.error("%s" %(str(error)))
 
     def completeCallback(self, *cbargs):
+        """ 
+            Callback after a complete panel/graph has been fetched.
+        """
         (graph, key) = cbargs
-        self.__removeFetcher(key)
+        self.removeFetcher(key)
 
         if graph != None:
             self.sendMessage(json.dumps(graph))
@@ -177,29 +227,29 @@ class GraphServerProtocol(BaseGraphServerProtocol):
             self.sendMessage(json.dumps(errResponse))
 
     def onOpen(self):
-        logger.info("Connection opened. extensions: %s" %(
-                                        self.websocket_extensions_in_use))
+        logger.info("Connection opened. extensions: %s" %(self.websocket_extensions_in_use))
+        # Add client to factory
         self.factory.addClient(self)
-        ## Expire fetchers
+        # Schedule  fetcher expiration
         logger.info("Scheduling fetcher expiration...")
-        self.__expirerDeferred = reactor.callLater(self.__activeFetchersTimeout, self.__expireActiveFetchers)
+        self.scheduleExpiration()
 
     def onClose(self, wasClean, code, reason):
         logger.info("Connection closed: wasClean=%s code=%s reason=%s" % 
                                 (str(wasClean), str(code), str(reason)))
 
-        for k,d in self.__activeFetchers.items():
-            d.cancelRequests()
-            self.__removeFetcher(k)
-
-        self.factory.removeClient(self)
-
+        self.cancelAllFetchers()
+        
         try:
-            self.__expirerDeferred.cancel()
+            self.expirerDeferred.cancel()
         except Exception:
             pass
+        
+        self.factory.removeClient(self)
 
 
+# Get protocol using the configured dataprovider and a subclass
+# of GraphServerProtocol 
 def getConfiguredProtocol():
     try:
         class GraphProtocol(GraphServerProtocol):

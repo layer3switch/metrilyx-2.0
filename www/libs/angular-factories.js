@@ -472,6 +472,7 @@ angular.module("metrilyxHelperFactories", [])
         var t = this;
 
         var queuedReqs = [];
+        
         var wssock = null;
         var modelGraphIdIdx = {};
 
@@ -535,7 +536,6 @@ angular.module("metrilyxHelperFactories", [])
                         wssock.dispatchEvent(ce);
                     }
                 }
-                //scope.$apply(function(){scope.globalAnno.status = 'dispatched'});
             } else {
                 // graph data //
                 var ce = new CustomEvent(data._id, {'detail': data });
@@ -547,13 +547,6 @@ angular.module("metrilyxHelperFactories", [])
             wssock.addEventListener(graphId, funct);
 
             modelGraphIdIdx[graphId] = funct;
-
-            /*
-            if(Object.keys(modelGraphIdIdx).length === scope.modelGraphIds.length) {
-                // trigger annotation request as all graph elems are loaded //
-                scope.globalAnno.status = 'load';
-            }
-            */
         }
 
         var initializeWebSocket = function() {
@@ -592,16 +585,13 @@ angular.module("metrilyxHelperFactories", [])
 
         this.requestData = function(query) {
             try {
-                wssock.send(JSON.stringify(query));
+                wssock.send(angular.toJson(query));
             } catch(e) {
+                queuedReqs.push(angular.toJson(query));
 
-                if(e.code === 11) {
-                    queuedReqs.push(JSON.stringify(query));
-                } else {
-                    //console.log(e);
+                if(e.code !== 11) {
                     console.log("iConnect state: " + __connectState);
-                    //reconnect
-                    queuedReqs.push(JSON.stringify(query));
+                    
                     /* only reconnect if there are no connection actions in progress */
                     if(__connectState === "disconnected") {
                         console.log("Re-connecting...");

@@ -143,58 +143,7 @@ angular.module('filters',[]).
 			return l;
 		}
 	});
-/*
-app.directive('eventTypes', function() {
-	return {
-		restrict: 'A',
-		require: '?ngModel',
-		link: function(scope, elem, attrs, ctrl) {
-			if(!ctrl) return;
 
-			ctrl.$formatters.push(function(modelValue){return "";});
-			ctrl.$parsers.unshift(function(viewValue){return ctrl.$modelValue;});
-
-			$(elem).autocomplete({
-				source: function(request, response) {
-	            	$.getJSON('/api/search/event_types?q='+request.term,
-	            		function(a,b,c) {
-		            		for(var o in a) {
-		            			a[o].label = a[o].name;
-		            			a[o].value = a[o].name;
-		            		}
-		            		response(a);
-	            	});
-	        	},
-				messages: {
-	            	noResults: '',
-	            	results: function() {}
-	        	},
-	        	minLength:1,
-	        	select: function( event, ui ) {
-	        		for(var i in ctrl.$modelValue) {
-	        			if(ctrl.$modelValue[i] === ui.item.value) {
-	        				$(elem).val('');
-	        				event.preventDefault();
-	        				return;
-	        			}
-	        		}
-	        		scope.$apply(ctrl.$modelValue.push(ui.item.value));
-	        		$(elem).val('');
-	        		event.preventDefault();
-	        	}
-			});
-
-			$(elem).keyup(function(e) {
-				if(e.keyCode === 13) {
-					// clear input & close autocomplete on 'enter' //
-					$(elem).val('');
-					$(elem).autocomplete('close');
-				}
-			});
-		}
-	};
-});
-*/
 app.directive('tagkeyvalue', function() {
 	return {
 		restrict: 'A',
@@ -321,73 +270,6 @@ app.directive('pageId', function() {
 		}
 	};
 });
-/*
-app.directive('globalAnnotations', function() {
-	return {
-		restrict: 'A',
-		require: '?ngModel',
-		link: function(scope, elem, attrs, ctrl) {
-			if(!ctrl) return;
-
-			var currTimer;
-
-			function getAnnoQuery(sVal, timeWindow) {
-
-				annoq = {
-					'annoEvents': {
-						'eventTypes': sVal.eventTypes,
-						'tags': sVal.tags
-					},
-					'_id': 'annotations'
-				};
-
-				if(timeWindow && timeWindow.start) return $.extend(timeWindow, annoq);
-				else return $.extend(scope.getTimeWindow(), annoq);
-			}
-
-			function hasOptions(annoOptions) {
-				return (annoOptions.eventTypes.length > 0)
-					&& (Object.keys(annoOptions.tags).length > 0);
-			}
-
-			function getUpdates() {
-
-				if(scope.updatesEnabled) {
-					if(ctrl.$modelValue && hasOptions(ctrl.$modelValue)) {
-
-						q = getAnnoQuery(ctrl.$modelValue, {
-							'start': Math.floor(((new Date()).getTime() - ANNO_FETCH_TIME_WIN)/1000)
-						});
-
-						scope.requestData(q);
-					}
-				}
-
-				if(currTimer) clearTimeout(currTimer);
-				currTimer = setTimeout(function() {
-					getUpdates();
-				}, ANNO_POLL_INTERVAL-1000);
-			}
-
-			scope.$watch(function() {
-				return ctrl.$modelValue;
-			}, function(newVal, oldVal) {
-
-				if(!newVal) return;
-
-				if(!hasOptions(newVal)) return;
-
-				// load, reload, dispatched, dispatching //
-				if(newVal.status === 'load' || newVal.status === 'reload') {
-
-					scope.requestData(getAnnoQuery(newVal));
-					setTimeout(function() {getUpdates();}, ANNO_FETCH_TIME_WIN);
-				}
-			}, true);
-		}
-	};
-});
-*/
 app.directive('tooltipArrow', function() {
 	return {
 		restrict: 'A',

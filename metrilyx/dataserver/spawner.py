@@ -37,7 +37,7 @@ class MemoryMonitoredProcess(multiprocessing.Process):
 
     def __checkMemory(self, logger, queue):
         mem = self.__getMemUsage()
-        logger.debug("%s PID: %s; Memory: %f MBs" % (self.name, self.pid, mem))
+        logger.info("%s PID: %s; Memory: %f MBs" % (self.name, self.pid, mem))
         
         self.queue.put((self.pid, mem))
 

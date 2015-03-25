@@ -328,6 +328,7 @@ class BasicAnalyticsSerie(object):
             logger.warning(str(e))
             return {"error": str(e)}
 
+
 ### TODO: add error handling on per serie basis
 class MetrilyxAnalyticsSerie(MetrilyxSerie, BasicAnalyticsSerie):
 
@@ -335,12 +336,12 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie, BasicAnalyticsSerie):
         super(MetrilyxAnalyticsSerie, self).__init__(serie, dataCallback)
 
         self.graphType = graphType
+        self._istruct = None
 
         if not self.error:
             self._istruct = self.__getInternalStruct()
             self.__applyTransform()
-        else:
-            self._istruct = None
+            
 
     def __getInternalStruct(self):
         out = []

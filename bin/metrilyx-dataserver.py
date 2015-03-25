@@ -4,119 +4,40 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import ujson as json
-import time
-import logging
-
-from optparse import OptionParser
-
-from twisted.internet import reactor
-from twisted.python import log
-
-import multiprocessing
-
-from metrilyx.metrilyxconfig import config
-from metrilyx.dataserver.protocols import getConfiguredProtocol
-
-from metrilyx.dataserver.spawner import MemoryMonitoredProcessPool, WebSocketServer
-
-from metrilyx.dataserver.wsfactory import MetrilyxWebSocketServerFactory
-
-from pprint import pprint
-
-LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s %(lineno)d] %(message)s"
-
-'''
-def getProtocol():
-	try:
-		class GraphProtocol(GraphServerProtocol):
-			dataprovider = getPerfDataProvider()
-
-		return GraphProtocol
-		#logger.warning("Protocol: %s" %(str(proto)))
-	except Exception,e:
-		logger.error("Could not set dataprovider and/or protocol: %s" %(str(e)))
-		sys.exit(2)
-'''
-
-class DataserverOptionParser(OptionParser):
-
-	def __init__(self, *args, **kwargs):
-		OptionParser.__init__(self, *args, **kwargs)
-
-	def __getLogger(self, opts):
-		try:
-			logging.basicConfig(level=eval("logging.%s" % (opts.logLevel)), format=LOG_FORMAT)
-			return logging.getLogger(__name__)
-		except Exception,e:
-			print "[ERROR] %s" %(str(e))
-			sys.exit(2)
-
-	def __checkServerCount(self, logger, count):
-		# Set to N-1 procs
-	    if count == 0:
-	    	count = multiprocessing.cpu_count()-1
-	    	logger.warning("Using auto-spawn count: %d" % (count))
-	    # Final check
-	    if count < 1:
-	    	count = 1
-	    	logger.warning("Detected single cpu/core!")
-	    return count
+from metrilyx.dataserver import cli
+from metrilyx.dataserver.server import ServerManager
 
 
-	def parse_args(self):
-		opts, args = OptionParser.parse_args(self)
-		logger = self.__getLogger(opts)
+def parseCliOptions():
 
-		if not opts.uri:
-			print " --uri required!"
-			parser.print_help()
-			sys.exit(1)
+    parser = cli.DataserverOptionParser()
+    parser.add_option("-l", "--log-level", dest="logLevel", default="INFO",
+        help="Log level. (default: INFO)")
+    parser.add_option("--log-format", dest="logFormat", default=cli.DEFAULT_LOG_FORMAT,
+        help="Log output format. (default: '"+cli.DEFAULT_LOG_FORMAT+"')")
 
-		opts.serverCount = self.__checkServerCount(logger, opts.serverCount)
+    parser.add_option("--hostname", dest="hostname", default="localhost",
+        help="Resolvable hostname  of the server. (default: localhost)")
+    parser.add_option("-p", "--port", dest="port", type="int", default=9000,
+        help="Port to listen on. (default: 9000)")
+    parser.add_option("-e", "--external-port", dest="extPort", type="int", default=None,
+        help="External port if running behind a proxy such as nginx. This would be the port of the proxy, usually port 80.")
 
-		return (logger, opts, args)
+    parser.add_option("--check-interval", dest="checkInterval", default=15.0, type="float", 
+        help="Interval to check for process stats. (default: 15.0 secs)")
+    parser.add_option("--max-memory", dest="maxAllowedMemory", type="float", default=1500.0,
+        help="Maximum allowed memory (MB) before server is gracefully respawned. (default: 1500.0 MB)")
 
-
-def parseCLIOptions():
-	#parser = OptionParser()
-	parser = DataserverOptionParser()
-	parser.add_option("-l", "--log-level", dest="logLevel", default="INFO",
-		help="Logging level.")
-	parser.add_option("-u", "--uri", dest="uri", default="ws://localhost",
-		help="ws://<hostname>")
-	parser.add_option("-s", "--start-port", dest="startPort", type="int", default=9000,
-		help="Starting point of the port range to listen on. This is only applicable when multiple servers are launched.")
-	parser.add_option("-c","--server-count", dest="serverCount", type="int", default=0,
-		help="Number of servers to spawn. If 0 is specified, the count will be based off of the number cpus/cores")
-	parser.add_option("-e", "--external-port", dest="externalPort", type="int", default=None,
-		help="External port to use.  This is needed when running the servers behind a reverse proxy (i.e nginx)")
-
-	#(logger, opts, args) = parser.parse_args()
-	return parser.parse_args()
+    return parser.parse_args()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-	(logger, opts, args) = parseCLIOptions()
+    (opts, args) = parseCliOptions()
 
-	mmProcPool = MemoryMonitoredProcessPool(logger, maxMemPerProc=1024)
-	# Added server processes
-	for i in range(opts.serverCount):
-		uri = "%s:%d" % (opts.uri, opts.startPort + i)
-		logger.warning("Starting server on: %s" %(uri))
-		
-		mmProcPool.addProcess(WebSocketServer, {
-			"factory": MetrilyxWebSocketServerFactory, 
-			"protocol": getConfiguredProtocol(), 
-			"uri": uri,
-			"extPort": opts.externalPort,
-			"checkInterval": 15
-			})
+    smgr = ServerManager(opts)
+    smgr.start()
 
-	try:
-		mmProcPool.start()
-	except KeyboardInterrupt:
-		logger.warning("Stopping...")
+
 
 

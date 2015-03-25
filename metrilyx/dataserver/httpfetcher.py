@@ -17,10 +17,9 @@ from twisted.internet.defer import Deferred, succeed
 from twisted.internet.protocol import Protocol
 
 from metrilyx.metrilyxconfig import config
-from ..dataserver.transforms import MetrilyxSerie
 
-from ..dataserver.transforms import MetrilyxAnalyticsSerie, SecondariesGraph
-from ..dataserver.dataproviders.opentsdb import re_504
+from transforms import MetrilyxSerie, MetrilyxAnalyticsSerie, SecondariesGraph
+from dataproviders.opentsdb import re_504
 
 from pprint import pprint
 
@@ -236,6 +235,7 @@ class AsyncHttpJsonClient(object):
     '''
         Supports json request payload on both HTTP GET and POST
     '''
+
     def __init__(self, **kwargs):
         # uri, method, body
         for k,v in kwargs.items():
@@ -283,25 +283,6 @@ class AsyncHttpJsonClient(object):
         except Exception,e:
             logger.debug(str(e))
 
-"""
-def checkHttpResponse(respBodyStr, response, url):
-    if response.code < 200 or response.code > 304:
-        logger.warning("Request failed %d %s %s" %(response.code, respBodyStr, url))
-        m = re_504.search(respBodyStr)
-        if  m != None:
-            return {"error": "code=%d,response=%s" %(response.code, m.group(1))}
-        return {"error": "code=%s,response=%s" %(response.code, respBodyStr)}
-
-    try:
-        d = json.loads(respBodyStr)
-        if isinstance(d, dict) and d.has_key('error'):
-            logger.warning(str(d))
-            return d
-        return {'data': d}
-    except Exception, e:
-        logger.warning("%s %s" %(str(e), url))
-        return {"error": str(e)}
-"""
 
 class MetrilyxGraphFetcher(object):
     '''
@@ -312,11 +293,12 @@ class MetrilyxGraphFetcher(object):
         self.__graphReq = metrilyxGraphReq
         self.__dataprovider = dataprovider
 
-        if self.__graphReq.request.has_key('secondaries') and \
-                len(self.__graphReq.request['secondaries']) > 0 and \
-                self.__graphReq.request['secondaries'][0]['query'] != "":
+        request = self.__graphReq.request()
+
+        if request.has_key('secondaries') and len(request['secondaries']) > 0 and \
+                                            request['secondaries'][0]['query'] != "":
             self.containsSecondaries = True
-            self.__secondariesGraph = SecondariesGraph(self.__graphReq.request)
+            self.__secondariesGraph = SecondariesGraph(request)
         else:
             self.containsSecondaries = False
 
@@ -335,7 +317,7 @@ class MetrilyxGraphFetcher(object):
 
     def __initGraphResponse(self):
         graphResponse = { "series": [] }
-        for k,v in self.__graphReq.request.items():
+        for k,v in self.__graphReq.request().items():
             if k != "series":
                 graphResponse[k] = v
         return graphResponse
@@ -344,6 +326,7 @@ class MetrilyxGraphFetcher(object):
     def __rmActivePartial(self, urlIdx):
         if self.__activePartials.has_key(urlIdx):
             del self.__activePartials[urlIdx]
+
 
     def __partialResponseCallback(self, respBodyStr, response, *cbargs):
         self.completed += 1
@@ -365,7 +348,9 @@ class MetrilyxGraphFetcher(object):
         else:
             gmeta['series'][0]['data'] = mas.data()
             gmeta['series'][0]['uuid'] = str(mas.uuid)
+            # may need to remove this ??
             self.__partialDeferreds[idx].callback(gmeta)
+
 
         if self.total == self.completed:
             if self.containsSecondaries:
@@ -387,7 +372,6 @@ class MetrilyxGraphFetcher(object):
 
 
     def __fetch(self):
-
         counter = 0
         for gr in self.__graphReq.split():
 
@@ -421,4 +405,4 @@ class MetrilyxGraphFetcher(object):
         for k,d in self.__activePartials.items():
             d.cancelRequest()
 
-        self.__activePartials = {}
+        self.__activePartials = None
