@@ -53,10 +53,11 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
             except Exception, e:
                 self.factory.logger.warning(e)
         
-        self.factory.logger.info("Active fetchers: %d" %(len(self.__activeFetchers.keys())))
+        self.factory.logger.info("Active fetchers (removed): %d" %(len(self.__activeFetchers.keys())))
 
         if len(self.__activeFetchers.keys()) == 0 and self.__isDraining:
             self.__onDrainComplete()
+
 
     def __onDrainComplete(self):
         try:
@@ -65,6 +66,7 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
             pass
         self.factory.logger.warning("Fetcher drain complete. Disconnecting client...")
         self.transport.loseConnection()
+
 
     def addFetcher(self, key, fetcher):
         """
@@ -75,6 +77,7 @@ class BaseGraphServerProtocol(WebSocketServerProtocol):
             self.__activeFetchers[key].cancelRequests()
         
         self.__activeFetchers[key] = fetcher
+        self.factory.logger.info("Active fetchers (added): %d" %(len(self.__activeFetchers.keys())))
 
 
     def scheduleExpiration(self):
