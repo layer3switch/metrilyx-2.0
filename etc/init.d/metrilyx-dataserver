@@ -15,22 +15,23 @@ fi
 
 NAME="metrilyx-dataserver"
 BIN=${APP_HOME}/bin/${NAME}.py
-LOGFILE=${APP_HOME}/log/${NAME}.log
 LOGLEVEL="WARNING"
 PGREP="/usr/bin/pgrep -f"
-
-## set -c to 0 spawn servers based on the number of cpus/cores
-DEFAULT_OPTS="-e 80 -c 0 -l${LOGLEVEL}"
+DEFAULT_OPTS="-e 80 -l${LOGLEVEL} --log-dir ${LOGDIR} --hostname $(hostname)"
 
 RETVAL=0
 
-start() {
-	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+# Starts a single dataserver
+start_dataserver() {
+	PORT=$1
+	OPTS="${DEFAULT_OPTS} --port ${PORT}";
+	PIDS=`${PGREP} "${BIN} ${OPTS}" | xargs`;
+
 	if [ "$PIDS" = "" ]; then
-		echo -n "${NAME} starting... "
-		METRILYX_HOME=${APP_HOME} PYTHONPATH=${PYTHONPATH} ${BIN} ${DEFAULT_OPTS} > ${LOGFILE} 2>&1 &
+		echo -n "${NAME} starting (port ${PORT})... "
+		METRILYX_HOME=${APP_HOME} PYTHONPATH=${PYTHONPATH} ${BIN} ${OPTS} 2>&1 &
 		sleep 2;
-		PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
+		PIDS=`${PGREP} "${BIN} ${OPTS}" | xargs`;
 		if [ "$PIDS" = "" ]; then
 			echo "[failed]";
 			RETVAL=2;
@@ -42,6 +43,19 @@ start() {
 		RETVAL=1
 	fi
 }
+
+# start N - 1 instances
+start() {
+	for c in `seq ${SERVER_COUNT}`; do
+		PORT=`expr 9000 \+ $c`
+		start_dataserver $PORT;
+		if [ "$RETVAL" ne == 0 ]; then
+			echo "Failed to start server on port: $PORT"
+			exit $RETVAL;
+		fi
+	done
+}
+
 status() {
 	PIDS=`${PGREP} "${BIN}" | xargs`;
 	if [ "$PIDS" = "" ]; then
@@ -50,6 +64,7 @@ status() {
 		echo "${NAME} running... ${PIDS}"
 	fi
 }
+
 stop() {
 	echo -n "${NAME} stopping...";
 	PIDS=`${PGREP} "${BIN}" | sort -r`;
@@ -79,4 +94,4 @@ case "$1" in
 		echo "$0 [start|stop|restart|status]"
 		exit 1;
 esac
-exit 0
+exit $RETVAL

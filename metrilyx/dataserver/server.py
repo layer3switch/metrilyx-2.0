@@ -31,7 +31,8 @@ class ServerManager(object):
 
         self.__maxAllowedMemory = options.maxAllowedMemory
         self.logger.warning("* Memory threshold: %.2f MBs" % (self.__maxAllowedMemory))
-        self.factory, self.listener = setupWebSocketFactory(options.hostname, options.port, options.extPort)
+        self.factory, self.listener = setupWebSocketFactory(options.hostname, 
+                                    options.port, options.extPort, self.logger)
 
     def start(self):
         """

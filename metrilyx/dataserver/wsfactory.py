@@ -1,6 +1,5 @@
 
 import sys
-import logging
 
 from twisted.internet import reactor
 from twisted.internet.defer import Deferred
@@ -10,29 +9,29 @@ from autobahn.twisted.websocket import WebSocketServerFactory
 
 from protocols import getConfiguredProtocol, acceptedCompression
 
-logger = logging.getLogger(__name__)
-
 class MetrilyxWebSocketServerFactory(WebSocketServerFactory):
     """
         Factory to manage clients.  It also allows to drain clients
         and their respective active fetchers.
     """
-     
-    clients = []
-    __drainDeferred = Deferred()
-    __isDraining = False
+    def __init__(self, logger, *args, **kwargs):
+        WebSocketServerFactory.__init__(self, *args, **kwargs)
+        self.logger = logger
+        self.clients = []
+        self.__drainDeferred = Deferred()
+        self.__isDraining = False
 
     def addClient(self, client):
         self.clients.append(client)
-        logger.warning("WebSocket clients: %d" %(len(self.clients)))
+        self.logger.warning("WebSocket clients: %d" %(len(self.clients)))
 
     def removeClient(self, client):
         self.clients.remove(client)
-        logger.warning("Client removed.  Active clients: %d refs: %d" %(
+        self.logger.warning("Client removed.  Active clients: %d refs: %d" %(
             len(self.clients), sys.getrefcount(client)))
 
         if self.__isDraining and len(self.clients) == 0:
-            logger.warning("All clients drained.")
+            self.logger.warning("All clients drained.")
             self.__drainDeferred.callback(None)
 
 
@@ -43,7 +42,7 @@ class MetrilyxWebSocketServerFactory(WebSocketServerFactory):
             Return:
                 deferred for when all clients are disconnected.
         """
-        logger.warning("Initiating client drain: %d" % (len(self.clients)))
+        self.logger.warning("Initiating client drain: %d" % (len(self.clients)))
         
         self.__isDraining = True
 
@@ -53,7 +52,7 @@ class MetrilyxWebSocketServerFactory(WebSocketServerFactory):
         return self.__drainDeferred
 
 
-def setupWebSocketFactory(hostname, port, extPort):
+def setupWebSocketFactory(hostname, port, extPort, cLogger):
     """
         Registers factory along with the protocol
 
@@ -61,13 +60,14 @@ def setupWebSocketFactory(hostname, port, extPort):
             hostname : resolvable fqdn of the system
             port     : port to listen on
             extPort  : external port if running behind a proxy.
+            logger   : global logger
 
         Return:
             websocket factory
             websocket listener object
     """
-    factory = MetrilyxWebSocketServerFactory("ws://%s:%d" % (hostname, port), extPort)
-    factory.protocol = getConfiguredProtocol()
+    factory = MetrilyxWebSocketServerFactory(cLogger, "ws://%s:%d" % (hostname, port), extPort)
+    factory.protocol = getConfiguredProtocol(cLogger)
     factory.setProtocolOptions(perMessageCompressionAccept=acceptedCompression)
-    logger.warning("Starting websocket server: ws://%s:%d [permessage-deflate]" % (hostname, port))
+    cLogger.warning("Starting websocket server: ws://%s:%d [permessage-deflate]" % (hostname, port))
     return factory, listenWS(factory)

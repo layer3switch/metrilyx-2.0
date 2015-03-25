@@ -38,7 +38,6 @@ class HttpJsonClient(object):
     def ungzip_response(self, response):
         raw_data = response.read()
         #pprint(response.getheader('content-encoding'))
-        #pprint(raw_data)
         if not response.getheader('content-encoding') or \
 			'gzip' not in response.getheader('content-encoding'):
             try:
@@ -207,13 +206,11 @@ class AsyncHttpResponseProtocol(Protocol):
     def __init__(self, finished_deferred, headers):
         self.headers = headers
         self.finished = finished_deferred
-        #self.remaining = 1024 * 50
         self.data = ""
 
     def dataReceived(self, bytes):
-        #if self.remaining:
         self.data += bytes
-        #    self.remaining -= len(bytes[:self.remaining])
+        
 
     def __ungzip_(self):
         try:
@@ -221,7 +218,6 @@ class AsyncHttpResponseProtocol(Protocol):
             gzipper = gzip.GzipFile(fileobj=compressedstream)
             return gzipper.read()
         except Exception,e:
-            #logger.error(e)
             return json.dumps({"error": str(e)})
 
     def connectionLost(self, reason):
@@ -289,7 +285,9 @@ class MetrilyxGraphFetcher(object):
     Handles how each graph query should be broken up.
     This depends on if it contains 'secondaries'
     '''
-    def __init__(self, dataprovider, metrilyxGraphReq):
+    def __init__(self, dataprovider, metrilyxGraphReq, logger):
+        self.logger = logger
+
         self.__graphReq = metrilyxGraphReq
         self.__dataprovider = dataprovider
 
@@ -334,7 +332,7 @@ class MetrilyxGraphFetcher(object):
         self.__rmActivePartial(url)
 
         respData = checkHttpResponse(respBodyStr, response, url)
-        logger.info("Partial response: %s" %(url.split("?")[-1]))
+        self.logger.info("Partial response: %s" %(url.split("?")[-1]))
         if respData.has_key('error'):
             gmeta['series'][0]['data'] = respData
         else:
@@ -384,7 +382,7 @@ class MetrilyxGraphFetcher(object):
             self.__activePartials[url] = a
             counter += 1
 
-            logger.info("Partial query (%s): %s" %(gr['_id'], url))
+            self.logger.info("Partial query (%s): %s" %(gr['_id'], url))
 
 
     def addCompleteCallback(self, callback, *cbargs):

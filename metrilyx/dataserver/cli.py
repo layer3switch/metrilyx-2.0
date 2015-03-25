@@ -2,12 +2,14 @@
     Command line option parser
 """
 
+import os
 import sys
 import logging
 
 from optparse import OptionParser
 
 DEFAULT_LOG_FORMAT = "%(asctime)s [%(levelname)s %(name)s %(lineno)d] %(message)s"
+LOG_BASENAME = "metrilyx-dataserver"
 
 class DataserverOptionParser(OptionParser):
 
@@ -16,9 +18,18 @@ class DataserverOptionParser(OptionParser):
 
     def __getLogger(self, opts):
         try:
-            logging.basicConfig(level=eval("logging.%s" % (opts.logLevel)), 
-                                                    format=opts.logFormat)
+            if opts.logDir != None:
+                logFile = os.path.join(opts.logDir, LOG_BASENAME+"-"+str(opts.port)+".log")
+                
+                logging.basicConfig(filename=logFile,
+                                    level=eval("logging.%s" % (opts.logLevel)), 
+                                    format=opts.logFormat)
+            else:
+                logging.basicConfig(level=eval("logging.%s" % (opts.logLevel)), 
+                                    format=opts.logFormat)
+            
             return logging.getLogger(__name__)
+
         except Exception,e:
             print "[ERROR] %s" %(str(e))
             sys.exit(2)
@@ -27,5 +38,6 @@ class DataserverOptionParser(OptionParser):
         opts, args = OptionParser.parse_args(self)
         setattr(opts, "logger", self.__getLogger(opts))
         opts.logger.warning("* Log level: %s" % (opts.logLevel))
+        
         return (opts, args)
         

@@ -15,6 +15,8 @@ def parseCliOptions():
         help="Log level. (default: INFO)")
     parser.add_option("--log-format", dest="logFormat", default=cli.DEFAULT_LOG_FORMAT,
         help="Log output format. (default: '"+cli.DEFAULT_LOG_FORMAT+"')")
+    parser.add_option("--log-dir", dest="logDir", default=None,
+        help="Log directory.")
 
     parser.add_option("--hostname", dest="hostname", default="localhost",
         help="Resolvable hostname  of the server. (default: localhost)")
