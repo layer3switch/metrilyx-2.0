@@ -9,7 +9,7 @@ before_install:
 install:
   - "sudo make .build"
   - "ls -la"
-  - "du -sh ./build/metrilyx"
+  - "du -sh ./build/metrilyx-2.0"
 
 script:
   - "sudo make .package"
