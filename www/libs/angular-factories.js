@@ -607,18 +607,7 @@ angular.module("metrilyxHelperFactories", [])
             if(wssock && wssock.readyState == 1) {
                 wssock.removeEventListener('message', onMessageWssock)
                 wssock.removeEventListener('open', onOpenWssock)
-                wssock.close();
-
-                //queuedReqs = [];
-                
-                // Remove all event listeners //
-                //for(var i in modelGraphIdIdx) {
-                //    removeGraphIdEventListener(i, modelGraphIdIdx[i]);
-                //    delete modelGraphIdIdx[i];
-                //}
-                
-            } else {
-                console.log("Socket state:", wssock.readyState);
+                wssock.close(); 
             }
         }
 
