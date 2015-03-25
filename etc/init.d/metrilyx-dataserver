@@ -49,7 +49,7 @@ start() {
 	for c in `seq ${SERVER_COUNT}`; do
 		PORT=`expr 9000 \+ $c`
 		start_dataserver $PORT;
-		if [ "$RETVAL" ne == 0 ]; then
+		if [ "$RETVAL" -ne 0 ]; then
 			echo "Failed to start server on port: $PORT"
 			exit $RETVAL;
 		fi

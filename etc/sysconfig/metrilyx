@@ -12,6 +12,6 @@ CACHER_CONFIG=${APP_HOME}/etc/metrilyx/metrilyx.conf
 
 # Metrilyx dataserver. Number of servers to spawn.
 SERVER_COUNT=`expr $(nproc) \- 1`
-if [ "$SERVER_COUNT" lt 1 ]; then
+if [ "$SERVER_COUNT" -lt 1 ]; then
     SERVER_COUNT=1;
 fi
