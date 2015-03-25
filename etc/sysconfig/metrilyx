@@ -1,6 +1,6 @@
 APP_HOME="/opt/metrilyx"
 
-LOGDIR=${APP_HOME}/logs
+LOGDIR=${APP_HOME}/log
 
 # For pandas/numpy
 PYTHON_EGG_CACHE="/dev/shm/metrilyx"

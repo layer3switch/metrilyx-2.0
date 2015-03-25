@@ -29,7 +29,7 @@ start_dataserver() {
 
 	if [ "$PIDS" = "" ]; then
 		echo -n "${NAME} starting (port ${PORT})... "
-		METRILYX_HOME=${APP_HOME} PYTHONPATH=${PYTHONPATH} ${BIN} ${OPTS} 2>&1 &
+		METRILYX_HOME=${APP_HOME} PYTHONPATH=${PYTHONPATH} ${BIN} ${OPTS} &
 		sleep 2;
 		PIDS=`${PGREP} "${BIN} ${OPTS}" | xargs`;
 		if [ "$PIDS" = "" ]; then
@@ -44,7 +44,7 @@ start_dataserver() {
 	fi
 }
 
-# start N - 1 instances
+# start $SERVER_COUNT instances
 start() {
 	for c in `seq ${SERVER_COUNT}`; do
 		PORT=`expr 9000 \+ $c`
@@ -71,6 +71,7 @@ stop() {
 	for pid in $PIDS; do
 		kill $pid;
 	done
+	sleep 2;
 	( ${PGREP} "${BIN}" && echo "[failed]" ) || echo "[ok]";
 }
 

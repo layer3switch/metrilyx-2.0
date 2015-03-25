@@ -66,7 +66,8 @@ def setupWebSocketFactory(hostname, port, extPort, cLogger):
             websocket factory
             websocket listener object
     """
-    factory = MetrilyxWebSocketServerFactory(cLogger, "ws://%s:%d" % (hostname, port), extPort)
+    factory = MetrilyxWebSocketServerFactory(cLogger, "ws://%s:%d" % (hostname, port), 
+                                                                externalPort=extPort)
     factory.protocol = getConfiguredProtocol(cLogger)
     factory.setProtocolOptions(perMessageCompressionAccept=acceptedCompression)
     cLogger.warning("Starting websocket server: ws://%s:%d [permessage-deflate]" % (hostname, port))
