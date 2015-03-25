@@ -11,4 +11,7 @@ PYTHONPATH=${APP_HOME}/usr/lib/python2.6/site-packages:${APP_HOME}/usr/lib64/pyt
 CACHER_CONFIG=${APP_HOME}/etc/metrilyx/metrilyx.conf
 
 # Metrilyx dataserver. Number of servers to spawn.
-SERVER_COUNT=`expr $(nproc) - 1`
+SERVER_COUNT=`expr $(nproc) \- 1`
+if [ "$SERVER_COUNT" lt 1 ]; then
+    SERVER_COUNT=1;
+fi
