@@ -4,10 +4,12 @@ python:
   - "2.7"
 
 before_install:
-  - "curl -s https://metrilyx.github.io/bootstrap.sh | bash"
+  - "sudo make .deps .nginx"
 
 install:
-  - "sudo python setup.py install"
+  - "sudo make build"
+  - "ls -la"
+  - "du -sh ./build/metrilyx"
 
 script:
-  - "sudo make .post_install"
+  - "sudo make .package"

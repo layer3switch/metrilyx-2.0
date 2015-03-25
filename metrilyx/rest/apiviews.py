@@ -5,8 +5,6 @@ import time
 import socket
 import requests
 
-from elasticsearch import Elasticsearch
-
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -21,12 +19,8 @@ from custompermissions import IsGroupOrReadOnly, IsCreatorOrReadOnly
 from serializers import *
 from ..models import *
 
-from ..annotations import Annotator
-
 from ..metrilyxconfig import config
 from metrilyx import metrilyxconfig
-from metrilyx.dataserver import GraphEventRequest
-from metrilyx.dataserver.dataproviders import getEventDataProvider
 
 from pprint import pprint
 
@@ -55,30 +49,6 @@ class MapViewSet(viewsets.ModelViewSet):
 
 	def pre_save(self, obj):
 		obj.user = self.request.user
-
-
-class EventTypeViewSet(viewsets.ModelViewSet):
-	queryset = EventType.objects.all()
-	serializer_class = EventTypeSerializer
-	permission_classes = (IsCreatorOrReadOnly,)
-
-	def create(self, request, path, pk=None):
-		if pk is None or pk in ("", "/"):
-			return Response({"error": "Invalid request"},
-						status=status.HTTP_400_BAD_REQUEST)
-
-		try:
-			obj = EventType.objects.get(_id=pk[1:].lower())
-			return Response({"error": "Event type already exists!"},
-								status=status.HTTP_400_BAD_REQUEST)
-		except EventType.DoesNotExist:
-			etype = EventType(name=pk[1:].title(), _id=pk[1:].lower(), metadata={})
-			rslt = etype.save()
-			if rslt.has_key("error"):
-				return Response(rslt, status=status.HTTP_400_BAD_REQUEST)
-
-			return Response(rslt)
-
 
 class GraphMapViewSet(MapViewSet):
 
@@ -124,7 +94,13 @@ class SchemaViewSet(viewsets.ViewSet):
 		except Exception,e:
 			return Response({"error": str(e)})
 
+
 class ConfigurationView(APIView):
+
+	def __annotationsConfig(self):
+		if config["annotations"]:
+			return config["annotations"]
+		return {}
 
 	def __metricSearchConfig(self):
 		if config['cache']['enabled']:
@@ -161,98 +137,12 @@ class ConfigurationView(APIView):
 			Websocket connection information for client requests.
 		'''
 		response = {
+			'annotations': self.__annotationsConfig(),
 			'websocket': self.__websocketConfig(),
 			'metric_search': self.__metricSearchConfig()
 			}
 
 		return Response(response)
-
-class EventsViewSet(APIView):
-	REQUIRED_QUERY_PARAMS = ('start','eventTypes','tags')
-	REQUIRED_WRITE_PARAMS = ('eventType','message', 'tags')
-
-	eventDataProvider = getEventDataProvider()
-
-	def __checkRequest(self, request):
-		if request.body == "":
-			return {'error': 'no query specified'}
-		try:
-			jsonReq = json.loads(request.body)
-		except Exception,e:
-			return {'error': 'json parse: %s' %(str(e))}
-
-		if request.method == 'GET':
-			for rp in self.REQUIRED_QUERY_PARAMS:
-				if rp not in jsonReq.keys():
-					return {'error':'%s key required' %(rp)}
-			if type(jsonReq['tags']) is not dict:
-				return {'error': 'Invalid tags'}
-		else:
-			for rp in self.REQUIRED_WRITE_PARAMS:
-				if rp not in jsonReq.keys():
-					return {'error': 'missing parameter: %s' %(rp)}
-
-			try:
-				etype = EventType.objects.get(_id=jsonReq['eventType'].lower())
-			except EventType.DoesNotExist:
-				return {'error': 'event type: %s not found' %(jsonReq['eventType'])}
-
-		return jsonReq
-
-	def get(self, request, pk=None):
-		'''
-			request object:
-				types:
-				tags:
-				start:
-				end: (optional)
-		'''
-		reqBody = self.__checkRequest(request)
-		if reqBody.has_key('error'):
-			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
-
-		gevt = {
-			"_id": "annotations",
-			"annoEvents": {
-				"tags": reqBody["tags"],
-				"eventTypes": reqBody["eventTypes"]
-			},
-			"start": reqBody["start"]
-		}
-		if reqBody.has_key("end"):
-			gevt["end"] = reqBody["end"]
-
-		ger = GraphEventRequest(gevt)
-		out = []
-		for gr in ger.split():
-			for (url, et, query) in self.eventDataProvider.queryBuilder.getQuery(gr, split=False):
-				rslt = self.eventDataProvider.search(query)
-				if len(rslt["hits"]["hits"]) > 0:
-					out += [r['_source'] for r in rslt['hits']['hits']]
-		return Response(out)
-
-	def post(self, request, pk=None):
-		'''
-			request object:
-				eventType:
-				tags:
-				message:
-				timestamp:
-		'''
-		reqBody = self.__checkRequest(request)
-		if reqBody.has_key('error'):
-			return Response(reqBody, status=status.HTTP_400_BAD_REQUEST)
-
-		try:
-			out = dict([(k,v) for k,v in reqBody.items() if k != "tags"])
-			for k,v in reqBody['tags'].items():
-				out[k] = v
-			anno = Annotator(out)
-			self.eventDataProvider.add(anno.annotation)
-			return Response(anno.annotation)
-		except Exception,e:
-			return Response({'error': str(e)},
-				status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 class TagViewSet(viewsets.ViewSet):
 

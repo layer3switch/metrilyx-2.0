@@ -14,7 +14,7 @@ metrilyxControllers.controller('staticsController', [
 
 		$scope.loadHome = function() {
 			$location.path('/graph').search({});
-			$route.reload();
+			//$route.reload();
 		}
 	}
 ]);
@@ -91,7 +91,8 @@ metrilyxControllers.controller('sidePanelController', [
 
 						setGlobalAlerts({message: 'Imported '+rslt._id});
 						flashAlertsBar();
-						document.getElementById('side-panel').dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
+						document.getElementById('side-panel')
+							.dispatchEvent(new CustomEvent('refresh-model-list', {'detail': 'refresh model list'}));
 					});
 
 				} catch(e) {
@@ -102,21 +103,28 @@ metrilyxControllers.controller('sidePanelController', [
 		}
 
 		$scope.loadList();
-		document.getElementById('side-panel').addEventListener('refresh-model-list', function(evt){$scope.loadList();});
+		document.getElementById('side-panel')
+			.addEventListener('refresh-model-list', function(evt){ $scope.loadList(); });
 	}
 ]);
 metrilyxControllers.controller('pageController', [
-	'$scope', '$routeParams', '$location', 'Schema', 'Model', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions', 'CtrlCommon', 'RouteManager', 'ModelManager',
-	function($scope, $routeParams, $location, Schema, Model, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions, CtrlCommon, RouteManager, ModelManager) {
+	'$scope', '$routeParams', '$location', 'Configuration', 'ModeManager',
+	'Schema', 'Model', 'TimeWindow', 'ComponentTemplates', 
+	'WebSocketDataProvider', 'AnnotationsManager', 'CtrlCommon', 'RouteManager', 'ModelManager',
+	function($scope, $routeParams, $location, Configuration, ModeManager, 
+		Schema, Model, TimeWindow, ComponentTemplates, WebSocketDataProvider, 
+		AnnotationsManager, CtrlCommon, RouteManager, ModelManager) {
 
 		$scope.modelType = "";
 		$scope.modelGraphIds = [];
 
 		$scope.tagsOnPage = {};
 
-		var annoOptions 	= new AnnotationOptions($scope);
-		var compTemplates 	= new ComponentTemplates($scope);
 		var timeWindow 		= new TimeWindow($scope);
+		
+		var annoManager 	= new AnnotationsManager($scope);
+		
+		var compTemplates 	= new ComponentTemplates($scope);
 		var wsdp 			= new WebSocketDataProvider($scope);
 		var ctrlCommon		= new CtrlCommon($scope);
 		var routeMgr 		= new RouteManager($scope);
@@ -124,10 +132,13 @@ metrilyxControllers.controller('pageController', [
 
 		clearAllTimeouts();
 
+		console.log('Controller: '+ $routeParams.pageId);
+
+
 		// Make sure modal window is not lingering around //
 		$('#confirm-delete').modal('hide');
 		$('.modal-backdrop').remove();
-		$('#side-panel').addClass('offstage');
+		//$('#side-panel').addClass('offstage');
 
 		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
 		$scope.graphSortOpts 		= DNDCONFIG.graph;
@@ -164,6 +175,9 @@ metrilyxControllers.controller('pageController', [
 						} else {
 							$scope.model = result;
 							$scope.modelGraphIds = getModelGraphIds();
+
+							/* get annotations */
+							if(Configuration.annotations.enabled) annoManager.connect($scope.modelGraphIds.length);
 						}
 					});
 				} else {
@@ -174,6 +188,7 @@ metrilyxControllers.controller('pageController', [
 				}
 			}
 		});
+
 		// index graph id's for the model //
 		function getModelGraphIds() {
 			out = [];
@@ -206,13 +221,14 @@ metrilyxControllers.controller('pageController', [
 		$scope.onPageHeaderLoad = function() {
 			// setTimeout is to account for processing time //
 			setTimeout(function() {
-				if($scope.editMode === ' edit-mode') {
+				if($scope.editMode === 'edit-mode') {
 					$('input.edit-comp').attr('disabled', false);
 				} else {
 					$('input.edit-comp').attr('disabled', true);
 				}
 			}, 150);
 		}
+		/*
 		$scope.onEditPanelLoad = function() {
 			document.getElementById('edit-panel').addEventListener('refresh-metric-list',
 				function() {
@@ -220,7 +236,7 @@ metrilyxControllers.controller('pageController', [
 				}
 			);
 		}
-
+		*/
 		$scope.addNewTags = function(elemSelector) {
 			var domNode = $(elemSelector);
 
@@ -331,31 +347,38 @@ metrilyxControllers.controller('pageController', [
 		}
 
 		$scope.enableEditMode = function() {
-			$scope.editMode = " edit-mode";
-			$scope.updatesEnabled = false;
 
+			$scope.editMode = ModeManager.setEditMode(true);
+			
+			$scope.updatesEnabled = false;
+			
 			$(".graph-metrics-panel").collapse('show');
 			$('input.edit-comp').attr('disabled',false);
 
 			$scope.enableDragDrop();
+
+			$scope.reflow();
 		}
+
 		$scope.disableEditMode = function() {
 			if($scope.timeType != "absolute") $scope.updatesEnabled = true;
 
 			$(".graph-metrics-panel").collapse('hide');
 			$('input.edit-comp').attr('disabled',true);
 
-			$scope.editMode = "";
+			$scope.editMode = ModeManager.setEditMode(false);
+		
 			$scope.disableDragDrop();
+
+			$scope.reflow();
 		}
 
 		$scope.toggleEditMode = function() {
-			if($scope.editMode == "") {
+			if( !ModeManager.isEditing() ) {
 				$scope.enableEditMode();
 			} else {
 				$scope.disableEditMode();
 			}
-			$scope.reflow();
 		}
 
 		$scope.setPlotBands = function(graph) {
@@ -389,163 +412,18 @@ metrilyxControllers.controller('pageController', [
 			domNode.html(GRAPH_LOADING_HTML);
 		}
 
-		$scope.$on('$destroy', function() {
-			try { wsdp.closeConnection(); } catch(e){};
-		});
+		var init = function() {
+			setTimeout(function() {$('#side-panel').addClass('offstage');}, 1000);
+			// Set edit mode.
+			$scope.editMode = ModeManager.setEditMode($routeParams.pageId == "new" ? true:false);
+			
+			$scope.$on('$destroy', clearAllTimeouts);
 
-		submitAnalytics({page: "/"+$routeParams.pageId, title: $routeParams.pageId});
-}]);
-
-metrilyxControllers.controller('adhocGraphController', [
-	'$scope', 'Schema', 'TimeWindow', 'ComponentTemplates', 'WebSocketDataProvider', 'AnnotationOptions', 'CtrlCommon', 'RouteManager', 'URLSetter',
-	function($scope, Schema, TimeWindow, ComponentTemplates, WebSocketDataProvider, AnnotationOptions, CtrlCommon, RouteManager, URLSetter) {
-
-		$scope.modelType 		= "adhoc";
-		$scope.modelGraphIds 	= [];
-
-		var annoOptions 	= new AnnotationOptions($scope);
-		var wsdp 			= new WebSocketDataProvider($scope);
-		var compTemplates 	= new ComponentTemplates($scope);
-		var timeWindow 		= new TimeWindow($scope);
-		var ctrlCommon		= new CtrlCommon($scope);
-		var routeMgr 		= new RouteManager($scope);
-		var urlSetter 		= new URLSetter($scope);
-
-		$scope.metricListSortOpts 	= DNDCONFIG.metricList;
-		$scope.adhocGraphSortOpts 	= DNDCONFIG.adhocGraph;
-
-		$scope.metricQueryResult = [];
-		$scope.tagsOnPage = {};
-		$scope.graph = {};
-		$scope.globalTags = {};
-
-		Schema.get({modelType: 'graph'}, function(graphModel) {
-
-			$.extend(graphModel, routeMgr.getParams(), true);
-			$scope.graph = graphModel
-
-			if($scope.graph.series.length > 0) {
-				$scope.modelGraphIds = [ $scope.graph._id ];
-				$scope.reloadGraph();
-			}
-		});
-
-		$('#side-panel').addClass('offstage');
-
-		$scope.metricListSortOpts.disabled = $scope.editMode === "" ? true : false;
-
-		$scope.addGraphIdEventListener = function(graphId, funct) {
-			wsdp.addGraphIdEventListener(graphId, funct);
-       	}
-       	$scope.removeGraphIdEventListener = function(graphId, funct) {
-       		wsdp.removeGraphIdEventListener(graphId, funct);
-       	}
-       	$scope.requestData = function(query) {
-        	wsdp.requestData(query);
-        }
-
-		$scope.onEditPanelLoad = function() {
-			document.getElementById('edit-panel').addEventListener('refresh-metric-list',
-				function() {
-					$scope.searchForMetric($('[ng-model=metricQuery]').val());
-				}
-			);
+			submitAnalytics({page: "/"+$routeParams.pageId, title: $routeParams.pageId});
 		}
 
-		$scope.removeTag = function(tags, tagkey) {
-			delete tags[tagkey];
-		}
+		init();
+	}
+]);
 
-		$scope.setTimeType = function(newRelativeTime, reloadPage) {
 
-			timeWindow.setAttribute('timeType', newRelativeTime);
-		}
-
-		$scope.setAbsoluteTime = function() {
-
-			$scope.reloadGraph();
-			$scope.globalAnno.status = 'reload';
-		}
-
-		$scope.baseQuery = function(graphObj) {
-			var q = {
-				_id: graphObj._id,
-				name: graphObj.name,
-				graphType: graphObj.graphType,
-				tags: {},
-				thresholds: graphObj.thresholds,
-				secondaries: graphObj.secondaries
-			};
-
-			$.extend(q, $scope.getTimeWindow(),true);
-			return q;
-		}
-
-		$scope.setURL = function(obj) {
-			urlSetter.setURL(obj);
-		}
-
-		$scope.reloadGraph = function(gobj) {
-
-			if(!gobj) gobj = $scope.graph;
-
-			$('.adhoc-metric-editor').hide();
-			if(gobj.series.length < 1) return;
-
-			$scope.setURL(gobj);
-
-			q = $scope.baseQuery(gobj)
-			q.series = gobj.series;
-
-			var domNode = $("[data-graph-id='"+gobj._id+"']");
-
-			/* Destroy current graph */
-			try { domNode.highcharts().destroy(); } catch(e) {};
-			domNode.html(GRAPH_LOADING_HTML);
-
-			$scope.requestData(q);
-		}
-
-		$scope.setPlotBands = function(graph) {
-			setPlotBands(graph);
-			$scope.setURL(graph);
-		}
-
-		$scope.enableEditMode = function() {
-			$scope.editMode = " edit-mode";
-			//$scope.enableDragDrop();
-			$scope.reflow();
-		}
-		$scope.disableEditMode = function() {
-			$scope.editMode = "";
-			//$scope.disableDragDrop();
-			$scope.reflow();
-		}
-		$scope.toggleEditMode = function() {
-			if($scope.editMode == "") {
-				$scope.enableEditMode();
-			} else {
-				$scope.disableEditMode();
-			}
-		}
-
-		$scope.graphSizeChanged = function() {
-			$scope.setURL($scope.graph);
-			$scope.reflow();
-		}
-
-		$scope.reflow = function(args) {
-			setTimeout(function() {
-				$('[data-graph-id]').each(function() {
-					hc = $(this).highcharts();
-					if(hc != undefined) hc.reflow();
-				});
-			}, 500);
-		}
-
-		$scope.$on('$destroy', function() {
-			try { wsdp.closeConnection(); } catch(e){};
-		});
-
-		submitAnalytics({title:'adhoc', page:'/graph'});
-}]);

@@ -20,7 +20,7 @@ from metrilyx.metrilyxconfig import config
 from ..dataserver.transforms import MetrilyxSerie
 
 from ..dataserver.transforms import MetrilyxAnalyticsSerie, SecondariesGraph
-from ..dataserver.dataproviders import re_504
+from ..dataserver.dataproviders.opentsdb import re_504
 
 from pprint import pprint
 
@@ -283,7 +283,7 @@ class AsyncHttpJsonClient(object):
         except Exception,e:
             logger.debug(str(e))
 
-
+"""
 def checkHttpResponse(respBodyStr, response, url):
     if response.code < 200 or response.code > 304:
         logger.warning("Request failed %d %s %s" %(response.code, respBodyStr, url))
@@ -301,7 +301,7 @@ def checkHttpResponse(respBodyStr, response, url):
     except Exception, e:
         logger.warning("%s %s" %(str(e), url))
         return {"error": str(e)}
-
+"""
 
 class MetrilyxGraphFetcher(object):
     '''

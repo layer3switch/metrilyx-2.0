@@ -1,6 +1,12 @@
 
 import os
-from datastores import jsonFromFile
+import ujson as json
+
+def jsonFromFile(filepath):
+    fh = open(filepath)
+    jdata = json.load(fh)
+    fh.close()
+    return jdata
 
 _abspath = os.path.abspath(__file__)
 
@@ -13,9 +19,14 @@ _appversion = open(os.path.join(_apphome, "VERSION")).read()
 
 CONFIG_FILE = os.path.join(_apphome, "etc/metrilyx/metrilyx.conf")
 if not os.path.exists(CONFIG_FILE):
-	raise RuntimeError("Configuration file not found: %s!" %(CONFIG_FILE))
+	raise RuntimeError("Configuration file not found: %s!" % (CONFIG_FILE))
 
-config = jsonFromFile(CONFIG_FILE)
+
+try:
+    config = jsonFromFile(CONFIG_FILE)
+except Exception, e:
+    raise e
+        
 
 if config.has_key("error"):
 	raise RuntimeError("Configuration error: %s" %(str(config)))
@@ -33,7 +44,6 @@ if not config.has_key("static_path"):
 
 if not config.has_key("schema_path"):
 	config["schema_path"] = os.path.join(_apphome, "etc/metrilyx/schemas")
-
 
 if config["version"].startswith("2.4"):
     adp = config['annotations']['dataprovider']

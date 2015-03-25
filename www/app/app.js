@@ -3,13 +3,44 @@ var app = angular.module('app', [
 	'filters',
 	'ngRoute',
 	'ui.sortable',
+	'metrilyx.mast',
 	'timeframe',
+	'adhoc',
 	'graphing',
 	'pageLayout',
 	'metrilyxHelperFactories',
 	'metrilyxControllers',
-	'metrilyxServices'
+	'metrilyxServices',
+	'metrilyxAnnotations'
 ]);
+
+/*
+ * Bootstrap the app with the config fetched via http
+ */
+(function() {
+	var configConstant = "Configuration";
+	var configUrl      = "/api/config";
+
+    function fetchAndInjectConfig() {
+        var initInjector = angular.injector(["ng"]);
+        var $http = initInjector.get("$http");
+
+        return $http.get(configUrl).then(function(response) {
+            app.constant(configConstant, response.data);
+        }, function(errorResponse) {
+            // Handle error case
+            console.log(errorResponse);
+        });
+    }
+
+    function bootstrapApplication() {
+        angular.element(document).ready(function() {
+            angular.bootstrap(document, ["app"]);
+        });
+    }
+
+    fetchAndInjectConfig().then(bootstrapApplication);
+}());
 
 app.config(['$sceProvider', function($sceProvider) {
     $sceProvider.enabled(false);
@@ -29,14 +60,12 @@ app.config(['$routeProvider',
 				controller: 'staticsController'
 			})
 			.when('/graph', {
-				templateUrl: 'partials/adhoc-graph.html',
-				controller: 'adhocGraphController',
-				reloadOnSearch: false
+				templateUrl: 'app/adhoc/adhoc-graph.html',
+				controller: 'adhocGraphController'
 			})
 			.when('/:pageId', {
 				templateUrl: 'partials/page.html',
-				controller: 'pageController',
-				/*reloadOnSearch: false*/
+				controller: 'pageController'
 			})
 			.otherwise({
 				redirectTo: '/graph'
@@ -114,7 +143,7 @@ angular.module('filters',[]).
 			return l;
 		}
 	});
-
+/*
 app.directive('eventTypes', function() {
 	return {
 		restrict: 'A',
@@ -126,7 +155,6 @@ app.directive('eventTypes', function() {
 			ctrl.$parsers.unshift(function(viewValue){return ctrl.$modelValue;});
 
 			$(elem).autocomplete({
-				/*source: ANNO_EVENT_TYPES,*/
 				source: function(request, response) {
 	            	$.getJSON('/api/search/event_types?q='+request.term,
 	            		function(a,b,c) {
@@ -166,7 +194,7 @@ app.directive('eventTypes', function() {
 		}
 	};
 });
-
+*/
 app.directive('tagkeyvalue', function() {
 	return {
 		restrict: 'A',
@@ -219,18 +247,8 @@ app.directive('tagkeyvalue', function() {
 	        		}
 	        	},
 	        	focus: function( event, ui ) {
-	        		//var ival = $(elem).val();
-	        		//kv = ival.split("=");
-	        		//if(kv.length == 2) {
-	        		//	var tvals = kv[1].split("|");
-	        		//	var retstr = "";
-	        		//	for(var i=0;i<tvals.length-1;i++) {
-	        		//		retstr += tvals[i]+"|";
-	        		//	}
-	        		//	retstr += ui.item.value;
-	        		//	$(elem).val(kv[0]+"="+retstr);
-	        			event.preventDefault();
-	        		//}
+
+	        		event.preventDefault();
 	        	}
 			});
 
@@ -303,7 +321,7 @@ app.directive('pageId', function() {
 		}
 	};
 });
-
+/*
 app.directive('globalAnnotations', function() {
 	return {
 		restrict: 'A',
@@ -369,7 +387,7 @@ app.directive('globalAnnotations', function() {
 		}
 	};
 });
-
+*/
 app.directive('tooltipArrow', function() {
 	return {
 		restrict: 'A',

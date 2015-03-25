@@ -87,7 +87,6 @@ var DNDCONFIG = {
 	/* new pod adder icon */
 	pod: {
 		connectWith: [ ".layout-column", ".layout-row", ".layout" ],
-		/*revert: true,*/
 		tolerance: "pointer",
 		helper: "clone",
 		cursor: '-webkit-grabbing',
@@ -117,13 +116,6 @@ var DNDCONFIG = {
 		items: ".layout-column",
 		connectWith: [".layout-row"],
 		disabled:true,
-		/*
-		over: function(event, ui) {
-			$(event.target).addClass('layout-row-hover');
-		},
-		out: function(event, ui) {
-			$(event.target).removeClass('layout-row-hover');
-		}*/
 	},
 	layout: {
 		tolerance: "pointer",

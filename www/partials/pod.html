@@ -1,27 +1,27 @@
-<div class="layout-column edit-comp{{editMode}} col-md-{{row.length|columnWidth}}" ng-repeat="column in row" ui-sortable="columnSortOpts" ng-model="column" column="true">
+<div class="layout-column edit-comp {{editMode}} col-md-{{row.length|columnWidth}}" ng-repeat="column in row" ui-sortable="columnSortOpts" ng-model="column" column="true">
 	<!-- BEGIN pod -->
-	<div ng-repeat="pod in column" class="pod{{editMode}} bottom-shadow" ng-model="pod" pod="true">
-		<div class="pod-header edit-comp{{editMode}} animated">
+	<div ng-repeat="pod in column" class="pod {{editMode}} bottom-shadow" ng-model="pod" pod="true">
+		<div class="pod-header edit-comp {{editMode}} animated">
 			<div class="input-group" style="width:100%">
-				<span class="input-group-btn edit-comp{{editMode}} pod-btn-bar nobg">
+				<span class="input-group-btn edit-comp {{editMode}} pod-btn-bar nobg">
 					<span ng-switch="modelType">
 						<span ng-switch-when="">
-							<a href="javascript:void(0)" class="btn pod-header-btn interactive edit-comp{{editMode}}" ng-click="addGraph(pod);" title="Add graph to pod"><i class="glyphicon glyphicon-plus"></i></a>
+							<a href="javascript:void(0)" class="btn pod-header-btn interactive edit-comp {{editMode}}" ng-click="addGraph(pod);" title="Add graph to pod"><i class="glyphicon glyphicon-plus"></i></a>
 						</span>
 						<span ng-switch-default>
 							<span style="opacity:0"><i class="glyphicon glyphicon-plus"></i></span>
 						</span>
 					</span>
 					<span>
-						<a href="javascript:void(0)" title="Vertical graph layout" ng-click="pod.orientation='vertical';" class="btn pod-header-btn edit-comp{{editMode}} vertical-graphs {{pod.orientation}}"><i class="glyphicon glyphicon-resize-vertical interactive" style="font-weight:bold;"></i></a>
-						<a href="javascript:void(0)" title="Horizontal graph layout" class="btn pod-header-btn edit-comp{{editMode}} horizontal-graphs {{pod.orientation}}" ng-click="pod.orientation='horizontal';">
+						<a href="javascript:void(0)" title="Vertical graph layout" ng-click="pod.orientation='vertical';" class="btn pod-header-btn edit-comp {{editMode}} vertical-graphs {{pod.orientation}}"><i class="glyphicon glyphicon-resize-vertical interactive" style="font-weight:bold;"></i></a>
+						<a href="javascript:void(0)" title="Horizontal graph layout" class="btn pod-header-btn edit-comp {{editMode}} horizontal-graphs {{pod.orientation}}" ng-click="pod.orientation='horizontal';">
 							<i class="glyphicon glyphicon-resize-horizontal interactive" style="font-weight:bold;"></i>
 						</a>
 					</span>
 				</span>
-				<input type="text" class="form-control edit-comp{{editMode}} idark" ng-model="pod.name" placeholder="Pod Name" disabled="true">
-				<span class="edit-comp{{editMode}} input-group-btn pod-btn-bar">
-					<a href="javascript:void(0)" title="Remove Pod" class="btn interactive pod-header-btn edit-comp{{editMode}}" ng-click="column.splice(column.indexOf(pod),1);reflow();">
+				<input type="text" class="form-control edit-comp {{editMode}} idark" ng-model="pod.name" placeholder="Pod Name" disabled="true">
+				<span class="edit-comp {{editMode}} input-group-btn pod-btn-bar">
+					<a href="javascript:void(0)" title="Remove Pod" class="btn interactive pod-header-btn edit-comp {{editMode}}" ng-click="column.splice(column.indexOf(pod),1);reflow();">
 						<i class="glyphicon glyphicon-trash"></i>
 					</a>
 				</span>
@@ -35,14 +35,14 @@
 					<div ng-switch-when="horizontal">
 						<div>
 							<div ng-repeat="graph in pod.graphs" class="col-md-{{pod.graphs.length|columnWidth}}">
-								<div ng-include="graphHtml" ng-model="graph" class="{{editMode}} {{pod.orientation}}" ws-highstock-graph></div>
+								<div ng-include="graphHtml" ng-model="graph" class=" {{editMode}} {{pod.orientation}}" ws-highstock-graph></div>
 							</div>
 						</div>
 					</div>
 					<div ng-switch-default>
 						<div>
 							<div ng-repeat="graph in pod.graphs" class="col-md-12">
-								<div ng-include="graphHtml" class="edit-comp{{editMode}} {{pod.orientation}}" ng-model="graph" ws-highstock-graph></div>
+								<div ng-include="graphHtml" class="edit-comp {{editMode}} {{pod.orientation}}" ng-model="graph" ws-highstock-graph></div>
 							</div>
 						</div>
 					</div>

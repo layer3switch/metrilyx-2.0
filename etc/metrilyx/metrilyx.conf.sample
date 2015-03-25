@@ -1,29 +1,17 @@
 {
 	"dataprovider": {
 		"name": "OpenTSDB",
-		"uri": "http://<OpenTSDB host>",
+		"uri": "http://<OpenTSDB url>",
 		"port": 4242,
 		"suggest_limit": 50,
 		"query_endpoint": "/api/query",
 		"search_endpoint": "/api/suggest",
-		"loader_class": "opentsdb.OpenTSDBDataProvider",
-		"suggest_limit": 50
-	},
-	"websocket": {
-		"endpoint": "/api/data"
-	},
-	"cache": {
-		"enabled": false,
-		"interval": 180,
-		"result_size": 50,
-		"datasource": {
-			"url": "/search"
-		}
+		"loader_class": "opentsdb.OpenTSDBDataProvider"
 	},
 	"databases":[
 		{
 			"ENGINE": "django.db.backends.sqlite3",
-			"NAME": "/opt/metrilyx/data/metrilyx.sqlite3"
+        	"NAME": "data/metrilyx.sqlite3"
 		},{
 			"ENGINE": "django.db.backends.postgresql_psycopg2",
 			"NAME": "metrilyx",
@@ -33,22 +21,30 @@
 			"PASSWORD": "metpass"
 		}
 	],
+	"cache": {
+		"enabled": true,
+		"interval": 180,
+    	"result_size": 50,
+    	"datasource": {
+    		"url": "/search"
+    	}
+	},
 	"annotations": {
 		"enabled": false,
-		"line_re": "([0-9]+) (.+) ([a-zA-Z0-9_]+):(.+) '({.*})'",
-		"dataprovider":{
-			"name": "Elasticsearch",
-			"host": "localhost",
-			"port": 9200,
-			"use_ssl": false,
-			"search_endpoint": "_search",
-			"index": "eventannotations",
-			"result_size": 10000000,
-			"loader_class": "ess.ElasticsearchEventDataProvider"
+		"url": "http://localhost:9898",
+		"endpoints": {
+			"annotate": "/api/annotations",
+			"search": "/api/query",
+			"types": "/api/types"
+		},
+		"websocket": {
+			"uri": "ws://localhost:9898/annotations/data"
 		}
+	},
+	"websocket": {
+		"endpoint": "/api/data"
 	},
 	"tmpdir": "/dev/shm/metrilyx",
 	"debug": false,
-	"schema_path": "/opt/metrilyx/etc/metrilyx/schemas",
-	"version": "2.4.3"
+	"version": "2.5.0"
 }

@@ -12,9 +12,8 @@ ConnectionPool.prototype.nextConnection = function() {
 
 var connectionPool = new ConnectionPool(CONN_POOL_CFG.urls);
 
-var metrilyxServices = angular.module('metrilyxServices', ['ngResource']);
-
-metrilyxServices.factory('Auth', ['$http', function ($http) {
+angular.module('metrilyxServices', ['ngResource'])
+.factory('Auth', ['$http', function ($http) {
     return {
         setCredentials: function (username, password) {
             $http.defaults.headers.common.Authorization = 'Basic ' + btoa(username + ':' + password);
@@ -26,56 +25,14 @@ metrilyxServices.factory('Auth', ['$http', function ($http) {
         	return {'Authorization': 'Basic ' + btoa(username + ':' + password)}
         }
     };
-}]);
-
-metrilyxServices.factory('EventTypes', ['$resource',
-	function($resource) {
-		return $resource('/api/event_types/:eventType', {}, {
-			listEvents: {
-				method: 'GET',
-				isArray: true
-			},
-			getEvent: {
-				method: 'GET',
-				params: {eventType: '@eventType'},
-				isArray: false
-			}
-		});
-	}
-]);
-
-metrilyxServices.factory('Configuration', ['$http',
-	function($http) {
-		var cache = null;
-		
-		return {
-			getConfig: function(callback) {
-
-				var dfd = $.Deferred();
-
-				if(cache !== null) {
-					
-					dfd.resolve(cache);
-				} else {
-					$http.get('/api/config').success(function(response) {
-
-						dfd.resolve(response);
-					}).error(function(err) {
-						
-						console.error(err)
-					})
-				}
-				dfd.done(callback)
-			}
-		}
-	}
-]);
-
-metrilyxServices.factory('Metrics', ['$http', 'Auth', 'Configuration', function($http, Auth, Configuration) {
+}])
+.factory('Metrics', ['$http', 'Auth', 'Configuration', function($http, Auth, Configuration) {
+	/*
 	var queryURL = "";
 	Configuration.getConfig(function(config) {
 		queryURL = config.metric_search.uri + "/metrics?q=";
 	});
+ 	*/
 	var cache = {};
 
     return {
@@ -86,7 +43,8 @@ metrilyxServices.factory('Metrics', ['$http', 'Auth', 'Configuration', function(
 			} else if(cache[query] === undefined){
 			    Auth.clearCredentials();
 			    // TODO: check query url
-			    $http.get(queryURL+query)
+			    //$http.get(queryURL+query)
+			    $http.get(Configuration.metric_search.uri + "/metrics?q=" + query)
 			    	.success(function(res){
 						cache[query] = res;
 						dfd.resolve(res);
@@ -97,9 +55,8 @@ metrilyxServices.factory('Metrics', ['$http', 'Auth', 'Configuration', function(
 			dfd.done(callback);
 		}
     };
-}]);
-
-metrilyxServices.factory('Model', ['$resource', 'Auth',
+}])
+.factory('Model', ['$resource', 'Auth',
 	function($resource, Auth) {
 		return $resource('/api/graphmaps/:pageId', {}, {
 			getModel: {
@@ -132,9 +89,8 @@ metrilyxServices.factory('Model', ['$resource', 'Auth',
 			}
 		});
 	}
-]);
-
-metrilyxServices.factory('Tags', ['$resource', 'Auth',
+])
+.factory('Tags', ['$resource', 'Auth',
 	function($resource, Auth) {
 		Auth.clearCredentials();
 		return $resource(connectionPool.nextConnection()+'/api/tags/:tagname', {}, {
@@ -149,21 +105,8 @@ metrilyxServices.factory('Tags', ['$resource', 'Auth',
 			},
 		});
 	}
-]);
-
-metrilyxServices.factory('EventTypes', ['$resource', 'Auth',
-	function($resource, Auth) {
-		Auth.clearCredentials();
-		return $resource(connectionPool.nextConnection()+'/api/event_types/:eventType', {}, {
-			listTypes: {
-				method:'GET', 
-				isArray:true
-			}
-		});
-	}
-]);
-
-metrilyxServices.factory('Schema', ['$http', 'Auth',
+])
+.factory('Schema', ['$http', 'Auth',
 	function($http, Auth) {
 		var cache = {};
 

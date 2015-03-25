@@ -233,11 +233,13 @@ input.codeline {
 	color: #eee;
 }
 .model-list-btn {
-	color: #777;
+	color: #999;
 }
+/*
 .model-list-btn:hover {
 	color: #f3f3f3;
 }
+*/
 td.side-panel-btn {
 	width: 50%;
 	text-align: center;
@@ -254,9 +256,9 @@ input.form-control.md {
 }
 
 #stage {
-	width:100%;
+	/*width:100%;
 	height: 100%;
-	margin-top:0;
+	margin-top:0;*/
 	background-color: #efefef;
 	overflow-x: hidden;
 }
@@ -407,7 +409,7 @@ input[ng-model='modelQuery'] {
 [ng-repeat='metric in metricQueryResult'] {
 	word-wrap:break-word;
 }
-[ng-repeat='evtType in globalAnno.eventTypes'].removable-tag,
+[ng-repeat="(typeId, aetype) in eventAnnoTypes"].removable-tag,
 [ng-repeat='evtType in graph.annoEvents.eventTypes'].removable-tag {
 	border:1px solid #888;
 	border-radius:26px;
@@ -532,6 +534,7 @@ input[ng-model='model.name'].edit-mode:hover {
 	cursor: -webkit-grab;
 	cursor: -moz-grab;
 }
+#stage,
 #main-view {
 	padding:0;
 	overflow-y:auto;
@@ -547,6 +550,7 @@ input[ng-model='model.name'].edit-mode:hover {
 	padding-left:10px !important;
 	padding-right:10px !important;
 }
+#stage.edit-mode,
 #main-view.edit-mode {
 	width:76.5%;
 	left:23.5%;
@@ -1240,6 +1244,20 @@ input.threshold-input:hover {
 input.threshold-input.wide {
 	width: 140px;
 }
+.anno-editor-content {
+	/*background:rgba(95,95,95,0.95);*/
+	/*border-radius: 0 2px 2px 2px;*/
+    display: none;
+    width: 280px;
+    position: absolute;
+    z-index: 1;
+}
+.anno-editor-content-body {
+	padding: 10px 5px;
+	background:rgba(95,95,95,0.9);
+	border-radius:2px;
+}
+
 .graph-control-details {
 	background:rgba(95,95,95,0.95);
 	border-radius: 0 2px 2px 2px;

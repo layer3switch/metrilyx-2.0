@@ -45,6 +45,7 @@ def absoluteTime(relTime, convertTo='micro'):
 
     return retVal
 
+"""
 class EventSerie(object):
     '''
     Args:
@@ -81,7 +82,7 @@ class EventSerie(object):
     def __microToMilli(self):
         for s in self._serie:
             s['timestamp'] = s['timestamp']/1000
-
+"""
 
 class BasicSerie(object):
 
