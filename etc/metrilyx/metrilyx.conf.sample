@@ -42,7 +42,8 @@
 		}
 	},
 	"websocket": {
-		"endpoint": "/api/data"
+		"endpoint": "/api/data",
+		"ssl": false,
 	},
 	"tmpdir": "/dev/shm/metrilyx",
 	"debug": false,

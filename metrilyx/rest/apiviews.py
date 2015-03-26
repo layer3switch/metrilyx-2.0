@@ -118,7 +118,10 @@ class ConfigurationView(APIView):
 		if config['websocket'].has_key('hostname'):
 			resp['hostname'] = config['websocket']['hostname']
 
-		resp['uri'] = 'ws://%s' %(resp['hostname'])
+		if config['websocket'].has_key('ssl') and config['websocket']['ssl']:
+			resp['uri'] = 'wss://%s' % (resp['hostname'])
+		else:
+			resp['uri'] = 'ws://%s' % (resp['hostname'])
 
 		if config['websocket'].has_key('port'):
 			resp['port'] = config['websocket']['port']

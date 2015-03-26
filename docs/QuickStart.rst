@@ -10,13 +10,9 @@ Although Metrilyx will run on any linux distribution, testing has been done agai
 
 Also a minimum of 1GB of memory is also required.
 
-The quickest way to  be get up and running is to use the following method in 2 forms although going through the steps below is recommended::
+The quickest way to  be get up and running is to use the packages provided under the release section.  The only additional required piece is a running installation of nginx.
 
-	## Install all prerequisites including the latest version of nginx and metrilyx.
-	curl -s http://metrilyx.github.io/bootstrap.sh  | bash -s -- install v2.4.2
-
-The above is a script that nicely wraps up all the steps mentioned below including dependencies.  If you choose to manually perform the installation then follow the next steps or after successfully completion of the above script, continue on to the **Configuration** section.
-
+You can yum or apt install the rpm based on your distribution.
 
 Nginx Installation
 ==================
@@ -49,47 +45,10 @@ For Debian base systems follow the directions from the link below::
 	http://nginx.org/en/linux_packages.html#stable
 
 
-Requirements
-============
-
-The compiler requirements are needed specifically by numpy and pandas for computation and analysis.
-
-- RHEL, CentOS, Oracle distributions (test w/ CentOS/Oracle 6.5)::
-
-	## Install OS packages
-	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
-
-	## Install pip
-	$ which pip || easy_install pip
-
-	## Install numpy before installing metrilyx
-	$ pip install 'numpy>=1.6.1'
-
-
-- Debian based distributions (tested w/ Ubuntu 14.04 & 12.04)::
-
-	## Install OS packages
-	$ apt-get install build-essential make g++ gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython2.7 python-pip git-core libffi-dev libatlas-dev libblas-dev python-numpy
-
-
-Installation
-============
-
-Finally install metrilyx::
-
-	$ pip install git+https://github.com/Ticketmaster/metrilyx-2.0.git@v2.4.2
-
-The next step is configure your installation.
-
-
 Configuration
 =============
 
-The configuration file can be found at **/opt/metrilyx/etc/metrilyx**.  To begin, copy the sample configs::
-
-	$ make config
-
-This will only copy the configs if none exist.
+The configuration file can be found at **/opt/metrilyx/etc/metrilyx**.  To begin, copy the sample configs.
 
 Edit **etc/metrilyx/metrilyx.conf**.  The 'dataprovider' section is the only needed configuration assuming that the host has a resolvable FQDN ( i.e. resolves via socket.gethostname() ).  Otherwise the 'websocket' section will also need to be edited.
 

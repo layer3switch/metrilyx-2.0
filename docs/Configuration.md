@@ -17,7 +17,8 @@ A sample configuration file has been provided.  The configuration file is in JSO
 			"suggest_limit": 50
 		},
 		"websocket": {
-			"endpoint": "/api/data"
+			"endpoint": "/api/data",
+			"ssl": false
 		},
 		"cache": {
 			"enabled": false,
@@ -68,6 +69,9 @@ OpenTSDB http port (default: 4242)
 ##### dataprovider.suggest_limit
 OpenTSDB suggest max result limit.
 
+##### websocket.ssl (optional)
+This option is only needed if you plan on running the websocket over ssl.
+
 ##### websocket.hostname (optional)
 This configuration option only needs to be edited if the host does not have a resolvable FQDN..  Add a hostname key under the websocket section called 'hostname' with a client resolvable name.
 
@@ -92,6 +96,7 @@ In order to use annotations they need to be enabled in the config.  Once enabled
 Now you will need to create the index in elasticsearch.  Create the index by issuing the following command:
 
 	curl -XPOST http://<elasticsearch_host>:<port>/eventannotations
+
 
 #### Nginx
 The metrilyx nginx configuration is installed under **/etc/nginx/conf.d/metrilyx.conf**.  The default nginx configuration may conflict with the metrilyx configuration and should be disabled. The name of the default file will be different depending on the operating system you are using.  Here's an example from a CentOS/RHEL based system.

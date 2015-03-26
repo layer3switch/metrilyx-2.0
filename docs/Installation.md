@@ -3,63 +3,33 @@ Installation Guide
 
 Metrilyx will run on any system that supports the packages mentioned below.  It has primarily been tested on RedHat based flavors of Linux.
 
-## Requirements:
+Requirements
+============
 
-**Before you can install Metrilyx, you will need to have the following pre-requisites installed**
+The compiler requirements are needed specifically by numpy and pandas for computation and analysis.
 
-Remove previously created temp files by pip. Depending on your platform one or both of the following directories willl need to be removed.
+- RHEL, CentOS, Oracle distributions (test w/ CentOS/Oracle 6.5)::
 
-	rm -rf /tmp/pip_build_root
-	rm -rf /tmp/pip-build-root
+	## Install OS packages
+	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel nginx
 
-You will also need the following python packages:
-
-	numpy>=1.6.1
-
-
-This is to ensure that previous versions of existing packages do not interfere with the depenedencies.
-
-*	**nginx**
-
-	This is used as the proxy layer to the model manager as well as the websocket data server. Installer packages are available on their site. Here's a link to the page for linux:
-
-		http://nginx.org/en/linux_packages.html#stable
-
-*	**elasticsearch** (optional)
-
-	This is used to store all event annotations.  This is where the data is queried from as well.  Installer packages are available on their site.
-	In order to create the index issue the following command:
-
-		curl -XPOST http://<elasticsearch_host>:<port>/eventannotations
-
-	If you've changed the name of the index in the configuration, appropriately change the name in the command above.
-
-*	**postgresql >= 9.3** (optional)
-
-	This component is only needed if you plan to store your models in a database other than the default sqlite3.  Based on the number of models and usage a proper database may be needed.  Metrilyx has been tested using postgresql and is currently in use at TicketMaster.  In order to install postgres on a RHEL based system, the OS version must be >= 6.5.  MySQL has not been tried due to the lack of JSON support.  Installer packages for postgres are available on their site.
-
-
-#### OS Packages:
-Once the above requirements have been fulfilled, run the following command to install the required OS packages.
-
-##### RHEL:
-
-	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
-
-##### Debian/Ubuntu:
-
-	$ apt-get install build-essential make g++ gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython2.7 python-pip git-core libffi-dev libatlas-dev libblas-dev python-numpy
-
-## Installation:
-The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below to install the application after the above mentioned requirements have been satisfied. The default install destination is **/opt/metrilyx**.
-
-- Install the required OS packages.
-
-- Issue the following command to install the application:
-
+	## Install pip
 	$ which pip || easy_install pip
 
+	## Install numpy before installing metrilyx
 	$ pip install 'numpy>=1.6.1'
+
+
+- Debian based distributions (tested w/ Ubuntu 14.04 & 12.04)::
+
+	## Install OS packages
+	$ apt-get install build-essential make g++ gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython2.7 python-pip git-core libffi-dev libatlas-dev libblas-dev python-numpy ngnix
+
+
+Installation
+============
+
+Finally install metrilyx::
 
 	$ pip install git+https://github.com/Ticketmaster/metrilyx-2.0.git
 
@@ -73,7 +43,7 @@ After you have completed editing the configuration file, start the modelmanager 
 
 **Note**: The default nginx configuration file may conflict with the metrilyx one.  In this case you'll need to disable the default one or edit the configuration file to accomodate for metrilyx's nginx configuration.
 
-#### Postgresql Install
+#### Postgresql Install (optional)
 If you would like to use postgres for the backend database instead of the default sqlite, you can do so by moving the provided postgres database configuration above the sqlite one in ***metrilyx.conf***.  Fill in the remainder options based on your postgresql instance.
 
 ###### ***Before performing the next step please export all of your existing models.***
