@@ -66,7 +66,9 @@ After you have completed editing the configuration file, start the modelmanager 
 
 **Note**: The default nginx configuration file may conflict with the metrilyx one.  In this case you'll need to disable the default one or edit the configuration file to accomodate for metrilyx's nginx configuration.
 
-#### Postgresql Install
+
+*	**Postgresql Install** (optional)
+
 If you would like to use postgres for the backend database instead of the default sqlite, you can do so by moving the provided postgres database configuration above the sqlite one in ***metrilyx.conf***.  Fill in the remainder options based on your postgresql instance.
 
 ###### ***Before performing the next step please export all of your existing models.***
@@ -81,8 +83,7 @@ To initialize django for postgres, issue the command below.  If you get prompted
 
 If you have existing models in sqlite follow the instructions to export/import them.
 
-#### Postgresql Client Install
-(only required if using postgres)
+*	**Postgresql Client Install** (optional)
 
 To install the client, first get postrgres's yum repo rpm.  Once that has been installed, you'll need to install the dependencies for the python postgres client (psycopg2).
 
