@@ -10,12 +10,17 @@ Although Metrilyx will run on any linux distribution, testing has been done agai
 
 Also a minimum of 1GB of memory is also required.
 
-The quickest way to  be get up and running is to use the following method in 2 forms although going through the steps below is recommended::
+The quickest way to be get up and running is to use the packages provided under the release section. The only additional required piece is a running installation of nginx.
 
-	## Install all prerequisites including the latest version of nginx and metrilyx.
-	curl -s http://metrilyx.github.io/bootstrap.sh  | bash -s -- install v2.4.2
+For yum based systems:
 
-The above is a script that nicely wraps up all the steps mentioned below including dependencies.  If you choose to manually perform the installation then follow the next steps or after successfully completion of the above script, continue on to the **Configuration** section.
+	yum install <metrilyx-2.0-x.rpm>
+
+	or
+
+For apt based systems:
+
+	apt-get install <metrilyx-2.0.x.deb>
 
 
 Nginx Installation
