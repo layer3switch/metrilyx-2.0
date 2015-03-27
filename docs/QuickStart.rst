@@ -16,8 +16,6 @@ For yum based systems:
 
 	yum install <metrilyx-2.0-x.rpm>
 
-	or
-
 For apt based systems:
 
 	apt-get install <metrilyx-2.0.x.deb>
