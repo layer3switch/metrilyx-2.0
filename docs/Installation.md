@@ -3,21 +3,27 @@ Installation Guide
 
 Metrilyx will run on any system that supports the packages mentioned below.  It has primarily been tested on RedHat based flavors of Linux.
 
-## Requirements:
+Requirements
+============
 
-**Before you can install Metrilyx, you will need to have the following pre-requisites installed**
+The compiler requirements are needed specifically by numpy and pandas for computation and analysis.
 
-Remove previously created temp files by pip. Depending on your platform one or both of the following directories willl need to be removed.
+- RHEL, CentOS, Oracle distributions (test w/ CentOS/Oracle 6.5)::
 
-	rm -rf /tmp/pip_build_root
-	rm -rf /tmp/pip-build-root
+	## Install OS packages
+	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
 
-You will also need the following python packages:
+	## Install pip
+	$ which pip || easy_install pip
 
-	numpy>=1.6.1
+	## Install numpy before installing metrilyx
+	$ pip install 'numpy>=1.6.1'
 
 
-This is to ensure that previous versions of existing packages do not interfere with the depenedencies.
+- Debian based distributions (tested w/ Ubuntu 14.04 & 12.04)::
+
+	## Install OS packages
+	$ apt-get install build-essential make g++ gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython2.7 python-pip git-core libffi-dev libatlas-dev libblas-dev python-numpy
 
 *	**nginx**
 
@@ -37,18 +43,6 @@ This is to ensure that previous versions of existing packages do not interfere w
 *	**postgresql >= 9.3** (optional)
 
 	This component is only needed if you plan to store your models in a database other than the default sqlite3.  Based on the number of models and usage a proper database may be needed.  Metrilyx has been tested using postgresql and is currently in use at TicketMaster.  In order to install postgres on a RHEL based system, the OS version must be >= 6.5.  MySQL has not been tried due to the lack of JSON support.  Installer packages for postgres are available on their site.
-
-
-#### OS Packages:
-Once the above requirements have been fulfilled, run the following command to install the required OS packages.
-
-##### RHEL:
-
-	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
-
-##### Debian/Ubuntu:
-
-	$ apt-get install build-essential make g++ gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython2.7 python-pip git-core libffi-dev libatlas-dev libblas-dev python-numpy
 
 ## Installation:
 The provided install script will work with both **RedHat** and **Debian** based distributions.  You can issue the command below to install the application after the above mentioned requirements have been satisfied. The default install destination is **/opt/metrilyx**.
