@@ -51,40 +51,6 @@ For Debian base systems follow the directions from the link below::
 
 	http://nginx.org/en/linux_packages.html#stable
 
-
-Requirements
-============
-
-The compiler requirements are needed specifically by numpy and pandas for computation and analysis.
-
-- RHEL, CentOS, Oracle distributions (test w/ CentOS/Oracle 6.5)::
-
-	## Install OS packages
-	$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
-
-	## Install pip
-	$ which pip || easy_install pip
-
-	## Install numpy before installing metrilyx
-	$ pip install 'numpy>=1.6.1'
-
-
-- Debian based distributions (tested w/ Ubuntu 14.04 & 12.04)::
-
-	## Install OS packages
-	$ apt-get install build-essential make g++ gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython2.7 python-pip git-core libffi-dev libatlas-dev libblas-dev python-numpy
-
-
-Installation
-============
-
-Finally install metrilyx::
-
-	$ pip install git+https://github.com/Ticketmaster/metrilyx-2.0.git@v2.4.2
-
-The next step is configure your installation.
-
-
 Configuration
 =============
 
