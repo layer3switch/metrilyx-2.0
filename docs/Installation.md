@@ -3,8 +3,7 @@ Installation Guide
 
 Metrilyx will run on any system that supports the packages mentioned below.  It has primarily been tested on RedHat based flavors of Linux.
 
-Requirements
-============
+### Requirements
 
 The compiler requirements are needed specifically by numpy and pandas for computation and analysis.
 

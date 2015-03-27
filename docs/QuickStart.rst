@@ -54,11 +54,7 @@ For Debian base systems follow the directions from the link below::
 Configuration
 =============
 
-The configuration file can be found at **/opt/metrilyx/etc/metrilyx**.  To begin, copy the sample configs::
-
-	$ make config
-
-This will only copy the configs if none exist.
+The configuration file can be found at **/opt/metrilyx/etc/metrilyx**.  To begin, copy the sample config.
 
 Edit **etc/metrilyx/metrilyx.conf**.  The 'dataprovider' section is the only needed configuration assuming that the host has a resolvable FQDN ( i.e. resolves via socket.gethostname() ).  Otherwise the 'websocket' section will also need to be edited.
 
