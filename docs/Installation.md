@@ -49,11 +49,11 @@ The provided install script will work with both **RedHat** and **Debian** based 
 
 - Issue the following command to install the application:
 
-	$ which pip || easy_install pip
+		$ which pip || easy_install pip
 
-	$ pip install 'numpy>=1.6.1'
+		$ pip install 'numpy>=1.6.1'
 
-	$ pip install git+https://github.com/Ticketmaster/metrilyx-2.0.git
+		$ pip install git+https://github.com/Ticketmaster/metrilyx-2.0.git
 
 Assuming all required OS packages are installed, the script will install the needed python modules and configurations and prompt you to edit the metrilyx configuration files.
 
