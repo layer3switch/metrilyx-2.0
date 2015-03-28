@@ -43,7 +43,7 @@ Finally install nginx::
 	$ yum -y install nginx
 	$ chkconfig nginx on
 
-Disable the default nginx configuration::
+**Disable the default nginx configuration**::
 
 	$ mv /etc/nginx/conf.d/default.conf{,.disabled}
 
@@ -56,7 +56,7 @@ Configuration
 
 The configuration file can be found at **/opt/metrilyx/etc/metrilyx**.  To begin, copy the sample config.
 
-Edit **etc/metrilyx/metrilyx.conf**.  The 'dataprovider' section is the only needed configuration assuming that the host has a resolvable FQDN ( i.e. resolves via socket.gethostname() ).  Otherwise the 'websocket' section will also need to be edited.
+Edit **etc/metrilyx/metrilyx.conf**.  The '**dataprovider**' section is the only needed configuration assuming that the host has a resolvable FQDN.
 
 Fill in the uri and port for OpenTSDB in the 'dataprovider' section::
 
@@ -71,7 +71,7 @@ Fill in the uri and port for OpenTSDB in the 'dataprovider' section::
 		}
 	}
 
-The 'websocket' section can be skipped if your host is a resolvable FQDN ( resolves via socket.gethostname() ), otherwise add the 'hostname' field and fill in the IP address of the server.  This should be the same address as the one used for web browser access ::
+The '**websocket**' section can be skipped if your **host is a resolvable FQDN** ( i.e socket.gethostname() ), otherwise add the '**hostname**' field, and fill in the IP address of the server::
 
 	{
 		"websocket": {
