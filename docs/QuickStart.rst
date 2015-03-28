@@ -5,18 +5,18 @@ This is a quick start guide for RHEL/CentOS/Oracle 6.4 & 6.5 and Debian/Ubuntu b
 
 Although Metrilyx will run on any linux distribution, testing has been done againsts the following 64bit systems:
 
-* CentOS/Oracle 6.4 & 6.5
-* Ubuntu 14.04 (trusty), 12.04 (precise)
+* CentOS/Oracle 6.4, 6.5
+* Ubuntu 14.04, 12.04
 
 Also a minimum of 1GB of memory is also required.
 
 The quickest way to be get up and running is to use the packages provided under the `Release <https://github.com/Ticketmaster/metrilyx-2.0/releases>`_ section. The only additional required piece is a running installation of nginx.
 
-For yum based systems:
+For yum based systems::
 
 	yum install <metrilyx-2.0-x.rpm>
 
-For apt based systems:
+For apt based systems::
 
 	apt-get install <metrilyx-2.0.x.deb>
 
