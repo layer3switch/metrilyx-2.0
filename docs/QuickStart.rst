@@ -5,14 +5,21 @@ This is a quick start guide for RHEL/CentOS/Oracle 6.4 & 6.5 and Debian/Ubuntu b
 
 Although Metrilyx will run on any linux distribution, testing has been done againsts the following 64bit systems:
 
-* CentOS/Oracle 6.4 & 6.5
-* Ubuntu 14.04 (trusty), 12.04 (precise)
+* CentOS/Oracle 6.4, 6.5
+* Ubuntu 14.04, 12.04
 
 Also a minimum of 1GB of memory is also required.
 
-The quickest way to  be get up and running is to use the packages provided under the release section.  The only additional required piece is a running installation of nginx.
+The quickest way to be get up and running is to use the packages provided under the `Release <https://github.com/Ticketmaster/metrilyx-2.0/releases>`_ section. The only additional required piece is a running installation of nginx.
 
-You can yum or apt install the rpm based on your distribution.
+For yum based systems::
+
+	yum install <metrilyx-2.0-x.rpm>
+
+For apt based systems::
+
+	apt-get install <metrilyx-2.0.x.deb>
+
 
 Nginx Installation
 ==================
@@ -36,7 +43,7 @@ Finally install nginx::
 	$ yum -y install nginx
 	$ chkconfig nginx on
 
-Disable the default nginx configuration::
+**Disable the default nginx configuration**::
 
 	$ mv /etc/nginx/conf.d/default.conf{,.disabled}
 
@@ -48,9 +55,9 @@ For Debian base systems follow the directions from the link below::
 Configuration
 =============
 
-The configuration file can be found at **/opt/metrilyx/etc/metrilyx**.  To begin, copy the sample configs.
+The configuration file can be found at **/opt/metrilyx/etc/metrilyx**.  To begin, copy the sample config.
 
-Edit **etc/metrilyx/metrilyx.conf**.  The 'dataprovider' section is the only needed configuration assuming that the host has a resolvable FQDN ( i.e. resolves via socket.gethostname() ).  Otherwise the 'websocket' section will also need to be edited.
+Edit **etc/metrilyx/metrilyx.conf**.  The '**dataprovider**' section is the only needed configuration assuming that the host has a resolvable FQDN.
 
 Fill in the uri and port for OpenTSDB in the 'dataprovider' section::
 
@@ -65,7 +72,7 @@ Fill in the uri and port for OpenTSDB in the 'dataprovider' section::
 		}
 	}
 
-The 'websocket' section can be skipped if your host is a resolvable FQDN ( resolves via socket.gethostname() ), otherwise add the 'hostname' field and fill in the IP address of the server.  This should be the same address as the one used for web browser access ::
+The '**websocket**' section can be skipped if your **host is a resolvable FQDN** ( i.e socket.gethostname() ), otherwise add the '**hostname**' field, and fill in the IP address of the server::
 
 	{
 		"websocket": {

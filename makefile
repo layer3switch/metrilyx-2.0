@@ -122,7 +122,7 @@ install:
 	rsync -aHP $(INSTALL_DIR)/ /
 
 .package:
-	cd `dirname $(INSTALL_DIR)` && tar -czf metrilyx-$(DISTRO).tgz metrilyx ; cd -
+	cd `dirname $(INSTALL_DIR)` && tar -czf metrilyx-2.0-$(DISTRO).tgz metrilyx-2.0 ; cd -
 
 # Copies sample configs and db
 # Create user
