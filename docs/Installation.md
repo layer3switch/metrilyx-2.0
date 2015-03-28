@@ -7,18 +7,16 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 
 The compiler requirements are needed specifically by numpy and pandas for computation and analysis.
 
-- RHEL, CentOS, Oracle distributions (test w/ CentOS/Oracle 6.5)::
+- **RHEL, CentOS, Oracle distributions ( test w/ CentOS/Oracle 6.5 )**:
 
 		$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
-
 		$ which pip || easy_install pip
-
 		$ pip install 'numpy>=1.6.1'
 
 
-- Debian based distributions (tested w/ Ubuntu 14.04 & 12.04)::
+- **Debian based distributions ( tested w/ Ubuntu 14.04 & 12.04 )**:
 
-		$ apt-get install build-essential make g++ gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython2.7 python-pip git-core libffi-dev libatlas-dev libblas-dev python-numpy
+		$ apt-get -y install build-essential make g++ gfortran libuuid1 uuid-runtime python-setuptools python-dev libpython2.7 python-pip git-core libffi-dev libatlas-dev libblas-dev python-numpy
 
 
 #### Other requirements
@@ -49,10 +47,6 @@ The provided install script will work with both **RedHat** and **Debian** based 
 
 - Issue the following command to install the application:
 
-		$ which pip || easy_install pip
-
-		$ pip install 'numpy>=1.6.1'
-
 		$ pip install git+https://github.com/Ticketmaster/metrilyx-2.0.git
 
 Assuming all required OS packages are installed, the script will install the needed python modules and configurations and prompt you to edit the metrilyx configuration files.
@@ -65,9 +59,7 @@ After you have completed editing the configuration file, start the modelmanager 
 
 **Note**: The default nginx configuration file may conflict with the metrilyx one.  In this case you'll need to disable the default one or edit the configuration file to accomodate for metrilyx's nginx configuration.
 
-
-*	**Postgresql Install** (optional)
-
+### Using postgresql ( optional )
 If you would like to use postgres for the backend database instead of the default sqlite, you can do so by moving the provided postgres database configuration above the sqlite one in ***metrilyx.conf***.  Fill in the remainder options based on your postgresql instance.
 
 ###### ***Before performing the next step please export all of your existing models.***
@@ -86,7 +78,7 @@ If you have existing models in sqlite follow the instructions to export/import t
 
 To install the client, first get postrgres's yum repo rpm.  Once that has been installed, you'll need to install the dependencies for the python postgres client (psycopg2).
 
-	yum -y install postgresql93 postrgresql93-devel libpqxx-devel python-psycopg2
+	$ yum -y install postgresql93 postrgresql93-devel libpqxx-devel python-psycopg2
 
 
 #### Upgrading models
