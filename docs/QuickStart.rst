@@ -10,7 +10,7 @@ Although Metrilyx will run on any linux distribution, testing has been done agai
 
 Also a minimum of 1GB of memory is also required.
 
-The quickest way to be get up and running is to use the packages provided under the [Release](https://github.com/Ticketmaster/metrilyx-2.0/releases "Release") section. The only additional required piece is a running installation of nginx.
+The quickest way to be get up and running is to use the packages provided under the `Release https://github.com/Ticketmaster/metrilyx-2.0/releases`_ section. The only additional required piece is a running installation of nginx.
 
 For yum based systems:
 
