@@ -7,7 +7,7 @@ Metrilyx will run on any system that supports the packages mentioned below.  It 
 
 The compiler requirements are needed specifically by numpy and pandas for computation and analysis.
 
-- **RHEL, CentOS, Oracle distributions ( test w/ CentOS/Oracle 6.5 )**:
+- **RHEL, CentOS, Oracle distributions ( tested w/ CentOS/Oracle 6.5 )**:
 
 		$ yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
 		$ which pip || easy_install pip
