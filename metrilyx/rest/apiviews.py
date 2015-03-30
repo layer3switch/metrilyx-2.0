@@ -25,13 +25,13 @@ from metrilyx import metrilyxconfig
 from pprint import pprint
 
 class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = (permissions.IsAuthenticated,)
+    #permission_classes = (permissions.IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
 class GroupViewSet(viewsets.ModelViewSet):
-    permission_classes = (permissions.IsAuthenticated,)
+    #permission_classes = (permissions.IsAuthenticated,)
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
@@ -41,8 +41,8 @@ class MapViewSet(viewsets.ModelViewSet):
     This class is not directly used.  It is subclassed by heatmaps and graphmaps.
     """
     serializer_class = MapModelSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-            IsGroupOrReadOnly, IsCreatorOrReadOnly)
+    #permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+    #        IsGroupOrReadOnly, IsCreatorOrReadOnly)
 
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name', '_id', 'tags',)
