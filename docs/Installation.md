@@ -66,7 +66,7 @@ If you would like to use postgres for the backend database instead of the defaul
 
 You will also need to create the appropriate schemas in postgres and re-initialize django.
 
-To initialize django for postgres, issue the command below.  If you get prompted to create a superuser, use the following credentials **admin/metrilyx**.  Setting them to anything else will cause the application to fail.  This is due to the fact that authentication has not been fully integrated and disabled in metrilyx.
+To initialize django for postgres, issue the command below.  If you get prompted to create a superuser, use the following credentials **admin/metrilyx**.  Setting them to anything else may cause the application to fail.
 
 	$ cd /opt/metrilyx
 	$ python manage.py syncdb

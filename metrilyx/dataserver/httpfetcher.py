@@ -14,7 +14,7 @@ from twisted.web.client import Agent
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IBodyProducer
 from twisted.internet.defer import Deferred, succeed
-from twisted.internet.protocol import Protocol
+from twisted.internet.protocol import Protocol, connectionDone
 
 from metrilyx.metrilyxconfig import config
 
@@ -220,7 +220,7 @@ class AsyncHttpResponseProtocol(Protocol):
         except Exception,e:
             return json.dumps({"error": str(e)})
 
-    def connectionLost(self, reason):
+    def connectionLost(self, reason=connectionDone):
         if self.headers.hasHeader('content-encoding') and \
                 ('gzip' in self.headers.getRawHeaders('content-encoding')):
             self.finished.callback(self.__ungzip_())

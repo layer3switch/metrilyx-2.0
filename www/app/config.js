@@ -19,12 +19,12 @@ var CONN_POOL_CFG = {
 	urls: []
 };
 /* Auth config until auth is enabled. This is just a future placeholder. */
-var AUTHCONFIG = {
-	modelstore: {
-		username: 'admin',
-		password: 'metrilyx'
-	}
-};
+//var AUTHCONFIG = {
+//	modelstore: {
+//		username: 'admin',
+//		password: 'metrilyx'
+//	}
+//};
 /* WebSocket URI */
 //var WS_URI = "ws://"+SERVER_NAME+"/api/data?compressed=true";
 
