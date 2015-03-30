@@ -1,4 +1,5 @@
 
+import time
 import logging
 
 import numpy
@@ -24,6 +25,8 @@ def absoluteTime(relTime, convertTo='micro'):
 
     val = int(relTime.split("-")[0][:-1])
     unit = relTime.split("-")[0][-1]
+
+    retVal = None
 
     if unit == 's':
         retVal = time.time() - val
@@ -107,8 +110,7 @@ class BasicSerie(object):
         """
         flat_obj = self._flatten_dict(obj)
         ## set unique tags string
-        if unique_tags_str:
-            uniqueTagsString = unique_tags_str %(flat_obj)
+        uniqueTagsString = unique_tags_str %(flat_obj) if unique_tags_str else None
 
         normalizedAlias = alias_str
         # When alias_str starts with ! we will do an eval for lambda processing
@@ -275,7 +277,7 @@ class MetrilyxSerie(BasicSerie):
             if toMillisecs:
                 return [ (int(tsval[0])*1000, tsval[1]) for tsval in sorted(data) ]
             else:
-                return [ (int(tsval[0]), tsval[1]) for ts in sorted(data) ]
+                return [ (int(tsval[0]), tsval[1]) for tsval in sorted(data) ]
 
 
     def __rmNegativeRates(self, data):

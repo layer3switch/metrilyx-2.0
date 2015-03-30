@@ -34,7 +34,7 @@ class DataserverOptionParser(OptionParser):
             print "[ERROR] %s" %(str(e))
             sys.exit(2)
 
-    def parse_args(self):
+    def parse_args(self, args=None, values=None):
         opts, args = OptionParser.parse_args(self)
         setattr(opts, "logger", self.__getLogger(opts))
         opts.logger.warning("* Log level: %s" % (opts.logLevel))
