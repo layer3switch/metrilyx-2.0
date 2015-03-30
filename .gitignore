@@ -11,6 +11,8 @@ test.py
 ##########
 *.pyc
 *.pyo
+env
+.idea
 
 # OS generated files #
 ######################
