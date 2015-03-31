@@ -117,7 +117,6 @@ Distributions:
       - "( id metrilyx > /dev/null 2>&1 ) || useradd -m metrilyx"
       - "chown -R metrilyx /opt/metrilyx"
       - "echo 'source /opt/metrilyx/bin/set-run-env.sh' >> ~metrilyx/.bashrc"
-      - "( id nginx > /dev/null 2>&1 ) || useradd -m nginx"
 
 Package:
     build_env: python

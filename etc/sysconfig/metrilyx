@@ -10,10 +10,14 @@ PYTHONPATH=${APP_HOME}/usr/lib/python2.6/site-packages:${APP_HOME}/usr/lib64/pyt
 
 # If this is a debian system
 if [ -d "${APP_HOME}/usr/local/lib" ]; then
-    PYTHONPATH=${APP_HOME}/usr/local/lib/python2.7/dist-packages
+    PYTHONPATH=${APP_HOME}/usr/local/lib/python2.7/dist-packages:${APP_HOME}/usr/local/lib64/python2.7/dist-packages
 fi
 
 UWSGI_BIN=`find ${APP_HOME}/usr -name uwsgi`
+
+NGINX_USER="nginx"
+# Debian http user
+( id www-data > /dev/null 2>&1 ) && NGINX_USER="www-data" 
 
 # Metrilyx cacher config
 CACHER_CONFIG=${APP_HOME}/etc/metrilyx/metrilyx.conf
