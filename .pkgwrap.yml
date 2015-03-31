@@ -70,7 +70,7 @@ Distributions:
       post_install: 
       - "[ -f /opt/metrilyx/etc/metrilyx/metrilyx.conf ] || cp /opt/metrilyx/etc/metrilyx/metrilyx.conf.sample /opt/metrilyx/etc/metrilyx/metrilyx.conf"
       - "[ -f /opt/metrilyx/data/metrilyx.sqlite3 ] || cp /opt/metrilyx/data/metrilyx.sqlite3.default /opt/metrilyx/data/metrilyx.sqlite3"
-      - "( id metrilyx > /dev/null 2>&1 ) || useradd metrilyx"
+      - "( id metrilyx > /dev/null 2>&1 ) || useradd -m metrilyx"
       - "chown -R metrilyx /opt/metrilyx"
       - "echo 'source /opt/metrilyx/bin/set-run-env.sh' >> ~metrilyx/.bashrc"
 
