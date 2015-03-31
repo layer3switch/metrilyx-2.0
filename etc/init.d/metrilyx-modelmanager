@@ -14,7 +14,8 @@ else
 fi
 
 NAME="metrilyx-modelmanager"
-BIN="/opt/metrilyx/usr/bin/uwsgi"
+#BIN="/opt/metrilyx/usr/bin/uwsgi"
+BIN=$UWSGI_BIN
 APP_HOME="/opt/metrilyx"
 LOGFILE="${APP_HOME}/log/${NAME}.log"
 PIDFILE="/tmp/${NAME}.pid"
@@ -28,6 +29,11 @@ RETVAL=0
 PYTHON_EGG_CACHE="/dev/shm/metrilyx"
 
 start() {
+	if [ ! -d "${APP_HOME}/run" ]; then
+		mkdir ${APP_HOME}/run
+	fi
+	chown nginx:nginx ${APP_HOME}/run
+	
 	PIDS=`${PGREP} "${BIN} ${DEFAULT_OPTS}" | xargs`;
 	if [ "$PIDS" = "" ]; then
 		echo -n "${NAME} starting... "

@@ -12,13 +12,19 @@ Also a minimum of 1GB of memory is also required.
 
 The quickest way to be get up and running is to use the packages provided under the `Release <https://github.com/Ticketmaster/metrilyx-2.0/releases>`_ section. The only additional required piece is a running installation of nginx.
 
-For yum based systems::
+**yum based systems**::
 
 	yum install <metrilyx-2.0-x.rpm>
 
-For apt based systems::
 
-	apt-get install <metrilyx-2.0.x.deb>
+**apt based systems**::
+
+	dpkg -i <metrilyx-2.0.x.deb>
+
+If the above command fails due to dependencies, you can issue the following to resolve the dependencies:
+
+	apt-get -f install
+	dpkg -i <metrilyx-2.0.x.deb>
 
 
 Nginx Installation
