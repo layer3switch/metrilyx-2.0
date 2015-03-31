@@ -80,6 +80,8 @@ Distributions:
       release: 12.04
 
       build_cmd: 
+      - sudo pip install --upgrade pip
+      - sudo ln -s /usr/local/bin/pip /usr/bin/pip
       - sudo make .build deps
 
       build_deps:
