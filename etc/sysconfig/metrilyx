@@ -1,6 +1,29 @@
 APP_HOME="/opt/metrilyx"
+
+LOGDIR=${APP_HOME}/log
+
 # For pandas/numpy
 PYTHON_EGG_CACHE="/dev/shm/metrilyx"
+
+# RHEL systems less than version 7
 PYTHONPATH=${APP_HOME}/usr/lib/python2.6/site-packages:${APP_HOME}/usr/lib64/python2.6/site-packages
+
+# If this is a debian system
+if [ -d "${APP_HOME}/usr/local/lib" ]; then
+    PYTHONPATH=${APP_HOME}/usr/local/lib/python2.7/dist-packages:${APP_HOME}/usr/local/lib64/python2.7/dist-packages
+fi
+
+UWSGI_BIN=`find ${APP_HOME}/usr -name uwsgi`
+
+NGINX_USER="nginx"
+# Debian http user
+( id www-data > /dev/null 2>&1 ) && NGINX_USER="www-data" 
+
 # Metrilyx cacher config
 CACHER_CONFIG=${APP_HOME}/etc/metrilyx/metrilyx.conf
+
+# Metrilyx dataserver. Number of servers to spawn based on cpus.
+SERVER_COUNT=`expr $(nproc) \- 1`
+if [ "$SERVER_COUNT" -lt 1 ]; then
+    SERVER_COUNT=1;
+fi

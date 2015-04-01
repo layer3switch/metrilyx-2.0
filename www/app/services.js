@@ -41,7 +41,7 @@ angular.module('metrilyxServices', ['ngResource'])
 			if (query == "") {
 			    dfd.resolve([]);
 			} else if(cache[query] === undefined){
-			    Auth.clearCredentials();
+//			    Auth.clearCredentials();
 			    // TODO: check query url
 			    //$http.get(queryURL+query)
 			    $http.get(Configuration.metric_search.uri + "/metrics?q=" + query)
@@ -71,28 +71,28 @@ angular.module('metrilyxServices', ['ngResource'])
 			saveModel: {
 				method:'POST',
 				isArray:false,
-				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
-											AUTHCONFIG.modelstore.password)
+//				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
+//											AUTHCONFIG.modelstore.password)
 			},
 			editModel: {
 				method:'PUT',
 				params:{pageId:'@pageId'},
 				isArray:false,
-				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
-											AUTHCONFIG.modelstore.password)
+//				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
+//											AUTHCONFIG.modelstore.password)
 			},
 			removeModel:{
 				method:'DELETE',
 				params:{pageId:'@pageId'},
-				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
-											AUTHCONFIG.modelstore.password)
+//				headers: Auth.authHeaders(AUTHCONFIG.modelstore.username,
+//											AUTHCONFIG.modelstore.password)
 			}
 		});
 	}
 ])
 .factory('Tags', ['$resource', 'Auth',
 	function($resource, Auth) {
-		Auth.clearCredentials();
+//		Auth.clearCredentials();
 		return $resource(connectionPool.nextConnection()+'/api/tags/:tagname', {}, {
 			listTags: {
 				method:'GET',
@@ -114,7 +114,7 @@ angular.module('metrilyxServices', ['ngResource'])
 			get : function(params, cb){
 				var dfd = $.Deferred();
 				if (params.modelType === 'graph' || cache[params.modelType] === undefined){
-					Auth.clearCredentials();
+//					Auth.clearCredentials();
 					$http.get(connectionPool.nextConnection()+'/api/schemas/' + params.modelType).success(function(res){
 						if(params.modelType !== 'graph') {
 							dfd.resolve(res)

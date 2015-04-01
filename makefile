@@ -132,9 +132,6 @@ install:
 	[ -f $(DEFAULT_DB) ] || cp $(DEFAULT_DB).default $(DEFAULT_DB)
 	( id $(USER) > /dev/null 2>&1 ) || useradd $(USER)
 	chown -R $(USER) $(METRILYX_HOME)
-	
-	
-# find $(METRILYX_HOME)/usr -type d -name 'site-packages' -exec echo export PYTHONPATH='{}':\$$PYTHONPATH >> ~$(USER)/.bashrc \;
 
 #
 # Test dataserver and modelmanager after they have been started.

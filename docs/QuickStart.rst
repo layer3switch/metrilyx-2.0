@@ -5,51 +5,41 @@ This is a quick start guide for RHEL/CentOS/Oracle 6.4 & 6.5 and Debian/Ubuntu b
 
 Although Metrilyx will run on any linux distribution, testing has been done againsts the following 64bit systems:
 
-* CentOS/Oracle 6.4, 6.5
-* Ubuntu 14.04, 12.04
+* CentOS/Oracle 6
+* Ubuntu 14.04
 
-Also a minimum of 1GB of memory is also required.
+Also a minimum of 1GB of memory is also required as well as nginx >= 1.6.1.
 
 The quickest way to be get up and running is to use the packages provided under the `Release <https://github.com/Ticketmaster/metrilyx-2.0/releases>`_ section. The only additional required piece is a running installation of nginx.
 
-For yum based systems::
+**yum based systems**::
 
 	yum install <metrilyx-2.0-x.rpm>
 
-For apt based systems::
 
-	apt-get install <metrilyx-2.0.x.deb>
+**apt based systems**::
 
+	dpkg -i <metrilyx-2.0.x.deb>
 
-Nginx Installation
-==================
+If the above command fails due to dependencies, you can issue the following to resolve the dependencies:
 
-If you have a running version of nginx >= 1.6.1 you can move on to the 'Installation' step.
+	apt-get -f install
+	
+	dpkg -i <metrilyx-2.0.x.deb>
 
-Download and install the appropriate nginx repository based on your distribution.  The setup has been tested with nginx >= 1.6.1
+For all other distros/version issue the following as root:
 
-Start by downloading the nginx repository rpm.
+	curl -s http://metrilyx.github.io/bootstrap.sh  | bash -s -- install v2.5.1
 
-For RedHat::
+** Note: Ubuntu 12.04 is not supported as the analytics libraries are unable to compile. 
 
-	$ yum -y install http://nginx.org/packages/rhel/6/noarch/RPMS/nginx-release-rhel-6-0.el6.ngx.noarch.rpm
+Nginx Installation & Configuration
+==================================
 
-For CentOS/Oracle::
-
-	$ yum -y install http://nginx.org/packages/centos/6/noarch/RPMS/nginx-release-centos-6-0.el6.ngx.noarch.rpm
-
-Finally install nginx::
-
-	$ yum -y install nginx
-	$ chkconfig nginx on
-
-**Disable the default nginx configuration**::
+Download and install the appropriate nginx repository based on your distribution with a minimum version of 1.6.  Once installed move the default config so it does not intercept metrilyx's nginx config.  The location of the default config may vary based on your installation.  For RHEL based systems you can issue the following::
 
 	$ mv /etc/nginx/conf.d/default.conf{,.disabled}
 
-For Debian base systems follow the directions from the link below::
-
-	http://nginx.org/en/linux_packages.html#stable
 
 Configuration
 =============
@@ -83,6 +73,7 @@ The '**websocket**' section can be skipped if your **host is a resolvable FQDN**
 		}
 	}
 
+If running through a NAT and on a non-standard port you may need to set the port in the above to what nginx is listening on.
 
 Services
 ========

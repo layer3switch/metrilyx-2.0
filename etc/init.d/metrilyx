@@ -15,8 +15,6 @@ fi
 
 NAME="metrilyx"
 
-NGINX_USER="nginx"
-
 SERVICE_START_ORDER="metrilyx-cacher metrilyx-dataserver metrilyx-modelmanager"
 SERVICE_STOP_ORDER="metrilyx-cacher metrilyx-dataserver metrilyx-modelmanager"
 

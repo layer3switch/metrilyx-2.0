@@ -14,13 +14,12 @@ from twisted.web.client import Agent
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IBodyProducer
 from twisted.internet.defer import Deferred, succeed
-from twisted.internet.protocol import Protocol
+from twisted.internet.protocol import Protocol, connectionDone
 
 from metrilyx.metrilyxconfig import config
-from ..dataserver.transforms import MetrilyxSerie
 
-from ..dataserver.transforms import MetrilyxAnalyticsSerie, SecondariesGraph
-from ..dataserver.dataproviders.opentsdb import re_504
+from transforms import MetrilyxSerie, MetrilyxAnalyticsSerie, SecondariesGraph
+from dataproviders.opentsdb import re_504
 
 from pprint import pprint
 
@@ -39,7 +38,6 @@ class HttpJsonClient(object):
     def ungzip_response(self, response):
         raw_data = response.read()
         #pprint(response.getheader('content-encoding'))
-        #pprint(raw_data)
         if not response.getheader('content-encoding') or \
 			'gzip' not in response.getheader('content-encoding'):
             try:
@@ -208,13 +206,11 @@ class AsyncHttpResponseProtocol(Protocol):
     def __init__(self, finished_deferred, headers):
         self.headers = headers
         self.finished = finished_deferred
-        #self.remaining = 1024 * 50
         self.data = ""
 
     def dataReceived(self, bytes):
-        #if self.remaining:
         self.data += bytes
-        #    self.remaining -= len(bytes[:self.remaining])
+        
 
     def __ungzip_(self):
         try:
@@ -222,10 +218,9 @@ class AsyncHttpResponseProtocol(Protocol):
             gzipper = gzip.GzipFile(fileobj=compressedstream)
             return gzipper.read()
         except Exception,e:
-            #logger.error(e)
             return json.dumps({"error": str(e)})
 
-    def connectionLost(self, reason):
+    def connectionLost(self, reason=connectionDone):
         if self.headers.hasHeader('content-encoding') and \
                 ('gzip' in self.headers.getRawHeaders('content-encoding')):
             self.finished.callback(self.__ungzip_())
@@ -236,6 +231,7 @@ class AsyncHttpJsonClient(object):
     '''
         Supports json request payload on both HTTP GET and POST
     '''
+
     def __init__(self, **kwargs):
         # uri, method, body
         for k,v in kwargs.items():
@@ -283,40 +279,24 @@ class AsyncHttpJsonClient(object):
         except Exception,e:
             logger.debug(str(e))
 
-"""
-def checkHttpResponse(respBodyStr, response, url):
-    if response.code < 200 or response.code > 304:
-        logger.warning("Request failed %d %s %s" %(response.code, respBodyStr, url))
-        m = re_504.search(respBodyStr)
-        if  m != None:
-            return {"error": "code=%d,response=%s" %(response.code, m.group(1))}
-        return {"error": "code=%s,response=%s" %(response.code, respBodyStr)}
-
-    try:
-        d = json.loads(respBodyStr)
-        if isinstance(d, dict) and d.has_key('error'):
-            logger.warning(str(d))
-            return d
-        return {'data': d}
-    except Exception, e:
-        logger.warning("%s %s" %(str(e), url))
-        return {"error": str(e)}
-"""
 
 class MetrilyxGraphFetcher(object):
     '''
     Handles how each graph query should be broken up.
     This depends on if it contains 'secondaries'
     '''
-    def __init__(self, dataprovider, metrilyxGraphReq):
+    def __init__(self, dataprovider, metrilyxGraphReq, logger):
+        self.logger = logger
+
         self.__graphReq = metrilyxGraphReq
         self.__dataprovider = dataprovider
 
-        if self.__graphReq.request.has_key('secondaries') and \
-                len(self.__graphReq.request['secondaries']) > 0 and \
-                self.__graphReq.request['secondaries'][0]['query'] != "":
+        request = self.__graphReq.request()
+
+        if request.has_key('secondaries') and len(request['secondaries']) > 0 and \
+                                            request['secondaries'][0]['query'] != "":
             self.containsSecondaries = True
-            self.__secondariesGraph = SecondariesGraph(self.__graphReq.request)
+            self.__secondariesGraph = SecondariesGraph(request)
         else:
             self.containsSecondaries = False
 
@@ -335,7 +315,7 @@ class MetrilyxGraphFetcher(object):
 
     def __initGraphResponse(self):
         graphResponse = { "series": [] }
-        for k,v in self.__graphReq.request.items():
+        for k,v in self.__graphReq.request().items():
             if k != "series":
                 graphResponse[k] = v
         return graphResponse
@@ -345,13 +325,14 @@ class MetrilyxGraphFetcher(object):
         if self.__activePartials.has_key(urlIdx):
             del self.__activePartials[urlIdx]
 
+
     def __partialResponseCallback(self, respBodyStr, response, *cbargs):
         self.completed += 1
         (url, gmeta, idx) = cbargs
         self.__rmActivePartial(url)
 
         respData = checkHttpResponse(respBodyStr, response, url)
-        logger.info("Partial response: %s" %(url.split("?")[-1]))
+        self.logger.info("Partial response: %s" %(url.split("?")[-1]))
         if respData.has_key('error'):
             gmeta['series'][0]['data'] = respData
         else:
@@ -365,7 +346,9 @@ class MetrilyxGraphFetcher(object):
         else:
             gmeta['series'][0]['data'] = mas.data()
             gmeta['series'][0]['uuid'] = str(mas.uuid)
+            # may need to remove this ??
             self.__partialDeferreds[idx].callback(gmeta)
+
 
         if self.total == self.completed:
             if self.containsSecondaries:
@@ -387,7 +370,6 @@ class MetrilyxGraphFetcher(object):
 
 
     def __fetch(self):
-
         counter = 0
         for gr in self.__graphReq.split():
 
@@ -400,7 +382,7 @@ class MetrilyxGraphFetcher(object):
             self.__activePartials[url] = a
             counter += 1
 
-            logger.info("Partial query (%s): %s" %(gr['_id'], url))
+            self.logger.info("Partial query (%s): %s" %(gr['_id'], url))
 
 
     def addCompleteCallback(self, callback, *cbargs):
@@ -421,4 +403,4 @@ class MetrilyxGraphFetcher(object):
         for k,d in self.__activePartials.items():
             d.cancelRequest()
 
-        self.__activePartials = {}
+        self.__activePartials = None

@@ -42,7 +42,7 @@ class MapModel(models.Model):
 
 	_id = models.CharField(max_length=128,primary_key=True)
 	name = models.CharField(max_length=128, default="", blank=True)
-	layout = layout = jsonfield.JSONField(default=[], null=True, blank=True)
+	layout = jsonfield.JSONField(default=[], null=True, blank=True)
 	user = models.ForeignKey('auth.User', related_name='mapmodels')
 	group = models.ForeignKey('auth.Group', related_name='mapmodels', null=True, blank=True)
 	tags = jsonfield.JSONField(default=[], null=True, blank=True)

@@ -13,3 +13,7 @@ install:
 
 script:
   - "sudo make .package"
+
+notifications:
+  irc: "chat.freenode.net#metrilyx"
+
