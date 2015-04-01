@@ -74,7 +74,7 @@ Distributions:
       - "( id metrilyx > /dev/null 2>&1 ) || useradd -m metrilyx"
       - "chown -R metrilyx /opt/metrilyx"
       - "echo 'source /opt/metrilyx/bin/set-run-env.sh' >> ~metrilyx/.bashrc"
-      - "[ -f /etc/nginx/sites-enabled/default ] && rm /etc/nginx/sites-enabled/default"
+      - "[ -h /etc/nginx/sites-enabled/default ] && rm /etc/nginx/sites-enabled/default || true"
 
     - name: ubuntu
       release: 12.04
@@ -117,7 +117,7 @@ Distributions:
       - "( id metrilyx > /dev/null 2>&1 ) || useradd -m metrilyx"
       - "chown -R metrilyx /opt/metrilyx"
       - "echo 'source /opt/metrilyx/bin/set-run-env.sh' >> ~metrilyx/.bashrc"
-      - "[ -f /etc/nginx/sites-enabled/default ] && rm /etc/nginx/sites-enabled/default"
+      - "[ -h /etc/nginx/sites-enabled/default ] && rm /etc/nginx/sites-enabled/default || true"
 
 Package:
     build_env: python
