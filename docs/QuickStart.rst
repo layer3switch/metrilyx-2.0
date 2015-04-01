@@ -24,6 +24,7 @@ The quickest way to be get up and running is to use the packages provided under 
 If the above command fails due to dependencies, you can issue the following to resolve the dependencies:
 
 	apt-get -f install
+	
 	dpkg -i <metrilyx-2.0.x.deb>
 
 For all other distros/version issue the following as root:
