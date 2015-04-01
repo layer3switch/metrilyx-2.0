@@ -4,6 +4,12 @@ Roadmap
 - Analysis engine as a service.
 - Peeling of individual components.
 
+##### v2.5.1
+- Fix for high memory consumption on websocket.
+- Fix for client making multiple websocket connections.
+- SSL support for websockets.
+- CentOS 6.x and Ubuntu 14.04 packages.
+
 ##### v2.5.0
 - Annotations as a seperate service (no longer part of default metrilyx).
 
