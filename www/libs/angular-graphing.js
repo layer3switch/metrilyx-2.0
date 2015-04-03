@@ -546,10 +546,10 @@ angular.module('timeframe', [])
 				}, function(newValue, oldValue) {
 					if(newValue === oldValue) return;
 
+					scope.setTimeType(newValue);
+
 					if(newValue == "absolute") {
-
-						scope.setTimeType(newValue);
-
+						
 						if(scope.modelType !== 'adhoc') scope.setUpdatesEnabled(false);
 
 						d = new Date();
@@ -560,21 +560,14 @@ angular.module('timeframe', [])
 						$('[ng-model=startTime]').data("DateTimePicker").setDate(new Date(startTime*1000));
 						scope.setEndTime(endTime);
 						$('[ng-model=endTime]').data("DateTimePicker").setDate(new Date(endTime*1000));
+					
 					} else {
 
-						if(scope.modelType === 'adhoc') {
+						var tmp = $location.search();
 
-							scope.setTimeType(newValue);
-							scope.reloadGraph();
-						} else {
-
-							tmp = $location.search();
-
-							if(tmp.end) delete tmp.end;
-							tmp['start'] = newValue;
-
-							$location.search(tmp);
-						}
+						if(tmp.end) delete tmp.end;
+						tmp['start'] = newValue;
+						$location.search(tmp);
 					}
 				}, true);
 			}
