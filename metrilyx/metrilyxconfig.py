@@ -34,6 +34,9 @@ except Exception, e:
 if config.has_key("error"):
     raise RuntimeError("Configuration error: %s" %(str(config)))
 
+# Set the default creds to mangae dashboards.
+config["django"] = {"user": "admin", "password": "metrilyx"}
+
 # Check version
 if not config.has_key("version"):
     config["version"] = _appversion

@@ -5,6 +5,7 @@ import time
 import socket
 import requests
 
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -48,7 +49,10 @@ class MapViewSet(viewsets.ModelViewSet):
     search_fields = ('name', '_id', 'tags',)
 
     def pre_save(self, obj):
-        obj.user = self.request.user
+        user = authenticate(username=config["django"]["user"], 
+                        password=config["django"]["password"])
+        #obj.user = self.request.user
+        obj.user = user
 
 class GraphMapViewSet(MapViewSet):
 
