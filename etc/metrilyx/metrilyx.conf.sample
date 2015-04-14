@@ -25,7 +25,7 @@
 		"enabled": true,
 		"interval": 180,
     	"result_size": 50,
-    	"datasource": {
+		"datasource": {
     		"url": "/search"
     	}
 	},
@@ -43,7 +43,7 @@
 	},
 	"websocket": {
 		"endpoint": "/api/data",
-		"ssl": false,
+		"ssl": false
 	},
 	"tmpdir": "/dev/shm/metrilyx",
 	"debug": false,

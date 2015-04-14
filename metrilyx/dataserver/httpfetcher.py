@@ -340,15 +340,16 @@ class MetrilyxGraphFetcher(object):
                                             respData['data'], url, gmeta)
 
         mas = MetrilyxAnalyticsSerie(gmeta['series'][0], graphType=gmeta['graphType'])
-
+        
         if self.containsSecondaries:
             self.__secondariesGraph.add(mas)
         else:
             gmeta['series'][0]['data'] = mas.data()
             gmeta['series'][0]['uuid'] = str(mas.uuid)
+            pprint(gmeta)
             # may need to remove this ??
             self.__partialDeferreds[idx].callback(gmeta)
-
+            logger.info("--- Done ---")
 
         if self.total == self.completed:
             if self.containsSecondaries:

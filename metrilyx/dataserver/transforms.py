@@ -10,6 +10,8 @@ from metrilyx.dataserver.uuids import QueryUUID, SerieUUID, TagsUUID
 
 logger = logging.getLogger(__name__)
 
+from pprint import pprint 
+
 def absoluteTime(relTime, convertTo='micro'):
     '''
         Convert relative time to absolute in epoch.
@@ -311,6 +313,7 @@ class BasicAnalyticsSerie(object):
     def _getDataSerieDps(self, aggr, column, ts_unit='ms'):
         try:
             nonNaSerie = column.replace([numpy.inf, -numpy.inf], numpy.nan).dropna()
+            
             if self.graphType in ("pie", "column", "bar"):
 
                 if aggr == "avg":
@@ -361,9 +364,10 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie, BasicAnalyticsSerie):
         out = []
         for s in self._serie['data']:
             md = self.__getSerieMetadata(s)
-
+            logger.error("HERE %s" % (s['uuid']))
             datapoints = self._getDataSerieDps(self._serie['query']['aggregator'],
                                                 self._istruct[s['uuid']], ts_unit)
+
             error = self._dataHasErrors(datapoints)
             if not error:
                 md['dps'] = datapoints
@@ -379,6 +383,13 @@ class MetrilyxAnalyticsSerie(MetrilyxSerie, BasicAnalyticsSerie):
         if self._serie['yTransform'] != "":
             try:
                 self._istruct = eval("%s" %(self._serie['yTransform']))(self._istruct)
+                
+                if isinstance(self._istruct, Series):
+                    logger.error("Need to handle 'Series'")
+                    logger.error(self._serie['alias'])
+                    self._istruct = DataFrame({self._serie['alias']: self._istruct})
+                    print self._istruct.head()
+
             except Exception,e:
                 logger.warn("Could not apply yTransform: %s" %(str(e)))
 
