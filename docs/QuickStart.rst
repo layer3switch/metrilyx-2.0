@@ -8,7 +8,7 @@ Although Metrilyx will run on any linux distribution, testing has been done agai
 * CentOS/Oracle 6
 * Ubuntu 14.04
 
-Also a minimum of 1GB of memory is also required as well as nginx >= 1.6.1.
+A minimum of 1GB of memory is required as well as nginx >= 1.6.1.
 
 The quickest way to be get up and running is to use the packages provided under the `Release <https://github.com/Ticketmaster/metrilyx-2.0/releases>`_ section. The only additional required piece is a running installation of nginx.
 
@@ -88,4 +88,4 @@ Also start or restart nginx::
 
 You should now be able to visit http://$my_ip_or_hostname to start using Metrilyx.
 
-Thats It!
+That's it!
