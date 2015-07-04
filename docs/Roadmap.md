@@ -1,8 +1,11 @@
 Roadmap
 =======
-- Dataserver as a service.
-- Analysis engine as a service.
+##### v3.0.0
+- Support for new version of OpenTSDB
+- Multiple OpenTSDB sources
+- Pandas analysis.
 - Peeling of individual components.
+- Copyable components
 
 ##### v2.5.1
 - Fix for high memory consumption on websocket.
