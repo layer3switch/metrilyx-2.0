@@ -30,4 +30,4 @@ To quickly get up and running, follow the  [Quick Start](https://github.com/Tick
 **Warning**
 This application is meant for internal 'trusted' organizational use.  Due to the use of certain methods and functions code injection attacks are possible. 
 
-IRC: Freenode #metrilyx
+**IRC:** freenode #metrilyx
