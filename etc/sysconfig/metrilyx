@@ -6,14 +6,15 @@ LOGDIR=${APP_HOME}/log
 PYTHON_EGG_CACHE="/dev/shm/metrilyx"
 
 # RHEL systems less than version 7
-PYTHONPATH=${APP_HOME}/usr/lib/python2.6/site-packages:${APP_HOME}/usr/lib64/python2.6/site-packages
+#PYTHONPATH=${APP_HOME}/usr/lib/python2.6/site-packages:${APP_HOME}/usr/lib64/python2.6/site-packages
 
 # If this is a debian system
-if [ -d "${APP_HOME}/usr/local/lib" ]; then
-    PYTHONPATH=${APP_HOME}/usr/local/lib/python2.7/dist-packages:${APP_HOME}/usr/local/lib64/python2.7/dist-packages
-fi
+#if [ -d "${APP_HOME}/usr/local/lib" ]; then
+#    PYTHONPATH=${APP_HOME}/usr/local/lib/python2.7/dist-packages:${APP_HOME}/usr/local/lib64/python2.7/dist-packages
+#fi
 
-UWSGI_BIN=`find ${APP_HOME}/usr -name uwsgi`
+#UWSGI_BIN=`find ${APP_HOME}/usr -name uwsgi`
+UWSGI_BIN="/usr/bin/uwsgi"
 
 NGINX_USER="nginx"
 # Debian http user

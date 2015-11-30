@@ -1,7 +1,7 @@
 
 FROM centos:7
 
-RUN yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel python-numpy
+RUN yum -y install git gcc gcc-c++ gcc-gfortran atlas-devel blas-devel libffi libffi-devel libuuid uuid python-setuptools python-devel
 
 RUN which pip || easy_install pip
 

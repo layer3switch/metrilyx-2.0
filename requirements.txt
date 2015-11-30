@@ -1,4 +1,4 @@
-Twisted>=14.0.0
+Twisted==14.0.2
 six==1.7.3
 Django==1.6.5
 django-cors-headers==0.12
