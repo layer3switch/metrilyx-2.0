@@ -12,7 +12,7 @@ Metrilyx is a web based dashboard engine to OpenTSDB, a time series database use
 - **Simple URL's**: Simple and readable URL format for sharing and manipulating.
 
 #### Getting Started
-To quickly get up and running, follow the  [Quick Start](https://github.com/Ticketmaster/metrilyx-2.0/blob/master/docs/QuickStart.rst "Quick Start") guide.
+To get up and running, follow the  [Installation Guide](https://github.com/Ticketmaster/metrilyx-2.0/blob/master/docs/Installation.md "Installation Guide").
 
 #### Screenshots
 ##### Adhoc Graphs
