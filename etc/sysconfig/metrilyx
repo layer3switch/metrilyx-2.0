@@ -33,3 +33,8 @@ SERVER_COUNT=`expr $(nproc) \- 1`
 if [ "$SERVER_COUNT" -lt 1 ]; then
     SERVER_COUNT=1;
 fi
+
+if [ ! -d ${LOGDIR} ]; then 
+	[ -d "${LOGDIR}" ] || { mkdir -m 0775 "${LOGDIR}"; chgrp $NGINX_USER "${LOGDIR}"; }
+	[ -d "${APP_HOME}/run" ] || { mkdir -m 0775 "${APP_HOME}/run"; chgrp $NGINX_USER "${APP_HOME}/run"; }
+if 

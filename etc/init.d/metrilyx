@@ -18,11 +18,10 @@ NAME="metrilyx"
 SERVICE_START_ORDER="metrilyx-cacher metrilyx-dataserver metrilyx-modelmanager"
 SERVICE_STOP_ORDER="metrilyx-cacher metrilyx-dataserver metrilyx-modelmanager"
 
-
-check_paths() {
-	[ -d "${APP_HOME}/log" ] || { mkdir -m 0775 "${APP_HOME}/log"; chgrp $NGINX_USER "${APP_HOME}/log"; }
-	[ -d "${APP_HOME}/run" ] || { mkdir -m 0775 "${APP_HOME}/run"; chgrp $NGINX_USER "${APP_HOME}/run"; }
-}
+#check_paths() {
+#	[ -d "${APP_HOME}/log" ] || { mkdir -m 0775 "${APP_HOME}/log"; chgrp $NGINX_USER "${APP_HOME}/log"; }
+#	[ -d "${APP_HOME}/run" ] || { mkdir -m 0775 "${APP_HOME}/run"; chgrp $NGINX_USER "${APP_HOME}/run"; }
+#}
 
 start() {
 	for service in ${SERVICE_START_ORDER}; do

@@ -24,7 +24,7 @@ fi
 
 NAME="metrilyx-cacher"
 BIN="${APP_HOME}/bin/${NAME}.${OS}.${ARCH}"
-LOGFILE="${APP_HOME}/log/${NAME}.log"
+LOGFILE="${LOGDIR}/${NAME}.log"
 
 CACHER_CONFIG=${CACHER_CONFIG:-${APP_HOME}/etc/metrilyx/metrilyx.conf}
 DEFAULT_OPTS="-config $CACHER_CONFIG";
