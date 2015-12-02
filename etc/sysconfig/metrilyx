@@ -14,7 +14,12 @@ if [ -d "${APP_HOME}/usr/local/lib" ]; then
 fi
 
 #UWSGI_BIN=`find ${APP_HOME}/usr -name uwsgi`
-UWSGI_BIN="/usr/bin/uwsgi"
+
+UWSGI_BIN=`which uwsgi`
+if [ "$UWSGI_BIN" == "" ]; then
+	echo "uwsgi not found!"
+	exit 1
+fi
 
 NGINX_USER="nginx"
 # Debian http user
