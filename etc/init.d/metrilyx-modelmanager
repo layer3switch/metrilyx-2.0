@@ -14,7 +14,7 @@ else
 fi
 
 NAME="metrilyx-modelmanager"
-BIN=$UWSGI_BIN
+BIN="${UWSGI_BIN}"
 APP_HOME="/opt/metrilyx"
 LOGFILE="${APP_HOME}/log/${NAME}.log"
 PIDFILE="/tmp/${NAME}.pid"
