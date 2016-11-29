@@ -1,3 +1,6 @@
+# DEPRECATED
+This is a fork of the original metrilyx-2.0 repo that was deleted in October 2016. The latest commit to this fork was December 15, 2015. This repository: may be missing up to 10 months of _minimal_ development.
+
 # Metrilyx ![Build Status] (https://travis-ci.org/Ticketmaster/metrilyx-2.0.svg?branch=master)
 
 Metrilyx is a web based dashboard engine to OpenTSDB, a time series database used to store large amounts of data.  It allows for analyzing, cross cutting and viewing of time series data in a simple manner.
